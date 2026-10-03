@@ -611,6 +611,15 @@ button{font-family:"Jua",sans-serif}
 .acrow .ac{width:clamp(22px,8vw,36px)}
 .acrows .opsign{padding:0;font-size:1.8rem}
 .visual .acrow+.acrow{margin-top:0}
+
+.oprows{display:grid;grid-template-columns:44px auto 104px;gap:6px 6px;align-items:center;padding:8px 6px}
+.oprows.three{grid-template-columns:54px auto auto 104px}
+.oprows .opsign{grid-column:1/-1;padding-left:8px;line-height:1}
+.ugrp{display:grid;gap:2px;align-content:center;max-width:none}
+.ugrp.t{grid-template-columns:repeat(5,27px)}.ugrp.t img.ub{width:26px}
+.ugrp.h{grid-template-columns:repeat(5,30px)}.ugrp.h img.uc{width:29px}
+.ugrp.o{grid-template-columns:repeat(5,20px)}.ugrp.o .ac{width:19px}
+.oprows .opnum{font-size:1.8rem;min-width:0}
 </style>
 </head>
 <body>
@@ -870,12 +879,10 @@ function plates(k,m){ return platesImg(k,m); }
 function platesImg(k,m){ let h='<div class="plates" style="margin:0">'; for(let i=0;i<k;i++) h+=`<div class="plate2 full" style="background-image:url(${A['접시']});display:flex;flex-wrap:wrap;gap:1px;padding:${m>6?'14px':'18px'};align-content:center;justify-content:center;box-shadow:none">${Array.from({length:m},()=>`<img src="${A['소품_도토리']}" class="ac" style="position:static;width:${m>6?'16px':'20px'}" alt="">`).join('')}</div>`; return h+'</div>'; }
 function seq(list){ return `<div class="seq">${list.map(v=>`<div class="card${v==='?'?' q':''}" style="background-image:url(${A['팻말']})">${v}</div>`).join('')}</div>`; }
 function eq(str, small){ return `<div class="eq${small?' small':''}">${str.replace(/□/g,'<span class="box"></span>')}</div>`; }
-function unitRow(n){ const h=Math.floor(n%1000/100), t=Math.floor(n%100/10), o=n%10; let g='';
-  if(h) g+=`<span class="ugrp">${Array.from({length:h},()=>`<img src="${A['소품_상자']}" class="uc" alt="">`).join('')}</span>`;
-  if(t) g+=`<span class="ugrp">${Array.from({length:t},()=>`<img src="${A['소품_바구니']}" class="ub" alt="">`).join('')}</span>`;
-  if(o) g+=`<span class="ugrp">${noTap(acorns(o))}</span>`;
-  return `<div class="oprow"><b class="opnum">${n}</b><div class="opitems">${g}</div></div>`; }
-function opRows(a,sign,b){ return `<div class="oprows">${unitRow(a)}<div class="opsign">${sign}</div>${unitRow(b)}</div>`; }
+function unitRow(n, cols){ const h=Math.floor(n%1000/100), t=Math.floor(n%100/10), o=n%10;
+  const col=(k,cls,img)=>`<span class="ugrp ${cls}">${Array.from({length:k},()=>img).join('')}</span>`;
+  return `<b class="opnum">${n}</b>${cols.h?col(h,'h',`<img src="${A['소품_상자']}" class="uc" alt="">`):''}${col(t,'t',`<img src="${A['소품_바구니']}" class="ub" alt="">`)}<span class="ugrp o">${o?noTap(acorns(o)):''}</span>`; }
+function opRows(a,sign,b){ const cols={h:a>=100||b>=100}; return `<div class="oprows${cols.h?' three':''}">${unitRow(a,cols)}<div class="opsign">${sign}</div>${unitRow(b,cols)}</div>`; }
 function unitsOf(n){ return units(Math.floor(n%1000/100), Math.floor(n%100/10), n%10, Math.floor(n/1000)); }
 
 /* ---------- 문제 만들기 도우미 ----------
