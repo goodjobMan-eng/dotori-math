@@ -612,13 +612,13 @@ button{font-family:"Jua",sans-serif}
 .acrows .opsign{padding:0;font-size:1.8rem}
 .visual .acrow+.acrow{margin-top:0}
 
-.oprows{display:grid;grid-template-columns:44px auto 104px;gap:6px 6px;align-items:center;padding:8px 6px}
-.oprows.three{grid-template-columns:54px auto auto 104px}
+.oprows{display:grid;grid-template-columns:42px minmax(0,5fr) minmax(0,4fr);gap:6px 8px;align-items:center;padding:8px 8px;overflow:hidden}
+.oprows.three{grid-template-columns:50px minmax(0,5fr) minmax(0,5fr) minmax(0,4fr)}
 .oprows .opsign{grid-column:1/-1;padding-left:8px;line-height:1}
-.ugrp{display:grid;gap:2px;align-content:center;max-width:none}
-.ugrp.t{grid-template-columns:repeat(5,27px)}.ugrp.t img.ub{width:26px}
-.ugrp.h{grid-template-columns:repeat(5,30px)}.ugrp.h img.uc{width:29px}
-.ugrp.o{grid-template-columns:repeat(5,20px)}.ugrp.o .ac{width:19px}
+.ugrp{display:grid;gap:2px;align-content:center;max-width:none;min-width:0}
+.ugrp.t{grid-template-columns:repeat(5,1fr)}.ugrp.t img.ub{width:100%;max-width:30px}
+.ugrp.h{grid-template-columns:repeat(5,1fr)}.ugrp.h img.uc{width:100%;max-width:32px}
+.ugrp.o{grid-template-columns:repeat(5,1fr)}.ugrp.o .ac{width:100%;max-width:22px}
 .oprows .opnum{font-size:1.8rem;min-width:0}
 </style>
 </head>
