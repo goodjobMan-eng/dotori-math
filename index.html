@@ -1010,8 +1010,9 @@ Object.assign(T,{
   // 세로셈
   vertW:(op,o)=>()=>{ let a,b; if(op==='+'){ const t1=rnd(1,o.carry?4:5), o1=rnd(o.carry?5:1,o.carry?9:4), t2=rnd(1,o.carry?4:9-t1), o2=rnd(o.carry?10-o1:1,o.carry?9:9-o1); a=t1*10+o1; b=o.one?rnd(1,9-o1):t2*10+o2; }
       else { const t1=rnd(3,9), o1=o.borrow?rnd(0,5):rnd(3,9), t2=rnd(1,t1-1), o2=o.borrow?rnd(o1+1,9):rnd(1,o1); a=t1*10+o1; b=o.one?rnd(1,o1||1):t2*10+o2; }
-    const r=op==='+'?a+b:a-b; const who=op==='+'?'halmi':'rami';
-    return PW(who,`${a} ${op} ${b}`,op==='+'?`${sino(a)} 더하기 ${sn(b)} 얼마일까요? 바구니끼리, 낱개끼리 더해 보렴.`:`${sino(a)} 빼기 ${sn(b)} 얼마일까요? 바구니끼리, 낱개끼리 빼요.`,opRows(a,op,b)+vertVis(a,op,b),r,{ansSpeech:`${sino(a)} ${op==='+'?'더하기':'빼기'} ${sn(b)} ${sino(r)}`,hint:'세로셈'}); },
+    const r=op==='+'?a+b:a-b; const who=op==='+'?'halmi':'rami'; const carry=o.carry&&(a%10+b%10>=10), borrow=o.borrow&&(a%10<b%10);
+    const ans=carry?'1'+String(Math.floor(r/10))+String(r%10):borrow?String(Math.floor(a/10)-1)+(r>=10?String(Math.floor(r/10)):'')+String(r%10):r;
+    return PW(who,`${a} ${op} ${b}`,op==='+'?`${sino(a)} 더하기 ${sn(b)} 얼마일까요? 바구니끼리, 낱개끼리 더해 보렴.`:`${sino(a)} 빼기 ${sn(b)} 얼마일까요? 바구니끼리, 낱개끼리 빼요.`,opRows(a,op,b)+vertVis(a,op,b,{carry,borrow}),ans,{ansText:`${a} ${op} ${b} = ${r}`,ansSpeech:`${sino(a)} ${op==='+'?'더하기':'빼기'} ${sn(b)} ${sino(r)}`,hint:carry?'받아올림 1을 위 칸에':borrow?'바구니 하나를 풀면 십의 자리는 하나 줄어요':'세로셈'}); },
   vertCarry:()=>{ const t1=rnd(1,4), o1=rnd(5,9), t2=rnd(1,4), o2=rnd(10-o1,9); const a=t1*10+o1, b=t2*10+o2, r=a+b;
     return PW('halmi',`${a} + ${b}, 받아올림`,`${sino(a)} 더하기 ${sn(b)} 얼마일까요? 낱개가 열 개가 되면 바구니 하나로 묶는단다.`,opRows(a,'+',b)+vertVis(a,'+',b,{carry:true}),'1'+String(Math.floor(r/10))+String(r%10),{ansText:`${a} + ${b} = ${r}`,ansSpeech:`${sino(a)} 더하기 ${sn(b)} ${sino(r)}`,hint:'받아올림 1을 위 칸에'}); },
   vertCarry1:()=>{ const a=rnd(5,9), b=rnd(11-a,9), r=a+b; return PW('halmi',`${a} + ${b}, 받아올림`,`${sino(a)} 더하기 ${sn(b)} 얼마일까요? 바구니를 먼저 채우고 남은 것을 더해 보렴.`,acRows(noTap(acorns(a)),'+',noTap(acorns(b)))+vertVis(a,'+',b,{carry:true}),'11'+String(r%10),{ansText:`${a} + ${b} = ${r}`,ansSpeech:`${sino(a)} 더하기 ${sn(b)} ${sino(r)}`,hint:'받아올림 1을 위 칸에'}); },
