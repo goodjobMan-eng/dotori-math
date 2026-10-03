@@ -605,6 +605,12 @@ button{font-family:"Jua",sans-serif}
 .vslot.mini .wbox.sm{width:38px;height:46px;border-radius:9px;border-width:2px;box-shadow:0 2px 0 #E3C9A0;border-color:#F0A070}
 .vslot.mini .wbox.sm canvas{border-radius:7px}
 .vten{font-size:1.1rem!important;color:#D45F16}
+
+.acrows{width:100%;display:flex;flex-direction:column;align-items:center;gap:4px}
+.acrow{display:flex;flex-wrap:nowrap;justify-content:center;gap:2px;max-width:100%}
+.acrow .ac{width:clamp(22px,8vw,36px)}
+.acrows .opsign{padding:0;font-size:1.8rem}
+.visual .acrow+.acrow{margin-top:0}
 </style>
 </head>
 <body>
@@ -852,6 +858,7 @@ function acorns(n, o={}){
   let h=''; for(let i=0;i<n;i++){ const gone=o.gone&&i>=n-o.gone; const hl=o.hl===i+1; h+=`<img src="${A['소품_도토리']}" class="ac${gone?' gone':''}${hl?' hl':''}" draggable="false" alt="" ${gone||o.notap?'':'data-tap="1"'}>`; } return h;
 }
 const noTap = h => h.replace(/data-tap="1"/g,'');
+const acRows=(h1,sign,h2)=>`<div class="acrows"><div class="acrow">${h1}</div><div class="opsign">${sign}</div><div class="acrow">${h2}</div></div>`;
 function twoRows(aName,a,bName,b){ return `<div class="row"><span class="name">${aName}</span><div class="items">${acorns(a)}</div></div><div class="row"><span class="name">${bName}</span><div class="items">${acorns(b)}</div></div>`; }
 function pouch(n, color){ return `<div class="pouch ${color}"><img class="pouchbg" src="${A[color==='pink'?'소품_주머니_분홍':'소품_주머니_파랑']}" alt="">${n===null?'<div class="big">?</div>':`<div class="items">${noTap(acorns(n))}</div>`}</div>`; }
 function pouches(a,b,c){ let h=pouch(a,'blue')+'<div class="plus">+</div>'+pouch(b,'pink'); if(c!==undefined) h+='<div class="plus">+</div>'+pouch(c,'green'); return h; }
@@ -895,7 +902,7 @@ const T = {
   compare:(lo,hi)=>()=>{ const a=rnd(lo,hi); let b=rnd(lo,hi); while(b===a) b=rnd(lo,hi); const w=a>b?'도토':'람이'; return P('cheong','누가 더 많을까요?',`도토는 도토리 ${GAE(a)}, 람이는 ${GAE(b)}. 누가 더 많을까요?`,twoRows('도토',a,'람이',b),w,shuffle(['도토','람이','같아요']),{hint:'줄을 맞춰 비교',text:true}); },
   compareLess:(lo,hi)=>()=>{ const a=rnd(lo,hi); let b=rnd(lo,hi); while(b===a) b=rnd(lo,hi); const w=a<b?'도토':'람이'; return P('halmi','누가 더 적을까요?',`도토는 ${GAE(a)}, 람이는 ${GAE(b)}. 누가 더 적을까?`,twoRows('도토',a,'람이',b),w,shuffle(['도토','람이','같아요']),{hint:'적은 쪽',text:true}); },
   bigger:(lo,hi)=>()=>{ let a=rnd(lo,hi), b=rnd(lo,hi); if(a===b) b=a+1; const big=Math.max(a,b); return P('rami','더 큰 수는?',`${sp(a,'과','와')} ${sino(b)}. 더 큰 수는 무엇일까요?`,seq([a,b]),big,shuffle([a,b,Math.min(a,b)-1>=0?Math.min(a,b)-1:big+1].filter((v,i,s)=>s.indexOf(v)===i)),{hint:'더 큰 수'}); },
-  oneMore:(lo,hi)=>()=>{ const n=rnd(lo,hi); return P('doto',`${n}보다 1 큰 수는?`,`${sino(n)}보다 일 큰 수는 무엇일까요? 하나 더 주웠어!`,noTap(acorns(n))+'<div class="plus">+</div>'+`<img src="${A['소품_도토리']}" class="ac" style="opacity:.45" alt="">`,n+1,numOpts(n+1,0,hi+2)); },
+  oneMore:(lo,hi)=>()=>{ const n=rnd(lo,hi); return P('doto',`${n}보다 1 큰 수는?`,`${sino(n)}보다 일 큰 수는 무엇일까요? 하나 더 주웠어!`,acRows(noTap(acorns(n)),'+',`<img src="${A['소품_도토리']}" class="ac" style="opacity:.45" alt="">`),n+1,numOpts(n+1,0,hi+2)); },
   oneLess:(lo,hi)=>()=>{ const n=rnd(lo,hi); return P('cheong',`${n}보다 1 작은 수는?`,`${sino(n)}보다 일 작은 수는? 헤헤, 하나 떨어뜨렸어!`,acorns(n,{gone:1}),n-1,numOpts(n-1,0,hi+1)); },
   between:(lo,hi)=>()=>{ const n=rnd(lo,hi); return P('rami','가운데 수는?',`${sp(n-1,'과','와')} ${sino(n+1)} 사이의 수는 무엇일까요?`,seq([n-1,'?',n+1]),n,numOpts(n,0,hi+2)); },
   split:(N)=>()=>{ const a=rnd(1,N-1); return P('rami',`${N}${pt(N,'은','는')} ${a}${pt(a,'과','와')} 몇?`,`${sp(N,'을','를')} 두 주머니에 갈라요. ${sn(N)} ${sp(a,'과','와')} 몇일까요?`,pouches(a,null),N-a,numOpts(N-a,1,N),{hint:'가르기'}); },
@@ -910,9 +917,9 @@ const T = {
   baskets:(tlo,thi,slo,shi)=>()=>{ const t=rnd(tlo,thi), s=rnd(slo,shi); const n=t*10+s; return P('halmi','모두 몇 개일까요?',`바구니 ${GAE(t)}, 낱개 ${GAE(s)}. 열, 스물, 하고 세어 보렴. 모두 몇 개일까?`,units(0,t,s),n,numOpts(n,10,99,s?1:10),{hint:'10씩 세고 낱개 이어 세기',ansSpeech:GAE(n)}); },
   tensName:(lo,hi)=>()=>{ const t=rnd(lo,hi); return P('rami',`바구니 ${t}개는 도토리 몇 개?`,`바구니 ${GAE(t)}는 도토리 몇 개일까요? 열씩 세어요.`,units(0,t,0),t*10,numOpts(t*10,10,100,10),{hint:'10씩 세기',ansSpeech:GAE(t*10)}); },
   tensBreak:(lo,hi)=>()=>{ const n=rnd(lo,hi); const t=Math.floor(n/10); return P('doto',`${n}${pt(n,'은','는')} 바구니 몇 개와 낱개 ${n%10}개?`,`${sn(n)} 바구니 몇 개와 낱개 ${GAE(n%10)}일까요? 그림을 보고 바구니를 세어 봐요.`,units(0,t,n%10)+eq(`${n} = 바구니 □ + ${n%10}`,true),t,numOpts(t,1,9),{hint:'바구니 수 세기'}); },
-  add:(who,alo,ahi,blo,bhi,max)=>()=>{ let a=rnd(alo,ahi), b=rnd(blo,bhi); if(max&&a+b>max){ b=Math.max(blo,max-a);} const s=a+b; const talk = who==='halmi'?`도토리 ${GAE(a)}에 할머니가 ${GAE(b)}를 더 주었단다. ${sino(a)} 더하기 ${sn(b)} 얼마일까?`:`${sino(a)} 더하기 ${sn(b)} 얼마일까요? 모두 몇 개인지 세어 보자.`; return P(who,`${a} + ${b} = ?`,talk,acorns(a)+'<div class="plus">+</div>'+acorns(b),s,numOpts(s,0,20),{hint:'더하기는 모으는 것',tap:true}); },
+  add:(who,alo,ahi,blo,bhi,max)=>()=>{ let a=rnd(alo,ahi), b=rnd(blo,bhi); if(max&&a+b>max){ b=Math.max(blo,max-a);} const s=a+b; const talk = who==='halmi'?`도토리 ${GAE(a)}에 할머니가 ${GAE(b)}를 더 주었단다. ${sino(a)} 더하기 ${sn(b)} 얼마일까?`:`${sino(a)} 더하기 ${sn(b)} 얼마일까요? 모두 몇 개인지 세어 보자.`; return P(who,`${a} + ${b} = ?`,talk,acRows(acorns(a),'+',acorns(b)),s,numOpts(s,0,20),{hint:'더하기는 모으는 것',tap:true}); },
   sub:(who,alo,ahi,blo,bhi)=>()=>{ const a=rnd(alo,ahi); const b=Math.min(rnd(blo,bhi),a); const d=a-b; const talk = who==='cheong'?`도토리 ${GAE(a)} 중에서 청이가 ${GAE(b)}를 냠냠 먹었어. ${sino(a)} 빼기 ${sn(b)} 얼마일까?`:`${sino(a)} 빼기 ${sn(b)} 얼마일까요? 남은 도토리를 세어 봐요.`; return P(who,`${a} − ${b} = ?`,talk,acorns(a,{gone:b}),d,numOpts(d,0,20),{hint:'빼기는 덜어 내는 것',tap:true}); },
-  addEq:(alo,ahi,blo,bhi,max)=>()=>{ let a=rnd(alo,ahi), b=rnd(blo,bhi); if(max&&a+b>max) b=Math.max(blo,max-a); const s=a+b; const vis=(a<=20&&b<=20)?noTap(acorns(a))+'<div class="plus">+</div>'+noTap(acorns(b)):unitsOf(a)+'<div class="plus">+</div>'+unitsOf(b); return P(pick(['doto','rami']),`${a} + ${b} = ?`,`${sino(a)} 더하기 ${sn(b)} 얼마일까요?`,vis+eq(`${a} + ${b} = □`,true),s,numOpts(s,0,999)); },
+  addEq:(alo,ahi,blo,bhi,max)=>()=>{ let a=rnd(alo,ahi), b=rnd(blo,bhi); if(max&&a+b>max) b=Math.max(blo,max-a); const s=a+b; const vis=(a<=20&&b<=20)?acRows(noTap(acorns(a)),'+',noTap(acorns(b))):unitsOf(a)+'<div class="plus">+</div>'+unitsOf(b); return P(pick(['doto','rami']),`${a} + ${b} = ?`,`${sino(a)} 더하기 ${sn(b)} 얼마일까요?`,vis+eq(`${a} + ${b} = □`,true),s,numOpts(s,0,999)); },
   subEq:(alo,ahi,blo,bhi)=>()=>{ const a=rnd(alo,ahi); const b=Math.min(rnd(blo,bhi),a); const d=a-b; const vis=a<=20?acorns(a,{gone:b,notap:true}):unitsOf(a); return P(pick(['doto','rami']),`${a} − ${b} = ?`,`${sino(a)} 빼기 ${sn(b)} 얼마일까요?`,vis+eq(`${a} − ${b} = □`,true),d,numOpts(d,0,999)); },
   addZero:()=>{ const a=rnd(1,9); return P('doto',`${a} + 0 = ?`,`빈 주머니의 비밀! ${sino(a)} 더하기 영은 얼마일까요?`,noTap(acorns(a))+'<div class="plus">+</div>'+pouch(0,'blue').replace('<span>0</span>','<div class="big">0</div>'),a,numOpts(a,0,10)); },
   subZero:()=>{ const a=rnd(1,9); return P('rami',`${a} − 0 = ?`,`${sino(a)} 빼기 영은 얼마일까요? 하나도 안 가져갔어요.`,noTap(acorns(a))+'<div class="plus">−</div>'+pouch(0,'pink').replace('<span>0</span>','<div class="big">0</div>'),a,numOpts(a,0,10)); },
@@ -922,7 +929,7 @@ const T = {
   makeTen:()=>{ const a=rnd(1,9); return P('rami',`${a} + □ = 10`,`${sino(a)}에 몇을 더해야 십이 될까요? 바구니를 꼭 채우려면?`,`<div class="zone basket" style="min-height:120px;width:150px"><img src="${A['소품_빈바구니']}" class="zoneimg" alt="">${Array.from({length:a},(_,i)=>`<img src="${A['소품_도토리']}" class="ac inb" style="left:${12+(i%5)*16}%;top:${28+Math.floor(i/5)*22}%" alt="">`).join('')}</div>`+eq(`${a} + □ = 10`,true),10-a,numOpts(10-a,1,9),{hint:'10 만들기'}); },
   fromTen:()=>{ const b=rnd(1,9); return P('cheong',`10 − ${b} = ?`,`바구니에서 ${GAE(b)}를 꺼냈어. 십 빼기 ${sn(b)} 얼마일까?`,acorns(10,{gone:b}),10-b,numOpts(10-b,0,10),{hint:'10에서 빼기',tap:true}); },
   three10:()=>{ const a=rnd(1,9), b=10-a, c=rnd(1,6); return P('halmi',`${a} + ${b} + ${c} = ?`,`${sino(a)} 더하기 ${sino(b)} 더하기 ${sino(c)}. 먼저 십을 만들면 쉽단다.`,pouches(a,b,c),a+b+c,numOpts(a+b+c,10,20),{hint:'10을 먼저 만들어요'}); },
-  carry1:()=>{ const a=rnd(5,9), b=rnd(11-a,9); const s=a+b; return P('halmi',`${a} + ${b} = ?`,`${sino(a)} 더하기 ${sino(b)}. 바구니를 먼저 채우고 남은 것을 더해 보렴.`,acorns(a)+'<div class="plus">+</div>'+acorns(b),s,numOpts(s,10,20),{hint:'바구니 채우고 남은 것',tap:true}); },
+  carry1:()=>{ const a=rnd(5,9), b=rnd(11-a,9); const s=a+b; return P('halmi',`${a} + ${b} = ?`,`${sino(a)} 더하기 ${sino(b)}. 바구니를 먼저 채우고 남은 것을 더해 보렴.`,acRows(acorns(a),'+',acorns(b)),s,numOpts(s,10,20),{hint:'바구니 채우고 남은 것',tap:true}); },
   borrow1:()=>{ const a=rnd(11,18), b=rnd(a-9,9); const d=a-b; return P('rami',`${a} − ${b} = ?`,`${sino(a)} 빼기 ${sino(b)}. 바구니를 풀어서 빼 보자!`,opRows(a,'−',b)+eq(`${a} − ${b} = □`,true),d,numOpts(d,1,10),{hint:'바구니를 풀어요'}); },
   add2d1:()=>{ const t=rnd(1,8), o=rnd(1,5), b=rnd(1,9-o); const a=t*10+o; return P('doto',`${a} + ${b} = ?`,`${sino(a)} 더하기 ${sn(b)} 얼마일까요? 낱개끼리 더해요.`,opRows(a,'+',b)+eq(`${a} + ${b} = □`,true),a+b,numOpts(a+b,10,99),{hint:'낱개끼리'}); },
   sub2d1:()=>{ const t=rnd(1,8), o=rnd(3,9), b=rnd(1,o); const a=t*10+o; return P('cheong',`${a} − ${b} = ?`,`${sino(a)} 빼기 ${sn(b)}? 낱개에서만 빼면 돼.`,opRows(a,'−',b)+eq(`${a} − ${b} = □`,true),a-b,numOpts(a-b,10,99),{hint:'낱개끼리'}); },
@@ -982,10 +989,10 @@ Object.assign(T,{
   boxW:()=>{ const a=rnd(1,6), b=rnd(1,9-a); const k=rnd(0,1); return PW('cheong','빈칸을 찾아요',k?`${sino(a)} 더하기 몇이 ${sn(a+b)} 될까? 빈칸에 들어갈 수를 찾아보렴.`:`어떤 수에서 ${sp(b,'을','를')} 빼면 ${sn(a)} 될까? 빈칸에 들어갈 수를 찾아보렴.`,k?eqRow([a,'+','?','=',a+b]):eqRow(['?','−',b,'=',a]),k?b:a+b,{hint:'도토리 탐정'}); },
   groupsW:(k)=>()=>{ const m=rnd(2,5); return PW('doto',`${k}씩 몇 묶음?`,`도토리를 ${GAE(k)}씩 묶으면 몇 묶음일까요?`,plates(m,k)+eqRow([k,'×','?','=',k*m]),m,{}); },
   // 덧셈·뺄셈 뜻: 그림 보고 식 전체 쓰기
-  eqAll:(op,who,lo,hi)=>()=>{ let a=rnd(lo,hi), b=rnd(1,op==='+'?hi-a:a); if(op==='+'&&a+b>9) b=9-a||1; const r=op==='+'?a+b:a-b; const vis=op==='+'?noTap(acorns(a))+'<div class="plus">+</div>'+noTap(acorns(b)):acorns(a,{gone:b,notap:true});
+  eqAll:(op,who,lo,hi)=>()=>{ let a=rnd(lo,hi), b=rnd(1,op==='+'?hi-a:a); if(op==='+'&&a+b>9) b=9-a||1; const r=op==='+'?a+b:a-b; const vis=op==='+'?acRows(noTap(acorns(a)),'+',noTap(acorns(b))):acorns(a,{gone:b,notap:true});
     return PW(who,'그림을 보고 식을 써요',op==='+'?`${sino(a)} 더하기 ${sn(b)} 얼마일까요? 모두 몇 개인지 세어 보자.`:`${sino(a)} 빼기 ${sn(b)} 얼마일까요? 남은 도토리를 세어 봐요.`,vis+eqRow(['?',op,'?','=','?']),`${a}${b}${r}`,{ansText:`${a} ${op} ${b} = ${r}`,ansSpeech:`${sino(a)} ${op==='+'?'더하기':'빼기'} ${sn(b)} ${sino(r)}`,hint:'식 쓰기'}); },
   // 답만 쓰기
-  eqAns:(op,who,lo,hi,max)=>()=>{ let a=rnd(lo,hi), b=rnd(1,hi); if(op==='+'&&max&&a+b>max) b=Math.max(1,max-a); if(op==='-') b=Math.min(b,a); const r=op==='+'?a+b:a-b; const vis=a<=10&&b<=10?(op==='+'?noTap(acorns(a))+'<div class="plus">+</div>'+noTap(acorns(b)):acorns(a,{gone:b,notap:true})):'';
+  eqAns:(op,who,lo,hi,max)=>()=>{ let a=rnd(lo,hi), b=rnd(1,hi); if(op==='+'&&max&&a+b>max) b=Math.max(1,max-a); if(op==='-') b=Math.min(b,a); const r=op==='+'?a+b:a-b; const vis=a<=10&&b<=10?(op==='+'?acRows(noTap(acorns(a)),'+',noTap(acorns(b))):acorns(a,{gone:b,notap:true})):'';
     return PW(who,`${a} ${op} ${b} = ?`,`${sino(a)} ${op==='+'?'더하기':'빼기'} ${sn(b)} 얼마일까요?`,vis+eqRow([a,op,b,'=',Q(r)]),r,{ansSpeech:`${sino(a)} ${op==='+'?'더하기':'빼기'} ${sn(b)} ${sino(r)}`}); },
   zeroEq:()=>{ const a=rnd(1,9); const k=rnd(0,2); const [q,sp,ans,row]=k===0?[`${a} + 0 = ?`,`${sino(a)} 더하기 영은 얼마일까요?`,a,[a,'+',0,'=','?']]:k===1?[`${a} − 0 = ?`,`${sino(a)} 빼기 영은 얼마일까요? 하나도 안 가져갔어요.`,a,[a,'−',0,'=','?']]:[`${a} − ${a} = ?`,`${sino(a)} 빼기 ${sn(a)} 얼마일까요? 청이가 다 먹어 버렸어!`,0,[a,'−',a,'=','?']];
     return PW(k===2?'cheong':'rami',q,sp,noTap(acorns(a,k===2?{gone:a}:{}))+eqRow(row),ans,{}); },
@@ -1000,7 +1007,7 @@ Object.assign(T,{
     return PW(who,`${a} ${op} ${b}`,op==='+'?`${sino(a)} 더하기 ${sn(b)} 얼마일까요? 바구니끼리, 낱개끼리 더해 보렴.`:`${sino(a)} 빼기 ${sn(b)} 얼마일까요? 바구니끼리, 낱개끼리 빼요.`,opRows(a,op,b)+vertVis(a,op,b),r,{ansSpeech:`${sino(a)} ${op==='+'?'더하기':'빼기'} ${sn(b)} ${sino(r)}`,hint:'세로셈'}); },
   vertCarry:()=>{ const t1=rnd(1,4), o1=rnd(5,9), t2=rnd(1,4), o2=rnd(10-o1,9); const a=t1*10+o1, b=t2*10+o2, r=a+b;
     return PW('halmi',`${a} + ${b}, 받아올림`,`${sino(a)} 더하기 ${sn(b)} 얼마일까요? 낱개가 열 개가 되면 바구니 하나로 묶는단다.`,opRows(a,'+',b)+vertVis(a,'+',b,{carry:true}),'1'+String(Math.floor(r/10))+String(r%10),{ansText:`${a} + ${b} = ${r}`,ansSpeech:`${sino(a)} 더하기 ${sn(b)} ${sino(r)}`,hint:'받아올림 1을 위 칸에'}); },
-  vertCarry1:()=>{ const a=rnd(5,9), b=rnd(11-a,9), r=a+b; return PW('halmi',`${a} + ${b}, 받아올림`,`${sino(a)} 더하기 ${sn(b)} 얼마일까요? 바구니를 먼저 채우고 남은 것을 더해 보렴.`,noTap(acorns(a))+'<div class="plus">+</div>'+noTap(acorns(b))+vertVis(a,'+',b,{carry:true}),'11'+String(r%10),{ansText:`${a} + ${b} = ${r}`,ansSpeech:`${sino(a)} 더하기 ${sn(b)} ${sino(r)}`,hint:'받아올림 1을 위 칸에'}); },
+  vertCarry1:()=>{ const a=rnd(5,9), b=rnd(11-a,9), r=a+b; return PW('halmi',`${a} + ${b}, 받아올림`,`${sino(a)} 더하기 ${sn(b)} 얼마일까요? 바구니를 먼저 채우고 남은 것을 더해 보렴.`,acRows(noTap(acorns(a)),'+',noTap(acorns(b)))+vertVis(a,'+',b,{carry:true}),'11'+String(r%10),{ansText:`${a} + ${b} = ${r}`,ansSpeech:`${sino(a)} 더하기 ${sn(b)} ${sino(r)}`,hint:'받아올림 1을 위 칸에'}); },
   vertBorrow:()=>{ const t1=rnd(3,9), o1=rnd(0,5), t2=rnd(1,t1-1), o2=rnd(o1+1,9); const a=t1*10+o1, b=t2*10+o2, r=a-b;
     return PW('rami',`${a} − ${b}, 받아내림`,`${sino(a)} 빼기 ${sn(b)} 얼마일까요? 낱개가 모자라면 바구니 하나를 풀어요.`,opRows(a,'−',b)+vertVis(a,'-',b,{borrow:true}),String(t1-1)+(r>=10?String(Math.floor(r/10)):'')+String(r%10),{ansText:`${a} − ${b} = ${r}`,ansSpeech:`${sino(a)} 빼기 ${sn(b)} ${sino(r)}`,hint:'바구니 하나를 풀면 십의 자리는 하나 줄어요'}); },
   vertBlank:(op)=>()=>{ let a,b; if(op==='+'){ const t1=rnd(1,5),o1=rnd(1,4),t2=rnd(1,9-t1),o2=rnd(1,9-o1); a=t1*10+o1; b=t2*10+o2; } else { const t1=rnd(3,9),o1=rnd(3,9),t2=rnd(1,t1-1),o2=rnd(1,o1); a=t1*10+o1; b=t2*10+o2; }
