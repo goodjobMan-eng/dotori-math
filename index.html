@@ -599,6 +599,12 @@ button{font-family:"Jua",sans-serif}
 .werase{position:absolute;right:-8px;top:-8px;width:32px;height:32px;border-radius:50%;background:#fff;border:2px solid #D9B98A;display:flex;align-items:center;justify-content:center;padding:0;box-shadow:0 2px 0 #D9B98A;z-index:2}
 .werase:active{transform:translateY(2px);box-shadow:none}
 .wbox.ok .werase{display:none}
+
+.vert .vrow.mini span{min-height:40px;font-size:1.1rem;color:#D45F16}
+.vslot.mini{min-width:40px;min-height:46px}
+.vslot.mini .wbox.sm{width:38px;height:46px;border-radius:9px;border-width:2px;box-shadow:0 2px 0 #E3C9A0;border-color:#F0A070}
+.vslot.mini .wbox.sm canvas{border-radius:7px}
+.vten{font-size:1.1rem!important;color:#D45F16}
 </style>
 </head>
 <body>
@@ -967,7 +973,8 @@ function vertVis(a, op, b, o={}){
   const cell=(ch,blank)=>blank?slotBox():`<span>${ch.trim()}</span>`;
   const ansD=String(o.ans!=null?o.ans:(op==='+'?a+b:a-b)).padStart(2,' ');
   const ansRow=o.blank?`<span>${ansD[0].trim()}</span><span>${ansD[1]}</span>`:`${ansD[0]===' '?'<span></span>':slotBox()}${slotBox()}`;
-  return `<div class="vert"><div class="vrow"><span></span>${cell(A[0],o.blank==='a0')}${cell(A[1],o.blank==='a1')}</div><div class="vrow"><span class="vop">${op}</span>${cell(B[0],o.blank==='b0')}${cell(B[1],o.blank==='b1')}</div><div class="vline"></div><div class="vrow ans"><span></span>${ansRow}</div></div>`;
+  const top=o.carry?`<div class="vrow mini"><span></span><span class="vslot mini"></span><span></span></div>`:o.borrow?`<div class="vrow mini"><span></span><span class="vslot mini"></span><span class="vten">10</span></div>`:'';
+  return `<div class="vert">${top}<div class="vrow"><span></span>${cell(A[0],o.blank==='a0')}${cell(A[1],o.blank==='a1')}</div><div class="vrow"><span class="vop">${op}</span>${cell(B[0],o.blank==='b0')}${cell(B[1],o.blank==='b1')}</div><div class="vline"></div><div class="vrow ans"><span></span>${ansRow}</div></div>`;
 }
 const PW=(who,q,speech,visual,ans,x={})=>P(who,q,speech,visual,ans,[],Object.assign({write:true,slots:true},x));
 T.again=f=>()=>f();
@@ -991,6 +998,11 @@ Object.assign(T,{
       else { const t1=rnd(3,9), o1=o.borrow?rnd(0,5):rnd(3,9), t2=rnd(1,t1-1), o2=o.borrow?rnd(o1+1,9):rnd(1,o1); a=t1*10+o1; b=o.one?rnd(1,o1||1):t2*10+o2; }
     const r=op==='+'?a+b:a-b; const who=op==='+'?'halmi':'rami';
     return PW(who,`${a} ${op} ${b}`,op==='+'?`${sino(a)} 더하기 ${sn(b)} 얼마일까요? 바구니끼리, 낱개끼리 더해 보렴.`:`${sino(a)} 빼기 ${sn(b)} 얼마일까요? 바구니끼리, 낱개끼리 빼요.`,opRows(a,op,b)+vertVis(a,op,b),r,{ansSpeech:`${sino(a)} ${op==='+'?'더하기':'빼기'} ${sn(b)} ${sino(r)}`,hint:'세로셈'}); },
+  vertCarry:()=>{ const t1=rnd(1,4), o1=rnd(5,9), t2=rnd(1,4), o2=rnd(10-o1,9); const a=t1*10+o1, b=t2*10+o2, r=a+b;
+    return PW('halmi',`${a} + ${b}, 받아올림`,`${sino(a)} 더하기 ${sn(b)} 얼마일까요? 낱개가 열 개가 되면 바구니 하나로 묶는단다.`,opRows(a,'+',b)+vertVis(a,'+',b,{carry:true}),'1'+String(Math.floor(r/10))+String(r%10),{ansText:`${a} + ${b} = ${r}`,ansSpeech:`${sino(a)} 더하기 ${sn(b)} ${sino(r)}`,hint:'받아올림 1을 위 칸에'}); },
+  vertCarry1:()=>{ const a=rnd(5,9), b=rnd(11-a,9), r=a+b; return PW('halmi',`${a} + ${b}, 받아올림`,`${sino(a)} 더하기 ${sn(b)} 얼마일까요? 바구니를 먼저 채우고 남은 것을 더해 보렴.`,noTap(acorns(a))+'<div class="plus">+</div>'+noTap(acorns(b))+vertVis(a,'+',b,{carry:true}),'11'+String(r%10),{ansText:`${a} + ${b} = ${r}`,ansSpeech:`${sino(a)} 더하기 ${sn(b)} ${sino(r)}`,hint:'받아올림 1을 위 칸에'}); },
+  vertBorrow:()=>{ const t1=rnd(3,9), o1=rnd(0,5), t2=rnd(1,t1-1), o2=rnd(o1+1,9); const a=t1*10+o1, b=t2*10+o2, r=a-b;
+    return PW('rami',`${a} − ${b}, 받아내림`,`${sino(a)} 빼기 ${sn(b)} 얼마일까요? 낱개가 모자라면 바구니 하나를 풀어요.`,opRows(a,'−',b)+vertVis(a,'-',b,{borrow:true}),String(t1-1)+(r>=10?String(Math.floor(r/10)):'')+String(r%10),{ansText:`${a} − ${b} = ${r}`,ansSpeech:`${sino(a)} 빼기 ${sn(b)} ${sino(r)}`,hint:'바구니 하나를 풀면 십의 자리는 하나 줄어요'}); },
   vertBlank:(op)=>()=>{ let a,b; if(op==='+'){ const t1=rnd(1,5),o1=rnd(1,4),t2=rnd(1,9-t1),o2=rnd(1,9-o1); a=t1*10+o1; b=t2*10+o2; } else { const t1=rnd(3,9),o1=rnd(3,9),t2=rnd(1,t1-1),o2=rnd(1,o1); a=t1*10+o1; b=t2*10+o2; }
     const r=op==='+'?a+b:a-b; const blank=pick(['a0','a1','b0','b1']); const d=blank==='a0'?Math.floor(a/10):blank==='a1'?a%10:blank==='b0'?Math.floor(b/10):b%10;
     return PW('rami','빈칸에 알맞은 수를 써요',`빈칸에 들어갈 수를 찾아보렴.`,vertVis(a,op,b,{blank}),d,{hint:'빈칸 채우기'}); },
@@ -1032,12 +1044,12 @@ const G = {
   24:[...N(6,T.makeTen),...N(4,T.tenPair),T.makeTenW,T.again(T.makeTenW),T.again(T.makeTenW)],
   25:[...N(7,T.fromTen),...N(3,T.subEq(10,10,1,9)),T.eqAns('-','cheong',10,10)],
   26:[...N(10,T.three10),T.eqAns('+','halmi',10,10,19)],
-  27:[...N(10,T.carry1),T.eqAns('+','halmi',5,9,18),T.vertW('+',{carry:true,one:true})],
+  27:[...N(10,T.carry1),T.eqAns('+','halmi',5,9,18),T.vertW('+',{carry:true,one:true}),T.vertCarry1,T.again(T.vertCarry1)],
   28:[...N(10,T.borrow1),T.eqAns('-','rami',11,18),T.vertW('-',{borrow:true,one:true})],
   29:[...N(6,T.add2d1),...N(4,T.sub2d1),T.vertW('+',{one:true}),T.vertW('-',{one:true}),T.vertBlank('+')],
   30:[...N(6,T.add2d2),...N(4,T.sub2d2),T.vertW('+',{}),T.vertW('-',{}),T.vertBlank('+'),T.vertBlank('-')],
-  31:[...N(10,T.carry2),T.vertW('+',{carry:true}),T.vertW('+',{carry:true}),T.vertBlank('+')],
-  32:[...N(10,T.borrow2),T.vertW('-',{borrow:true}),T.vertW('-',{borrow:true}),T.vertBlank('-')],
+  31:[...N(10,T.carry2),T.vertW('+',{carry:true}),T.vertW('+',{carry:true}),T.vertBlank('+'),T.vertCarry,T.again(T.vertCarry),T.again(T.vertCarry)],
+  32:[...N(10,T.borrow2),T.vertW('-',{borrow:true}),T.vertW('-',{borrow:true}),T.vertBlank('-'),T.vertBorrow,T.again(T.vertBorrow),T.again(T.vertBorrow)],
   33:[...N(10,T.three),T.eqAns('+','halmi',3,9,20)],
   34:[...N(10,T.box),T.boxW,T.again(T.boxW),T.again(T.boxW)],
   35:[...N(6,T.hundreds),T.tenBasketsHundred,...N(3,T.hundredsBreak),T.write3,T.again(T.write3)],
@@ -1415,16 +1427,27 @@ function gCarry(){
   const a=rnd(6,9), b=rnd(11-a,9); const who='halmi';
   return gameP(who, `${a} + ${b}: 바구니 먼저 채우기`, `도토리 ${GAE(a)}와 ${GAE(b)}가 있단다. 먼저 바구니에 열 개를 꼭 채우고, 남은 도토리를 세어 보렴. 그러면 ${sino(a)} 더하기 ${sino(b)}를 알 수 있어.`,
   (root, done)=>{
-    root.innerHTML=`<div class="zone-wrap"><div class="zone basket" id="basket"><img src="${A['소품_빈바구니']}" class="zoneimg" alt=""><div class="zcount" id="bc">0</div></div><div class="zone ground2" id="ground"><div class="zcount" id="gc">${a+b}</div></div></div>
-      <div class="gsay"></div><div class="eq small" id="eqline">${a} + ${b} = 10 + <span id="rest">?</span></div><div class="opts" id="copts" hidden>${numOpts(a+b,10,20).map(v=>`<button class="opt" data-v="${v}">${v}</button>`).join('')}</div>`;
-    const basket=root.querySelector('#basket'), ground=root.querySelector('#ground'); let inB=0;
-    for(let i=0;i<a+b;i++){ const el=document.createElement('img'); el.src=A['소품_도토리']; el.className='ac'; el.style.position='absolute'; el.style.left=(4+(i%6)*15.5)+'%'; el.style.top=(6+Math.floor(i/6)*42)+'px'; if(i>=a) el.classList.add('hl2'); ground.appendChild(el);
-      drag(el,(e,x,y)=>{ if(inside(x,y,basket)){ if(inB>=10&&e.dataset.in!=='1'){ bubbleSay(root,who,'바구니는 열 개면 가득이란다!'); snapInto(e,ground); return; } if(e.dataset.in!=='1'){ inB++; e.dataset.in='1'; sfx('pop'); sayNum(inB,who); } snapInto(e,basket.querySelector('.zoneimg')); e.style.width='34px'; } else { if(e.dataset.in==='1'){ inB--; e.dataset.in='0'; } e.style.width=''; snapInto(e,ground); }
-        root.querySelector('#bc').textContent=inB; root.querySelector('#gc').textContent=a+b-inB; basket.querySelector('.zoneimg').src=inB>=10?A['소품_바구니']:A['소품_빈바구니'];
-        if(inB===10){ root.querySelector('#rest').textContent=a+b-10; root.querySelector('#copts').hidden=false; bubbleSay(root,who,`바구니 하나(열 개)와 낱개 ${GAE(a+b-10)}. 모두 몇 개일까?`); } }); }
-    root.querySelectorAll('#copts .opt').forEach(o=>o.onclick=()=>{ if(+o.dataset.v===a+b){ o.classList.add('ok'); sfx('good'); done(`${sino(a)} 더하기 ${sino(b)}는 ${sino(a+b)}! 십과 ${sino(a+b-10)}이지.`); } else { o.classList.add('no'); sfx('bad'); say('열하고 남은 것을 이어 세어 보렴.',who); setTimeout(()=>o.classList.remove('no'),600); } });
+    root.innerHTML=`<div class="fr-wrap" id="fw"><div class="fr-basket">${frame10(0,{slots:true})}</div><div class="fr-pile" id="pile"></div></div><div class="gsay"></div>
+      <div class="eq small" id="eqline">${a} + ${b} = 10 + <span id="rest">□</span></div><div class="opts" id="copts" hidden>${numOpts(a+b,10,20).map(v=>`<button class="opt" data-v="${v}">${v}</button>`).join('')}</div>`;
+    const fw=root.querySelector('#fw'), f10=root.querySelector('.f10'), pile=root.querySelector('#pile'); const slot=new Array(10).fill(null); let locked=false, fullSaid=false;
+    const filled=()=>slot.filter(Boolean).length;
+    const place=(el,i)=>{ slot[i]=el; el.dataset.slot=i; f10.appendChild(el); el.className='ac f10ac'+(el.dataset.b?' hl2':''); el.style.cssText=`left:${SLOT10[i][0]*100}%;top:${SLOT10[i][1]*100}%`; };
+    const toPile=el=>{ delete el.dataset.slot; el.className='ac frpile'+(el.dataset.b?' hl2':''); el.style.cssText=''; pile.appendChild(el); };
+    for(let i=0;i<a+b;i++){ const el=document.createElement('img'); el.src=A['소품_도토리']; el.alt=''; el.draggable=false; if(i>=a) el.dataset.b='1'; toPile(el); bind(el); }
+    function bind(el){ el.style.touchAction='none'; el.addEventListener('pointerdown',e=>{ if(locked) return; e.preventDefault();
+      const sx=e.clientX, sy=e.clientY; let moved=false;
+      const mv=ev=>{ if(!moved){ if(Math.hypot(ev.clientX-sx,ev.clientY-sy)<7) return; moved=true; if(el.dataset.slot!=null){ slot[+el.dataset.slot]=null; delete el.dataset.slot; } fw.appendChild(el); el.className='ac frdrag'+(el.dataset.b?' hl2':''); sfx('pick',.4); }
+        const r=fw.getBoundingClientRect(); el.style.left=(ev.clientX-r.left)+'px'; el.style.top=(ev.clientY-r.top)+'px'; };
+      const up=ev=>{ window.removeEventListener('pointermove',mv); window.removeEventListener('pointerup',up); window.removeEventListener('pointercancel',up);
+        if(!moved){ if(el.dataset.slot!=null){ slot[+el.dataset.slot]=null; toPile(el); sfx('pick',.4); check(); } return; }
+        const fr=f10.getBoundingClientRect(); const inBasket=inside(ev.clientX,ev.clientY,f10);
+        if(inBasket){ const i=slot.indexOf(null); if(i<0){ toPile(el); sfx('bad'); bubbleSay(root,who,'바구니는 열 개면 가득이란다!'); return; } place(el,i); sfx('basket'); sayNum(filled(),who); check(); }
+        else { toPile(el); sfx('pick',.4); check(); } };
+      window.addEventListener('pointermove',mv); window.addEventListener('pointerup',up); window.addEventListener('pointercancel',up); }); }
+    function check(){ const n=filled(); if(n===10){ if(!fullSaid){ fullSaid=true; root.querySelector('#rest').textContent=a+b-10; root.querySelector('#copts').hidden=false; bubbleSay(root,who,`바구니 하나(열 개)와 낱개 ${GAE(a+b-10)}. 모두 몇 개일까?`); } } else { fullSaid=false; root.querySelector('#rest').textContent='□'; root.querySelector('#copts').hidden=true; } }
+    root.querySelectorAll('#copts .opt').forEach(o=>o.onclick=()=>{ if(+o.dataset.v===a+b){ locked=true; o.classList.add('ok'); sfx('good'); done(`${sino(a)} 더하기 ${sino(b)}는 ${sino(a+b)}! 십과 ${sino(a+b-10)}이지.`); } else { o.classList.add('no'); sfx('bad'); say('열하고 남은 것을 이어 세어 보렴.',who); setTimeout(()=>o.classList.remove('no'),600); } });
     bubbleSay(root,who,'바구니에 열 개를 먼저 채워 보렴.');
-  }, '바구니에 10개 먼저');
+  }, '칸에 하나씩 놓아요 · 10개면 가득');
 }
 
 /* ---------- 17. 받아내림 (바구니 풀기) ---------- */
