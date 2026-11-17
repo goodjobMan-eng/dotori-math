@@ -620,6 +620,53 @@ button{font-family:"Jua",sans-serif}
 .ugrp.h{grid-template-columns:repeat(5,1fr)}.ugrp.h img.uc{width:100%;max-width:32px}
 .ugrp.o{grid-template-columns:repeat(5,1fr)}.ugrp.o .ac{width:100%;max-width:22px}
 .oprows .opnum{font-size:1.8rem;min-width:0}
+
+/* ---- 3~6학년 ---- */
+.grades{display:grid;gap:10px;margin-top:18px}
+.gtitle{font-family:"Jua",sans-serif;font-size:1.3rem;color:#6B3E1C;text-align:center;margin-top:6px}
+.grade{display:flex;align-items:center;gap:12px;text-align:left;background:linear-gradient(135deg,#FFF3C4,#FFFDF4 60%);border:4px solid var(--line);border-radius:24px;padding:10px 14px;box-shadow:var(--card-shadow);color:var(--ink)}
+.grade:active{transform:translateY(4px);box-shadow:0 1px 0 #B98A55}
+.grade img.chr{width:72px}
+.grade .t{font-family:"Jua",sans-serif;font-size:1.4rem;line-height:1.2}
+.grade .d{color:var(--ink-soft);font-size:.92rem;margin-top:2px}
+.grade .stars{font-size:.95rem;margin-top:3px;color:var(--sun-deep)}
+.grade[data-g="4"]{background:linear-gradient(135deg,#E9FBD9,#FFFDF4 60%)}
+.grade[data-g="5"]{background:linear-gradient(135deg,#FFE9D0,#FFFDF4 60%)}
+.grade[data-g="6"]{background:linear-gradient(135deg,#EDE4FF,#FFFDF4 60%)}
+.eqrow.long{font-size:1.7rem;gap:5px}
+.eqrow.xl{font-size:1.35rem;gap:4px}
+.eqrow b{word-break:break-word}
+.opts .opt.text{font-size:1.15rem;line-height:1.25;word-break:keep-all}
+.eqrow.long .vslot{min-width:48px;min-height:66px}.eqrow.long .wbox.sm{width:48px;height:66px}
+.vslot.xs{min-width:50px;min-height:66px}.vslot.xs .wbox.sm{width:48px;height:66px}
+.vert.w3{grid-template-columns:34px repeat(3,66px)}
+.vert.w4{grid-template-columns:28px repeat(4,56px);font-size:2rem}.vert.w4 .wbox.sm{width:52px;height:70px}.vert.w4 span{min-height:70px}
+.vert.w5{grid-template-columns:24px repeat(5,48px);font-size:1.7rem}.vert.w5 .wbox.sm{width:46px;height:62px}.vert.w5 span{min-height:62px}
+.vert.w6{grid-template-columns:20px repeat(6,42px);font-size:1.5rem}.vert.w6 .wbox.sm{width:40px;height:56px}.vert.w6 span{min-height:56px}
+.vert span.vdot{align-items:flex-end;padding-bottom:8px;font-weight:900;font-size:2.4rem;line-height:.5}
+.eqrow em.dot{display:block;width:13px;height:13px;border-radius:50%;background:#4A2E14;font-size:0;align-self:flex-end;margin:0 1px 12px}
+.frac{display:inline-flex;flex-direction:column;align-items:center;vertical-align:middle;line-height:1;margin:0 4px}
+.frac b{font-weight:400;min-width:1em;text-align:center;display:inline-flex;justify-content:center;gap:3px}
+.frac i{display:block;width:100%;min-width:1.2em;height:4px;background:#4A2E14;border-radius:2px;margin:6px 0}
+.frac b.fs .vslot{min-width:52px;min-height:70px}.frac b.fs .wbox.sm{width:50px;height:68px}
+.mix{display:inline-flex;align-items:center;gap:2px}
+.fbars{display:flex;flex-direction:column;gap:6px;align-items:center;margin-top:6px}
+.fbar{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;width:min(320px,86vw);height:34px;border:3px solid #7A4A1E;border-radius:8px;overflow:hidden;background:#fff}
+.fbar span{border-right:2px solid #7A4A1E}.fbar span:last-child{border-right:0}.fbar span.on{background:#F2A65A}
+.fbar.small{height:22px;width:min(220px,70vw)}
+.pies{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;margin-top:6px}
+.grps{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:6px}
+.grp{display:inline-flex;gap:3px;flex-wrap:wrap;max-width:140px;padding:6px;border:3px dashed #C99A5B;border-radius:14px;background:#FFF9E8}
+.grp.left{border-color:#D45F16;background:#FFEFE3}
+.grp .ac{width:26px;height:26px}
+.nline{position:relative;height:64px;margin:14px 10px 0}
+.nlbar{position:absolute;left:0;right:0;top:28px;height:4px;background:#6B3E1C;border-radius:2px}
+.nline .tick{position:absolute;top:22px;width:0;height:16px;border-left:3px solid #6B3E1C}
+.nline .tick em{position:absolute;top:18px;left:0;transform:translateX(-50%);font-style:normal;font-size:.85rem;color:#4A2E14;white-space:nowrap}
+.nline .mark{position:absolute;top:30px;width:18px;height:18px;border-radius:50%;background:#D45F16;border:3px solid #D45F16;transform:translate(-50%,-50%);font-size:0}
+.nline .mark.open{background:#fff}
+.opts.wide{grid-template-columns:1fr}.opts.wide .opt{padding:12px 8px}
+.opt{min-width:0;overflow-wrap:anywhere}
 </style>
 </head>
 <body>
@@ -728,6 +775,8 @@ const CHAPTERS = {
   3:{title:'창고를 가득', desc:'큰 수·곱셈 · EP35~51', who:'halmi', eps:[35,51]},
 };
 const chapterOf = ep => ep<=17?1:ep<=34?2:3;
+const EP_ORDER = {1:[...Array(17)].map((_,i)=>i+1), 2:[...Array(17)].map((_,i)=>i+18), 3:[35,36,37,38,40,41,42,39,43,44,45,46,47,48,49,50,51]};
+const nextEpOf = ep => { const o=EP_ORDER[chapterOf(ep)]; const k=o.indexOf(ep); return k<o.length-1?o[k+1]:null; };
 
 /* ---------- 캐릭터 SVG ---------- */
 const CH_KO={doto:'도토',rami:'람이',halmi:'할머니',cheong:'청이'}, MOOD_KO={base:'기본',happy:'기쁨',oops:'놀람',point:'가리키기'};
@@ -999,7 +1048,7 @@ Object.assign(T,{
   eqAll:(op,who,lo,hi)=>()=>{ let a=rnd(lo,hi), b=rnd(1,op==='+'?hi-a:a); if(op==='+'&&a+b>9) b=9-a||1; const r=op==='+'?a+b:a-b; const vis=op==='+'?acRows(noTap(acorns(a)),'+',noTap(acorns(b))):acorns(a,{gone:b,notap:true});
     return PW(who,'그림을 보고 식을 써요',op==='+'?`${sino(a)} 더하기 ${sn(b)} 얼마일까요? 모두 몇 개인지 세어 보자.`:`${sino(a)} 빼기 ${sn(b)} 얼마일까요? 남은 도토리를 세어 봐요.`,vis+eqRow(['?',op,'?','=','?']),`${a}${b}${r}`,{ansText:`${a} ${op} ${b} = ${r}`,ansSpeech:`${sino(a)} ${op==='+'?'더하기':'빼기'} ${sn(b)} ${sino(r)}`,hint:'식 쓰기'}); },
   // 답만 쓰기
-  eqAns:(op,who,lo,hi,max)=>()=>{ let a=rnd(lo,hi), b=rnd(1,hi); if(op==='+'&&max&&a+b>max) b=Math.max(1,max-a); if(op==='-') b=Math.min(b,a); const r=op==='+'?a+b:a-b; const vis=a<=10&&b<=10?(op==='+'?acRows(noTap(acorns(a)),'+',noTap(acorns(b))):acorns(a,{gone:b,notap:true})):'';
+  eqAns:(op,who,lo,hi,max,bhi,min)=>()=>{ let a=rnd(lo,hi), b=rnd(1,bhi||hi); if(op==='+'&&min&&a+b<min) b=rnd(Math.max(1,min-a),bhi||hi); if(op==='+'&&max&&a+b>max) b=Math.max(1,max-a); if(op==='-') b=Math.min(b,a); const r=op==='+'?a+b:a-b; const vis=a<=10&&b<=10?(op==='+'?acRows(noTap(acorns(a)),'+',noTap(acorns(b))):acorns(a,{gone:b,notap:true})):'';
     return PW(who,`${a} ${op} ${b} = ?`,`${sino(a)} ${op==='+'?'더하기':'빼기'} ${sn(b)} 얼마일까요?`,vis+eqRow([a,op,b,'=',Q(r)]),r,{ansSpeech:`${sino(a)} ${op==='+'?'더하기':'빼기'} ${sn(b)} ${sino(r)}`}); },
   zeroEq:()=>{ const a=rnd(1,9); const k=rnd(0,2); const [q,sp,ans,row]=k===0?[`${a} + 0 = ?`,`${sino(a)} 더하기 영은 얼마일까요?`,a,[a,'+',0,'=','?']]:k===1?[`${a} − 0 = ?`,`${sino(a)} 빼기 영은 얼마일까요? 하나도 안 가져갔어요.`,a,[a,'−',0,'=','?']]:[`${a} − ${a} = ?`,`${sino(a)} 빼기 ${sn(a)} 얼마일까요? 청이가 다 먹어 버렸어!`,0,[a,'−',a,'=','?']];
     return PW(k===2?'cheong':'rami',q,sp,noTap(acorns(a,k===2?{gone:a}:{}))+eqRow(row),ans,{}); },
@@ -1007,6 +1056,7 @@ Object.assign(T,{
   splitW:(N)=>()=>{ const a=rnd(1,N-1); return PW('rami',`${N}${pt(N,'은','는')} ${a}${pt(a,'과','와')} 몇?`,`${sn(N)} ${sp(a,'과','와')} 몇일까요?`,pouches(a,null)+eqRow([N,'=',a,'+','?']),N-a,{}); },
   mergeW:(N)=>()=>{ const a=rnd(1,N-1), b=N-a; return PW('doto',`${a}${pt(a,'과','와')} ${b}${pt(b,'을','를')} 모으면?`,`${sp(a,'과','와')} ${sp(b,'을','를')} 모으면 얼마일까요?`,pouches(a,b)+eqRow([a,'+',b,'=',Q(N)]),N,{}); },
   familyW:()=>{ const a=rnd(1,5), b=rnd(1,4), s=a+b; const k=rnd(0,1); return PW(k?'doto':'rami',`${a}+${b}=${s}이면, ${s}−${k?a:b}=?`,`${sino(a)} 더하기 ${sn(b)} ${sino(s)}. 그러면 ${sino(s)} 빼기 ${sn(k?a:b)} 얼마일까요?`,eq(`${a} + ${b} = ${s}`,true)+eqRow([s,'−',k?a:b,'=','?']),k?b:a,{hint:'덧셈과 뺄셈은 한 가족'}); },
+  borrow1W:()=>{ const a=rnd(11,18), b=rnd(a-9,9), d=a-b; return PW('rami',`${a} − ${b} = ?`,`${sino(a)} 빼기 ${sn(b)} 얼마일까요? 바구니를 풀어서 빼 보자!`,opRows(a,'−',b)+eqRow([a,'−',b,'=',Q(d)]),d,{ansSpeech:`${sino(a)} 빼기 ${sn(b)} ${sino(d)}`,hint:'바구니를 풀어요'}); },
   // 세로셈
   vertW:(op,o)=>()=>{ let a,b; if(op==='+'){ const t1=rnd(1,o.carry?4:5), o1=rnd(o.carry?5:1,o.carry?9:4), t2=rnd(1,o.carry?4:9-t1), o2=rnd(o.carry?10-o1:1,o.carry?9:9-o1); a=t1*10+o1; b=o.one?rnd(1,9-o1):t2*10+o2; }
       else { const t1=rnd(3,9), o1=o.borrow?rnd(0,5):rnd(3,9), t2=rnd(1,t1-1), o2=o.borrow?rnd(o1+1,9):rnd(1,o1); a=t1*10+o1; b=o.one?rnd(1,o1||1):t2*10+o2; }
@@ -1018,8 +1068,8 @@ Object.assign(T,{
   vertCarry1:()=>{ const a=rnd(5,9), b=rnd(11-a,9), r=a+b; return PW('halmi',`${a} + ${b}, 받아올림`,`${sino(a)} 더하기 ${sn(b)} 얼마일까요? 바구니를 먼저 채우고 남은 것을 더해 보렴.`,acRows(noTap(acorns(a)),'+',noTap(acorns(b)))+vertVis(a,'+',b,{carry:true}),'11'+String(r%10),{ansText:`${a} + ${b} = ${r}`,ansSpeech:`${sino(a)} 더하기 ${sn(b)} ${sino(r)}`,hint:'받아올림 1을 위 칸에'}); },
   vertBorrow:()=>{ const t1=rnd(3,9), o1=rnd(0,5), t2=rnd(1,t1-1), o2=rnd(o1+1,9); const a=t1*10+o1, b=t2*10+o2, r=a-b;
     return PW('rami',`${a} − ${b}, 받아내림`,`${sino(a)} 빼기 ${sn(b)} 얼마일까요? 낱개가 모자라면 바구니 하나를 풀어요.`,opRows(a,'−',b)+vertVis(a,'-',b,{borrow:true}),String(t1-1)+(r>=10?String(Math.floor(r/10)):'')+String(r%10),{ansText:`${a} − ${b} = ${r}`,ansSpeech:`${sino(a)} 빼기 ${sn(b)} ${sino(r)}`,hint:'바구니 하나를 풀면 십의 자리는 하나 줄어요'}); },
-  vertBlank:(op)=>()=>{ let a,b; if(op==='+'){ const t1=rnd(1,5),o1=rnd(1,4),t2=rnd(1,9-t1),o2=rnd(1,9-o1); a=t1*10+o1; b=t2*10+o2; } else { const t1=rnd(3,9),o1=rnd(3,9),t2=rnd(1,t1-1),o2=rnd(1,o1); a=t1*10+o1; b=t2*10+o2; }
-    const r=op==='+'?a+b:a-b; const blank=pick(['a0','a1','b0','b1']); const d=blank==='a0'?Math.floor(a/10):blank==='a1'?a%10:blank==='b0'?Math.floor(b/10):b%10;
+  vertBlank:(op,o={})=>()=>{ let a,b; if(op==='+'){ const t1=rnd(1,5),o1=rnd(1,4),t2=rnd(1,9-t1),o2=rnd(1,9-o1); a=t1*10+o1; b=o.one?o2:t2*10+o2; } else { const t1=rnd(3,9),o1=rnd(3,9),t2=rnd(1,t1-1),o2=rnd(1,o1); a=t1*10+o1; b=o.one?o2:t2*10+o2; }
+    const r=op==='+'?a+b:a-b; const blank=pick(o.one?['a0','a1','b1']:['a0','a1','b0','b1']); const d=blank==='a0'?Math.floor(a/10):blank==='a1'?a%10:blank==='b0'?Math.floor(b/10):b%10;
     return PW('rami','빈칸에 알맞은 수를 써요',`빈칸에 들어갈 수를 찾아보렴.`,vertVis(a,op,b,{blank}),d,{hint:'빈칸 채우기'}); },
   // 큰 수 쓰기
   write3:()=>{ const c=rnd(1,9), b=rnd(0,9), s=rnd(0,9); const n=c*100+b*10+s; return PW('halmi','모두 몇 개? 숫자로 써요',`창고 ${nativeCount(c)} 칸, 바구니 ${GAE(b)}, 낱개 ${GAE(s)}. 모두 몇 개일까?`,units(c,b,s)+slotCols(n,['백','십','일']),n,{ansSpeech:sino(n)}); },
@@ -1057,11 +1107,11 @@ const G = {
   22:[...N(3,T.addZero),...N(3,T.subZero),...N(2,T.subSelf),...N(2,T.zeroAdd),T.zeroEq,T.again(T.zeroEq),T.again(T.zeroEq)],
   23:[...N(10,T.family),T.familyW,T.again(T.familyW)],
   24:[...N(6,T.makeTen),...N(4,T.tenPair),T.makeTenW,T.again(T.makeTenW),T.again(T.makeTenW)],
-  25:[...N(7,T.fromTen),...N(3,T.subEq(10,10,1,9)),T.eqAns('-','cheong',10,10)],
+  25:[...N(7,T.fromTen),...N(3,T.subEq(10,10,1,9)),T.eqAns('-','cheong',10,10,0,9)],
   26:[...N(10,T.three10),T.eqAns('+','halmi',10,10,19)],
-  27:[...N(10,T.carry1),T.eqAns('+','halmi',5,9,18),T.vertW('+',{carry:true,one:true}),T.vertCarry1,T.again(T.vertCarry1)],
-  28:[...N(10,T.borrow1),T.eqAns('-','rami',11,18),T.vertW('-',{borrow:true,one:true})],
-  29:[...N(6,T.add2d1),...N(4,T.sub2d1),T.vertW('+',{one:true}),T.vertW('-',{one:true}),T.vertBlank('+')],
+  27:[...N(10,T.carry1),T.eqAns('+','halmi',5,9,18,9,11),T.eqAns('+','doto',2,9,18,9,11),T.vertCarry1,T.again(T.vertCarry1)],
+  28:[...N(10,T.borrow1),T.borrow1W,T.again(T.borrow1W),T.again(T.borrow1W)],
+  29:[...N(6,T.add2d1),...N(4,T.sub2d1),T.vertW('+',{one:true}),T.vertW('-',{one:true}),T.vertBlank('+',{one:true}),T.vertBlank('-',{one:true})],
   30:[...N(6,T.add2d2),...N(4,T.sub2d2),T.vertW('+',{}),T.vertW('-',{}),T.vertBlank('+'),T.vertBlank('-')],
   31:[...N(10,T.carry2),T.vertW('+',{carry:true}),T.vertW('+',{carry:true}),T.vertBlank('+'),T.vertCarry,T.again(T.vertCarry),T.again(T.vertCarry)],
   32:[...N(10,T.borrow2),T.vertW('-',{borrow:true}),T.vertW('-',{borrow:true}),T.vertBlank('-'),T.vertBorrow,T.again(T.vertBorrow),T.again(T.vertBorrow)],
@@ -2049,15 +2099,17 @@ function home(){
     <div class="chapters">
       ${[1,2,3].map(c=>{ const [lo,hi]=CHAPTERS[c].eps; let done=0; for(let e=lo;e<=hi;e++) if(best['EP'+e]!=null) done++; return `<button class="chap" data-ch="${c}">${chip(CHAPTERS[c].who,'base')}<div><div class="t">${c}장 · ${CHAPTERS[c].title}</div><div class="d">${CHAPTERS[c].desc}</div><div class="stars">에피소드 ${done}/17 완료 · 종합 ${best['CH'+c]!=null?best['CH'+c]+'/10':'-'}</div></div></button>`; }).join('')}
     </div>
+    ${homeGrades()}
     ${warn}
     <div class="note">📺 영상 → 🎵 노래 → 🎮 활동 10개 순서예요.${location.protocol==='file:'?'<br>⚠️ 파일로 바로 열면 유튜브 영상이 안 나올 수 있어요. 영상 아래 <b>유튜브에서 보기</b>를 누르세요.':''}</div>`;
   app.querySelectorAll('.chap').forEach(b=>b.onclick=()=>chapter(+b.dataset.ch));
+  app.querySelectorAll('.grade').forEach(b=>b.onclick=()=>grade36(+b.dataset.g));
 }
 
 /* ---------- 화면: 에피소드 목록 ---------- */
 function chapter(ch){
   hush(); const best=load(); app.className='wrap'; const [lo,hi]=CHAPTERS[ch].eps; let cards='';
-  for(let e=lo;e<=hi;e++){ const sc=best['EP'+e]; cards+=`<button class="ep${sc!=null?' done':''}" data-ep="${e}"><span class="n">EP${String(e).padStart(2,'0')}${SONG_AFTER[e]?' · ♪ '+SONG_AFTER[e].map(k=>SONG_NAME[k]).join('·'):''}</span><span class="t">${EPS[e][0]}</span><span class="s">${starsOf(sc)}${sc!=null?` <span style="color:var(--ink-soft)">${sc}/10</span>`:''}</span></button>`; }
+  for(const e of EP_ORDER[ch]){ const sc=best['EP'+e]; cards+=`<button class="ep${sc!=null?' done':''}" data-ep="${e}"><span class="n">EP${String(e).padStart(2,'0')}${SONG_AFTER[e]?' · ♪ '+SONG_AFTER[e].map(k=>SONG_NAME[k]).join('·'):''}</span><span class="t">${EPS[e][0]}</span><span class="s">${starsOf(sc)}${sc!=null?` <span style="color:var(--ink-soft)">${sc}/10</span>`:''}</span></button>`; }
   cards+=`<button class="ep final" data-ep="final"><span class="n">단원 마무리</span><span class="t">${ch}장 종합 활동 10개</span><span class="s">${starsOf(best['CH'+ch])}${best['CH'+ch]!=null?` <span style="color:var(--ink-soft)">${best['CH'+ch]}/10</span>`:''}</span></button>`;
   app.innerHTML=`
     <div class="top"><button class="back" id="back">← 처음</button><div class="crumb">${ch}장 · ${CHAPTERS[ch].title}</div><span style="width:70px"></span></div>
@@ -2081,14 +2133,14 @@ function startFinal(ch){
   say(' ','rami'); step();
 }
 function stepsBar(){
-  return `<div class="steps">${S.steps.map((s,k)=>`<span class="step ${k<S.si?'done':k===S.si?'now':''}">${s.kind==='acts'?'🎮 활동':s.kind==='song'?'🎵 노래':s.key.startsWith('EP')?'📺 개념':s.outro?'🏁 마무리':'🎬 '+s.label}</span>`).join('')}</div>`;
+  return `<div class="steps">${S.steps.map((s,k)=>`<span class="step ${k<S.si?'done':k===S.si?'now':''}">${s.kind==='acts'?'🎮 활동':s.kind==='song'?'🎵 노래':(s.key.startsWith('EP')||s.key.startsWith('S'))?'📺 개념':s.outro?'🏁 마무리':'🎬 '+s.label}</span>`).join('')}</div>`;
 }
 function step(){
   const st=S.steps[S.si]; app.className='wrap';
   if(st.kind==='acts'){ runAct(); return; }
   hush();
-  const who = st.kind==='song'?'rami':S.ch===1?'doto':S.ch===2?'cheong':'halmi';
-  const line = st.kind==='song'?'같이 불러 보자!':st.key==='intro'?'도토리 숲에 온 걸 환영해!':st.outro?'오늘도 도토리 많이 모았다!':st.key.startsWith('ch')?'오늘도 도토리 모으는 날!':'영상을 보고 문제를 풀어 보자!';
+  const who = st.kind==='song'?'rami':S.mode==='ep36'?GRADE_WHO[UNITS36[S.ui].grade]:S.ch===1?'doto':S.ch===2?'cheong':'halmi';
+  const line = st.kind==='song'?'같이 불러 보자!':st.key.startsWith('S')?'영상을 보고 문제를 풀어 보자!':st.key==='intro'?'도토리 숲에 온 걸 환영해!':st.outro?'오늘도 도토리 많이 모았다!':st.key.startsWith('ch')?'오늘도 도토리 모으는 날!':'영상을 보고 문제를 풀어 보자!';
   const nextStep = S.steps[S.si+1];
   const btn = st.outro ? nextLabelAfter() : nextStep.kind==='acts' ? '활동 하러 가기 →' : st.skip ? '건너뛰기 →' : '다음 →';
   app.innerHTML=`
@@ -2100,8 +2152,8 @@ function step(){
       <button class="next" id="next">${btn}</button>
       ${st.outro?'<button class="ghost" id="list" style="width:100%;margin-top:10px">에피소드 목록</button>':''}
     </div>`;
-  document.getElementById('back').onclick=()=>chapter(S.ch);
-  if(st.outro){ document.getElementById('next').onclick=goAfter; document.getElementById('list').onclick=()=>chapter(S.ch); }
+  document.getElementById('back').onclick=backToList;
+  if(st.outro){ document.getElementById('next').onclick=goAfter; document.getElementById('list').onclick=backToList; }
   else document.getElementById('next').onclick=()=>{ S.si++; step(); };
 }
 
@@ -2121,7 +2173,7 @@ function game(g){
   const root=document.getElementById('groot');
   const leave=()=>{ hush(); if(root.cleanup) root.cleanup(); };
   const advance=()=>{ leave(); if(S.results[S.i]==null) S.results[S.i]=false; S.i++; S.i<S.acts.length?runAct():result(); };
-  document.getElementById('back').onclick=()=>{ leave(); chapter(S.ch); };
+  document.getElementById('back').onclick=()=>{ leave(); backToList(); };
   document.getElementById('speak').onclick=()=>say(g.speech,g.who);
   document.getElementById('skipgame').onclick=advance;
   const done=(msg)=>{ if(root.cleanup) root.cleanup(); root.querySelectorAll('button,.opt').forEach(b=>b.disabled=true); root.style.pointerEvents='none';
@@ -2143,10 +2195,10 @@ function question(q){
     <div class="stage">
       <div class="talker">${talker(q.who)}<div class="bubble"><div class="who">${NAMES[q.who]}</div><div class="q">${q.q}</div><div class="hint">${q.hint}</div></div></div>
       <div class="visual" id="visual">${q.visual}</div>
-      ${q.write?'<div id="wpad"></div>':`<div class="opts" id="opts">${q.opts.map(o=>`<button class="opt${q.text?' text':''}" data-v="${o}">${o}</button>`).join('')}</div>`}
+      ${q.write?'<div id="wpad"></div>':`<div class="opts${q.opts.some(o=>String(o).length>9)?" wide":""}" id="opts">${q.opts.map(o=>`<button class="opt${q.text?' text':''}" data-v="${o}">${o}</button>`).join('')}</div>`}
       <div id="fb"></div>
     </div>`;
-  document.getElementById('back').onclick=()=>chapter(S.ch);
+  document.getElementById('back').onclick=backToList;
   document.getElementById('speak').onclick=()=>say(q.speech,q.who);
   document.querySelectorAll('.opt').forEach(b=>b.onclick=()=>answer(b,q));
   if(q.write) mountWriteQ(q);
@@ -2188,18 +2240,625 @@ function result(){
       </div>
     </div>`;
   say(`${sino(score)} 문제 맞았어요. ${line}`,'halmi');
-  document.getElementById('again').onclick=()=>S.mode==='ep'?startEp(S.ep):startFinal(S.ch);
-  document.getElementById('list').onclick=()=>chapter(S.ch);
+  document.getElementById('again').onclick=()=>S.mode==='ep36'?startEp36(S.ep,S.ui):S.mode==='ep'?startEp(S.ep):startFinal(S.ch);
+  document.getElementById('list').onclick=backToList;
   const nb=document.getElementById('nextbtn'); if(nb) nb.onclick=goAfter;
 }
 function nextLabelAfter(){
-  if(S.mode==='ep') return S.ep===CHAPTERS[S.ch].eps[1] ? `${S.ch}장 종합 문제 →` : `EP${String(S.ep+1).padStart(2,'0')} ${EPS[S.ep+1][0]} →`;
+  if(S.mode==='ep36'){ const n=next36(); return n?`${n.ep} ${EPS36[n.ep][0]} →`:'단원 목록'; }
+  if(S.mode==='ep'){ const n=nextEpOf(S.ep); return n==null ? `${S.ch}장 종합 문제 →` : `EP${String(n).padStart(2,'0')} ${EPS[n][0]} →`; }
   return S.ch<3 ? `${S.ch+1}장으로 →` : '처음으로';
 }
 function goAfter(){
-  if(S.mode==='ep'){ S.ep===CHAPTERS[S.ch].eps[1] ? startFinal(S.ch) : startEp(S.ep+1); }
+  if(S.mode==='ep36'){ const n=next36(); n?startEp36(n.ep,n.ui):unit36(S.ui); return; }
+  if(S.mode==='ep'){ const n=nextEpOf(S.ep); n==null ? startFinal(S.ch) : startEp(n); }
   else { S.ch<3 ? chapter(S.ch+1) : home(); }
 }
+/* ================= 3~6학년 수와 연산 (시즌2 1~16 + 시즌3 17~113) ================= */
+const gcd=(a,b)=>b?gcd(b,a%b):Math.abs(a);
+const fmtDec=(x,p)=>x.toFixed(p).replace(/\.?0+$/,'').replace(/^(\d+)$/,'$1');
+const rndPick=(...a)=>a[Math.floor(Math.random()*a.length)];
+const dd=n=>String(n).length;
+const slot=()=>'<span class="vslot"></span>';
+const SL=n=>{ const L=String(n).length; return String(n).split('').map(()=>L>=4?'<span class="vslot xs"></span>':slot()).join(''); };
+const num36=n=>n.toLocaleString('ko-KR').replace(/,/g,'');
+const fr=(n,d)=>`<span class="frac"><b>${n}</b><i></i><b>${d}</b></span>`;
+const frQ=(n,d,hide)=>`<span class="frac"><b class="fs">${hide.includes('n')?SL(n):n}</b><i></i><b class="fs">${hide.includes('d')?SL(d):d}</b></span>`;
+const mix=(w,n,d)=>`<span class="mix"><b>${w}</b>${fr(n,d)}</span>`;
+const mixQ=(w,n,d,hide)=>`<span class="mix">${hide.includes('w')?`<span class="vgrp">${SL(w)}</span>`:`<b>${w}</b>`}${frQ(n,d,hide)}</span>`;
+const decS=s=>`<span class="vgrp">${String(s).split('').map(c=>c==='.'?'<em class="dot">.</em>':slot()).join('')}</span>`;
+const row=(...parts)=>{ const L=Math.max(0,...parts.map(x=>/^</.test(String(x))?0:String(x).length)); return `<div class="eqrow${L>11?' xl':(parts.length>6||L>7)?' long':''}">${parts.map(p=>typeof p==='string'&&/^[+−×÷=…>]$/.test(p)?`<i>${p}</i>`:/^<|<span/.test(String(p))?p:`<b>${p}</b>`).join('')}</div>`; };
+const digitsOf=s=>String(s).replace(/[^0-9]/g,'');
+/* 쓰기 문제: ans는 숫자만 모은 문자열, visual의 칸 수와 같아야 함 */
+const W36=(who,q,speech,visual,ans,x={})=>PW(who,q,speech,visual,digitsOf(ans),Object.assign({ansText:x.ansText||String(ans),ansSpeech:x.ansSpeech||' ',hint:x.hint||''},x));
+const C36=(who,q,speech,visual,ans,opts,x={})=>P(who,q,speech,visual,ans,opts,Object.assign({text:true,ansSpeech:' '},x));
+const optsFrom=(ans,cands)=>{ const s=new Set([String(ans)]); for(const c of shuffle(cands)){ if(s.size>=3) break; if(c!=null&&String(c)!==String(ans)) s.add(String(c)); } return shuffle([...s]); };
+const nOpts=(ans,spread=10)=>{ const s=new Set([ans]); let t=0; while(s.size<3&&t++<50){ const v=ans+rnd(-spread,spread); if(v!==ans&&v>=0) s.add(v); } return shuffle([...s]); };
+/* 세로셈(두 수) 답 칸 */
+function vert2(a,op,b,ans,o={}){ const A=String(a),B=String(b),R=String(ans); const w=Math.max(A.length,B.length,R.length);
+  const cells=(s,cls)=>s.padStart(w,' ').split('').map(c=>`<span class="${c==='.'?'vdot':cls}">${c.trim()}</span>`).join('');
+  const ansCells=R.padStart(w,' ').split('').map(c=>c===' '?'<span></span>':c==='.'?'<span class="vdot">.</span>':slot()).join('');
+  return `<div class="vert w${w}"><div class="vrow"><span></span>${cells(A,'')}</div><div class="vrow"><span class="vop">${op}</span>${cells(B,'')}</div><div class="vline"></div><div class="vrow ans"><span></span>${ansCells}</div></div>`; }
+/* 분수 그림: 막대를 d칸으로 나누고 n칸 색칠 */
+const bar=(d,n,o={})=>`<div class="fbar${o.small?' small':''}">${Array.from({length:d},(_,i)=>`<span class="${i<n?'on':''}"></span>`).join('')}</div>`;
+const bars=(count,d,n)=>`<div class="fbars">${Array.from({length:count},(_,k)=>bar(d, Math.max(0,Math.min(d,n-k*d)))).join('')}</div>`;
+const pie=(d,n,size=96)=>{ const r=44,c=48; let paths=''; for(let i=0;i<d;i++){ const a0=-Math.PI/2+2*Math.PI*i/d, a1=-Math.PI/2+2*Math.PI*(i+1)/d; const x0=c+r*Math.cos(a0),y0=c+r*Math.sin(a0),x1=c+r*Math.cos(a1),y1=c+r*Math.sin(a1); paths+=d===1?`<circle cx="${c}" cy="${c}" r="${r}" fill="${n>0?'#F2A65A':'#fff'}" stroke="#7A4A1E" stroke-width="2"/>`:`<path d="M${c},${c} L${x0.toFixed(1)},${y0.toFixed(1)} A${r},${r} 0 ${(2*Math.PI/d)>Math.PI?1:0},1 ${x1.toFixed(1)},${y1.toFixed(1)} Z" fill="${i<n?'#F2A65A':'#fff'}" stroke="#7A4A1E" stroke-width="2"/>`; } return `<svg class="pie" viewBox="0 0 96 96" width="${size}" height="${size}">${paths}</svg>`; };
+const groupsVis=(g,k)=>`<div class="grps">${Array.from({length:g},()=>`<span class="grp">${Array.from({length:k},()=>`<img src="${A['소품_도토리']}" class="ac" alt="">`).join('')}</span>`).join('')}</div>`;
+const nl=(lo,hi,marks,o={})=>{ const n=hi-lo; return `<div class="nline"><div class="nlbar"></div>${Array.from({length:n+1},(_,i)=>`<span class="tick" style="left:${i/n*100}%"><em>${(i%(o.every||1)===0)?(lo+i*(o.step||1)):''}</em></span>`).join('')}${(marks||[]).map(m=>`<span class="mark${m.open?' open':''}" style="left:${(m.v-lo)/n*100}%">${m.label||''}</span>`).join('')}</div>`; };
+
+const EPS36={}, G36={}, UNITS36=[];
+function unit(grade, title, eps){ UNITS36.push({grade,title,eps:eps.map(e=>e[0])}); eps.forEach(([id,name,topic,gens])=>{ EPS36[id]=[name,topic]; G36[id]=gens; }); }
+const K=who=>who; // 캐릭터 약칭
+
+/* ---------- 3-1 ---------- */
+unit(3,'3-1 덧셈과 뺄셈 (세 자리 수)',[
+ ['S2-01','자리를 맞춰 더해요','세 자리 덧셈(받아올림 없음)',[
+  ()=>{ const a=rnd(1,8)*100+rnd(0,4)*10+rnd(0,4), b=rnd(1,9-Math.floor(a/100))*100+rnd(0,9-Math.floor(a%100/10))*10+rnd(0,9-a%10); return W36('halmi',`${a} + ${b}`,`${sino(a)} 더하기 ${sn(b)} 얼마일까요? 일의 자리부터 자리를 맞춰 더해 보렴.`,vert2(a,'+',b,a+b),a+b,{ansText:`${a} + ${b} = ${a+b}`}); },
+  ()=>{ const a=rnd(1,8)*100+rnd(0,4)*10+rnd(0,4), b=rnd(1,9-Math.floor(a/100))*100+rnd(0,9-Math.floor(a%100/10))*10+rnd(0,9-a%10); return W36('doto',`${a} + ${b} = ?`,`${sino(a)} 더하기 ${sn(b)} 얼마일까요?`,row(a,'+',b,'=',`<span class="vgrp">${SL(a+b)}</span>`),a+b,{ansText:`${a} + ${b} = ${a+b}`}); },
+  ()=>{ const a=rnd(1,8)*100+rnd(0,4)*10+rnd(0,4), b=rnd(1,9-Math.floor(a/100))*100+rnd(0,9-Math.floor(a%100/10))*10+rnd(0,9-a%10); return C36('rami',`${a} + ${b}의 값은?`,`${sino(a)} 더하기 ${sn(b)} 얼마일까요?`,units(Math.floor(a/100),Math.floor(a%100/10),a%10)+'<div class="plus">+</div>'+units(Math.floor(b/100),Math.floor(b%100/10),b%10),a+b,nOpts(a+b,100)); },
+ ]],
+ ['S2-02','열이 되면 올려요','세 자리 덧셈(받아올림 1번)',[
+  ()=>{ const a=rnd(1,7)*100+rnd(0,4)*10+rnd(5,9), b=rnd(1,9-Math.floor(a/100)-1)*100+rnd(0,9-Math.floor(a%100/10)-1)*10+rnd(10-a%10,9); return W36('halmi',`${a} + ${b}`,`${sino(a)} 더하기 ${sn(b)} 얼마일까요? 일의 자리가 열이 넘으면 십의 자리로 올려 주렴.`,vert2(a,'+',b,a+b),a+b,{ansText:`${a} + ${b} = ${a+b}`,hint:'받아올림 1번'}); },
+  ()=>{ const a=rnd(1,7)*100+rnd(5,9)*10+rnd(0,4), b=rnd(1,8-Math.floor(a/100))*100+rnd(10-Math.floor(a%100/10),9)*10+rnd(0,9-a%10); return W36('doto',`${a} + ${b}`,`${sino(a)} 더하기 ${sn(b)} 얼마일까요? 십의 자리에서 받아올림이 있어요.`,vert2(a,'+',b,a+b),a+b,{ansText:`${a} + ${b} = ${a+b}`}); },
+  ()=>{ const a=rnd(1,7)*100+rnd(0,4)*10+rnd(5,9), b=rnd(1,8-Math.floor(a/100))*100+rnd(0,8-Math.floor(a%100/10))*10+rnd(10-a%10,9); return C36('cheong',`${a} + ${b}, 청이가 ${a+b-10}이래. 맞을까?`,`청이는 올린 일을 빼먹었대. 바른 답은 무엇일까요?`,row(a,'+',b),a+b,nOpts(a+b,10)); },
+ ]],
+ ['S2-03','올린 수도 같이 더해요','세 자리 덧셈(받아올림 여러 번)',[
+  ()=>{ const a=rnd(1,6)*100+rnd(5,9)*10+rnd(5,9), b=rnd(1,8-Math.floor(a/100))*100+rnd(10-Math.floor(a%100/10),9)*10+rnd(10-a%10,9); return W36('halmi',`${a} + ${b}`,`${sino(a)} 더하기 ${sn(b)} 얼마일까요? 올린 수도 잊지 말고 더해 주렴.`,vert2(a,'+',b,a+b),a+b,{ansText:`${a} + ${b} = ${a+b}`,hint:'받아올림 2번'}); },
+  ()=>{ const a=rnd(5,9)*100+rnd(5,9)*10+rnd(5,9), b=rnd(1,9)*100+rnd(10-Math.floor(a%100/10),9)*10+rnd(10-a%10,9); return W36('rami',`${a} + ${b}`,`${sino(a)} 더하기 ${sn(b)} 얼마일까요? 천의 자리까지 올라가요.`,vert2(a,'+',b,a+b),a+b,{ansText:`${a} + ${b} = ${a+b}`}); },
+ ]],
+ ['S2-04','큰 수를 위에 써요','세 자리 뺄셈(받아내림 없음)',[
+  ()=>{ const b=rnd(1,5)*100+rnd(0,5)*10+rnd(0,5), a=b+rnd(1,9-Math.floor(b/100))*100+rnd(0,9-Math.floor(b%100/10))*10+rnd(0,9-b%10); return W36('rami',`${a} − ${b}`,`${sino(a)} 빼기 ${sn(b)} 얼마일까요? 큰 수를 위에 쓰고 자리를 맞춰 빼요.`,vert2(a,'−',b,a-b),a-b,{ansText:`${a} − ${b} = ${a-b}`}); },
+  ()=>{ const b=rnd(1,5)*100+rnd(0,5)*10+rnd(0,5), a=b+rnd(1,9-Math.floor(b/100))*100+rnd(0,9-Math.floor(b%100/10))*10+rnd(0,9-b%10); return W36('doto',`${a} − ${b} = ?`,`${sino(a)} 빼기 ${sn(b)} 얼마일까요?`,row(a,'−',b,'=',`<span class="vgrp">${SL(a-b)}</span>`),a-b,{ansText:`${a} − ${b} = ${a-b}`}); },
+ ]],
+ ['S2-05','모자라면 바구니를 풀어요','세 자리 뺄셈(받아내림 1번)',[
+  ()=>{ const b=rnd(1,5)*100+rnd(0,4)*10+rnd(5,9), a=b+rnd(1,8-Math.floor(b/100))*100+rnd(1,9-Math.floor(b%100/10)-1)*10-(rnd(1,b%10)); return W36('rami',`${a} − ${b}`,`${sino(a)} 빼기 ${sn(b)} 얼마일까요? 일의 자리가 모자라면 바구니 하나를 풀어요.`,vert2(a,'−',b,a-b),a-b,{ansText:`${a} − ${b} = ${a-b}`,hint:'받아내림 1번'}); },
+  ()=>{ const b=rnd(1,5)*100+rnd(5,9)*10+rnd(0,4), a=b+rnd(1,8-Math.floor(b/100))*100-rnd(1,Math.floor(b%100/10))*10+rnd(0,9-b%10); return W36('halmi',`${a} − ${b}`,`${sino(a)} 빼기 ${sn(b)} 얼마일까요? 십의 자리가 모자라면 상자를 하나 풀어 바구니 열 개로 만들렴.`,vert2(a,'−',b,a-b),a-b,{ansText:`${a} − ${b} = ${a-b}`}); },
+  ()=>{ const b=rnd(1,5)*100+rnd(0,4)*10+rnd(5,9), a=b+rnd(1,8-Math.floor(b/100))*100+rnd(0,8-Math.floor(b%100/10))*10-rnd(1,b%10); const wrong=a-b+ (2*((b%10)-(a%10))); return C36('cheong',`${a} − ${b}, 청이는 거꾸로 뺐대`,`청이는 작은 수에서 큰 수를 뺐대요. 바른 답은?`,row(a,'−',b),a-b,optsFrom(a-b,[wrong,a-b+10,a-b-10])); },
+ ]],
+ ['S2-06','빈자리가 있는 뺄셈','세 자리 뺄셈(받아내림 2번, 0)',[
+  ()=>{ const b=rnd(1,5)*100+rnd(1,9)*10+rnd(1,9), a=(Math.floor(b/100)+rnd(1,9-Math.floor(b/100)))*100; return W36('rami',`${a} − ${b}`,`${sino(a)} 빼기 ${sn(b)} 얼마일까요? 십의 자리가 영이면 백의 자리에서부터 차례로 풀어요.`,vert2(a,'−',b,a-b),a-b,{ansText:`${a} − ${b} = ${a-b}`,hint:'받아내림 2번'}); },
+  ()=>{ const b=rnd(1,4)*100+rnd(5,9)*10+rnd(5,9), a=b+rnd(1,9-Math.floor(b/100)-1)*100-rnd(1,Math.floor(b%100/10))*10-rnd(1,b%10); return W36('halmi',`${a} − ${b}`,`${sino(a)} 빼기 ${sn(b)} 얼마일까요? 두 번 받아내림이 있단다.`,vert2(a,'−',b,a-b),a-b,{ansText:`${a} − ${b} = ${a-b}`}); },
+ ]],
+ ['S2-07','어림하면 보여요','어림·검산',[
+  ()=>{ const a=rnd(2,7)*100+rnd(0,9)*10+rnd(0,9), b=rnd(1,9-Math.floor(a/100)-1)*100+rnd(0,9)*10+rnd(0,9); const e=Math.round(a/100)*100+Math.round(b/100)*100; return C36('halmi',`${a} + ${b}은 약 얼마일까?`,`백의 자리까지 어림하면 ${sino(a)}은 약 ${sino(Math.round(a/100)*100)}, ${sino(b)}은 약 ${sino(Math.round(b/100)*100)}. 합은 약 얼마일까요?`,row(a,'+',b,'≈','?'),e,optsFrom(e,[e+100,e-100,e+200]),{hint:'몇백으로 어림'}); },
+  ()=>{ const a=rnd(3,9)*100+rnd(0,9)*10+rnd(0,9), b=rnd(1,Math.floor(a/100)-1)*100+rnd(0,9)*10+rnd(0,9); const ok=a-b; const cands=[ok,ok+100,ok-10,ok+1]; return C36('doto',`${a} − ${b}의 답으로 알맞은 것은?`,`어림해서 가장 알맞은 답을 골라 보세요. ${sino(a)}은 약 ${sino(Math.round(a/100)*100)}이에요.`,row(a,'−',b),ok,optsFrom(ok,cands.slice(1))); },
+  ()=>{ const b=rnd(1,4)*100+rnd(0,9)*10+rnd(0,9), d=rnd(1,4)*100+rnd(0,9)*10+rnd(0,9), a=b+d; return C36('rami',`${a} − ${b} = ${d}, 검산 식은?`,`뺄셈을 검산하려면 차에 뺀 수를 더해요. 알맞은 식을 고르세요.`,row(a,'−',b,'=',d),`${d} + ${b} = ${a}`,optsFrom(`${d} + ${b} = ${a}`,[`${a} + ${b} = ${a+b}`,`${d} − ${b} = ${d-b}`])); },
+ ]],
+]);
+unit(3,'3-1 나눗셈',[
+ ['S2-08','똑같이 나누어요','나눗셈(등분제)',[
+  ()=>{ const g=rnd(2,5), k=rnd(2,6); return W36('rami',`도토리 ${g*k}개를 ${g}접시에 똑같이`,`도토리 ${GAE(g*k)}를 접시 ${nativeCount(g)} 개에 똑같이 나누면 한 접시에 몇 개일까요?`,groupsVis(g,k)+row(g*k,'÷',g,'=',`<span class="vgrp">${SL(k)}</span>`),k,{ansText:`${g*k} ÷ ${g} = ${k}`}); },
+  ()=>{ const g=rnd(2,6), k=rnd(2,9); return C36('doto',`${g*k} ÷ ${g}의 뜻은?`,`${sino(g*k)} 나누기 ${sino(g)}. 어떤 뜻일까요?`,row(g*k,'÷',g),`${g*k}개를 ${g}곳에 똑같이 나누기`,optsFrom(`${g*k}개를 ${g}곳에 똑같이 나누기`,[`${g*k}개에서 ${g}개 빼기`,`${g*k}개를 ${g}번 더하기`])); },
+  ()=>{ const g=rnd(2,4), k=rnd(2,5); return W36('halmi',`한 접시에 몇 개?`,`도토리 ${GAE(g*k)}를 ${nativeCount(g)} 접시에 똑같이 나누어 담자. 나눗셈식을 써 보렴.`,groupsVis(g,k)+row(`<span class="vgrp">${SL(g*k)}</span>`,'÷',`<span class="vgrp">${SL(g)}</span>`,'=',`<span class="vgrp">${SL(k)}</span>`),`${g*k}${g}${k}`,{ansText:`${g*k} ÷ ${g} = ${k}`}); },
+ ]],
+ ['S2-09','몇 묶음일까요?','나눗셈(포함제)',[
+  ()=>{ const k=rnd(2,5), g=rnd(2,6); return W36('doto',`${g*k}개를 ${k}개씩 묶으면 몇 묶음?`,`도토리 ${GAE(g*k)}를 ${nativeCount(k)} 개씩 묶으면 몇 묶음일까요?`,groupsVis(g,k)+row(g*k,'÷',k,'=',`<span class="vgrp">${SL(g)}</span>`),g,{ansText:`${g*k} ÷ ${k} = ${g}`}); },
+  ()=>{ const k=rnd(2,5), g=rnd(2,6); return C36('cheong',`${g*k}에서 ${k}씩 몇 번 뺄 수 있을까?`,`${sino(g*k)}에서 ${sino(k)}씩 몇 번 빼면 영이 될까요?`,row(g*k,'−',k,'−',k,'− … = 0'),g,nOpts(g,2)); },
+ ]],
+ ['S2-10','곱셈과 나눗셈은 한 가족','곱셈↔나눗셈',[
+  ()=>{ const a=rnd(2,9), b=rnd(2,9); return W36('rami',`${a} × ${b} = ${a*b}이면`,`${sino(a)} 곱하기 ${sn(b)} ${sino(a*b)}. 그러면 ${sino(a*b)} 나누기 ${sn(a)} 얼마일까요?`,row(a,'×',b,'=',a*b)+row(a*b,'÷',a,'=',`<span class="vgrp">${SL(b)}</span>`),b,{ansText:`${a*b} ÷ ${a} = ${b}`}); },
+  ()=>{ const a=rnd(2,9), b=rnd(2,9); return C36('doto',`${a*b} ÷ ${b}과 한 가족인 곱셈식은?`,`나눗셈식과 한 가족인 곱셈식을 고르세요.`,row(a*b,'÷',b,'=',a),`${a} × ${b} = ${a*b}`,optsFrom(`${a} × ${b} = ${a*b}`,[`${a*b} × ${b} = ${a*b*b}`,`${a} × ${b+1} = ${a*(b+1)}`])); },
+ ]],
+ ['S2-11','곱셈구구로 몫 찾기','구구로 몫 구하기',[
+  ()=>{ const a=rnd(2,9), b=rnd(2,9); return W36('halmi',`${a*b} ÷ ${a} = ?`,`${sino(a*b)} 나누기 ${sn(a)} 얼마일까요? ${sino(a)}단을 떠올려 보렴.`,row(a*b,'÷',a,'=',`<span class="vgrp">${SL(b)}</span>`),b,{ansText:`${a*b} ÷ ${a} = ${b}`}); },
+  ()=>{ const a=rnd(2,9), b=rnd(2,9); return C36('rami',`${a*b} ÷ ${a}의 몫은?`,`${sino(a)} 곱하기 몇이 ${sino(a*b)}일까요?`,row(a,'×','□','=',a*b),b,nOpts(b,2)); },
+ ]],
+]);
+unit(3,'3-1 곱셈 (두 자리 × 한 자리)',[
+ ['S2-12','바구니는 열 개짜리','(몇십)×(몇)',[
+  ()=>{ const a=rnd(2,9)*10, b=rnd(2,9); return W36('doto',`${a} × ${b}`,`${sino(a)} 곱하기 ${sn(b)} 얼마일까요? ${sino(a/10)} 곱하기 ${sino(b)}에 영을 하나 붙여요.`,row(a,'×',b,'=',`<span class="vgrp">${SL(a*b)}</span>`),a*b,{ansText:`${a} × ${b} = ${a*b}`}); },
+  ()=>{ const a=rnd(2,9)*10, b=rnd(2,9); return C36('cheong',`바구니 ${a/10}개씩 ${b}묶음, 도토리는?`,`열 개짜리 바구니가 ${nativeCount(a/10)} 개씩 ${nativeCount(b)} 묶음이면 도토리는 모두 몇 개일까요?`,row(a,'×',b),a*b,nOpts(a*b,30)); },
+ ]],
+ ['S2-13','자리마다 모두 곱해요','(두 자리)×(한 자리), 올림 없음',[
+  ()=>{ const a=rnd(1,4)*10+rnd(1,4), b=rnd(2,Math.floor(9/Math.max(Math.floor(a/10),a%10))); return W36('rami',`${a} × ${b}`,`${sino(a)} 곱하기 ${sn(b)} 얼마일까요? 일의 자리와 십의 자리를 모두 곱해요.`,vert2(a,'×',b,a*b),a*b,{ansText:`${a} × ${b} = ${a*b}`}); },
+  ()=>{ const a=rnd(1,4)*10+rnd(1,4), b=rnd(2,Math.floor(9/Math.max(Math.floor(a/10),a%10))); return W36('doto',`${a} × ${b} = ?`,`${sino(a)} 곱하기 ${sn(b)} 얼마일까요?`,row(a,'×',b,'=',`<span class="vgrp">${SL(a*b)}</span>`),a*b,{ansText:`${a} × ${b} = ${a*b}`}); },
+ ]],
+ ['S2-14','넘치면 백의 자리로','십의 자리에서 올림',[
+  ()=>{ const b=rnd(2,4), a=rnd(Math.ceil(10/b),9)*10+rnd(1,Math.floor(9/b)); return W36('halmi',`${a} × ${b}`,`${sino(a)} 곱하기 ${sn(b)} 얼마일까요? 십의 자리 곱이 백을 넘으면 백의 자리에 써요.`,vert2(a,'×',b,a*b),a*b,{ansText:`${a} × ${b} = ${a*b}`}); },
+  ()=>{ const b=rnd(2,4), a=rnd(Math.ceil(10/b),9)*10+rnd(1,Math.floor(9/b)); return C36('cheong',`${a} × ${b}, 청이는 ${(a*b)%100}이래`,`청이는 백의 자리를 버렸대요. 바른 답은?`,row(a,'×',b),a*b,optsFrom(a*b,[(a*b)%100,a*b+100])); },
+ ]],
+ ['S2-15','곱하고 나서 올린 수를 더해요','일의 자리에서 올림',[
+  ()=>{ const b=rnd(2,4), a=rnd(1,Math.floor(8/b))*10+rnd(Math.ceil(10/b),9); return W36('rami',`${a} × ${b}`,`${sino(a)} 곱하기 ${sn(b)} 얼마일까요? 일의 자리에서 올린 수를 십의 자리 곱에 더해요.`,vert2(a,'×',b,a*b),a*b,{ansText:`${a} × ${b} = ${a*b}`}); },
+  ()=>{ const b=rnd(2,4), a=rnd(1,Math.floor(8/b))*10+rnd(Math.ceil(10/b),9); return C36('doto',`${a} × ${b}, 올린 수를 안 더하면?`,`청이는 올린 수를 더하지 않았어요. 바른 답은?`,row(a,'×',b),a*b,optsFrom(a*b,[a*b-Math.floor((a%10*b)/10)*10,a*b+10])); },
+ ]],
+ ['S2-16','올림이 두 번이어도 차근차근','올림 2번',[
+  ()=>{ const b=rnd(3,9), a=rnd(Math.ceil(10/b),9)*10+rnd(Math.ceil(10/b),9); return W36('halmi',`${a} × ${b}`,`${sino(a)} 곱하기 ${sn(b)} 얼마일까요? 올림이 두 번이어도 차근차근.`,vert2(a,'×',b,a*b),a*b,{ansText:`${a} × ${b} = ${a*b}`}); },
+  ()=>{ const b=rnd(3,9), a=rnd(Math.ceil(10/b),9)*10+rnd(Math.ceil(10/b),9); return W36('rami',`${a} × ${b} = ?`,`${sino(a)} 곱하기 ${sn(b)} 얼마일까요?`,row(a,'×',b,'=',`<span class="vgrp">${SL(a*b)}</span>`),a*b,{ansText:`${a} × ${b} = ${a*b}`}); },
+ ]],
+]);
+unit(3,'3-1 분수와 소수',[
+ ['S3-17','똑같아야 분수야','등분할',[
+  ()=>{ const d=rndPick(2,3,4,6,8); return C36('rami',`똑같이 ${d}로 나눈 것은?`,`전체를 똑같이 ${nativeCount(d)} 조각으로 나눈 그림을 고르세요.`,`<div class="pies">${pie(d,0)}</div>`,`똑같이 ${d}조각`,optsFrom(`똑같이 ${d}조각`,[`크기가 다른 ${d}조각`,`${d+1}조각`])); },
+  ()=>{ const d=rndPick(2,3,4,5,6,8); return C36('doto',`몇 조각으로 나누었나요?`,`케이크를 똑같이 몇 조각으로 나누었을까요?`,`<div class="pies">${pie(d,0)}</div>`,d,nOpts(d,2)); },
+  ()=>{ const d=rndPick(2,4,8); return C36('cheong',`한 조각은 전체의 얼마?`,`똑같이 ${nativeCount(d)} 조각으로 나눈 것 중 한 조각은 전체의 몇 분의 일일까요?`,`<div class="pies">${pie(d,1)}</div>`,`${d}분의 1`,optsFrom(`${d}분의 1`,[`${d*2}분의 1`,`1분의 ${d}`,`${d-1}분의 1`])); },
+ ]],
+ ['S3-18','분모와 분자','분수 읽고 쓰기',[
+  ()=>{ const d=rnd(3,8), n=rnd(1,d-1); return W36('rami',`색칠한 부분을 분수로`,`똑같이 ${nativeCount(d)} 조각 중 ${nativeCount(n)} 조각. 분수로 써 보세요. 아래가 분모, 위가 분자예요.`,`<div class="pies">${pie(d,n)}</div>`+row(frQ(n,d,'nd')),`${n}${d}`,{ansText:`${d}분의 ${n}`}); },
+  ()=>{ const d=rnd(3,9), n=rnd(1,d-1); return C36('doto',`${d}분의 ${n}에서 분모는?`,`${sino(d)}분의 ${sino(n)}. 분모는 무엇일까요?`,row(fr(n,d)),d,optsFrom(d,[n,d+n])); },
+  ()=>{ const d=rnd(3,8), n=rnd(1,d-1); return C36('halmi',`그림에 맞는 분수는?`,`색칠한 부분은 전체의 얼마일까요?`,bar(d,n),`${d}분의 ${n}`,optsFrom(`${d}분의 ${n}`,[`${n}분의 ${d}`,`${d}분의 ${d-n}`])); },
+ ]],
+ ['S3-19','누가 더 먹었을까','분모 같은 분수 크기 비교',[
+  ()=>{ const d=rnd(4,9), a=rnd(1,d-1); let b=rnd(1,d-1); if(b===a) b=a===1?2:a-1; return C36('cheong',`${d}분의 ${a}와 ${d}분의 ${b}, 더 큰 것은?`,`분모가 같으면 분자가 클수록 커요. 어느 쪽이 더 클까요?`,`<div class="pies">${pie(d,a)}${pie(d,b)}</div>`,`${d}분의 ${Math.max(a,b)}`,[`${d}분의 ${a}`,`${d}분의 ${b}`]); },
+  ()=>{ const d=rnd(4,9), a=rnd(1,d-2), b=rnd(a+1,d-1); return C36('rami',`□ 안에 알맞은 것은?`,`${sino(d)}분의 ${sino(a)}와 ${sino(d)}분의 ${sino(b)}. 부등호를 넣어 보세요.`,row(fr(a,d),'□',fr(b,d)),'<',['<','>','=']); },
+ ]],
+ ['S3-20','8분의 1이 더 크지?','단위분수 크기 비교',[
+  ()=>{ const a=rnd(2,5), b=rnd(a+1,9); return C36('cheong',`${a}분의 1과 ${b}분의 1, 더 큰 것은?`,`청이는 ${sino(b)}이 크니까 ${sino(b)}분의 일이 크대요. 정말 그럴까요?`,`<div class="fbars">${bar(a,1)}${bar(b,1)}</div>`,`${a}분의 1`,[`${a}분의 1`,`${b}분의 1`]); },
+  ()=>{ const a=rnd(2,4), b=rnd(a+1,6), c=rnd(b+1,9); return C36('rami',`가장 작은 분수는?`,`단위분수는 분모가 클수록 작아요. 가장 작은 것을 고르세요.`,row(fr(1,a),fr(1,b),fr(1,c)),`${c}분의 1`,[`${a}분의 1`,`${b}분의 1`,`${c}분의 1`]); },
+ ]],
+ ['S3-21','한 칸을 열로','소수 한 자리 수',[
+  ()=>{ const n=rnd(1,9); return W36('rami',`10분의 ${n}을 소수로`,`십분의 ${sino(n)}을 소수로 쓰면 영 점 ${sino(n)}. 써 보세요.`,bar(10,n)+row(fr(n,10),'=',decS('0.'+n)),`0${n}`,{ansText:`0.${n}`}); },
+  ()=>{ const w=rnd(1,5), n=rnd(1,9); return W36('doto',`${w}과 10분의 ${n}을 소수로`,`${sino(w)}과 십분의 ${sino(n)}은 소수로 ${sino(w)} 점 ${sino(n)}. 써 보세요.`,bars(w+1,10,w*10+n)+row(decS(`${w}.${n}`)),`${w}${n}`,{ansText:`${w}.${n}`}); },
+  ()=>{ const mm=rnd(1,9); return C36('halmi',`${mm} mm는 몇 cm?`,`일 센티미터는 십 밀리미터. ${sino(mm)} 밀리미터는 몇 센티미터일까요?`,row(`${mm} mm`,'=','□ cm'),`0.${mm}`,optsFrom(`0.${mm}`,[`${mm}`,`${mm}.0`,`0.0${mm}`])); },
+ ]],
+ ['S3-22','어느 대나무가 더 길까','소수 한 자리 수 비교',[
+  ()=>{ const a=rnd(1,30)/10; let b=rnd(1,30)/10; if(b===a) b=a+0.1; return C36('doto',`${a}와 ${b}, 더 큰 수는?`,`${fmtDec(a,1)}과 ${fmtDec(b,1)} 중 더 큰 수는?`,row(fmtDec(a,1),'□',fmtDec(b,1)),a>b?'>':'<',['>','<']); },
+  ()=>{ const a=rnd(5,29)/10; return C36('rami',`${fmtDec(a,1)}보다 0.1 큰 수는?`,`${fmtDec(a,1)}보다 영 점 일 큰 수는 무엇일까요?`,nl(Math.floor(a),Math.floor(a)+2,[{v:a,label:fmtDec(a,1)}],{every:1}),fmtDec(a+0.1,1),optsFrom(fmtDec(a+0.1,1),[fmtDec(a+1,1),fmtDec(a-0.1,1)])); },
+ ]],
+]);
+/* ---------- 3-2 ---------- */
+unit(3,'3-2 곱셈',[
+ ['S3-23','세 자리 곱하기 한 자리','(세 자리)×(한 자리), 올림 없음',[
+  ()=>{ const b=rnd(2,4), a=rnd(1,Math.floor(9/b))*100+rnd(0,Math.floor(9/b))*10+rnd(1,Math.floor(9/b)); return W36('halmi',`${a} × ${b}`,`${sino(a)} 곱하기 ${sn(b)} 얼마일까요? 일, 십, 백의 자리를 차례로 곱해요.`,vert2(a,'×',b,a*b),a*b,{ansText:`${a} × ${b} = ${a*b}`}); },
+  ()=>{ const b=rnd(2,3), a=rnd(1,3)*100+rnd(0,3)*10+rnd(1,3); return W36('doto',`${a} × ${b} = ?`,`${sino(a)} 곱하기 ${sn(b)} 얼마일까요?`,row(a,'×',b,'=',`<span class="vgrp">${SL(a*b)}</span>`),a*b,{ansText:`${a} × ${b} = ${a*b}`}); },
+ ]],
+ ['S3-24','올림이 있는 세 자리 곱셈','(세 자리)×(한 자리), 올림',[
+  ()=>{ const b=rnd(3,9), a=rnd(1,9)*100+rnd(0,9)*10+rnd(Math.ceil(10/b),9); return W36('rami',`${a} × ${b}`,`${sino(a)} 곱하기 ${sn(b)} 얼마일까요? 올린 수를 잊지 마세요.`,vert2(a,'×',b,a*b),a*b,{ansText:`${a} × ${b} = ${a*b}`}); },
+  ()=>{ const b=rnd(4,9), a=rnd(2,9)*100+rnd(3,9)*10+rnd(3,9); return W36('halmi',`${a} × ${b}`,`${sino(a)} 곱하기 ${sn(b)} 얼마일까요?`,vert2(a,'×',b,a*b),a*b,{ansText:`${a} × ${b} = ${a*b}`}); },
+ ]],
+ ['S3-25','몇십 곱하기 몇십','(몇십)×(몇십)',[
+  ()=>{ const a=rnd(2,9)*10, b=rnd(2,9)*10; return W36('doto',`${a} × ${b}`,`${sino(a)} 곱하기 ${sn(b)} 얼마일까요? ${sino(a/10)} 곱하기 ${sino(b/10)}에 영을 두 개 붙여요.`,row(a,'×',b,'=',`<span class="vgrp">${SL(a*b)}</span>`),a*b,{ansText:`${a} × ${b} = ${a*b}`}); },
+  ()=>{ const a=rnd(2,9)*10, b=rnd(2,9)*10; return C36('cheong',`${a} × ${b}, 영은 몇 개?`,`${sino(a)} 곱하기 ${sino(b)}의 답에 영이 몇 개 붙을까요?`,row(a,'×',b),String(a*b).match(/0+$/)[0].length,optsFrom(String(a*b).match(/0+$/)[0].length,[1,3,4])); },
+ ]],
+ ['S3-26','몇 곱하기 두 자리','(몇)×(두 자리), (두 자리)×(몇십)',[
+  ()=>{ const a=rnd(2,9), b=rnd(12,49); return W36('rami',`${a} × ${b}`,`${sino(a)} 곱하기 ${sn(b)} 얼마일까요? 곱하는 순서를 바꿔도 돼요.`,row(a,'×',b,'=',`<span class="vgrp">${SL(a*b)}</span>`),a*b,{ansText:`${a} × ${b} = ${a*b}`}); },
+  ()=>{ const a=rnd(12,49), b=rnd(2,9)*10; return W36('halmi',`${a} × ${b}`,`${sino(a)} 곱하기 ${sn(b)} 얼마일까요? ${sino(a)} 곱하기 ${sino(b/10)}에 영을 붙여요.`,vert2(a,'×',b,a*b),a*b,{ansText:`${a} × ${b} = ${a*b}`}); },
+ ]],
+ ['S3-27','두 자리 곱하기 두 자리','(두 자리)×(두 자리)',[
+  ()=>{ const a=rnd(12,49), b=rnd(12,39); return W36('halmi',`${a} × ${b}`,`${sino(a)} 곱하기 ${sn(b)} 얼마일까요? 일의 자리 곱과 십의 자리 곱을 더해요.`,vert2(a,'×',b,a*b),a*b,{ansText:`${a} × ${b} = ${a*b}`}); },
+  ()=>{ const a=rnd(12,29), b=rnd(11,19); return C36('doto',`${a} × ${b}에서 ${a} × ${Math.floor(b/10)*10}은?`,`${sino(a)} 곱하기 ${sino(b)}를 계산할 때 부분곱 ${sino(a)} 곱하기 ${sino(Math.floor(b/10)*10)}은 얼마일까요?`,row(a,'×',b),a*Math.floor(b/10)*10,optsFrom(a*Math.floor(b/10)*10,[a*Math.floor(b/10),a*b])); },
+  ()=>{ const a=rnd(21,59), b=rnd(21,49); return W36('rami',`${a} × ${b}`,`${sino(a)} 곱하기 ${sn(b)} 얼마일까요?`,vert2(a,'×',b,a*b),a*b,{ansText:`${a} × ${b} = ${a*b}`}); },
+ ]],
+]);
+unit(3,'3-2 나눗셈',[
+ ['S3-28','몇십 나누기 몇','(몇십)÷(몇)',[
+  ()=>{ const b=rnd(2,4), q=rnd(1,4), a=q*b*10; return W36('halmi',`${a} ÷ ${b}`,`${sino(a)} 나누기 ${sn(b)} 얼마일까? 바구니 ${nativeCount(a/10)} 개를 ${nativeCount(b)} 곳에 나눠 보렴.`,row(a,'÷',b,'=',`<span class="vgrp">${SL(a/b)}</span>`),a/b,{ansText:`${a} ÷ ${b} = ${a/b}`}); },
+  ()=>{ const b=rnd(2,5), q=rnd(11,19); const a=q*b; if(a%10!==0) return G36['S3-28'][0](); return W36('doto',`${a} ÷ ${b}`,`${sino(a)} 나누기 ${sn(b)} 얼마일까요?`,row(a,'÷',b,'=',`<span class="vgrp">${SL(q)}</span>`),q,{ansText:`${a} ÷ ${b} = ${q}`}); },
+  ()=>{ const b=rnd(2,5), q=rnd(12,25); const a=q*b; return W36('rami',`${a} ÷ ${b}`,`${sino(a)} 나누기 ${sn(b)} 얼마일까요? 십의 자리부터 나누어요.`,row(a,'÷',b,'=',`<span class="vgrp">${SL(q)}</span>`),q,{ansText:`${a} ÷ ${b} = ${q}`}); },
+ ]],
+ ['S3-29','남는 도토리','나머지가 있는 나눗셈',[
+  ()=>{ const b=rnd(2,6), q=rnd(2,6), r=rnd(1,b-1), a=q*b+r; return W36('cheong',`${a} ÷ ${b}`,`도토리 ${GAE(a)}를 ${nativeCount(b)} 개씩 묶으면 몇 묶음이고 몇 개가 남을까요?`,groupsVis(q,b)+`<div class="grps"><span class="grp left">${Array.from({length:r},()=>`<img src="${A['소품_도토리']}" class="ac" alt="">`).join('')}</span></div>`+row(a,'÷',b,'=',`<span class="vgrp">${SL(q)}</span>`,'…',`<span class="vgrp">${SL(r)}</span>`),`${q}${r}`,{ansText:`${a} ÷ ${b} = ${q} … ${r}`}); },
+  ()=>{ const b=rnd(3,8), q=rnd(3,9), r=rnd(1,b-1), a=q*b+r; return W36('rami',`${a} ÷ ${b}`,`${sino(a)} 나누기 ${sino(b)}. 몫과 나머지를 쓰세요.`,row(a,'÷',b,'=',`<span class="vgrp">${SL(q)}</span>`,'…',`<span class="vgrp">${SL(r)}</span>`),`${q}${r}`,{ansText:`${a} ÷ ${b} = ${q} … ${r}`}); },
+ ]],
+ ['S3-30','나머지가 너무 커','나머지는 나누는 수보다 작다',[
+  ()=>{ const b=rnd(3,7), q=rnd(2,8), r=rnd(1,b-1), a=q*b+r; return C36('cheong',`${a} ÷ ${b} = ${q-1} … ${r+b}, 맞을까?`,`청이가 나머지를 ${sino(r+b)}라고 했어요. 나머지는 나누는 수 ${sino(b)}보다 작아야 해요. 바른 몫과 나머지는?`,row(a,'÷',b),`${q} … ${r}`,optsFrom(`${q} … ${r}`,[`${q-1} … ${r+b}`,`${q+1} … ${r}`])); },
+  ()=>{ const b=rnd(3,9); return C36('doto',`어떤 수를 ${b}로 나눌 때 나머지가 될 수 없는 수는?`,`나머지는 나누는 수보다 항상 작아요. ${sino(b)}로 나눌 때 나머지가 될 수 없는 수는?`,row('□','÷',b,'=','△','…','★'),b,optsFrom(b,[b-1,rnd(0,b-2)])); },
+ ]],
+ ['S3-31','바구니부터 나눠요','(두 자리)÷(한 자리) 세로셈',[
+  ()=>{ const b=rnd(2,4), q=rnd(12,33); const a=q*b; if(a>99) return G36['S3-31'][0](); return W36('halmi',`${a} ÷ ${b}`,`${sino(a)} 나누기 ${sn(b)} 얼마일까? 십의 자리부터 나누고 남은 것은 내려서 나눠요.`,row(a,'÷',b,'=',`<span class="vgrp">${SL(q)}</span>`),q,{ansText:`${a} ÷ ${b} = ${q}`}); },
+  ()=>{ const b=rnd(3,7), q=rnd(10,16), r=rnd(1,b-1); const a=q*b+r; if(a>99) return G36['S3-31'][1](); return W36('rami',`${a} ÷ ${b}`,`${sino(a)} 나누기 ${sino(b)}. 몫과 나머지를 쓰세요.`,row(a,'÷',b,'=',`<span class="vgrp">${SL(q)}</span>`,'…',`<span class="vgrp">${SL(r)}</span>`),`${q}${r}`,{ansText:`${a} ÷ ${b} = ${q} … ${r}`}); },
+ ]],
+ ['S3-32','상자도 나눠요','(세 자리)÷(한 자리)',[
+  ()=>{ const b=rnd(2,6), q=rnd(101,199); const a=q*b; return W36('halmi',`${a} ÷ ${b}`,`${sino(a)} 나누기 ${sn(b)} 얼마일까? 백의 자리부터 차례로.`,row(a,'÷',b,'=',`<span class="vgrp">${SL(q)}</span>`),q,{ansText:`${a} ÷ ${b} = ${q}`}); },
+  ()=>{ const b=rnd(3,8), q=rnd(50,160), r=rnd(1,b-1); const a=q*b+r; return W36('rami',`${a} ÷ ${b}`,`${sino(a)} 나누기 ${sino(b)}. 몫과 나머지를 쓰세요.`,row(a,'÷',b,'=',`<span class="vgrp">${SL(q)}</span>`,'…',`<span class="vgrp">${SL(r)}</span>`),`${q}${r}`,{ansText:`${a} ÷ ${b} = ${q} … ${r}`}); },
+ ]],
+ ['S3-33','맞게 나눴을까','검산',[
+  ()=>{ const b=rnd(3,8), q=rnd(5,20), r=rnd(1,b-1), a=q*b+r; return C36('doto',`${a} ÷ ${b} = ${q} … ${r}의 검산식은?`,`나누는 수 곱하기 몫에 나머지를 더하면 나누어지는 수가 돼요. 알맞은 검산식은?`,row(a,'÷',b,'=',q,'…',r),`${b} × ${q} + ${r} = ${a}`,optsFrom(`${b} × ${q} + ${r} = ${a}`,[`${b} × ${q} − ${r} = ${a-2*r}`,`${q} × ${r} + ${b} = ${q*r+b}`])); },
+  ()=>{ const b=rnd(3,8), q=rnd(5,20), r=rnd(1,b-1), a=q*b+r; return W36('rami',`검산: ${b} × ${q} + ${r} = ?`,`${sino(b)} 곱하기 ${sino(q)}에 ${sino(r)}을 더하면 얼마일까요? 나누어지는 수가 나와야 해요.`,row(b,'×',q,'+',r,'=',`<span class="vgrp">${SL(a)}</span>`),a,{ansText:`${b} × ${q} + ${r} = ${a}`}); },
+ ]],
+]);
+unit(3,'3-2 분수',[
+ ['S3-34','묶음을 분수로','전체 묶음 중 일부',[
+  ()=>{ const g=rnd(3,6), k=rnd(2,4), part=rnd(1,g-1); return W36('rami',`${g*k}개를 ${k}개씩 묶으면 ${part*k}개는 전체의 얼마?`,`도토리 ${GAE(g*k)}를 ${nativeCount(k)} 개씩 묶으면 ${nativeCount(g)} 묶음. 그중 ${nativeCount(part)} 묶음은 전체의 몇 분의 몇일까요?`,groupsVis(g,k)+row(frQ(part,g,'nd')),`${part}${g}`,{ansText:`${g}분의 ${part}`}); },
+  ()=>{ const g=rnd(3,6), k=rnd(2,4); return C36('doto',`한 묶음은 전체의 얼마?`,`${GAE(g*k)}를 ${nativeCount(k)} 개씩 묶으면 ${nativeCount(g)} 묶음. 한 묶음은 전체의 몇 분의 몇일까요?`,groupsVis(g,k),`${g}분의 1`,optsFrom(`${g}분의 1`,[`${k}분의 1`,`${g*k}분의 1`])); },
+ ]],
+ ['S3-35','분수만큼은 몇 개?','□의 몇 분의 몇',[
+  ()=>{ const d=rnd(3,6), n=rnd(1,d-1), k=rnd(2,4), N=d*k; return W36('cheong',`${N}의 ${d}분의 ${n}은?`,`${sino(N)}의 ${sino(d)}분의 ${sino(n)}은 몇일까요? ${nativeCount(d)} 묶음으로 나누고 ${nativeCount(n)} 묶음을 세어요.`,groupsVis(d,k)+row(N,'의',fr(n,d),'=',`<span class="vgrp">${SL(n*k)}</span>`),n*k,{ansText:`${N}의 ${d}분의 ${n} = ${n*k}`}); },
+  ()=>{ const d=rnd(2,5), k=rnd(2,6), N=d*k; return C36('halmi',`${N}의 ${d}분의 1은?`,`${sino(N)}의 ${sino(d)}분의 일은 얼마일까?`,groupsVis(d,k),k,nOpts(k,3)); },
+ ]],
+ ['S3-36','진분수와 가분수','진분수·가분수',[
+  ()=>{ const d=rnd(3,7); const n=rndPick(rnd(1,d-1),rnd(d,d*2)); const ans=n<d?'진분수':'가분수'; return C36('rami',`${d}분의 ${n}은?`,`${sino(d)}분의 ${sino(n)}은 진분수일까요, 가분수일까요? 분자가 분모보다 작으면 진분수예요.`,row(fr(n,d)),ans,['진분수','가분수']); },
+  ()=>{ const d=rnd(2,6), w=rnd(1,4); return W36('doto',`${w}을 분모가 ${d}인 가분수로`,`자연수 ${sino(w)}을 분모가 ${sino(d)}인 가분수로 나타내면 분자는 얼마일까요?`,bars(w,d,w*d)+row(w,'=',frQ(w*d,d,'n')),w*d,{ansText:`${d}분의 ${w*d}`}); },
+ ]],
+ ['S3-37','한 판과 조금','대분수, 가분수↔대분수',[
+  ()=>{ const d=rnd(3,6), w=rnd(1,3), n=rnd(1,d-1); return W36('rami',`대분수 ${w}와 ${d}분의 ${n}을 가분수로`,`${sino(w)}과 ${sino(d)}분의 ${sino(n)}을 가분수로 바꾸면 분자는 얼마일까요?`,bars(w+1,d,w*d+n)+row(mix(w,n,d),'=',frQ(w*d+n,d,'n')),w*d+n,{ansText:`${d}분의 ${w*d+n}`}); },
+  ()=>{ const d=rnd(3,6), w=rnd(1,3), n=rnd(1,d-1), N=w*d+n; return W36('doto',`가분수 ${d}분의 ${N}을 대분수로`,`${sino(d)}분의 ${sino(N)}을 대분수로 바꾸면 자연수 부분과 분자는 얼마일까요?`,bars(w+1,d,N)+row(fr(N,d),'=',mixQ(w,n,d,'wn')),`${w}${n}`,{ansText:`${w}와 ${d}분의 ${n}`}); },
+ ]],
+ ['S3-38','분수 크기 대결','분모 같은 분수 비교',[
+  ()=>{ const d=rnd(3,6), w=rnd(1,2), n=rnd(1,d-1), N2=rnd(d,3*d); const A1=w*d+n; return C36('cheong',`${w}와 ${d}분의 ${n} 과 ${d}분의 ${N2}, 더 큰 것은?`,`대분수를 가분수로 바꾸거나 가분수를 대분수로 바꿔 비교해요.`,row(mix(w,n,d),'□',fr(N2,d)),A1>N2?'>':A1<N2?'<':'=',['>','<','=']); },
+  ()=>{ const d=rnd(3,7), a=rnd(d+1,3*d), b=rnd(d+1,3*d); if(a===b) return G36['S3-38'][1](); return C36('rami',`${d}분의 ${a}와 ${d}분의 ${b}`,`분모가 같은 가분수는 분자가 클수록 커요.`,row(fr(a,d),'□',fr(b,d)),a>b?'>':'<',['>','<']); },
+ ]],
+]);
+/* ---------- 4-1 ---------- */
+unit(4,'4-1 큰 수',[
+ ['S3-39','수레 열 대는 만','10000',[
+  ()=>{ return C36('halmi',`9999보다 1 큰 수는?`,`구천구백구십구보다 일 큰 수는 무엇일까?`,row(9999,'+',1),'10000',['10000','9100','99910']); },
+  ()=>{ const k=rnd(2,9); return C36('doto',`1000이 ${k*10}개인 수는?`,`천이 ${sino(k*10)} 개이면 얼마일까요? 천이 열 개면 만이에요.`,row(1000,'×',k*10),`${k}0000`,optsFrom(`${k}0000`,[`${k}000`,`${k*10}000`])); },
+  ()=>{ const k=rnd(2,9); return C36('rami',`${k}만은 1000이 몇 개?`,`${sino(k)}만은 천이 몇 개일까요?`,row(`${k}0000`),k*10,optsFrom(k*10,[k,k*100])); },
+ ]],
+ ['S3-40','0이 있는 자리','다섯 자리 수 읽고 쓰기',[
+  ()=>{ const n=rnd(1,9)*10000+rnd(0,9)*1000+rndPick(0,0,rnd(1,9))*100+rnd(0,9)*10+rnd(0,9); return C36('rami',`${n}을 읽으면?`,`이 수를 읽어 보세요. 영인 자리는 읽지 않아요.`,row(n),readBig(n),optsFrom(readBig(n),[readBig(n+1000),readBig(n+100)])); },
+  ()=>{ const n=rnd(1,9)*10000+rndPick(0,rnd(1,9))*1000+rnd(0,9)*100+rndPick(0,rnd(1,9))*10+rnd(1,9); return W36('doto',`'${readBig(n)}'을 숫자로`,`${readBig(n)}을 숫자로 쓰면? 비어 있는 자리에는 영을 써요.`,row(`<span class="vgrp">${SL(n)}</span>`),n,{ansText:String(n)}); },
+  ()=>{ const n=rnd(1,9)*10000+rnd(0,9)*1000+rnd(0,9)*100+rnd(0,9)*10+rnd(0,9); const pos=rnd(0,4); const names=['만','천','백','십','일']; const digit=+String(n)[pos]; return C36('halmi',`${n}에서 ${names[pos]}의 자리 숫자는?`,`${readBig(n)}에서 ${names[pos]}의 자리 숫자는 무엇일까?`,row(n),digit,nOpts(digit,3)); },
+ ]],
+ ['S3-41','만씩 끊어 읽어요','십만·백만·천만',[
+  ()=>{ const n=rnd(1,9)*1000000+rnd(0,9)*100000+rnd(0,9)*10000+rnd(0,9)*1000+rnd(0,9)*100; return C36('rami',`${n.toLocaleString()}을 읽으면?`,`네 자리씩 끊어서 읽어요.`,row(n.toLocaleString()),readBig(n),optsFrom(readBig(n),[readBig(n*10),readBig(Math.floor(n/10))])); },
+  ()=>{ const k=rnd(2,9), p=rndPick(100000,1000000,10000000); const nm={100000:'십만',1000000:'백만',10000000:'천만'}[p]; return C36('doto',`${nm}이 ${k}개인 수는?`,`${nm}이 ${sino(k)} 개이면 얼마일까요?`,row(`${nm} × ${k}`),(k*p).toLocaleString(),optsFrom((k*p).toLocaleString(),[(k*p*10).toLocaleString(),(k*p/10).toLocaleString()])); },
+ ]],
+ ['S3-42','별만큼 많은 수','억과 조',[
+  ()=>{ const k=rnd(1,9), p=rndPick(1e8,1e9,1e12); const nm=p===1e8?'억':p===1e9?'십억':'조'; return C36('halmi',`${nm}이 ${k}개인 수는?`,`${nm}이 ${sino(k)} 개이면 얼마일까? 만이 만 개면 억, 억이 만 개면 조란다.`,row(`${nm} × ${k}`),(k*p).toLocaleString(),optsFrom((k*p).toLocaleString(),[(k*p*10).toLocaleString(),(k*p/10).toLocaleString()])); },
+  ()=>{ const a=rnd(1,9), b=rnd(1,9), c=rnd(1,9); const n=a*1e8+b*1e4+c; return C36('rami',`${n.toLocaleString()}을 읽으면?`,`억, 만, 일로 끊어 읽어요.`,row(n.toLocaleString()),`${a}억 ${b}만 ${c}`,optsFrom(`${a}억 ${b}만 ${c}`,[`${a}만 ${b}천 ${c}`,`${a}억 ${b}천 ${c}`])); },
+ ]],
+ ['S3-43','만씩 폴짝','큰 수의 뛰어 세기',[
+  ()=>{ const step=rndPick(10000,100000,1000000); const n=rnd(1,9)*step*rnd(1,3)+rnd(1,9)*1000; const list=[n,n+step,n+2*step]; return C36('doto',`${step.toLocaleString()}씩 뛰어 세기, 다음은?`,`${readBig(step)}씩 뛰어 세어요. 다음 수는?`,row(list.map(x=>x.toLocaleString()).join(' → ')+' → ?'),(n+3*step).toLocaleString(),optsFrom((n+3*step).toLocaleString(),[(n+2*step+1000).toLocaleString(),(n+4*step).toLocaleString()])); },
+  ()=>{ const a=rnd(1,8)*10000+rnd(0,9)*1000, b=a+rnd(1,4)*10000; const step=(b-a); return C36('rami',`${a.toLocaleString()}에서 ${b.toLocaleString()}, 몇씩 뛰었나요?`,`두 수 사이가 얼마인지 보면 뛰어 센 크기를 알 수 있어요.`,row(a.toLocaleString(),'→',b.toLocaleString()),step.toLocaleString(),optsFrom(step.toLocaleString(),[(step/10).toLocaleString(),(step*10).toLocaleString()])); },
+ ]],
+ ['S3-44','어느 마을이 더 많을까','큰 수의 크기 비교',[
+  ()=>{ const a=rnd(10000,99999)*rndPick(1,10,100), b=rnd(10000,99999)*rndPick(1,10,100); if(a===b) return G36['S3-44'][0](); return C36('doto',`${a.toLocaleString()} □ ${b.toLocaleString()}`,`자리 수가 다르면 자리 수가 많은 쪽이 커요. 같으면 높은 자리부터 비교해요.`,row(a.toLocaleString(),'□',b.toLocaleString()),a>b?'>':'<',['>','<']); },
+  ()=>{ const base=rnd(1,9)*100000+rnd(0,9)*10000; const a=base+rnd(0,9999), b=base+rnd(0,9999), c=base+rnd(0,9999); const m=Math.max(a,b,c); if(new Set([a,b,c]).size<3) return G36['S3-44'][1](); return C36('rami',`가장 큰 수는?`,`높은 자리부터 차례로 비교해 가장 큰 수를 찾아요.`,row(a.toLocaleString(),b.toLocaleString(),c.toLocaleString()),m.toLocaleString(),[a,b,c].map(x=>x.toLocaleString())); },
+ ]],
+]);
+unit(4,'4-1 곱셈과 나눗셈',[
+ ['S3-45','대량 주문','(세 자리)×(두 자리)',[
+  ()=>{ const a=rnd(102,399), b=rnd(12,39); return W36('halmi',`${a} × ${b}`,`${sino(a)} 곱하기 ${sn(b)} 얼마일까? 일의 자리 곱과 십의 자리 곱을 더하렴.`,vert2(a,'×',b,a*b),a*b,{ansText:`${a} × ${b} = ${a*b}`}); },
+  ()=>{ const a=rnd(120,480), b=rnd(2,9)*10; return W36('doto',`${a} × ${b}`,`${sino(a)} 곱하기 ${sn(b)} 얼마일까요? ${sino(b/10)}을 곱하고 영을 붙여요.`,row(a,'×',b,'=',`<span class="vgrp">${SL(a*b)}</span>`),a*b,{ansText:`${a} × ${b} = ${a*b}`}); },
+ ]],
+ ['S3-46','몇십으로 나누기','(두·세 자리)÷(몇십)',[
+  ()=>{ const b=rnd(2,9)*10, q=rnd(2,9); return W36('rami',`${b*q} ÷ ${b}`,`${sino(b*q)} 나누기 ${sn(b)} 얼마일까요? ${sino(b/10)} 곱하기 몇이 ${sino(b*q/10)}일까요?`,row(b*q,'÷',b,'=',`<span class="vgrp">${SL(q)}</span>`),q,{ansText:`${b*q} ÷ ${b} = ${q}`}); },
+  ()=>{ const b=rnd(2,9)*10, q=rnd(2,9), r=rnd(1,b-1), a=b*q+r; return W36('halmi',`${a} ÷ ${b}`,`${sino(a)} 나누기 ${sino(b)}. 몫과 나머지를 쓰렴.`,row(a,'÷',b,'=',`<span class="vgrp">${SL(q)}</span>`,'…',`<span class="vgrp">${SL(r)}</span>`),`${q}${r}`,{ansText:`${a} ÷ ${b} = ${q} … ${r}`}); },
+ ]],
+ ['S3-47','몫을 어림해요','(두 자리)÷(두 자리)',[
+  ()=>{ const b=rnd(12,29), q=rnd(2,7), r=rnd(0,b-1); const a=b*q+r; if(a>99) return G36['S3-47'][0](); return W36('doto',`${a} ÷ ${b}`,`${sino(a)} 나누기 ${sino(b)}. ${sino(b)}를 ${sino(Math.round(b/10)*10)}으로 어림해 몫을 생각해요.`,row(a,'÷',b,'=',`<span class="vgrp">${SL(q)}</span>`,'…',`<span class="vgrp">${SL(r)}</span>`),`${q}${r}`,{ansText:`${a} ÷ ${b} = ${q} … ${r}`}); },
+  ()=>{ const b=rnd(13,24), q=rnd(2,6); const a=b*q+rnd(0,b-1); if(a>99) return G36['S3-47'][1](); return C36('rami',`${a} ÷ ${b}의 몫은 얼마쯤?`,`어림해서 몫을 골라 보세요.`,row(a,'÷',b),q,optsFrom(q,[q+1,q-1,q+2])); },
+ ]],
+ ['S3-48','스물네 개씩 포장','(세 자리)÷(두 자리)',[
+  ()=>{ const b=rnd(12,36), q=rnd(4,29), r=rnd(0,b-1); const a=b*q+r; if(a>999) return G36['S3-48'][0](); return W36('halmi',`${a} ÷ ${b}`,`${sino(a)} 나누기 ${sino(b)}. 몫과 나머지를 쓰렴.`,row(a,'÷',b,'=',`<span class="vgrp">${SL(q)}</span>`,'…',`<span class="vgrp">${SL(r)}</span>`),`${q}${r}`,{ansText:`${a} ÷ ${b} = ${q} … ${r}`}); },
+  ()=>{ const b=rnd(12,25), q=rnd(10,40); const a=b*q; if(a>999) return G36['S3-48'][1](); return W36('rami',`${a} ÷ ${b}`,`${sino(a)} 나누기 ${sn(b)} 얼마일까요?`,row(a,'÷',b,'=',`<span class="vgrp">${SL(q)}</span>`),q,{ansText:`${a} ÷ ${b} = ${q}`}); },
+ ]],
+ ['S3-49','어림으로 장보기','어림셈',[
+  ()=>{ const a=rnd(21,89)*10+rnd(1,9), b=rnd(11,49)*10+rnd(1,9); const e=Math.round(a/100)*100+Math.round(b/100)*100; return C36('doto',`${a} + ${b}은 약 얼마?`,`몇백으로 어림해 더해 보세요.`,row(a,'+',b,'≈','?'),`약 ${e}`,optsFrom(`약 ${e}`,[`약 ${e+100}`,`약 ${e-100}`])); },
+  ()=>{ const a=rnd(2,9)*100+rnd(-30,30), b=rnd(2,9); const e=Math.round(a/100)*100*b; return C36('rami',`${a} × ${b}은 약 얼마?`,`${sino(a)}을 몇백으로 어림해 곱해 보세요.`,row(a,'×',b,'≈','?'),`약 ${e}`,optsFrom(`약 ${e}`,[`약 ${e+100*b}`,`약 ${e-100*b}`])); },
+ ]],
+ ['S3-50','배가 몇 척 필요할까','나머지 처리',[
+  ()=>{ const b=rnd(12,30), q=rnd(3,8), r=rnd(1,b-1), n=b*q+r; return C36('halmi',`${n}명이 ${b}명씩 타는 배, 몇 척?`,`${sino(n)} 명이 ${sino(b)} 명씩 타는 배로 모두 건너려면 배가 몇 척 필요할까? 남는 사람도 타야 한단다.`,row(n,'÷',b,'=',q,'…',r),q+1,optsFrom(q+1,[q,q+2])); },
+  ()=>{ const b=rnd(4,9), q=rnd(5,20), r=rnd(1,b-1), n=b*q+r; return C36('cheong',`도토리 ${n}개로 ${b}개짜리 꾸러미 몇 개?`,`${GAE(n)}로 ${nativeCount(b)} 개짜리 꾸러미를 만들면 몇 개까지 만들 수 있을까? 모자라는 건 못 만들어.`,row(n,'÷',b,'=',q,'…',r),q,optsFrom(q,[q+1,q-1])); },
+ ]],
+]);
+function readBig(n){ if(n===0) return '영'; const u=['','만','억','조']; let s='', i=0; while(n>0){ const part=n%10000; if(part) s=sinoRaw(part)+u[i]+(s?' '+s:''); n=Math.floor(n/10000); i++; } return s.replace(/^일만/,'만'); }
+
+/* ---------- 4-2 ---------- */
+const red=(n,d)=>{ const g=gcd(n,d)||1; return [n/g,d/g]; };
+const frTxt=(n,d)=>`${d}분의 ${n}`;
+const mixTxt=(w,n,d)=>n?`${w}와 ${d}분의 ${n}`:`${w}`;
+const toMix=(N,d)=>[Math.floor(N/d),N%d];
+const frSp=(n,d)=>`${sino(d)}분의 ${sino(n)}`;
+const mixSp=(w,n,d)=>`${sino(w)}과 ${frSp(n,d)}`;
+unit(4,'4-2 분수의 덧셈과 뺄셈',[
+ ['S3-51','묵을 모아요','분모 같은 진분수 덧셈',[
+  ()=>{ const d=rnd(4,9), a=rnd(1,d-2), b=rnd(1,d-1-a); return W36('rami',`${frTxt(a,d)} + ${frTxt(b,d)}`,`${frSp(a,d)} 더하기 ${frSp(b,d)}. 분모는 그대로, 분자끼리 더해요.`,`<div class="fbars">${bar(d,a)}${bar(d,b)}</div>`+row(fr(a,d),'+',fr(b,d),'=',frQ(a+b,d,'n')),a+b,{ansText:frTxt(a+b,d)}); },
+  ()=>{ const d=rnd(4,9), a=rnd(1,d-2), b=rnd(1,d-1-a); return C36('cheong',`${frTxt(a,d)} + ${frTxt(b,d)}, 청이는 ${frTxt(a+b,2*d)}이래`,`청이는 분모끼리도 더했어요. 바른 답은?`,row(fr(a,d),'+',fr(b,d)),frTxt(a+b,d),optsFrom(frTxt(a+b,d),[frTxt(a+b,2*d),frTxt(a*b,d),frTxt(a+b+1,d)])); },
+ ]],
+ ['S3-52','1보다 커졌어','합이 1보다 큰 진분수 덧셈',[
+  ()=>{ const d=rnd(3,8), a=rnd(2,d-1), b=rnd(d-a+1,d-1); const [w,n]=toMix(a+b,d); return W36('rami',`${frTxt(a,d)} + ${frTxt(b,d)} (대분수로)`,`${frSp(a,d)} 더하기 ${frSp(b,d)}. 합이 일보다 크면 대분수로 나타내요.`,`<div class="fbars">${bar(d,a)}${bar(d,b)}</div>`+row(fr(a,d),'+',fr(b,d),'=',n?mixQ(w,n,d,'wn'):`<span class="vgrp">${SL(w)}</span>`),n?`${w}${n}`:`${w}`,{ansText:mixTxt(w,n,d)}); },
+  ()=>{ const d=rnd(3,8), a=rnd(2,d-1), b=rnd(d-a+1,d-1); return W36('doto',`${frTxt(a,d)} + ${frTxt(b,d)} (가분수로)`,`${frSp(a,d)} 더하기 ${frSp(b,d)}. 가분수로 써 보세요.`,row(fr(a,d),'+',fr(b,d),'=',frQ(a+b,d,'n')),a+b,{ansText:frTxt(a+b,d)}); },
+ ]],
+ ['S3-53','남은 케이크','진분수 뺄셈, 1−분수',[
+  ()=>{ const d=rnd(4,9), b=rnd(1,d-2), a=rnd(b+1,d-1); return W36('rami',`${frTxt(a,d)} − ${frTxt(b,d)}`,`${frSp(a,d)} 빼기 ${frSp(b,d)}. 분자끼리 빼요.`,bar(d,a)+row(fr(a,d),'−',fr(b,d),'=',frQ(a-b,d,'n')),a-b,{ansText:frTxt(a-b,d)}); },
+  ()=>{ const d=rnd(3,9), b=rnd(1,d-1); return W36('cheong',`1 − ${frTxt(b,d)}`,`케이크 한 판에서 ${frSp(b,d)}을 먹었어요. 남은 건? 일을 ${sino(d)}분의 ${sino(d)}로 바꿔요.`,pie(d,d-b)+row(1,'−',fr(b,d),'=',frQ(d-b,d,'n')),d-b,{ansText:frTxt(d-b,d)}); },
+ ]],
+ ['S3-54','대분수 더하기','대분수의 덧셈',[
+  ()=>{ const d=rnd(3,7), w1=rnd(1,3), n1=rnd(1,d-2), w2=rnd(1,3), n2=rnd(1,d-1-n1); return W36('rami',`${mixTxt(w1,n1,d)} + ${mixTxt(w2,n2,d)}`,`${mixSp(w1,n1,d)} 더하기 ${mixSp(w2,n2,d)}. 자연수끼리, 분수끼리 더해요.`,row(mix(w1,n1,d),'+',mix(w2,n2,d),'=',mixQ(w1+w2,n1+n2,d,'wn')),`${w1+w2}${n1+n2}`,{ansText:mixTxt(w1+w2,n1+n2,d)}); },
+  ()=>{ const d=rnd(3,7), w1=rnd(1,3), n1=rnd(1,d-1), w2=rnd(1,3), n2=rnd(d-n1,d-1); const N=n1+n2; const [cw,cn]=toMix(N,d); return W36('halmi',`${mixTxt(w1,n1,d)} + ${mixTxt(w2,n2,d)}`,`${mixSp(w1,n1,d)} 더하기 ${mixSp(w2,n2,d)}. 분수 부분이 일을 넘으면 자연수로 받아올림하렴.`,row(mix(w1,n1,d),'+',mix(w2,n2,d),'=',cn?mixQ(w1+w2+cw,cn,d,'wn'):`<span class="vgrp">${SL(w1+w2+cw)}</span>`),cn?`${w1+w2+cw}${cn}`:`${w1+w2+cw}`,{ansText:mixTxt(w1+w2+cw,cn,d),hint:'받아올림'}); },
+ ]],
+ ['S3-55','대분수 빼기','대분수의 뺄셈(받아내림)',[
+  ()=>{ const d=rnd(3,7), w2=rnd(1,2), n2=rnd(1,d-2), w1=w2+rnd(1,3), n1=rnd(n2+1,d-1); return W36('rami',`${mixTxt(w1,n1,d)} − ${mixTxt(w2,n2,d)}`,`${mixSp(w1,n1,d)} 빼기 ${mixSp(w2,n2,d)}. 자연수끼리, 분수끼리 빼요.`,row(mix(w1,n1,d),'−',mix(w2,n2,d),'=',mixQ(w1-w2,n1-n2,d,'wn')),`${w1-w2}${n1-n2}`,{ansText:mixTxt(w1-w2,n1-n2,d)}); },
+  ()=>{ const d=rnd(3,7), w2=rnd(1,2), n2=rnd(2,d-1), w1=w2+rnd(1,3), n1=rnd(1,n2-1); const rw=w1-1-w2, rn=n1+d-n2; return W36('halmi',`${mixTxt(w1,n1,d)} − ${mixTxt(w2,n2,d)}`,`${mixSp(w1,n1,d)} 빼기 ${mixSp(w2,n2,d)}. 분수 부분이 모자라면 자연수 일을 ${sino(d)}분의 ${sino(d)}로 빌려 오렴.`,row(mix(w1,n1,d),'−',mix(w2,n2,d),'=',rw?mixQ(rw,rn,d,'wn'):frQ(rn,d,'n')),rw?`${rw}${rn}`:`${rn}`,{ansText:rw?mixTxt(rw,rn,d):frTxt(rn,d),hint:'받아내림'}); },
+ ]],
+]);
+const decTxt=(x,p)=>x.toFixed(p);
+const decSp=s=>String(s).replace('.',' 점 ').split('').map(c=>/\d/.test(c)?SINO[+c]:c).join('').replace(/ 점 /,' 점 ');
+unit(4,'4-2 소수의 덧셈과 뺄셈',[
+ ['S3-56','더 작은 눈금','소수 두 자리 수',[
+  ()=>{ const n=rnd(1,99); const s=(n/100).toFixed(2); return W36('rami',`100분의 ${n}을 소수로`,`백분의 ${sino(n)}을 소수로 쓰면 ${decSp(s)}. 써 보세요.`,row(fr(n,100),'=',decS(s)),s,{ansText:s}); },
+  ()=>{ const w=rnd(0,3), n=rnd(1,99); const s=`${w}.${String(n).padStart(2,'0')}`; return C36('doto',`${s}에서 소수 둘째 자리 숫자는?`,`${decSp(s)}에서 소수 둘째 자리 숫자는 무엇일까요?`,row(s),n%10,optsFrom(n%10,[Math.floor(n/10),w,(n%10+1)%10])); },
+  ()=>{ const cm=rnd(1,99); return C36('halmi',`${cm} cm는 몇 m?`,`일 미터는 백 센티미터. ${sino(cm)} 센티미터는 몇 미터일까?`,row(`${cm} cm`,'=','□ m'),(cm/100).toFixed(2),optsFrom((cm/100).toFixed(2),[(cm/10).toFixed(1),`${cm}`])); },
+ ]],
+ ['S3-57','대나무 무게 달기','소수 세 자리 수',[
+  ()=>{ const g=rnd(1,999); const s=(g/1000).toFixed(3); return W36('rami',`${g} g은 몇 kg?`,`일 킬로그램은 천 그램. ${sino(g)} 그램은 ${decSp(s)} 킬로그램. 써 보세요.`,row(`${g} g`,'=',decS(s),'kg'),s,{ansText:`${s} kg`}); },
+  ()=>{ const n=rnd(1001,9999); const s=(n/1000).toFixed(3); return C36('doto',`${s}을 읽으면?`,`소수는 자릿값을 붙이지 않고 숫자만 차례로 읽어요.`,row(s),decSp(s).replace(/​/g,''),optsFrom(decSp(s).replace(/​/g,''),[decSp((n/100).toFixed(2)).replace(/​/g,''),decSp((n/10000).toFixed(4)).replace(/​/g,'')])); },
+ ]],
+ ['S3-58','길면 큰 수?','소수 크기 비교',[
+  ()=>{ const a=rnd(1,9)/10, b=(rnd(1,9)*10+rnd(1,9))/100; const A=a.toFixed(1),B=b.toFixed(2); return C36('cheong',`${A}와 ${B}, 어느 쪽이 클까?`,`청이는 숫자가 길면 크다고 해요. 자리를 맞춰서 비교해 봐요.`,row(A,'□',B),a>b?'>':a<b?'<':'=',['>','<','=']); },
+  ()=>{ const n=rnd(1,9); return C36('rami',`0.${n}과 0.${n}0은?`,`영 점 ${sino(n)}과 영 점 ${sino(n)} 영. 소수 끝자리의 영은 생략할 수 있어요.`,row(`0.${n}`,'□',`0.${n}0`),'=',['=','<','>']); },
+ ]],
+ ['S3-59','열 배, 십 분의 일','소수점 이동',[
+  ()=>{ const n=rnd(11,99); const s=(n/100).toFixed(2); const t=(n/10).toFixed(1); return W36('rami',`${s}의 10배는?`,`${decSp(s)}의 열 배는 얼마일까요? 소수점이 오른쪽으로 한 자리 가요.`,row(s,'× 10 =',decS(t)),t,{ansText:t}); },
+  ()=>{ const n=rnd(11,99); const s=(n/10).toFixed(1); const t=(n/100).toFixed(2); return W36('doto',`${s}의 10분의 1은?`,`${decSp(s)}의 십분의 일은 얼마일까요? 소수점이 왼쪽으로 한 자리 가요.`,row(s,'의',fr(1,10),'=',decS(t)),t,{ansText:t}); },
+  ()=>{ const n=rnd(1,9); const a=(n/100).toFixed(2); return C36('halmi',`${a}은 ${n}의 몇 배?`,`${decSp(a)}은 ${sino(n)}의 얼마일까?`,row(n,'→',a),'100분의 1',['100분의 1','10분의 1','100배']); },
+ ]],
+ ['S3-60','멀리뛰기 두 번','소수 한 자리 수 덧셈',[
+  ()=>{ const a=rnd(5,39)/10, b=rnd(5,39)/10; const r=(a+b).toFixed(1); return W36('rami',`${a.toFixed(1)} + ${b.toFixed(1)}`,`${decSp(a.toFixed(1))} 더하기 ${decSp(b.toFixed(1))}. 소수점을 맞춰 더해요.`,row(a.toFixed(1),'+',b.toFixed(1),'=',decS(r)),r,{ansText:r}); },
+  ()=>{ const a=rnd(5,39)/10, b=rnd(5,39)/10; const r=(a+b).toFixed(1); return C36('cheong',`${a.toFixed(1)} + ${b.toFixed(1)}, 청이는 ${(a+b).toFixed(1).replace('.','')}이래`,`청이는 소수점을 빼먹었어요. 바른 답은?`,row(a.toFixed(1),'+',b.toFixed(1)),r,optsFrom(r,[(a+b).toFixed(1).replace('.',''),(a+b+1).toFixed(1)])); },
+ ]],
+ ['S3-61','소수점을 맞춰요','소수 두 자리 수 덧셈',[
+  ()=>{ const a=rnd(1,9)/10, b=rnd(11,99)/100; const r=(a+b).toFixed(2); return W36('rami',`${a.toFixed(1)} + ${b.toFixed(2)}`,`${decSp(a.toFixed(1))} 더하기 ${decSp(b.toFixed(2))}. 자리를 맞춰요. ${decSp(a.toFixed(1))}은 ${decSp(a.toFixed(2))}이에요.`,row(a.toFixed(1),'+',b.toFixed(2),'=',decS(r)),r,{ansText:r,hint:'0.5 = 0.50'}); },
+  ()=>{ const a=rnd(101,499)/100, b=rnd(101,499)/100; const r=(a+b).toFixed(2); return W36('doto',`${a.toFixed(2)} + ${b.toFixed(2)}`,`${decSp(a.toFixed(2))} 더하기 ${decSp(b.toFixed(2))} 얼마일까요?`,row(a.toFixed(2),'+',b.toFixed(2),'=',decS(r)),r,{ansText:r}); },
+ ]],
+ ['S3-62','얼마나 더 뛰었나','소수의 뺄셈',[
+  ()=>{ const b=rnd(5,29)/10, a=b+rnd(11,199)/100; const r=(a-b).toFixed(2); return W36('rami',`${a.toFixed(2)} − ${b.toFixed(1)}`,`${decSp(a.toFixed(2))} 빼기 ${decSp(b.toFixed(1))}. 소수점을 맞추고 빈 자리는 영으로 생각해요.`,row(a.toFixed(2),'−',b.toFixed(1),'=',decS(r)),r,{ansText:r}); },
+  ()=>{ const b=rnd(11,49)/10, a=b+rnd(1,39)/10; const r=(a-b).toFixed(1); return W36('doto',`${a.toFixed(1)} − ${b.toFixed(1)}`,`${decSp(a.toFixed(1))} 빼기 ${decSp(b.toFixed(1))} 얼마일까요?`,row(a.toFixed(1),'−',b.toFixed(1),'=',decS(r)),r,{ansText:r}); },
+ ]],
+]);
+/* ---------- 5-1 ---------- */
+unit(5,'5-1 자연수의 혼합 계산',[
+ ['S3-63','더하고 빼는 순서','덧셈·뺄셈 섞인 식',[
+  ()=>{ const a=rnd(20,60), b=rnd(5,19), c=rnd(5,19); return W36('rami',`${a} − ${b} + ${c}`,`${sino(a)} 빼기 ${sino(b)} 더하기 ${sino(c)}. 앞에서부터 차례로 계산해요.`,row(a,'−',b,'+',c,'=',`<span class="vgrp">${SL(a-b+c)}</span>`),a-b+c,{ansText:`${a} − ${b} + ${c} = ${a-b+c}`}); },
+  ()=>{ const a=rnd(20,60), b=rnd(5,19), c=rnd(5,19); const wrong=a-(b+c); return C36('cheong',`${a} − ${b} + ${c}, 청이는 ${wrong}이래`,`청이는 뒤에서부터 계산했어요. 앞에서부터 하면?`,row(a,'−',b,'+',c),a-b+c,optsFrom(a-b+c,[wrong,a+b-c])); },
+ ]],
+ ['S3-64','곱하고 나누는 순서','곱셈·나눗셈 섞인 식',[
+  ()=>{ const b=rnd(2,6), q=rnd(2,9), a=b*q, c=rnd(2,9); return W36('rami',`${a} ÷ ${b} × ${c}`,`${sino(a)} 나누기 ${sino(b)} 곱하기 ${sino(c)}. 앞에서부터 차례로.`,row(a,'÷',b,'×',c,'=',`<span class="vgrp">${SL(q*c)}</span>`),q*c,{ansText:`${a} ÷ ${b} × ${c} = ${q*c}`}); },
+  ()=>{ const a=rnd(2,9), c=rnd(2,6), b=c*rnd(1,3); return C36('doto',`${a} × ${b} ÷ ${c}`,`${sino(a)} 곱하기 ${sino(b)} 나누기 ${sino(c)}는?`,row(a,'×',b,'÷',c),a*b/c,nOpts(a*b/c,4)); },
+ ]],
+ ['S3-65','곱셈 먼저!','덧셈·뺄셈·곱셈 섞인 식',[
+  ()=>{ const a=rnd(10,40), b=rnd(2,6), c=rnd(2,9); return W36('rami',`${a} + ${b} × ${c}`,`${sino(a)} 더하기 ${sino(b)} 곱하기 ${sino(c)}. 곱셈을 먼저 계산해요.`,row(a,'+',b,'×',c,'=',`<span class="vgrp">${SL(a+b*c)}</span>`),a+b*c,{ansText:`${a} + ${b} × ${c} = ${a+b*c}`}); },
+  ()=>{ const b=rnd(2,6), c=rnd(2,9), a=b*c+rnd(5,30); return C36('cheong',`${a} − ${b} × ${c}, 청이는 ${(a-b)*c}이래`,`청이는 앞에서부터 뺐어요. 곱셈 먼저 하면?`,row(a,'−',b,'×',c),a-b*c,optsFrom(a-b*c,[(a-b)*c,a-b-c])); },
+ ]],
+ ['S3-66','괄호부터!','괄호가 있는 식',[
+  ()=>{ const a=rnd(10,40), b=rnd(2,9), c=rnd(2,6); return W36('rami',`(${a} − ${b}) × ${c}`,`괄호 ${sino(a)} 빼기 ${sino(b)} 괄호 닫고 곱하기 ${sino(c)}. 괄호 안을 먼저 계산해요.`,row(`(${a} − ${b})`,'×',c,'=',`<span class="vgrp">${SL((a-b)*c)}</span>`),(a-b)*c,{ansText:`(${a} − ${b}) × ${c} = ${(a-b)*c}`}); },
+  ()=>{ const b=rnd(2,6), c=rnd(2,9), s=b*c, a=rnd(2,9); return C36('doto',`${a*s} ÷ (${b} × ${c})`,`괄호 안을 먼저 계산하면?`,row(a*s,'÷',`(${b} × ${c})`),a,optsFrom(a,[a*c*c,a*b])); },
+ ]],
+ ['S3-67','계산 순서 총정리','사칙연산과 괄호',[
+  ()=>{ const b=rnd(2,5), q=rnd(2,6), c=rnd(2,9), a=rnd(5,30); const r=a+b*q*c- (b*q); return W36('halmi',`${a} + ${b*q} ÷ ${b} × ${c} − ${b*q}`,`괄호 없으면 곱셈과 나눗셈을 먼저, 앞에서부터. 그다음 덧셈과 뺄셈.`,row(a,'+',b*q,'÷',b,'×',c,'−',b*q,'=',`<span class="vgrp">${SL(r)}</span>`),r,{ansText:`= ${r}`}); },
+  ()=>{ const a=rnd(2,6), b=rnd(2,6), c=rnd(2,5), d=rnd(1,9); const r=(a+b)*c-d; return C36('rami',`(${a} + ${b}) × ${c} − ${d}`,`괄호 먼저, 곱셈, 그다음 뺄셈.`,row(`(${a} + ${b})`,'×',c,'−',d),r,optsFrom(r,[a+b*c-d,(a+b)*(c-d)])); },
+ ]],
+]);
+const divisors=n=>{ const r=[]; for(let i=1;i<=n;i++) if(n%i===0) r.push(i); return r; };
+const lcm=(a,b)=>a*b/gcd(a,b);
+unit(5,'5-1 약수와 배수',[
+ ['S3-68','나누어떨어지는 수','약수',[
+  ()=>{ const n=rndPick(12,18,20,24,28,30,36); const ds=divisors(n); const non=shuffle([...Array(n).keys()].map(i=>i+1).filter(x=>!ds.includes(x)&&x>1))[0]; const two=shuffle(ds.filter(x=>x>1&&x<n)).slice(0,2); return C36('rami',`${n}의 약수가 아닌 것은?`,`${sino(n)}을 나누어떨어지게 하는 수가 약수예요. 약수가 아닌 것은?`,row(n),non,shuffle([non,...two])); },
+  ()=>{ const n=rndPick(8,10,12,15,16,18,20); const ds=divisors(n); return C36('doto',`${n}의 약수는 모두 몇 개?`,`${sino(n)}의 약수를 모두 찾아 세어 보세요.`,row(n),ds.length,optsFrom(ds.length,[ds.length+1,ds.length-1,ds.length+2])); },
+ ]],
+ ['S3-69','몇씩 커지는 수','배수',[
+  ()=>{ const n=rnd(3,9), k=rnd(2,6); return W36('rami',`${n}의 배수를 작은 수부터, ${k}번째는?`,`${sino(n)}의 배수를 작은 것부터 쓰면 ${sino(n)}, ${sino(2*n)}, … ${sino(k)}번째 배수는?`,row(Array.from({length:k-1},(_,i)=>n*(i+1)).join(', ')+', ?')+row(`<span class="vgrp">${SL(n*k)}</span>`),n*k,{ansText:String(n*k)}); },
+  ()=>{ const n=rnd(3,9); const m=n*rnd(3,12); const non=m+rnd(1,n-1); return C36('cheong',`${n}의 배수는?`,`${sino(n)}의 배수를 고르세요. ${sino(n)}으로 나누어떨어져야 해요.`,row(n,'× □'),m,[m,non,non+n].sort(()=>Math.random()-.5)); },
+ ]],
+ ['S3-70','약수와 배수는 짝꿍','약수·배수의 관계',[
+  ()=>{ const a=rnd(2,9), b=rnd(2,9); return C36('rami',`${a} × ${b} = ${a*b}. 알맞은 말은?`,`${sino(a)} 곱하기 ${sino(b)}는 ${sino(a*b)}. 그러면 ${sino(a*b)}는 ${sino(a)}의 무엇일까요?`,row(a,'×',b,'=',a*b),`${a*b}는 ${a}의 배수`,[`${a*b}는 ${a}의 배수`,`${a*b}는 ${a}의 약수`,`${a}는 ${a*b}의 배수`]); },
+  ()=>{ const a=rnd(2,9), b=rnd(2,9); return C36('doto',`${a*b}의 약수인 것은?`,`${sino(a*b)}를 곱셈식으로 나타내면 ${sino(a)} 곱하기 ${sino(b)}. 약수를 고르세요.`,row(a*b,'=',a,'×',b),String(a),optsFrom(String(a),[String(a*b+1),String(a+b)])); },
+ ]],
+ ['S3-71','똑같이 나눠 담기','공약수·최대공약수',[
+  ()=>{ const g=rndPick(2,3,4,5,6), a=g*rnd(2,6), b=g*rnd(2,6); if(gcd(a,b)!==g) return G36['S3-71'][0](); return W36('rami',`${a}과 ${b}의 최대공약수`,`${sino(a)}과 ${sino(b)}의 공약수 중 가장 큰 수는? 두 수를 모두 나누는 수를 찾아요.`,row(a,',',b)+row(`<span class="vgrp">${SL(g)}</span>`),g,{ansText:String(g)}); },
+  ()=>{ const g=rndPick(4,6,8,12), a=g*rnd(2,5), b=g*rnd(2,5); if(gcd(a,b)!==g) return G36['S3-71'][1](); return C36('halmi',`${a}과 ${b}의 공약수가 아닌 것은?`,`최대공약수 ${sino(g)}의 약수가 공약수란다. 공약수가 아닌 것은?`,row(a,',',b),String(divisors(a).find(x=>b%x!==0)||a+1),optsFrom(String(divisors(a).find(x=>b%x!==0)||a+1),divisors(g).map(String))); },
+ ]],
+ ['S3-72','다시 만나는 날','공배수·최소공배수',[
+  ()=>{ const a=rnd(2,9), b=rnd(2,9); if(a===b) return G36['S3-72'][0](); return W36('rami',`${a}과 ${b}의 최소공배수`,`${sino(a)}의 배수와 ${sino(b)}의 배수 중 공통인 가장 작은 수는?`,row(a,',',b)+row(`<span class="vgrp">${SL(lcm(a,b))}</span>`),lcm(a,b),{ansText:String(lcm(a,b))}); },
+  ()=>{ const a=rnd(2,6), b=rnd(2,6); if(a===b) return G36['S3-72'][1](); const l=lcm(a,b); return C36('doto',`${a}일마다, ${b}일마다 오면 처음 같이 오는 날은?`,`도토가 ${sino(a)}일마다, 람이가 ${sino(b)}일마다 숲에 와요. 오늘 같이 왔다면 다음에 함께 오는 건 며칠 뒤?`,row(a,'일','·',b,'일'),`${l}일 뒤`,optsFrom(`${l}일 뒤`,[`${a*b}일 뒤`,`${a+b}일 뒤`,`${gcd(a,b)}일 뒤`])); },
+ ]],
+ ['S3-73','최대·최소 작전','최대공약수·최소공배수 활용',[
+  ()=>{ const g=rndPick(3,4,6,8), a=g*rnd(2,5), b=g*rnd(2,5); if(gcd(a,b)!==g) return G36['S3-73'][0](); return C36('halmi',`도토리 ${a}개, 밤 ${b}개를 최대 몇 봉지에 똑같이?`,`도토리 ${sino(a)} 개와 밤 ${sino(b)} 개를 남김없이 똑같이 나누어 담으려면 봉지는 최대 몇 개일까?`,row(a,',',b),`${g}봉지`,optsFrom(`${g}봉지`,[`${g*2}봉지`,`${g/2|0||1}봉지`,`${a+b}봉지`])); },
+  ()=>{ const a=rndPick(4,6,8,9), b=rndPick(6,8,10,12); if(a===b) return G36['S3-73'][1](); const l=lcm(a,b); return C36('rami',`가로 ${a}, 세로 ${b} 타일로 가장 작은 정사각형, 한 변은?`,`가로 ${sino(a)}, 세로 ${sino(b)}인 타일을 빈틈없이 붙여 가장 작은 정사각형을 만들면 한 변은?`,row(a,'×',b,'타일'),l,optsFrom(l,[a*b,a+b])); },
+ ]],
+]);
+unit(5,'5-1 약분과 통분',[
+ ['S3-74','크기가 같은 분수','크기가 같은 분수',[
+  ()=>{ const d=rnd(2,6), n=rnd(1,d-1), k=rnd(2,4); return W36('rami',`${frTxt(n,d)}과 크기가 같은 분수`,`분모와 분자에 똑같은 수 ${sino(k)}를 곱해도 크기는 같아요.`,`<div class="fbars">${bar(d,n)}${bar(d*k,n*k)}</div>`+row(fr(n,d),'=',frQ(n*k,d*k,'nd')),`${n*k}${d*k}`,{ansText:frTxt(n*k,d*k)}); },
+  ()=>{ const d=rnd(2,6), n=rnd(1,d-1), k=rnd(2,4); return C36('doto',`${frTxt(n,d)}과 크기가 같은 것은?`,`크기가 같은 분수를 고르세요.`,bar(d,n),frTxt(n*k,d*k),[frTxt(n*k,d*k),frTxt(n+k,d+k),frTxt(n*k,d)]); },
+ ]],
+ ['S3-75','간단하게, 약분','약분·기약분수',[
+  ()=>{ const g=rnd(2,5), d0=rnd(2,6), n0=rnd(1,d0-1); if(gcd(n0,d0)!==1) return G36['S3-75'][0](); return W36('rami',`${frTxt(n0*g,d0*g)}을 기약분수로`,`분모와 분자를 최대공약수 ${sino(g)}로 나누어 더 이상 약분할 수 없게 만들어요.`,row(fr(n0*g,d0*g),'=',frQ(n0,d0,'nd')),`${n0}${d0}`,{ansText:frTxt(n0,d0)}); },
+  ()=>{ const g=rnd(2,4), d0=rnd(3,7), n0=rnd(1,d0-1); if(gcd(n0,d0)!==1) return G36['S3-75'][1](); return C36('cheong',`${frTxt(n0*g,d0*g)}, 기약분수는?`,`더 이상 약분할 수 없는 분수를 고르세요.`,row(fr(n0*g,d0*g)),frTxt(n0,d0),[frTxt(n0,d0),frTxt(n0*g,d0*g),frTxt(n0,d0*g)]); },
+ ]],
+ ['S3-76','분모를 같게, 통분','통분',[
+  ()=>{ const a=rnd(2,6), b=rnd(2,6); if(a===b||a%b===0||b%a===0) return G36['S3-76'][0](); const L=lcm(a,b), n1=rnd(1,a-1), n2=rnd(1,b-1); return W36('rami',`${frTxt(n1,a)}과 ${frTxt(n2,b)}을 통분 (최소공배수로)`,`분모의 최소공배수 ${sino(L)}로 통분해요.`,row(fr(n1,a),',',fr(n2,b),'→',frQ(n1*L/a,L,'n'),',',frQ(n2*L/b,L,'n')),`${n1*L/a}${n2*L/b}`,{ansText:`${frTxt(n1*L/a,L)}, ${frTxt(n2*L/b,L)}`}); },
+  ()=>{ const a=rnd(2,6), b=rnd(2,6); if(a===b) return G36['S3-76'][1](); const L=lcm(a,b)*rnd(1,2); return C36('doto',`${a}과 ${b}을 분모로 하는 분수의 공통분모가 될 수 있는 수는?`,`두 분모의 공배수가 공통분모가 될 수 있어요.`,row(`분모 ${a}`,',',`분모 ${b}`),L,optsFrom(L,[a+b,L+1,a*b+1,L-1].filter(x=>x%a||x%b))); },
+ ]],
+ ['S3-77','분모가 다른 분수 비교','통분하여 비교',[
+  ()=>{ const a=rnd(2,7), b=rnd(2,7), n1=rnd(1,a-1), n2=rnd(1,b-1); if(a===b||n1*b===n2*a) return G36['S3-77'][0](); return C36('rami',`${frTxt(n1,a)} □ ${frTxt(n2,b)}`,`분모를 같게 만들어 비교해요.`,`<div class="fbars">${bar(a,n1)}${bar(b,n2)}</div>`+row(fr(n1,a),'□',fr(n2,b)),n1*b>n2*a?'>':'<',['>','<']); },
+  ()=>{ const d=rnd(3,8), n=rnd(1,d-1); const x=n/d; const dec=rnd(1,9)/10; if(Math.abs(x-dec)<0.01) return G36['S3-77'][1](); return C36('doto',`${frTxt(n,d)} □ ${dec}`,`분수를 소수로 바꾸거나 소수를 분수로 바꾸어 비교해요.`,row(fr(n,d),'□',dec),x>dec?'>':'<',['>','<']); },
+ ]],
+ ['S3-78','분수를 소수로, 소수를 분수로','분수↔소수',[
+  ()=>{ const d=rndPick(2,4,5,10,20,25), n=rnd(1,d-1); const s=String(+(n/d).toFixed(2)); return W36('rami',`${frTxt(n,d)}을 소수로`,`분모를 십, 백으로 만들면 소수로 바꿀 수 있어요.`,row(fr(n,d),'=',decS(s)),s,{ansText:s}); },
+  ()=>{ const n=rnd(1,99); const [a,b]=red(n,100); return C36('doto',`${(n/100).toFixed(2)}을 기약분수로`,`${decSp((n/100).toFixed(2))}은 백분의 ${sino(n)}. 약분하면?`,row((n/100).toFixed(2)),frTxt(a,b),optsFrom(frTxt(a,b),[frTxt(n,100),frTxt(n,10),frTxt(a,b*2)])); },
+ ]],
+]);
+unit(5,'5-1 분수의 덧셈과 뺄셈 (분모가 다른)',[
+ ['S3-79','분모가 달라도 더할 수 있어','분모 다른 진분수 덧셈',[
+  ()=>{ const a=rnd(2,6), b=rnd(2,6); if(a===b) return G36['S3-79'][0](); const L=lcm(a,b); const n1=rnd(1,a-1), n2=rnd(1,b-1); const N=n1*L/a+n2*L/b; if(N>=L) return G36['S3-79'][0](); const [rn,rd]=red(N,L); return W36('rami',`${frTxt(n1,a)} + ${frTxt(n2,b)} (기약분수로)`,`통분해서 분자끼리 더하고, 약분이 되면 약분해요.`,`<div class="fbars">${bar(a,n1)}${bar(b,n2)}</div>`+row(fr(n1,a),'+',fr(n2,b),'=',frQ(rn,rd,'nd')),`${rn}${rd}`,{ansText:frTxt(rn,rd)}); },
+  ()=>{ const a=rnd(2,6), b=rnd(2,6); if(a===b) return G36['S3-79'][1](); const L=lcm(a,b); const n1=rnd(1,a-1), n2=rnd(1,b-1); const N=n1*L/a+n2*L/b; if(N>=L) return G36['S3-79'][1](); const [rn,rd]=red(N,L); return C36('cheong',`${frTxt(n1,a)} + ${frTxt(n2,b)}, 청이는 ${frTxt(n1+n2,a+b)}이래`,`청이는 분모끼리, 분자끼리 더했어요. 통분해서 바르게 계산하면?`,row(fr(n1,a),'+',fr(n2,b)),frTxt(rn,rd),[frTxt(rn,rd),frTxt(n1+n2,a+b),frTxt(n1+n2,L)]); },
+ ]],
+ ['S3-80','대분수도 통분해서','분모 다른 대분수 덧셈',[
+  ()=>{ const a=rnd(2,5), b=rnd(2,5); if(a===b) return G36['S3-80'][0](); const L=lcm(a,b), w1=rnd(1,3), w2=rnd(1,3), n1=rnd(1,a-1), n2=rnd(1,b-1); const N=n1*L/a+n2*L/b; const [cw,cn]=toMix(N,L); const [rn,rd]=cn?red(cn,L):[0,L]; const W=w1+w2+cw; return W36('rami',`${mixTxt(w1,n1,a)} + ${mixTxt(w2,n2,b)}`,`자연수끼리 더하고, 분수는 통분해서 더해요. 일을 넘으면 받아올림.`,row(mix(w1,n1,a),'+',mix(w2,n2,b),'=',rn?mixQ(W,rn,rd,'wn'):`<span class="vgrp">${SL(W)}</span>`),rn?`${W}${rn}`:`${W}`,{ansText:rn?mixTxt(W,rn,rd):String(W)}); },
+ ]],
+ ['S3-81','분모 다른 뺄셈','분모 다른 진분수 뺄셈',[
+  ()=>{ const a=rnd(2,6), b=rnd(2,6); if(a===b) return G36['S3-81'][0](); const L=lcm(a,b); const n1=rnd(1,a-1), n2=rnd(1,b-1); const N=n1*L/a-n2*L/b; if(N<=0) return G36['S3-81'][0](); const [rn,rd]=red(N,L); return W36('rami',`${frTxt(n1,a)} − ${frTxt(n2,b)} (기약분수로)`,`통분해서 분자끼리 빼요.`,`<div class="fbars">${bar(a,n1)}${bar(b,n2)}</div>`+row(fr(n1,a),'−',fr(n2,b),'=',frQ(rn,rd,'nd')),`${rn}${rd}`,{ansText:frTxt(rn,rd)}); },
+  ()=>{ const a=rnd(2,6), b=rnd(2,6); if(a===b) return G36['S3-81'][1](); const L=lcm(a,b); const n1=rnd(1,a-1), n2=rnd(1,b-1); const N=n1*L/a-n2*L/b; if(N<=0) return G36['S3-81'][1](); const [rn,rd]=red(N,L); return C36('doto',`${frTxt(n1,a)} − ${frTxt(n2,b)}`,`통분하면 분모가 ${sino(L)}. 계산 결과는?`,row(fr(n1,a),'−',fr(n2,b)),frTxt(rn,rd),optsFrom(frTxt(rn,rd),[frTxt(Math.abs(n1-n2)||1,Math.abs(a-b)||1),frTxt(N+1,L),frTxt(N,L+1)])); },
+ ]],
+ ['S3-82','빌려 와서 빼기','분모 다른 대분수 뺄셈(받아내림)',[
+  ()=>{ const a=rnd(2,5), b=rnd(2,5); if(a===b) return G36['S3-82'][0](); const L=lcm(a,b), w2=rnd(1,2), w1=w2+rnd(1,3), n1=rnd(1,a-1), n2=rnd(1,b-1); const N1=n1*L/a, N2=n2*L/b; if(N1>=N2) return G36['S3-82'][0](); const rw=w1-1-w2, N=N1+L-N2; const [rn,rd]=red(N,L); return W36('halmi',`${mixTxt(w1,n1,a)} − ${mixTxt(w2,n2,b)}`,`통분한 뒤 분수 부분이 모자라면 자연수 일을 빌려 오렴.`,row(mix(w1,n1,a),'−',mix(w2,n2,b),'=',rw?mixQ(rw,rn,rd,'wn'):frQ(rn,rd,'nd')),rw?`${rw}${rn}`:`${rn}${rd}`,{ansText:rw?mixTxt(rw,rn,rd):frTxt(rn,rd),hint:'받아내림'}); },
+  ()=>{ const a=rnd(2,5), b=rnd(2,5); if(a===b) return G36['S3-82'][1](); const L=lcm(a,b), w2=rnd(1,2), w1=w2+rnd(1,3), n1=rnd(1,a-1), n2=rnd(1,b-1); const N1=n1*L/a, N2=n2*L/b; if(N1<=N2) return G36['S3-82'][1](); const [rn,rd]=red(N1-N2,L); return W36('rami',`${mixTxt(w1,n1,a)} − ${mixTxt(w2,n2,b)}`,`자연수끼리, 통분한 분수끼리 빼요.`,row(mix(w1,n1,a),'−',mix(w2,n2,b),'=',mixQ(w1-w2,rn,rd,'wn')),`${w1-w2}${rn}`,{ansText:mixTxt(w1-w2,rn,rd)}); },
+ ]],
+]);
+/* ---------- 5-2 ---------- */
+const roundTo=(n,p,how)=>{ const u=Math.pow(10,p); return how==='up'?Math.ceil(n/u)*u:how==='down'?Math.floor(n/u)*u:Math.round(n/u)*u; };
+unit(5,'5-2 수의 범위와 어림하기',[
+ ['S3-83','이상과 이하','이상·이하',[
+  ()=>{ const k=rnd(10,40); const xs=shuffle([k,k+rnd(1,5),k-rnd(1,5),k+rnd(6,9)]); const cnt=xs.filter(x=>x>=k).length; return C36('rami',`${xs.join(', ')} 중 ${k} 이상인 수는 몇 개?`,`${sino(k)} 이상은 ${sino(k)}과 같거나 큰 수예요. ${sino(k)}도 포함!`,nl(k-6,k+10,[{v:k,label:k}])+row(xs.join(', ')),cnt,optsFrom(cnt,[cnt-1,cnt+1])); },
+  ()=>{ const k=rnd(10,40); return C36('cheong',`${k} 이하에 ${k}이 들어갈까?`,`청이는 ${sino(k)} 이하라면 ${sino(k)}은 안 들어간대요. 맞을까요?`,row(`${k} 이하`),'들어간다',['들어간다','안 들어간다']); },
+ ]],
+ ['S3-84','초과와 미만','초과·미만',[
+  ()=>{ const k=rnd(10,40); const xs=shuffle([k,k+rnd(1,5),k-rnd(1,5),k-rnd(6,9)]); const cnt=xs.filter(x=>x<k).length; return C36('rami',`${xs.join(', ')} 중 ${k} 미만인 수는 몇 개?`,`${sino(k)} 미만은 ${sino(k)}보다 작은 수. ${sino(k)}은 포함되지 않아요.`,nl(k-10,k+6,[{v:k,label:k,open:true}])+row(xs.join(', ')),cnt,optsFrom(cnt,[cnt-1,cnt+1])); },
+  ()=>{ const a=rnd(10,30), b=a+rnd(3,8); const inside=rnd(a+1,b); return C36('doto',`${a} 초과 ${b} 이하인 자연수는 몇 개?`,`${sino(a)} 초과 ${sino(b)} 이하. ${sino(a)}은 빼고 ${sino(b)}은 넣어요.`,nl(a-1,b+1,[{v:a,label:a,open:true},{v:b,label:b}]),b-a,optsFrom(b-a,[b-a+1,b-a-1])); },
+ ]],
+ ['S3-85','올림','올림',[
+  ()=>{ const n=rnd(101,999); if(n%10===0) return G36['S3-85'][0](); const r=roundTo(n,1,'up'); return W36('rami',`${n}을 올림하여 십의 자리까지`,`${sino(n)}을 올림하여 십의 자리까지 나타내요. 십의 자리 아래가 영이 아니면 올려요.`,row(n,'→',`<span class="vgrp">${SL(r)}</span>`),r,{ansText:String(r)}); },
+  ()=>{ const n=rnd(101,999); if(n%100===0) return G36['S3-85'][1](); const r=roundTo(n,2,'up'); return C36('halmi',`도토리 ${n}개를 100개 상자에 담으면 상자 몇 개?`,`${sino(n)} 개를 백 개씩 상자에 담아 모두 담으려면? 남는 것도 상자가 필요하단다.`,row(n,'→ 백의 자리로 올림'),`${r/100}상자`,optsFrom(`${r/100}상자`,[`${r/100-1}상자`,`${r/100+1}상자`])); },
+ ]],
+ ['S3-86','버림','버림',[
+  ()=>{ const n=rnd(101,999); if(n%10===0) return G36['S3-86'][0](); const r=roundTo(n,1,'down'); return W36('rami',`${n}을 버림하여 십의 자리까지`,`${sino(n)}을 버림하여 십의 자리까지 나타내요. 십의 자리 아래를 영으로 만들어요.`,row(n,'→',`<span class="vgrp">${SL(r)}</span>`),r,{ansText:String(r)}); },
+  ()=>{ const n=rnd(101,999); if(n%10===0) return G36['S3-86'][1](); const r=roundTo(n,1,'down'); return C36('doto',`도토리 ${n}개를 10개씩 바구니에, 가득 찬 바구니는?`,`${sino(n)} 개를 열 개씩 담으면 가득 찬 바구니는 몇 개? 모자라는 건 못 채워요.`,row(n,'→ 십의 자리로 버림'),`${r/10}개`,optsFrom(`${r/10}개`,[`${r/10+1}개`,`${r/10-1}개`])); },
+ ]],
+ ['S3-87','반올림','반올림',[
+  ()=>{ const n=rnd(101,999); const r=roundTo(n,1,'near'); return W36('rami',`${n}을 반올림하여 십의 자리까지`,`${sino(n)}을 반올림해요. 일의 자리가 영, 일, 이, 삼, 사면 버리고 오, 육, 칠, 팔, 구면 올려요.`,row(n,'→',`<span class="vgrp">${SL(r)}</span>`),r,{ansText:String(r)}); },
+  ()=>{ const n=rnd(1001,9999); const r=roundTo(n,2,'near'); return C36('cheong',`${n}을 반올림하여 백의 자리까지?`,`십의 자리 숫자를 보고 결정해요.`,row(n),r,optsFrom(r,[roundTo(n,2,'up'),roundTo(n,2,'down'),roundTo(n,3,'near')])); },
+ ]],
+ ['S3-88','어떤 어림을 쓸까','상황에 맞는 어림',[
+  ()=>{ return C36('halmi',`사람 ${rnd(102,199)}명이 10명씩 타는 배, 배는 몇 척? 어떤 어림?`,`모두 타야 하니까 남는 사람도 배가 필요하지. 어떤 어림을 쓸까?`,row('모두 타려면?'),'올림',['올림','버림','반올림']); },
+  ()=>{ return C36('doto',`동전 ${rnd(1010,1990)}원을 1000원 지폐로 바꾸면? 어떤 어림?`,`지폐로 바꿀 수 있는 만큼만 바꿔요. 어떤 어림일까요?`,row('지폐로 바꾸기'),'버림',['버림','올림','반올림']); },
+  ()=>{ return C36('rami',`키 ${rnd(1201,1399)/10} cm를 약 몇 cm라고 말할까? 어떤 어림?`,`가까운 쪽으로 어림해서 말해요.`,row('약 몇 cm?'),'반올림',['반올림','올림','버림']); },
+ ]],
+]);
+unit(5,'5-2 분수의 곱셈',[
+ ['S3-89','몇 배의 케이크','(분수)×(자연수)',[
+  ()=>{ const d=rnd(3,8), n=rnd(1,d-1), k=rnd(2,5); const [rn,rd]=red(n*k,d); const [w,m]=toMix(rn,rd); return W36('rami',`${frTxt(n,d)} × ${k}`,`${frSp(n,d)}의 ${sino(k)}배. 분자에 ${sino(k)}를 곱해요. 약분하고 대분수로.`,bars(k,d,n*k)+row(fr(n,d),'×',k,'=',w?(m?mixQ(w,m,rd,'wn'):`<span class="vgrp">${SL(w)}</span>`):frQ(rn,rd,'nd')),w?(m?`${w}${m}`:`${w}`):`${rn}${rd}`,{ansText:w?mixTxt(w,m,rd):frTxt(rn,rd)}); },
+  ()=>{ const d=rnd(3,8), n=rnd(1,d-1), k=rnd(2,5); return C36('cheong',`${frTxt(n,d)} × ${k}, 청이는 ${frTxt(n*k,d*k)}이래`,`청이는 분모에도 곱했어요. 분자에만 곱하면?`,row(fr(n,d),'×',k),frTxt(n*k,d),[frTxt(n*k,d),frTxt(n*k,d*k),frTxt(n,d*k)]); },
+ ]],
+ ['S3-90','자연수의 몇 분의 몇','(자연수)×(분수)',[
+  ()=>{ const d=rnd(2,6), n=rnd(1,d-1), k=rnd(2,5), N=d*k; return W36('rami',`${N} × ${frTxt(n,d)}`,`${sino(N)}의 ${frSp(n,d)}는? ${sino(N)}을 ${sino(d)}로 나눈 뒤 ${sino(n)}을 곱해요.`,groupsVis(d,k)+row(N,'×',fr(n,d),'=',`<span class="vgrp">${SL(n*k)}</span>`),n*k,{ansText:String(n*k)}); },
+  ()=>{ const d=rnd(3,6), n=rnd(1,d-1), N=rnd(2,9); const [rn,rd]=red(N*n,d); const [w,m]=toMix(rn,rd); return C36('doto',`${N} × ${frTxt(n,d)}`,`${sino(N)} 곱하기 ${frSp(n,d)}. 결과는?`,row(N,'×',fr(n,d)),w?mixTxt(w,m,rd):frTxt(rn,rd),optsFrom(w?mixTxt(w,m,rd):frTxt(rn,rd),[frTxt(N*n,d*N),frTxt(N+n,d)])); },
+ ]],
+ ['S3-91','조각의 조각','(진분수)×(진분수)',[
+  ()=>{ const a=rnd(2,5), b=rnd(2,5); return W36('rami',`${frTxt(1,a)} × ${frTxt(1,b)}`,`${sino(a)}분의 일의 ${sino(b)}분의 일은? 분모끼리 곱해요.`,row(fr(1,a),'×',fr(1,b),'=',frQ(1,a*b,'d')),a*b,{ansText:frTxt(1,a*b)}); },
+  ()=>{ const a=rnd(2,5), b=rnd(2,5), n1=rnd(1,a-1), n2=rnd(1,b-1); const [rn,rd]=red(n1*n2,a*b); return W36('doto',`${frTxt(n1,a)} × ${frTxt(n2,b)} (기약분수로)`,`분자끼리, 분모끼리 곱하고 약분해요.`,row(fr(n1,a),'×',fr(n2,b),'=',frQ(rn,rd,'nd')),`${rn}${rd}`,{ansText:frTxt(rn,rd)}); },
+ ]],
+ ['S3-92','대분수의 곱셈','대분수를 가분수로',[
+  ()=>{ const d=rnd(2,4), w=rnd(1,2), n=rnd(1,d-1), k=rnd(2,4); const N=(w*d+n)*k; const [rn,rd]=red(N,d); const [cw,cm]=toMix(rn,rd); return W36('rami',`${mixTxt(w,n,d)} × ${k}`,`대분수를 가분수 ${frSp(w*d+n,d)}로 바꿔서 곱해요.`,row(mix(w,n,d),'×',k,'=',cm?mixQ(cw,cm,rd,'wn'):`<span class="vgrp">${SL(cw)}</span>`),cm?`${cw}${cm}`:`${cw}`,{ansText:mixTxt(cw,cm,rd)}); },
+  ()=>{ const d=rnd(2,4), w=rnd(1,2), n=rnd(1,d-1), b=rnd(2,5), n2=rnd(1,b-1); const N=(w*d+n)*n2, D=d*b; const [rn,rd]=red(N,D); const [cw,cm]=toMix(rn,rd); return C36('doto',`${mixTxt(w,n,d)} × ${frTxt(n2,b)}`,`대분수를 가분수로 바꾼 뒤 분자끼리, 분모끼리 곱해요.`,row(mix(w,n,d),'×',fr(n2,b)),cw?mixTxt(cw,cm,rd):frTxt(rn,rd),optsFrom(cw?mixTxt(cw,cm,rd):frTxt(rn,rd),[mixTxt(w,n*n2,d*b),frTxt(N+1,D)])); },
+ ]],
+]);
+unit(5,'5-2 소수의 곱셈',[
+ ['S3-93','소수 곱하기 자연수','(소수)×(자연수)',[
+  ()=>{ const a=rnd(2,9)/10, k=rnd(2,9); const r=(a*k).toFixed(1); return W36('rami',`${a.toFixed(1)} × ${k}`,`${decSp(a.toFixed(1))} 곱하기 ${sino(k)}. ${sino(a*10)} 곱하기 ${sino(k)}를 계산한 뒤 소수점을 찍어요.`,row(a.toFixed(1),'×',k,'=',decS(r)),r,{ansText:r}); },
+  ()=>{ const a=rnd(11,49)/10, k=rnd(2,9); const r=(a*k).toFixed(1); return W36('doto',`${a.toFixed(1)} × ${k}`,`${decSp(a.toFixed(1))} 곱하기 ${sino(k)} 얼마일까요?`,vert2(a.toFixed(1),'×',k,r),r,{ansText:r}); },
+ ]],
+ ['S3-94','자연수 곱하기 소수','(자연수)×(소수)',[
+  ()=>{ const k=rnd(2,9), a=rnd(2,9)/10; const r=(k*a).toFixed(1); return W36('rami',`${k} × ${a.toFixed(1)}`,`${sino(k)} 곱하기 ${decSp(a.toFixed(1))}. 일보다 작은 수를 곱하면 결과가 ${sino(k)}보다 작아져요.`,row(k,'×',a.toFixed(1),'=',decS(r)),r,{ansText:r}); },
+  ()=>{ const k=rnd(2,9), a=rnd(2,9)/10; return C36('cheong',`${k} × ${a.toFixed(1)}은 ${k}보다?`,`일보다 작은 수를 곱하면 결과는 어떻게 될까요?`,row(k,'×',a.toFixed(1)),`${k}보다 작다`,[`${k}보다 작다`,`${k}보다 크다`,`${k}와 같다`]); },
+ ]],
+ ['S3-95','소수 곱하기 소수','(소수)×(소수)',[
+  ()=>{ const a=rnd(2,9)/10, b=rnd(2,9)/10; const r=(a*b).toFixed(2); return W36('rami',`${a.toFixed(1)} × ${b.toFixed(1)}`,`${decSp(a.toFixed(1))} 곱하기 ${decSp(b.toFixed(1))}. 자연수처럼 곱한 뒤 소수점 아래 자릿수를 더해요.`,row(a.toFixed(1),'×',b.toFixed(1),'=',decS(r)),r,{ansText:r}); },
+  ()=>{ const a=rnd(11,39)/10, b=rnd(2,9)/10; const r=(a*b).toFixed(2); return W36('doto',`${a.toFixed(1)} × ${b.toFixed(1)}`,`${decSp(a.toFixed(1))} 곱하기 ${decSp(b.toFixed(1))} 얼마일까요?`,vert2(a.toFixed(1),'×',b.toFixed(1),r),r,{ansText:r}); },
+ ]],
+ ['S3-96','소수점은 어디에','곱의 소수점 위치',[
+  ()=>{ const a=rnd(12,99), b=rnd(2,9); const prod=a*b; const pa=rnd(1,2), pb=rnd(1,2); const A=(a/Math.pow(10,pa)).toFixed(pa), B=(b/Math.pow(10,pb)).toFixed(pb); const r=(prod/Math.pow(10,pa+pb)).toFixed(pa+pb); return C36('rami',`${a} × ${b} = ${prod}이면 ${A} × ${B}은?`,`소수점 아래 자릿수를 더하면 ${sino(pa+pb)}자리. 소수점을 찍어요.`,row(a,'×',b,'=',prod)+row(A,'×',B,'= ?'),r,optsFrom(r,[(prod/Math.pow(10,pa+pb-1)).toFixed(pa+pb-1),(prod/Math.pow(10,pa+pb+1)).toFixed(pa+pb+1)])); },
+  ()=>{ const a=rnd(12,99)/100; const k=rndPick(10,100,1000); const r=String(+(a*k).toFixed(2)); return W36('doto',`${a.toFixed(2)} × ${k}`,`${decSp(a.toFixed(2))}에 ${sino(k)}을 곱하면 소수점이 오른쪽으로 ${sino(String(k).length-1)}자리 가요.`,row(a.toFixed(2),'×',k,'=',decS(r)),r,{ansText:r}); },
+ ]],
+]);
+/* ---------- 6-1 ---------- */
+unit(6,'6-1 분수의 나눗셈',[
+ ['S3-97','나눗셈의 몫을 분수로','(자연수)÷(자연수)→분수',[
+  ()=>{ const b=rnd(3,9), a=rnd(1,b-1); if(gcd(a,b)!==1) return G36['S3-97'][0](); return W36('rami',`${a} ÷ ${b}의 몫을 분수로`,`${sino(a)} 나누기 ${sino(b)}의 몫은 ${sino(b)}분의 ${sino(a)}. 나누어지는 수가 분자예요.`,row(a,'÷',b,'=',frQ(a,b,'nd')),`${a}${b}`,{ansText:frTxt(a,b)}); },
+  ()=>{ const b=rnd(2,6), a=b*rnd(1,2)+rnd(1,b-1); const [w,n]=toMix(a,b); const [rn,rd]=red(n,b); return C36('doto',`${a} ÷ ${b}의 몫을 대분수로`,`${sino(a)} 나누기 ${sino(b)}. 몫을 대분수로 나타내면?`,row(a,'÷',b),mixTxt(w,rn,rd),optsFrom(mixTxt(w,rn,rd),[frTxt(b,a),mixTxt(w+1,rn,rd)])); },
+ ]],
+ ['S3-98','분수를 자연수로 나누기','(분수)÷(자연수)',[
+  ()=>{ const d=rnd(3,9), k=rnd(2,4), n=k*rnd(1,Math.floor((d-1)/k)||1); if(n>=d) return G36['S3-98'][0](); return W36('rami',`${frTxt(n,d)} ÷ ${k}`,`분자가 ${sino(k)}로 나누어떨어지면 분자를 나눠요.`,bar(d,n)+row(fr(n,d),'÷',k,'=',frQ(n/k,d,'n')),n/k,{ansText:frTxt(n/k,d)}); },
+  ()=>{ const d=rnd(2,6), n=rnd(1,d-1), k=rnd(2,5); const [rn,rd]=red(n,d*k); return W36('doto',`${frTxt(n,d)} ÷ ${k}`,`분자가 나누어떨어지지 않으면 ${sino(k)}분의 일을 곱해요. 분모에 ${sino(k)}를 곱한 뒤 약분.`,row(fr(n,d),'÷',k,'=',fr(n,d),'×',fr(1,k),'=',frQ(rn,rd,'nd')),`${rn}${rd}`,{ansText:frTxt(rn,rd)}); },
+ ]],
+ ['S3-99','대분수를 나누기','(대분수)÷(자연수)',[
+  ()=>{ const d=rnd(2,5), w=rnd(1,3), n=rnd(1,d-1), k=rnd(2,4); const N=w*d+n; const [rn,rd]=red(N,d*k); const [cw,cm]=toMix(rn,rd); return W36('rami',`${mixTxt(w,n,d)} ÷ ${k}`,`대분수를 가분수 ${frSp(N,d)}로 바꾼 뒤 ${sino(k)}분의 일을 곱해요.`,row(mix(w,n,d),'÷',k,'=',cw?(cm?mixQ(cw,cm,rd,'wn'):`<span class="vgrp">${SL(cw)}</span>`):frQ(rn,rd,'nd')),cw?(cm?`${cw}${cm}`:`${cw}`):`${rn}${rd}`,{ansText:cw?mixTxt(cw,cm,rd):frTxt(rn,rd)}); },
+ ]],
+]);
+unit(6,'6-1 소수의 나눗셈',[
+ ['S3-100','소수를 자연수로 나누기','(소수)÷(자연수)',[
+  ()=>{ const k=rnd(2,6), q=rnd(11,49)/10; const a=(q*k).toFixed(1); return W36('rami',`${a} ÷ ${k}`,`${decSp(a)} 나누기 ${sino(k)}. ${sino(Math.round(q*k*10))} 나누기 ${sino(k)}를 계산하고 소수점을 그대로 올려요.`,row(a,'÷',k,'=',decS(q.toFixed(1))),q.toFixed(1),{ansText:q.toFixed(1)}); },
+  ()=>{ const k=rnd(2,6), q=rnd(101,399)/100; const a=(q*k).toFixed(2); return W36('doto',`${a} ÷ ${k}`,`${decSp(a)} 나누기 ${sino(k)} 얼마일까요?`,row(a,'÷',k,'=',decS(q.toFixed(2))),q.toFixed(2),{ansText:q.toFixed(2)}); },
+ ]],
+ ['S3-101','0을 내려 쓰기','몫이 1보다 작거나 0을 내려 계산',[
+  ()=>{ const k=rnd(2,8), q=rnd(1,9)/10*(rnd(0,1)?1:0.5); const qq=+q.toFixed(2); const a=+(qq*k).toFixed(2); if(a>=k) return G36['S3-101'][0](); const qs=String(qq); return W36('rami',`${a} ÷ ${k}`,`${decSp(String(a))} 나누기 ${sino(k)}. 나누어지는 수가 작아 몫이 일보다 작으면 일의 자리에 영을 써요.`,row(String(a),'÷',k,'=',decS(qs)),qs,{ansText:qs}); },
+  ()=>{ const k=rndPick(2,4,5,8), a=rnd(1,9)*rnd(1,3); const q=a/k; if(Number.isInteger(q)) return G36['S3-101'][1](); const qs=String(+q.toFixed(3)); return W36('halmi',`${a} ÷ ${k}`,`${sino(a)} 나누기 ${sino(k)}. 나누어떨어지지 않으면 소수점을 찍고 영을 내려 계속 나누렴.`,row(a,'÷',k,'=',decS(qs)),qs,{ansText:qs}); },
+ ]],
+ ['S3-102','나눗셈의 몫을 소수로','(자연수)÷(자연수)→소수',[
+  ()=>{ const k=rndPick(2,4,5), a=rnd(1,k-1)+k*rnd(0,2); const q=String(+(a/k).toFixed(2)); return W36('rami',`${a} ÷ ${k}의 몫을 소수로`,`${sino(a)} 나누기 ${sino(k)}. 몫을 소수로 나타내요.`,row(a,'÷',k,'=',decS(q)),q,{ansText:q}); },
+  ()=>{ const k=rndPick(4,5,8), a=rnd(1,k-1); const q=+(a/k).toFixed(3); return C36('doto',`${a} ÷ ${k} = ?`,`${sino(a)} 나누기 ${sino(k)}의 몫은?`,row(a,'÷',k),String(q),optsFrom(String(q),[String(+(k/a).toFixed(2)),String(q*10)])); },
+ ]],
+ ['S3-103','몫을 어림해요','어림으로 소수점 위치',[
+  ()=>{ const k=rnd(2,6), q=rnd(11,49)/10; const a=(q*k).toFixed(1); const digits=String(Math.round(q*10)); return C36('rami',`${a} ÷ ${k}, 몫은?`,`${decSp(a)}은 약 ${sino(Math.round(+a))}. ${sino(Math.round(+a))} 나누기 ${sino(k)}는 약 ${sino(Math.round(+a/k))}. 어림으로 소수점 위치를 찾아요.`,row(a,'÷',k),q.toFixed(1),[q.toFixed(1),(q*10).toFixed(0),(q/10).toFixed(2)]); },
+ ]],
+]);
+/* ---------- 6-2 ---------- */
+unit(6,'6-2 분수의 나눗셈',[
+ ['S3-104','분모가 같은 분수 나누기','(분수)÷(분수) 분모 같을 때',[
+  ()=>{ const d=rnd(3,9), b=rnd(1,3), a=b*rnd(2,Math.floor((d-1)/b)||1); if(a>=d) return G36['S3-104'][0](); return W36('rami',`${frTxt(a,d)} ÷ ${frTxt(b,d)}`,`분모가 같으면 분자끼리 나눠요. ${sino(a)} 나누기 ${sino(b)}.`,bar(d,a)+row(fr(a,d),'÷',fr(b,d),'=',`<span class="vgrp">${SL(a/b)}</span>`),a/b,{ansText:String(a/b)}); },
+  ()=>{ const d=rnd(4,9), a=rnd(1,d-1), b=rnd(1,d-1); if(a===b||a%b===0) return G36['S3-104'][1](); const [rn,rd]=red(a,b); const [w,m]=toMix(rn,rd); return C36('doto',`${frTxt(a,d)} ÷ ${frTxt(b,d)}`,`분자끼리 나누면 ${sino(a)} 나누기 ${sino(b)}. 분수로 나타내면?`,row(fr(a,d),'÷',fr(b,d)),w?mixTxt(w,m,rd):frTxt(rn,rd),optsFrom(w?mixTxt(w,m,rd):frTxt(rn,rd),[frTxt(b,a),frTxt(a,d*b)])); },
+ ]],
+ ['S3-105','분모가 다른 분수 나누기','통분하여 나누기',[
+  ()=>{ const a=rnd(2,5), b=rnd(2,5); if(a===b) return G36['S3-105'][0](); const L=lcm(a,b), n1=rnd(1,a-1), n2=rnd(1,b-1); const N1=n1*L/a, N2=n2*L/b; const [rn,rd]=red(N1,N2); const [w,m]=toMix(rn,rd); return W36('rami',`${frTxt(n1,a)} ÷ ${frTxt(n2,b)}`,`통분해서 분모를 ${sino(L)}로 같게 만든 뒤 분자끼리 나눠요.`,row(fr(n1,a),'÷',fr(n2,b),'=',fr(N1,L),'÷',fr(N2,L),'=',w?(m?mixQ(w,m,rd,'wn'):`<span class="vgrp">${SL(w)}</span>`):frQ(rn,rd,'nd')),w?(m?`${w}${m}`:`${w}`):`${rn}${rd}`,{ansText:w?mixTxt(w,m,rd):frTxt(rn,rd)}); },
+ ]],
+ ['S3-106','자연수를 분수로 나누기','(자연수)÷(분수)',[
+  ()=>{ const d=rnd(2,6), n=rnd(1,d-1), k=n*rnd(1,3); const r=k*d/n; return W36('rami',`${k} ÷ ${frTxt(n,d)}`,`${sino(k)}를 ${sino(n)}으로 나누고 ${sino(d)}를 곱해요.`,row(k,'÷',fr(n,d),'=',`(${k} ÷ ${n}) × ${d}`,'=',`<span class="vgrp">${SL(r)}</span>`),r,{ansText:String(r)}); },
+  ()=>{ const d=rnd(2,5), k=rnd(2,6); return C36('cheong',`${k} ÷ ${frTxt(1,d)}은 ${k}보다?`,`일보다 작은 수로 나누면 몫은 어떻게 될까요?`,row(k,'÷',fr(1,d)),`${k}보다 크다 (${k*d})`,[`${k}보다 크다 (${k*d})`,`${k}보다 작다`,`${k}와 같다`]); },
+ ]],
+ ['S3-107','뒤집어서 곱하기','(분수)÷(분수)를 곱셈으로',[
+  ()=>{ const a=rnd(2,5), b=rnd(2,5), n1=rnd(1,a-1), n2=rnd(1,b-1); const [rn,rd]=red(n1*b,a*n2); const [w,m]=toMix(rn,rd); return W36('rami',`${frTxt(n1,a)} ÷ ${frTxt(n2,b)}`,`나누는 분수의 분모와 분자를 뒤집어 곱해요. ${frSp(n1,a)} 곱하기 ${frSp(b,n2)}.`,row(fr(n1,a),'÷',fr(n2,b),'=',fr(n1,a),'×',fr(b,n2),'=',w?(m?mixQ(w,m,rd,'wn'):`<span class="vgrp">${SL(w)}</span>`):frQ(rn,rd,'nd')),w?(m?`${w}${m}`:`${w}`):`${rn}${rd}`,{ansText:w?mixTxt(w,m,rd):frTxt(rn,rd)}); },
+  ()=>{ const a=rnd(2,5), b=rnd(2,5), n1=rnd(1,a-1), n2=rnd(1,b-1); return C36('doto',`${frTxt(n1,a)} ÷ ${frTxt(n2,b)}과 같은 식은?`,`나눗셈을 곱셈으로 바꾸면?`,row(fr(n1,a),'÷',fr(n2,b)),`${frTxt(n1,a)} × ${frTxt(b,n2)}`,[`${frTxt(n1,a)} × ${frTxt(b,n2)}`,`${frTxt(n1,a)} × ${frTxt(n2,b)}`,`${frTxt(a,n1)} × ${frTxt(n2,b)}`]); },
+ ]],
+]);
+unit(6,'6-2 소수의 나눗셈',[
+ ['S3-108','소수를 소수로 나누기','자릿수 같은 (소수)÷(소수)',[
+  ()=>{ const b=rnd(2,9)/10, q=rnd(2,9); const a=(b*q).toFixed(1); return W36('rami',`${a} ÷ ${b.toFixed(1)}`,`${decSp(a)} 나누기 ${decSp(b.toFixed(1))}. 둘 다 열 배 하면 ${sino(Math.round(b*q*10))} 나누기 ${sino(b*10)}.`,row(a,'÷',b.toFixed(1),'=',`<span class="vgrp">${SL(q)}</span>`),q,{ansText:String(q)}); },
+  ()=>{ const b=rnd(11,29)/100, q=rnd(2,9); const a=(b*q).toFixed(2); return W36('doto',`${a} ÷ ${b.toFixed(2)}`,`둘 다 백 배 하면 자연수 나눗셈이 돼요.`,row(a,'÷',b.toFixed(2),'=',`<span class="vgrp">${SL(q)}</span>`),q,{ansText:String(q)}); },
+ ]],
+ ['S3-109','자릿수가 달라도','자릿수 다른 (소수)÷(소수)',[
+  ()=>{ const b=rnd(2,9)/10, q=rnd(11,39)/10; const a=(b*q).toFixed(2); return W36('rami',`${a} ÷ ${b.toFixed(1)}`,`${decSp(a)} 나누기 ${decSp(b.toFixed(1))}. 나누는 수가 자연수가 되도록 둘 다 열 배 해요.`,row(a,'÷',b.toFixed(1),'=',decS(q.toFixed(1))),q.toFixed(1),{ansText:q.toFixed(1)}); },
+  ()=>{ const b=rnd(2,9)/10, q=rnd(11,39)/10; const a=(b*q).toFixed(2); return C36('cheong',`${a} ÷ ${b.toFixed(1)}, 청이는 ${(q*10).toFixed(0)}이래`,`청이는 소수점 위치를 틀렸어요. 바른 몫은?`,row(a,'÷',b.toFixed(1)),q.toFixed(1),[q.toFixed(1),(q*10).toFixed(0),(q/10).toFixed(2)]); },
+ ]],
+ ['S3-110','자연수를 소수로 나누기','(자연수)÷(소수)',[
+  ()=>{ const b=rnd(2,9)/10, q=rnd(2,9)*rnd(1,3); const a=+(b*q).toFixed(1); if(!Number.isInteger(a)) return G36['S3-110'][0](); return W36('rami',`${a} ÷ ${b.toFixed(1)}`,`${sino(a)} 나누기 ${decSp(b.toFixed(1))}. ${sino(a)}를 ${sino(a*10)}으로, ${decSp(b.toFixed(1))}을 ${sino(b*10)}으로 바꿔요.`,row(a,'÷',b.toFixed(1),'=',`<span class="vgrp">${SL(q)}</span>`),q,{ansText:String(q)}); },
+  ()=>{ const b=rnd(11,49)/100, q=rnd(2,9)*rnd(1,4); const a=+(b*q).toFixed(2); if(!Number.isInteger(a)) return G36['S3-110'][1](); return W36('doto',`${a} ÷ ${b.toFixed(2)}`,`둘 다 백 배 해서 계산해요.`,row(a,'÷',b.toFixed(2),'=',`<span class="vgrp">${SL(q)}</span>`),q,{ansText:String(q)}); },
+ ]],
+ ['S3-111','몫을 반올림해요','몫 반올림',[
+  ()=>{ const a=rnd(10,60), k=rndPick(3,6,7,9); if(a%k===0) return G36['S3-111'][0](); const q=a/k; const r=q.toFixed(1); return W36('rami',`${a} ÷ ${k}의 몫을 반올림하여 소수 첫째 자리까지`,`${sino(a)} 나누기 ${sino(k)}는 나누어떨어지지 않아요. 소수 둘째 자리에서 반올림해요.`,row(a,'÷',k,'≈',decS(r)),r,{ansText:r}); },
+  ()=>{ const a=rnd(10,60), k=rndPick(3,6,7,9); if(a%k===0) return G36['S3-111'][1](); const q=a/k; const r=q.toFixed(2); return C36('doto',`${a} ÷ ${k}의 몫을 반올림하여 소수 둘째 자리까지?`,`소수 셋째 자리 숫자를 보고 반올림해요.`,row(a,'÷',k),r,optsFrom(r,[q.toFixed(1),(Math.floor(q*100)/100).toFixed(2)===r?(+r+0.01).toFixed(2):(Math.floor(q*100)/100).toFixed(2)])); },
+ ]],
+ ['S3-112','나누어 주고 남는 양','몫(자연수)과 남는 양',[
+  ()=>{ const k=rnd(2,5), a=rnd(k*2*10+1,k*9*10+9)/10; const q=Math.floor(a/k), r=+(a-q*k).toFixed(1); if(r===0) return G36['S3-112'][0](); return W36('rami',`물 ${a.toFixed(1)} L를 ${k} L씩 나누면?`,`${decSp(a.toFixed(1))} 리터를 ${sino(k)} 리터씩 나누면 몇 병이 되고 몇 리터가 남을까요? 몫은 자연수까지만.`,row(a.toFixed(1),'÷',k,'=',`<span class="vgrp">${SL(q)}</span>`,'…',decS(r.toFixed(1))),`${q}${r.toFixed(1)}`,{ansText:`${q}병, ${r.toFixed(1)} L 남음`}); },
+  ()=>{ const k=rnd(2,5), a=rnd(k*2*10+1,k*9*10+9)/10; const q=Math.floor(a/k), r=+(a-q*k).toFixed(1); if(r===0) return G36['S3-112'][1](); return C36('cheong',`${a.toFixed(1)} ÷ ${k} = ${q} … ?`,`남는 양의 소수점은 나누어지는 수의 소수점과 같은 자리예요. 남는 양은?`,row(a.toFixed(1),'÷',k,'=',q,'…','?'),r.toFixed(1),optsFrom(r.toFixed(1),[(r*10).toFixed(0),(r/10).toFixed(2)])); },
+ ]],
+ ['S3-113','숲 마을 대축제','수와 연산 종합',[
+  ()=>G36['S3-67'][0](), ()=>G36['S3-82'][0](), ()=>G36['S3-95'][0](), ()=>G36['S3-107'][0](), ()=>G36['S3-110'][0](), ()=>G36['S3-48'][0](),
+ ]],
+]);
+
+/* ================= 3~6학년 화면 ================= */
+const VIDEOS36={"S3-46": "https://youtube.com/shorts/sHRFdGYapHM", "S3-69": "https://youtube.com/shorts/0Kxi6wLp0W4", "S3-70": "https://youtube.com/shorts/o1p-dRLV_js", "S3-71": "https://youtube.com/shorts/aRa2qUcwOyc", "S3-72": "https://youtube.com/shorts/oAqDt_ujfvk", "S3-73": "https://youtube.com/shorts/EDWMtsRmLTI", "S3-74": "https://youtube.com/shorts/h9zmoazUYO4", "S3-75": "https://youtube.com/shorts/B3e-yVEHAI8", "S3-76": "https://youtube.com/shorts/kBN3REUMOo8", "S3-77": "https://youtube.com/shorts/XeFHIXbOxMc", "S3-78": "https://youtube.com/shorts/iAJzN9Sauuw", "S3-79": "https://youtube.com/shorts/a_LK_Q5MRWg", "S3-80": "https://youtube.com/shorts/ES1pWTEeKx8", "S3-81": "https://youtube.com/shorts/Z4uQD90iwcM", "S3-82": "https://youtube.com/shorts/ugAvNyykqGg", "S3-83": "https://youtube.com/shorts/vtGppR8C58I", "S3-84": "https://youtube.com/shorts/TstW5lD8qIw", "S3-85": "https://youtube.com/shorts/mQipc1-l2Lc", "S3-86": "https://youtube.com/shorts/XvrWtBq0-cU", "S3-87": "https://youtube.com/shorts/dLw7jhw7a7U", "S3-88": "https://youtube.com/shorts/CjQ3LhoVuEU", "S3-89": "https://youtube.com/shorts/3_FCM3TxFOo", "S3-90": "https://youtube.com/shorts/zIaAWJ4GK5Q", "S3-91": "https://youtube.com/shorts/gOYwFqhqlfY", "S3-92": "https://youtube.com/shorts/koXJpj3vawk", "S3-93": "https://youtube.com/shorts/8HmQfBIsGs0", "S3-94": "https://youtube.com/shorts/0bMM215_Vtw", "S3-95": "https://youtube.com/shorts/tCkekP99Ol4", "S3-96": "https://youtube.com/shorts/mwSSMmcFdDk", "S3-97": "https://youtube.com/shorts/dZ_tzuYmd44", "S3-98": "https://youtube.com/shorts/v7vtRBOq_JI", "S3-99": "https://youtube.com/shorts/DSKIKnARE34", "S3-100": "https://youtube.com/shorts/TKL-EP6UqZo", "S3-101": "https://youtube.com/shorts/HjgGHgCupIM", "S3-102": "https://youtube.com/shorts/MGtExdGEPto", "S3-103": "https://youtube.com/shorts/eFXyfoY8Fn4", "S3-104": "https://youtube.com/shorts/05fVTE1EKZE", "S3-105": "https://youtube.com/shorts/7fAboplK-hk", "S3-106": "https://youtube.com/shorts/CipjrloHY7g", "S3-107": "https://youtube.com/shorts/yYXANmVxc8E", "S3-108": "https://youtube.com/shorts/uCLfk7IJsOA", "S3-109": "https://youtube.com/shorts/EFmWTuMtr10", "S3-110": "https://youtube.com/shorts/3oUAnRzHvJ0", "S3-111": "https://youtube.com/shorts/ofH3L6cyRQ4", "S3-112": "https://youtube.com/shorts/COcZUYU0w_c", "S3-113": "https://youtube.com/shorts/b7C06RDMUfg"};
+Object.assign(VIDEOS, VIDEOS36);
+const GRADE_WHO={3:'doto',4:'rami',5:'halmi',6:'cheong'};
+const GRADE_DESC={3:'세 자리 덧셈·뺄셈, 나눗셈, 곱셈, 분수와 소수',4:'큰 수, 곱셈과 나눗셈, 분수·소수의 덧셈과 뺄셈',5:'혼합 계산, 약수와 배수, 약분과 통분, 분수·소수의 곱셈',6:'분수의 나눗셈, 소수의 나눗셈'};
+const unitsOfGrade=g=>UNITS36.map((u,i)=>({...u,i})).filter(u=>u.grade===g);
+function gradeDone(g){ const best=load(); let n=0,all=0; unitsOfGrade(g).forEach(u=>u.eps.forEach(e=>{ all++; if(best['EP'+e]!=null) n++; })); return [n,all]; }
+function homeGrades(){
+  return `<div class="grades"><div class="gtitle">3~6학년 · 수와 연산</div>${[3,4,5,6].map(g=>{ const [n,all]=gradeDone(g); return `<button class="grade" data-g="${g}">${chip(GRADE_WHO[g],'base')}<div><div class="t">${g}학년</div><div class="d">${GRADE_DESC[g]}</div><div class="stars">편 ${n}/${all} 완료</div></div></button>`; }).join('')}</div>`;
+}
+function grade36(g){
+  hush(); const best=load(); app.className='wrap';
+  const cards=unitsOfGrade(g).map(u=>{ let n=0; u.eps.forEach(e=>{ if(best['EP'+e]!=null) n++; }); return `<button class="ep${n===u.eps.length?' done':''}" data-u="${u.i}"><span class="n">${u.title.split(' ')[0]}</span><span class="t">${u.title.replace(/^\S+\s/,'')}</span><span class="s">${n}/${u.eps.length} 편</span></button>`; }).join('');
+  app.innerHTML=`
+    <div class="top"><button class="back" id="back">← 처음</button><div class="crumb">${g}학년 · 수와 연산</div><span style="width:70px"></span></div>
+    <div class="talker" style="margin-bottom:6px">${chip(GRADE_WHO[g],'point')}<div class="bubble"><div class="who">${NAMES[GRADE_WHO[g]]}</div><div class="q">어느 단원부터 할까?</div><div class="hint">1학기 → 2학기 순서예요</div></div></div>
+    <div class="eps">${cards}</div>`;
+  document.getElementById('back').onclick=home;
+  app.querySelectorAll('.ep').forEach(b=>b.onclick=()=>unit36(+b.dataset.u));
+}
+function unit36(ui){
+  hush(); const best=load(); app.className='wrap'; const u=UNITS36[ui];
+  const cards=u.eps.map(e=>{ const sc=best['EP'+e]; return `<button class="ep${sc!=null?' done':''}" data-ep="${e}"><span class="n">${e}${VIDEOS[e]?' · 📺':''}</span><span class="t">${EPS36[e][0]}</span><span class="s">${starsOf(sc)}${sc!=null?` <span style="color:var(--ink-soft)">${sc}/10</span>`:''}</span></button>`; }).join('');
+  app.innerHTML=`
+    <div class="top"><button class="back" id="back">← 단원</button><div class="crumb">${u.title}</div><span style="width:70px"></span></div>
+    <div class="talker" style="margin-bottom:6px">${chip(GRADE_WHO[u.grade],'point')}<div class="bubble"><div class="who">${NAMES[GRADE_WHO[u.grade]]}</div><div class="q">어느 편부터 볼까?</div><div class="hint">순서대로 하면 좋아요</div></div></div>
+    <div class="eps">${cards}</div>`;
+  document.getElementById('back').onclick=()=>grade36(u.grade);
+  app.querySelectorAll('.ep').forEach(b=>b.onclick=()=>startEp36(b.dataset.ep,ui));
+}
+function startEp36(ep,ui){
+  const u=UNITS36[ui]; const steps=[];
+  if(VIDEOS[ep]) steps.push({kind:'video',key:ep,label:`${ep} ${EPS36[ep][0]}`});
+  steps.push({kind:'acts'});
+  S={mode:'ep36',ep,ui,ch:0,steps,si:0,acts:pickProblems(G36[ep],10).map(q=>({kind:'q',q})),i:0,results:[],tries:0,counted:0,title:`${ep} ${EPS36[ep][0]}`,saveKey:'EP'+ep};
+  say(' ','rami'); step();
+}
+/* 뒤로 가기·다음 편 공용 */
+function backToList(){ if(S.mode==='ep36') unit36(S.ui); else chapter(S.ch); }
+function next36(){ const u=UNITS36[S.ui]; const k=u.eps.indexOf(S.ep); if(k<u.eps.length-1) return {ep:u.eps[k+1],ui:S.ui}; const nu=UNITS36[S.ui+1]; return nu?{ep:nu.eps[0],ui:S.ui+1}:null; }
+
 document.body.style.setProperty('--forest',`url(${A['배경_숲']})`);
 home();
 </script>
