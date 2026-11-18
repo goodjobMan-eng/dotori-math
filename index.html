@@ -3106,20 +3106,32 @@ unit(6,'6-1 비율그래프',[
 ]);
 
 /* ===== 시즌5 변화와 관계 ===== */
+const seqV=(arr,hole)=>`<div class="seqrow">${arr.map((x,i)=>i===hole?'<span class="qbox">?</span>':`<span>${x}</span>`).join('')}</div>`;
+const WN_=0;
+
 const EM=['🌰','🍁','🍄','⭐','🌸'];
 unit(2,'1-2 규칙 찾기',[
  ['S5-01','무늬에 규칙이 있어','반복 규칙',[
+  ()=>{ const [a,b,c]=pickN(EM,3); const pat=rndPick([a,b],[a,a,b],[a,b,c],[a,b,b]); const len=rnd(7,9); const seq=Array.from({length:len},(_,i)=>pat[i%pat.length]); const h=rnd(2,len-2); return CF('? 에 들어갈 것은?',seqV(seq,h),seq[h],[a,b,c]); },
+  ()=>{ const acts=['👏','🦶','🙌']; const pat=rndPick([0,1],[0,0,1],[0,1,2],[0,1,1]).map(i=>acts[i]); const len=rnd(6,8); const seq=Array.from({length:len},(_,i)=>pat[i%pat.length]); return CF('손뼉(👏)·발(🦶)·만세(🙌) 규칙! 다음 동작은?',seqV([...seq,'?'],len),pat[len%pat.length],acts); },
+  ()=>{ const [a,b]=pickN(EM,2); const k=rnd(1,3); const pat=[...Array(k).fill(a),b]; const seq=Array.from({length:pat.length*2},(_,i)=>pat[i%pat.length]); return CF('반복되는 부분은?',seqV(seq,-1),pat.join(''),[pat.join(''),[a,b].join(''),[b,...pat.slice(1)].join('')].filter((x,i,arr)=>arr.indexOf(x)===i).length>1?[pat.join(''),[b,a,a].slice(0,pat.length).join(''),[a,b,b,b].slice(0,pat.length+1).join('')]:[pat.join(''),b+a]); },
   ()=>{ const [a,b,c]=pickN(EM,3); const pat=rndPick([a,b],[a,a,b],[a,b,c],[a,b,b]); const len=rnd(6,8); const seq=Array.from({length:len},(_,i)=>pat[i%pat.length]); const ans=pat[len%pat.length]; return CF('다음에 올 것은?',`<div class="seqrow">${seq.map(x=>`<span>${x}</span>`).join('')}<span class="qbox">?</span></div>`,ans,[a,b,c]); },
   ()=>{ const k=rnd(2,3); const pat=pickN(EM,k); return WN(`몇 개씩 반복될까요?`,`<div class="seqrow">${Array.from({length:k*3},(_,i)=>`<span>${pat[i%k]}</span>`).join('')}</div>`,k,'','개'); },
  ]],
  ['S5-02','색과 모양 규칙','두 속성 규칙',[
+  ()=>{ const sh=['세모','네모','동그라미'], cl=['빨간','파란','노란']; const p=rnd(2,3); const len=rnd(6,8); const seq=Array.from({length:len},(_,i)=>({s:sh[i%p],c:cl[0]})); const nx=sh[len%p]; return CF('모양의 규칙을 보고 다음 모양은?',itemsVis(seq),nx,sh); },
+  ()=>{ const cl=['빨간','파란','노란']; const p=rnd(2,3); const len=rnd(6,8); const seq=Array.from({length:len},(_,i)=>({s:'동그라미',c:cl[i%p]})); return CF('색깔 규칙을 보고 다음 색은?',itemsVis(seq),cl[len%p],cl); },
   ()=>{ const sh=['세모','네모','동그라미'], cl=['빨간','파란']; const len=rnd(5,7); const seq=Array.from({length:len},(_,i)=>({s:sh[i%3],c:cl[i%2]})); const nx={s:sh[len%3],c:cl[len%2]}; return CF('다음에 올 것은?',itemsVis(seq),`${nx.c} ${nx.s}`,[`${nx.c} ${nx.s}`,`${cl[(len+1)%2]} ${nx.s}`,`${nx.c} ${sh[(len+1)%3]}`]); },
  ]],
  ['S5-03','수 배열의 규칙','수 배열표',[
+  ()=>{ const st=rnd(1,40), k=rndPick(1,2,5,10); const seq=[0,1,2,3,4,5].map(i=>st+i*k); const h=rnd(1,5); return WN(`${seq.map((x,i)=>i===h?'□':x).join(', ')} 에서 □는?`,'',seq[h]); },
+  ()=>{ const c=rnd(1,9); const col=[0,1,2,3,4].map(r=>r*10+c); return CC(`수 배열표에서 ${col.slice(0,3).join(', ')}…로 색칠했어요. 규칙은?`,'','10씩 커진다',['1씩 커진다','10씩 커진다','5씩 커진다']); },
   ()=>{ const st=rnd(1,8)*10+rnd(1,5); const rows=[0,1,2].map(r=>[0,1,2,3,4].map(c=>st+r*10+c)); const r=rnd(0,2), c=rnd(0,4); const ans=rows[r][c]; return WN('빈칸에 알맞은 수는?',`<table class="dt num">${rows.map((rw,i)=>`<tr>${rw.map((v,j)=>`<td>${i===r&&j===c?'?':v}</td>`).join('')}</tr>`).join('')}</table>`,ans); },
   pickQ([['수 배열표에서 오른쪽으로 한 칸 가면?','1 커진다',['1 커진다','10 커진다','1 작아진다']],['수 배열표에서 아래로 한 칸 가면?','10 커진다',['10 커진다','1 커진다','10 작아진다']]]),
  ]],
  ['S5-05','내가 만든 규칙','규칙 만들기',[
+  ()=>{ const s0=rnd(1,10), k=rnd(2,5); const seq=[0,1,2,3,4].map(i=>s0+i*k); const h=rnd(1,3); return WN(`규칙: ${k}씩 커져요. ${seq.map((x,i)=>i===h?'□':x).join(', ')} 의 □는?`,'',seq[h]); },
+  ()=>{ const k=rnd(2,9); return CC(`${k}, ${2*k}, ${3*k}, ${4*k}의 규칙은?`,'',`${k}씩 커진다`,[`${k}씩 작아진다`,`${k+1}씩 커진다`,`1씩 커진다`]); },
   ()=>{ const s=rnd(1,20), k=rnd(2,9); const seq=[0,1,2,3].map(i=>s+i*k); return WN(`${seq.join(', ')}, 다음 수는?`,'',s+4*k); },
   ()=>{ const s=rnd(40,90), k=rnd(2,9); const seq=[0,1,2,3].map(i=>s-i*k); return WN(`${seq.join(', ')}, 다음 수는?`,'',s-4*k); },
  ]],
