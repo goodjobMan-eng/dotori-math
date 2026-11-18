@@ -897,6 +897,7 @@ function clipsFor(text, who){ const ko=CH_KO[who]; const alt=who==='halmi'?'람�
 window.__missing=window.__missing||{};
 function say(text, who='rami', cb){
   hush();
+  if(typeof S!=='undefined'&&S&&S.mode==='ep36'){ cb&&cb(); return; }
   const keys=clipsFor(text,who);
   if(keys&&keys.length){ playClips(keys, who, cb); return; }
   // 문장별로 나눠서: 녹음된 문장은 녹음으로, 없는 문장만 TTS
