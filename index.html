@@ -686,6 +686,20 @@ button{font-family:"Jua",sans-serif}
 .recent{list-style:none;padding:0;margin:0;background:#fff;border:3px solid var(--line);border-radius:16px;overflow:hidden}
 .recent li{display:flex;align-items:center;gap:8px;padding:8px 12px;border-bottom:1px dashed var(--line);font-size:.95rem}.recent li:last-child{border-bottom:0}
 .recent .rt{flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.recent .rs{font-family:"Jua",sans-serif;color:#D45F16}.recent .rd{color:var(--ink-soft);font-size:.8rem;width:38px;text-align:right}
+
+/* ---- 도형·측정·규칙·자료 ---- */
+.domh{grid-column:1/-1;justify-self:start;font-family:"Jua",sans-serif;font-size:1.1rem;color:#fff;background:#8A5A2B;border-radius:14px;padding:3px 14px;margin:10px 0 0}
+.items{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;max-width:300px;margin:6px auto}
+table.dt{border-collapse:collapse;margin:8px auto;background:#fff;font-size:1.05rem}
+table.dt th,table.dt td{border:2px solid #C99A5B;padding:5px 9px;text-align:center}
+table.dt th{background:#FFF3C4}
+table.og td,table.pg td{text-align:left;letter-spacing:2px;color:#D45F16;min-width:150px}
+.pgb{font-size:1.5rem}.pgs{font-size:.9rem}
+.band{display:flex;width:min(320px,90vw);margin:8px auto;border:3px solid #7A4A1E;border-radius:8px;overflow:hidden;font-size:.78rem;text-align:center}
+.band span{padding:6px 0;border-right:2px solid #7A4A1E;line-height:1.2}.band span:last-child{border-right:0}
+.bigsym{font-size:4rem;text-align:center;line-height:1.2;letter-spacing:4px}
+.grow{display:flex;gap:14px;justify-content:center;align-items:flex-end;flex-wrap:wrap}.grow span{max-width:90px;word-break:break-all;line-height:1.1}
+svg.fig{display:block;margin:6px auto}
 </style>
 </head>
 <body>
@@ -2842,18 +2856,21 @@ unit(6,'6-2 소수의 나눗셈',[
 /* ================= 3~6학년 화면 ================= */
 const VIDEOS36={"S3-46": "https://youtube.com/shorts/sHRFdGYapHM", "S3-69": "https://youtube.com/shorts/0Kxi6wLp0W4", "S3-70": "https://youtube.com/shorts/o1p-dRLV_js", "S3-71": "https://youtube.com/shorts/aRa2qUcwOyc", "S3-72": "https://youtube.com/shorts/oAqDt_ujfvk", "S3-73": "https://youtube.com/shorts/EDWMtsRmLTI", "S3-74": "https://youtube.com/shorts/h9zmoazUYO4", "S3-75": "https://youtube.com/shorts/B3e-yVEHAI8", "S3-76": "https://youtube.com/shorts/kBN3REUMOo8", "S3-77": "https://youtube.com/shorts/XeFHIXbOxMc", "S3-78": "https://youtube.com/shorts/iAJzN9Sauuw", "S3-79": "https://youtube.com/shorts/a_LK_Q5MRWg", "S3-80": "https://youtube.com/shorts/ES1pWTEeKx8", "S3-81": "https://youtube.com/shorts/Z4uQD90iwcM", "S3-82": "https://youtube.com/shorts/ugAvNyykqGg", "S3-83": "https://youtube.com/shorts/vtGppR8C58I", "S3-84": "https://youtube.com/shorts/TstW5lD8qIw", "S3-85": "https://youtube.com/shorts/mQipc1-l2Lc", "S3-86": "https://youtube.com/shorts/XvrWtBq0-cU", "S3-87": "https://youtube.com/shorts/dLw7jhw7a7U", "S3-88": "https://youtube.com/shorts/CjQ3LhoVuEU", "S3-89": "https://youtube.com/shorts/3_FCM3TxFOo", "S3-90": "https://youtube.com/shorts/zIaAWJ4GK5Q", "S3-91": "https://youtube.com/shorts/gOYwFqhqlfY", "S3-92": "https://youtube.com/shorts/koXJpj3vawk", "S3-93": "https://youtube.com/shorts/8HmQfBIsGs0", "S3-94": "https://youtube.com/shorts/0bMM215_Vtw", "S3-95": "https://youtube.com/shorts/tCkekP99Ol4", "S3-96": "https://youtube.com/shorts/mwSSMmcFdDk", "S3-97": "https://youtube.com/shorts/dZ_tzuYmd44", "S3-98": "https://youtube.com/shorts/v7vtRBOq_JI", "S3-99": "https://youtube.com/shorts/DSKIKnARE34", "S3-100": "https://youtube.com/shorts/TKL-EP6UqZo", "S3-101": "https://youtube.com/shorts/HjgGHgCupIM", "S3-102": "https://youtube.com/shorts/MGtExdGEPto", "S3-103": "https://youtube.com/shorts/eFXyfoY8Fn4", "S3-104": "https://youtube.com/shorts/05fVTE1EKZE", "S3-105": "https://youtube.com/shorts/7fAboplK-hk", "S3-106": "https://youtube.com/shorts/CipjrloHY7g", "S3-107": "https://youtube.com/shorts/yYXANmVxc8E", "S3-108": "https://youtube.com/shorts/uCLfk7IJsOA", "S3-109": "https://youtube.com/shorts/EFmWTuMtr10", "S3-110": "https://youtube.com/shorts/3oUAnRzHvJ0", "S3-111": "https://youtube.com/shorts/ofH3L6cyRQ4", "S3-112": "https://youtube.com/shorts/COcZUYU0w_c", "S3-113": "https://youtube.com/shorts/b7C06RDMUfg"};
 Object.assign(VIDEOS, VIDEOS36);
-const GRADE_WHO={3:'doto',4:'rami',5:'halmi',6:'cheong'};
-const GRADE_DESC={3:'세 자리 덧셈·뺄셈, 나눗셈, 곱셈, 분수와 소수',4:'큰 수, 곱셈과 나눗셈, 분수·소수의 덧셈과 뺄셈',5:'혼합 계산, 약수와 배수, 약분과 통분, 분수·소수의 곱셈',6:'분수의 나눗셈, 소수의 나눗셈'};
-const unitsOfGrade=g=>UNITS36.map((u,i)=>({...u,i})).filter(u=>u.grade===g);
+const GRADE_WHO={2:'cheong',3:'doto',4:'rami',5:'halmi',6:'cheong'};
+const GNAME=g=>g===2?'1~2학년':g+'학년';
+const DOMS=['수와 연산','변화와 관계','도형과 측정','자료와 가능성'];
+const domOf=u=>/^S4/.test(u.eps[0])?'자료와 가능성':/^S5/.test(u.eps[0])?'변화와 관계':/^S6/.test(u.eps[0])?'도형과 측정':'수와 연산';
+const GRADE_DESC={2:'도형과 측정 · 규칙 찾기 · 분류와 그래프 (글자 문제)',3:'세 자리 덧셈·뺄셈, 나눗셈, 곱셈, 분수와 소수',4:'큰 수, 곱셈과 나눗셈, 분수·소수의 덧셈과 뺄셈',5:'혼합 계산, 약수와 배수, 약분과 통분, 분수·소수의 곱셈',6:'분수의 나눗셈, 소수의 나눗셈'};
+const unitsOfGrade=g=>UNITS36.map((u,i)=>({...u,i,dom:domOf(u)})).filter(u=>u.grade===g).sort((a,b)=>DOMS.indexOf(a.dom)-DOMS.indexOf(b.dom)||a.title.slice(0,3).localeCompare(b.title.slice(0,3))||a.i-b.i);
 function gradeDone(g){ const best=load(); let n=0,all=0; unitsOfGrade(g).forEach(u=>u.eps.forEach(e=>{ all++; if(best['EP'+e]!=null) n++; })); return [n,all]; }
 function homeGrades(){
-  return `<div class="grades"><div class="gtitle">3~6학년 · 수와 연산</div>${[3,4,5,6].map(g=>{ const [n,all]=gradeDone(g); return `<button class="grade" data-g="${g}">${chip(GRADE_WHO[g],'base')}<div><div class="t">${g}학년</div><div class="d">${GRADE_DESC[g]}</div><div class="stars">편 ${n}/${all} 완료</div></div></button>`; }).join('')}</div>`;
+  return `<div class="grades"><div class="gtitle">영역별 문제 · 1~6학년</div>${[2,3,4,5,6].map(g=>{ const [n,all]=gradeDone(g); return `<button class="grade" data-g="${g}">${chip(GRADE_WHO[g],'base')}<div><div class="t">${GNAME(g)}</div><div class="d">${GRADE_DESC[g]}</div><div class="stars">편 ${n}/${all} 완료</div></div></button>`; }).join('')}</div>`;
 }
 function grade36(g){
   hush(); const best=load(); app.className='wrap';
-  const cards=unitsOfGrade(g).map(u=>{ let n=0; u.eps.forEach(e=>{ if(best['EP'+e]!=null) n++; }); return `<button class="ep${n===u.eps.length?' done':''}" data-u="${u.i}"><span class="n">${u.title.split(' ')[0]}</span><span class="t">${u.title.replace(/^\S+\s/,'')}</span><span class="s">${n}/${u.eps.length} 편</span></button>`; }).join('');
+  let lastDom=''; const cards=unitsOfGrade(g).map(u=>{ let n=0; u.eps.forEach(e=>{ if(best['EP'+e]!=null) n++; }); const hd=u.dom!==lastDom?`<div class="domh">${u.dom}</div>`:''; lastDom=u.dom; return hd+`<button class="ep${n===u.eps.length?' done':''}" data-u="${u.i}"><span class="n">${u.title.split(' ')[0]}</span><span class="t">${u.title.replace(/^\S+\s/,'')}</span><span class="s">${n}/${u.eps.length} 편</span></button>`; }).join('');
   app.innerHTML=`
-    <div class="top"><button class="back" id="back">← 처음</button><div class="crumb">${g}학년 · 수와 연산</div><span style="width:70px"></span></div>
+    <div class="top"><button class="back" id="back">← 처음</button><div class="crumb">${GNAME(g)}</div><span style="width:70px"></span></div>
     <div class="talker" style="margin-bottom:6px">${chip(GRADE_WHO[g],'point')}<div class="bubble"><div class="who">${NAMES[GRADE_WHO[g]]}</div><div class="q">어느 단원부터 할까?</div><div class="hint">1학기 → 2학기 순서예요</div></div></div>
     <div class="eps">${cards}</div>`;
   document.getElementById('back').onclick=home;
@@ -2878,7 +2895,7 @@ function startEp36(ep,ui){
 }
 /* 뒤로 가기·다음 편 공용 */
 function backToList(){ if(S.mode==='ep36') unit36(S.ui); else chapter(S.ch); }
-function next36(){ const u=UNITS36[S.ui]; const k=u.eps.indexOf(S.ep); if(k<u.eps.length-1) return {ep:u.eps[k+1],ui:S.ui}; const nu=UNITS36[S.ui+1]; return nu?{ep:nu.eps[0],ui:S.ui+1}:null; }
+function next36(){ const u=UNITS36[S.ui]; const k=u.eps.indexOf(S.ep); if(k<u.eps.length-1) return {ep:u.eps[k+1],ui:S.ui}; const ord=unitsOfGrade(u.grade); const j=ord.findIndex(x=>x.i===S.ui); const nu=ord[j+1]; return nu?{ep:nu.eps[0],ui:nu.i}:null; }
 
 
 /* ================= 누적 기록 ================= */
@@ -2919,6 +2936,600 @@ function statsPage(){ hush(); app.className='wrap'; const st=loadStats(); const 
   document.getElementById('back').onclick=home;
   document.getElementById('reset').onclick=()=>{ if(confirm('누적 기록을 모두 지울까요? (편마다 최고 점수는 남아요)')){ saveStats(EMPTY_ST()); statsPage(); } };
 }
+
+/* ================= 자료와 가능성 · 변화와 관계 · 도형과 측정 (시즌4·5·6) ================= */
+const WHO=()=>rndPick('doto','rami','halmi','cheong');
+const slotsN=n=>`<span class="vgrp">${SL(n)}</span>`;
+const WN=(q,vis,ans,pre='',post='')=>W36(WHO(),q,q,vis+row(...(pre?[pre]:[]),slotsN(ans),...(post?[post]:[])),ans,{ansText:`${pre} ${ans} ${post}`.trim()});
+const WN2=(q,vis,a,u1,b,u2)=>W36(WHO(),q,q,vis+row(slotsN(a),u1,slotsN(b),u2),`${a}${b}`,{ansText:`${a} ${u1} ${b} ${u2}`});
+const CC=(q,vis,ans,others)=>C36(WHO(),q,q,vis,ans,optsFrom(ans,others));
+const CF=(q,vis,ans,list)=>C36(WHO(),q,q,vis,ans,shuffle([...list]));
+const pickQ=bank=>()=>{ const [q,ans,list,vis]=rndPick(...bank); return CF(q,vis||'',ans,list); };
+const fx=v=>+v.toFixed(1);
+/* --- 그림 도우미 --- */
+const SV=(w,h,s,mw=300)=>`<svg class="fig" viewBox="0 0 ${w} ${h}" style="width:100%;max-width:${mw}px">${s}</svg>`;
+const STK='stroke="#6B3E1C" stroke-width="3"';
+const COLORS={빨간:'#E85D4A',파란:'#4A8FE8',노란:'#F2C230',초록:'#5DB85D'};
+const shp=(kind,fill)=>{ const st=`fill="${fill}" stroke="#6B3E1C" stroke-width="2"`; const b=kind==='세모'?`<polygon points="17,3 31,31 3,31" ${st}/>`:kind==='네모'?`<rect x="4" y="4" width="26" height="26" ${st}/>`:`<circle cx="17" cy="17" r="14" ${st}/>`; return `<svg width="34" height="34" viewBox="0 0 34 34">${b}</svg>`; };
+const mkItems=(n)=>Array.from({length:n},()=>({s:rndPick('세모','네모','동그라미'),c:rndPick('빨간','파란','노란')}));
+const itemsVis=items=>`<div class="items">${items.map(i=>shp(i.s,COLORS[i.c])).join('')}</div>`;
+const tbl=(heads,vals,first=['종류','수'])=>`<table class="dt"><tr><th>${first[0]}</th>${heads.map(h=>`<th>${h}</th>`).join('')}</tr><tr><th>${first[1]}</th>${vals.map(v=>`<td>${v}</td>`).join('')}</tr></table>`;
+const FRUITS=['사과','배','감','귤','포도','밤'], PLACES=['가 마을','나 마을','다 마을','라 마을'], DAYS=['월','화','수','목','금'];
+const pickN=(arr,n)=>shuffle([...arr]).slice(0,n);
+const distinct=(n,lo,hi)=>{ const s=new Set(); while(s.size<n) s.add(rnd(lo,hi)); return [...s]; };
+const oGraph=(labels,vals)=>`<table class="dt og">${labels.map((l,i)=>`<tr><th>${l}</th><td>${'○'.repeat(vals[i])}</td></tr>`).join('')}</table>`;
+const picG=(labels,vals)=>`<table class="dt pg">${labels.map((l,i)=>`<tr><th>${l}</th><td>${'<span class="pgb">🌰</span>'.repeat(Math.floor(vals[i]/10))}${'<span class="pgs">🌰</span>'.repeat(vals[i]%10)}</td></tr>`).join('')}</table><div class="hint" style="text-align:center">큰 그림 10개 · 작은 그림 1개</div>`;
+function barG(labels,vals,step){ const max=Math.max(...vals); const top=Math.ceil(max/step)*step; const W=300,H=180,L=34,B=24; const cw=(W-L-6)/labels.length; const sc=(H-B-12)/top; let g='';
+  for(let v=0;v<=top;v+=step){ const y=H-B-v*sc; g+=`<line x1="${L}" y1="${y}" x2="${W-4}" y2="${y}" stroke="#E5D3B5"/><text x="${L-4}" y="${y+4}" text-anchor="end" font-size="11">${v}</text>`; }
+  labels.forEach((lb,i)=>{ const x=L+i*cw+cw*0.2, h=vals[i]*sc; g+=`<rect x="${x}" y="${H-B-h}" width="${cw*0.6}" height="${h}" fill="#F2A65A" stroke="#7A4A1E"/><text x="${x+cw*0.3}" y="${H-6}" text-anchor="middle" font-size="12">${lb}</text>`; });
+  return SV(W,H,g+`<line x1="${L}" y1="${H-B}" x2="${W-4}" y2="${H-B}" stroke="#6B3E1C" stroke-width="2"/><line x1="${L}" y1="6" x2="${L}" y2="${H-B}" stroke="#6B3E1C" stroke-width="2"/>`,320); }
+function lineG(labels,vals,step,base=0){ const max=Math.max(...vals); const top=Math.ceil(max/step)*step; const W=300,H=180,L=34,B=24; const cw=(W-L-6)/labels.length; const sc=(H-B-12)/(top-base); let g='';
+  for(let v=base;v<=top;v+=step){ const y=H-B-(v-base)*sc; g+=`<line x1="${L}" y1="${y}" x2="${W-4}" y2="${y}" stroke="#E5D3B5"/><text x="${L-4}" y="${y+4}" text-anchor="end" font-size="11">${v}</text>`; }
+  const pts=vals.map((v,i)=>[L+i*cw+cw/2, H-B-(v-base)*sc]); g+=`<polyline points="${pts.map(p=>p.join(',')).join(' ')}" fill="none" stroke="#D45F16" stroke-width="3"/>`+pts.map(p=>`<circle cx="${p[0]}" cy="${p[1]}" r="4" fill="#D45F16"/>`).join('')+labels.map((lb,i)=>`<text x="${L+i*cw+cw/2}" y="${H-6}" text-anchor="middle" font-size="12">${lb}</text>`).join('');
+  if(base>0) g+=`<path d="M${L-6},${H-B-4} q3,-4 6,0 t6,0" fill="none" stroke="#6B3E1C" stroke-width="2"/>`;
+  return SV(W,H,g+`<line x1="${L}" y1="${H-B}" x2="${W-4}" y2="${H-B}" stroke="#6B3E1C" stroke-width="2"/><line x1="${L}" y1="6" x2="${L}" y2="${H-B}" stroke="#6B3E1C" stroke-width="2"/>`,320); }
+const bandG=(labels,pcts)=>`<div class="band">${labels.map((l,i)=>`<span style="flex:${pcts[i]};background:${['#F2A65A','#8CC7E8','#A6D98C','#F2D06B','#D9A6E8'][i%5]}">${l}<br>${pcts[i]}%</span>`).join('')}</div>`;
+function clockSvg(h,m){ let s=`<circle cx="60" cy="60" r="54" fill="#FFFDF4" stroke="#6B3E1C" stroke-width="4"/>`; for(let i=1;i<=12;i++){ const a=i*Math.PI/6; s+=`<text x="${(60+42*Math.sin(a)).toFixed(1)}" y="${(60-42*Math.cos(a)+5).toFixed(1)}" text-anchor="middle" font-size="14" font-weight="700">${i}</text>`; }
+  for(let i=0;i<60;i++){ const a=i*Math.PI/30, r1=i%5?50:46; s+=`<line x1="${(60+r1*Math.sin(a)).toFixed(1)}" y1="${(60-r1*Math.cos(a)).toFixed(1)}" x2="${(60+53*Math.sin(a)).toFixed(1)}" y2="${(60-53*Math.cos(a)).toFixed(1)}" stroke="#6B3E1C" stroke-width="${i%5?1:2}"/>`; }
+  const ha=((h%12)+m/60)*Math.PI/6, ma=m*Math.PI/30; s+=`<line x1="60" y1="60" x2="${(60+27*Math.sin(ha)).toFixed(1)}" y2="${(60-27*Math.cos(ha)).toFixed(1)}" stroke="#4A2E14" stroke-width="6" stroke-linecap="round"/><line x1="60" y1="60" x2="${(60+43*Math.sin(ma)).toFixed(1)}" y2="${(60-43*Math.cos(ma)).toFixed(1)}" stroke="#D45F16" stroke-width="4" stroke-linecap="round"/><circle cx="60" cy="60" r="4" fill="#4A2E14"/>`;
+  return SV(120,120,s,160); }
+const regPts=(n,r=44,cx=50,cy=52)=>Array.from({length:n},(_,i)=>{ const a=-Math.PI/2+2*Math.PI*i/n; return `${(cx+r*Math.cos(a)).toFixed(1)},${(cy+r*Math.sin(a)).toFixed(1)}`; }).join(' ');
+const polySvg=(n)=>n===0?SV(100,100,`<circle cx="50" cy="52" r="42" fill="#FFE3B0" ${STK}/>`,130):n===4?SV(100,100,`<rect x="14" y="16" width="72" height="72" fill="#FFE3B0" ${STK}/>`,130):SV(100,100,`<polygon points="${regPts(n)}" fill="#FFE3B0" ${STK}/>`,130);
+const SHAPE_NAME={3:'삼각형',4:'사각형',5:'오각형',6:'육각형',7:'칠각형',8:'팔각형'};
+function angSvg(deg){ const r=70, a=deg*Math.PI/180; const x2=20+r*Math.cos(a), y2=90-r*Math.sin(a); const ar=22; const ax=20+ar*Math.cos(a), ay=90-ar*Math.sin(a);
+  return SV(170,100,`<line x1="20" y1="90" x2="160" y2="90" ${STK}/><line x1="20" y1="90" x2="${x2.toFixed(1)}" y2="${y2.toFixed(1)}" ${STK}/>`+(deg===90?`<path d="M20,72 h18 v18" fill="none" stroke="#D45F16" stroke-width="2"/>`:`<path d="M42,90 A22,22 0 ${deg>180?1:0},0 ${ax.toFixed(1)},${ay.toFixed(1)}" fill="none" stroke="#D45F16" stroke-width="2"/>`),200); }
+function protractor(deg){ let s=`<path d="M10,110 A100,100 0 0,1 210,110 Z" fill="#EAF6FF" stroke="#4A8FE8" stroke-width="2"/>`; for(let d=0;d<=180;d+=10){ const a=d*Math.PI/180; s+=`<line x1="${(110+100*Math.cos(a)).toFixed(1)}" y1="${(110-100*Math.sin(a)).toFixed(1)}" x2="${(110+88*Math.cos(a)).toFixed(1)}" y2="${(110-88*Math.sin(a)).toFixed(1)}" stroke="#4A8FE8"/>`; if(d%30===0) s+=`<text x="${(110+78*Math.cos(a)).toFixed(1)}" y="${(114-78*Math.sin(a)).toFixed(1)}" font-size="10" text-anchor="middle">${d}</text>`; }
+  const a=deg*Math.PI/180; s+=`<line x1="110" y1="110" x2="215" y2="110" stroke="#6B3E1C" stroke-width="3"/><line x1="110" y1="110" x2="${(110+105*Math.cos(a)).toFixed(1)}" y2="${(110-105*Math.sin(a)).toFixed(1)}" stroke="#D45F16" stroke-width="3"/>`; return SV(220,118,s,300); }
+function ruler(len){ const u=24, W=u*(len+2)+20; let s=`<rect x="10" y="40" width="${W-20}" height="34" fill="#FFF3C4" stroke="#6B3E1C" stroke-width="2"/>`; for(let i=0;i<=len+1;i++){ s+=`<line x1="${10+i*u}" y1="40" x2="${10+i*u}" y2="58" stroke="#6B3E1C" stroke-width="2"/><text x="${10+i*u}" y="70" font-size="11" text-anchor="middle">${i}</text>`; if(i<=len) s+=`<line x1="${10+i*u+u/2}" y1="40" x2="${10+i*u+u/2}" y2="49" stroke="#6B3E1C"/>`; }
+  s+=`<rect x="10" y="18" width="${len*u}" height="14" rx="4" fill="#F2A65A" stroke="#7A4A1E" stroke-width="2"/>`; return SV(W,80,s,Math.min(340,W)); }
+function gridShape(cells){ const u=22; const xs=cells.map(c=>c[0]), ys=cells.map(c=>c[1]); const W=(Math.max(...xs)+3)*u, H=(Math.max(...ys)+3)*u; let s=''; for(let x=0;x<=W;x+=u) s+=`<line x1="${x}" y1="0" x2="${x}" y2="${H}" stroke="#E5D3B5"/>`; for(let y=0;y<=H;y+=u) s+=`<line x1="0" y1="${y}" x2="${W}" y2="${y}" stroke="#E5D3B5"/>`;
+  cells.forEach(([x,y])=>s+=`<rect x="${(x+1)*u}" y="${(y+1)*u}" width="${u}" height="${u}" fill="#F2A65A" stroke="#7A4A1E"/>`); return SV(W,H,s,260); }
+const polyomino=n=>{ const set=new Set(['0,0']); const cs=[[0,0]]; while(cs.length<n){ const [x,y]=rndPick(...cs); const [dx,dy]=rndPick([1,0],[0,1],[-1,0],[0,-1]); const nx=x+dx, ny=y+dy; if(nx<0||ny<0||nx>5||ny>4) continue; const k=nx+','+ny; if(set.has(k)) continue; set.add(k); cs.push([nx,ny]); } return cs; };
+const lab=(x,y,t)=>`<text x="${x}" y="${y}" font-size="14" text-anchor="middle" font-weight="700" fill="#4A2E14">${t}</text>`;
+function figSvg(kind,a,b,c){ const F='fill="#FFE3B0" '+STK, D='stroke="#D45F16" stroke-width="2" stroke-dasharray="5 4"'; let s;
+  if(kind==='rect') s=`<rect x="40" y="20" width="160" height="90" ${F}/>`+lab(120,130,a+' cm')+lab(20,70,b+' cm');
+  else if(kind==='sq') s=`<rect x="70" y="15" width="100" height="100" ${F}/>`+lab(120,134,a+' cm');
+  else if(kind==='para') s=`<polygon points="70,20 220,20 180,110 30,110" ${F}/><line x1="70" y1="20" x2="70" y2="110" ${D}/>`+lab(105,130,a+' cm')+lab(88,70,b);
+  else if(kind==='tri') s=`<polygon points="90,15 210,110 30,110" ${F}/><line x1="90" y1="15" x2="90" y2="110" ${D}/>`+lab(120,130,a+' cm')+lab(105,75,b);
+  else if(kind==='rhom') s=`<polygon points="120,10 200,65 120,120 40,65" ${F}/><line x1="40" y1="65" x2="200" y2="65" ${D}/><line x1="120" y1="10" x2="120" y2="120" ${D}/>`+lab(165,58,a+' cm')+lab(140,100,b);
+  else if(kind==='trap') s=`<polygon points="80,20 170,20 215,110 30,110" ${F}/><line x1="80" y1="20" x2="80" y2="110" ${D}/>`+lab(125,14,a+' cm')+lab(122,130,b+' cm')+lab(98,72,c);
+  else if(kind==='circ') s=`<circle cx="120" cy="65" r="55" ${F}/><line x1="120" y1="65" x2="175" y2="65" ${D}/><circle cx="120" cy="65" r="3" fill="#4A2E14"/>`+lab(148,58,a);
+  return SV(240,140,s,300); }
+const boxSvg=(a,b,c)=>SV(220,150,`<polygon points="20,50 150,50 150,140 20,140" fill="#FFE3B0" ${STK}/><polygon points="20,50 70,15 200,15 150,50" fill="#FFF0D0" ${STK}/><polygon points="150,50 200,15 200,105 150,140" fill="#F5D39A" ${STK}/><line x1="20" y1="140" x2="70" y2="105" stroke="#6B3E1C" stroke-width="2" stroke-dasharray="5 4"/><line x1="70" y1="105" x2="200" y2="105" stroke="#6B3E1C" stroke-width="2" stroke-dasharray="5 4"/><line x1="70" y1="15" x2="70" y2="105" stroke="#6B3E1C" stroke-width="2" stroke-dasharray="5 4"/>`+(a?lab(85,148,a+' cm')+lab(190,140,b+' cm')+lab(8,98,c+' cm'):''),260);
+const ROT={'↑':'→','→':'↓','↓':'←','←':'↑'}, FLR={'↑':'↑','↓':'↓','←':'→','→':'←'}, FUD={'↑':'↓','↓':'↑','←':'←','→':'→'};
+const ARR=['↑','→','↓','←'];
+const big=t=>`<div class="bigsym">${t}</div>`;
+
+/* ===== 시즌4 자료와 가능성 ===== */
+const cntBy=(items,key,val)=>items.filter(i=>i[key]===val).length;
+unit(2,'2-1 분류하기',[
+ ['S4-01','기준을 정해 나눠요','분류 기준',[
+  ()=>{ const it=mkItems(rnd(8,12)); const c=rndPick('빨간','파란','노란'); return WN(`${c} 것은 몇 개일까요?`,itemsVis(it),cntBy(it,'c',c),'','개'); },
+  ()=>{ const it=mkItems(rnd(8,12)); const s=rndPick('세모','네모','동그라미'); return WN(`${s} 모양은 몇 개일까요?`,itemsVis(it),cntBy(it,'s',s),'','개'); },
+  pickQ([['분류 기준으로 알맞은 것은?','색깔',['색깔','예쁜 것','좋아하는 것']],['누가 나누어도 결과가 같은 기준은?','모양',['모양','멋진 것','귀여운 것']],['분명한 기준이 아닌 것은?','예쁜 것',['예쁜 것','색깔','다리 수']]]),
+ ]],
+ ['S4-02','나누고 세어요','분류하여 세기',[
+  ()=>{ const it=mkItems(rnd(9,12)); const cs=['빨간','파란','노란'].map(c=>cntBy(it,'c',c)); const m=Math.max(...cs); if(cs.filter(x=>x===m).length>1) return G36['S4-02'][0](); return CF('가장 많은 색은?',itemsVis(it),['빨간','파란','노란'][cs.indexOf(m)],['빨간','파란','노란']); },
+  ()=>{ const it=mkItems(rnd(9,12)); return WN('모두 몇 개일까요? 색깔별로 세고 더해 보세요.',itemsVis(it),it.length,'','개'); },
+ ]],
+]);
+unit(2,'2-2 표와 그래프',[
+ ['S4-03','표로 나타내요','표',[
+  ()=>{ const it=mkItems(rnd(8,12)); const c=rndPick('빨간','파란','노란'); const v=['빨간','파란','노란'].map(x=>x===c?'?':cntBy(it,'c',x)); return WN(`표의 ? 에 알맞은 수는?`,itemsVis(it)+tbl(['빨간','파란','노란'],v,['색깔','수']),cntBy(it,'c',c),'','개'); },
+  ()=>{ const L=pickN(FRUITS,3), v=L.map(()=>rnd(2,8)); return WN('합계는 몇 명일까요?',tbl([...L,'합계'],[...v,'?'],['과일','학생 수']),v.reduce((a,b)=>a+b),'','명'); },
+ ]],
+ ['S4-04','○로 그래프 그리기','○ 그래프',[
+  ()=>{ const L=pickN(FRUITS,3), v=L.map(()=>rnd(1,6)); const k=rnd(0,2); return WN(`${L[k]}에는 ○를 몇 개 그려야 할까요?`,tbl(L,v,['과일','학생 수']),v[k],'','개'); },
+  ()=>{ const L=pickN(FRUITS,3), v=L.map(()=>rnd(1,6)); const k=rnd(0,2); return WN(`그래프에서 ${L[k]}를 좋아하는 학생은 몇 명?`,oGraph(L,v),v[k],'','명'); },
+ ]],
+ ['S4-05','그래프를 읽어요','그래프 해석',[
+  ()=>{ const L=pickN(FRUITS,3), v=distinct(3,1,7); const mx=Math.max(...v); return CF('가장 많은 학생이 좋아하는 과일은?',oGraph(L,v),L[v.indexOf(mx)],L); },
+  ()=>{ const L=pickN(FRUITS,3), v=distinct(3,1,7); return WN('가장 많은 것과 가장 적은 것은 몇 명 차이?',oGraph(L,v),Math.max(...v)-Math.min(...v),'','명'); },
+ ]],
+]);
+unit(3,'3-2 자료의 정리',[
+ ['S4-06','자료를 모아요','자료 수집·정리',[
+  ()=>{ const L=pickN(FRUITS,4), v=L.map(()=>rnd(3,12)); return WN('조사한 학생은 모두 몇 명?',tbl([...L,'합계'],[...v,'?'],['과일','학생 수']),v.reduce((a,b)=>a+b),'','명'); },
+  ()=>{ const L=pickN(FRUITS,4), v=L.map(()=>rnd(3,12)); const tot=v.reduce((a,b)=>a+b); const k=rnd(0,3); const vv=v.map((x,i)=>i===k?'?':x); return WN('? 에 알맞은 수는?',tbl([...L,'합계'],[...vv,tot],['과일','학생 수']),v[k],'','명'); },
+ ]],
+ ['S4-07','그림그래프','그림그래프',[
+  ()=>{ const L=pickN(PLACES,3), v=L.map(()=>rnd(11,48)); const k=rnd(0,2); return WN(`${L[k]}의 도토리는 몇 개?`,picG(L,v),v[k],'','개'); },
+  ()=>{ const n=rnd(12,49); return WN(`도토리 ${n}개를 그림그래프로 나타내면 큰 그림은 몇 개?`,'',Math.floor(n/10),'','개'); },
+ ]],
+ ['S4-08','그림그래프 읽기','그림그래프 해석',[
+  ()=>{ const L=pickN(PLACES,4), v=distinct(4,11,48); return CF('도토리가 가장 많은 마을은?',picG(L,v),L[v.indexOf(Math.max(...v))],L); },
+  ()=>{ const L=pickN(PLACES,3), v=L.map(()=>rnd(11,48)); return WN('세 마을 도토리는 모두 몇 개?',picG(L,v),v.reduce((a,b)=>a+b),'','개'); },
+ ]],
+]);
+unit(4,'4-1 막대그래프',[
+ ['S4-09','막대그래프 그리기','막대그래프 그리기',[
+  ()=>{ const st=rndPick(1,2,5), v=st*rnd(2,9); return WN(`세로 눈금 한 칸이 ${st}명이면 ${v}명은 몇 칸?`,'',v/st,'','칸'); },
+  ()=>{ const st=rndPick(2,5,10), k=rnd(2,9); return WN(`눈금 한 칸이 ${st}명일 때 막대가 ${k}칸이면 몇 명?`,'',st*k,'','명'); },
+ ]],
+ ['S4-10','막대그래프 읽기','막대그래프 해석',[
+  ()=>{ const st=rndPick(1,2,5), L=pickN(FRUITS,4), v=L.map(()=>st*rnd(1,9)); const k=rnd(0,3); return WN(`${L[k]}를 좋아하는 학생은 몇 명?`,barG(L,v,st),v[k],'','명'); },
+  ()=>{ const st=rndPick(1,2,5), L=pickN(FRUITS,4), v=distinct(4,1,9).map(x=>x*st); return WN('가장 많은 것과 가장 적은 것의 차이는?',barG(L,v,st),Math.max(...v)-Math.min(...v),'','명'); },
+  ()=>{ const st=rndPick(1,2,5), L=pickN(FRUITS,4), v=distinct(4,1,9).map(x=>x*st); return CF('두 번째로 많은 것은?',barG(L,v,st),L[v.indexOf([...v].sort((a,b)=>b-a)[1])],L); },
+ ]],
+]);
+unit(4,'4-2 꺾은선그래프',[
+ ['S4-11','꺾은선그래프','꺾은선그래프',[
+  ()=>{ const v=DAYS.map(()=>2*rnd(2,10)); const k=rnd(0,4); return WN(`${DAYS[k]}요일 새싹의 키는 몇 cm?`,lineG(DAYS,v,2),v[k],'','cm'); },
+  ()=>{ let v=[rnd(4,8)]; for(let i=1;i<5;i++) v.push(v[i-1]+rnd(1,4)); v=v.map(x=>x*2); const d=v.slice(1).map((x,i)=>x-v[i]); const m=Math.max(...d); if(d.filter(x=>x===m).length>1) return G36['S4-11'][1](); const i=d.indexOf(m); return CF('키가 가장 많이 자란 때는?',lineG(DAYS,v,2),`${DAYS[i]}~${DAYS[i+1]}`,d.map((_,j)=>`${DAYS[j]}~${DAYS[j+1]}`).slice(0,4)); },
+ ]],
+ ['S4-12','물결선으로 줄여요','물결선',[
+  ()=>{ const base=rndPick(20,30,40); const v=DAYS.map(()=>base+rnd(1,9)); const k=rnd(0,4); return WN(`${DAYS[k]}요일 기온은 몇 도?`,lineG(DAYS,v,1,base),v[k],'','도'); },
+  ()=>{ const base=rndPick(20,30,40); return CF(`자료가 모두 ${base+1}~${base+9} 사이일 때 물결선으로 줄일 부분은?`,'',`0~${base}`,[`0~${base}`,`${base}~${base+10}`,`${base+10}~${base+20}`]); },
+ ]],
+ ['S4-13','어떤 그래프가 알맞을까','그래프 선택',[
+  pickQ([['날마다 변하는 기온을 나타내기 알맞은 그래프는?','꺾은선그래프',['꺾은선그래프','막대그래프']],['반 친구들이 좋아하는 과일별 수를 비교하기 알맞은 그래프는?','막대그래프',['막대그래프','꺾은선그래프']],['내 키가 해마다 자란 모습을 나타내기 알맞은 그래프는?','꺾은선그래프',['꺾은선그래프','막대그래프']],['마을별 나무 수를 비교하기 알맞은 그래프는?','막대그래프',['막대그래프','꺾은선그래프']]]),
+  ()=>{ let v=[rnd(10,14)]; for(let i=1;i<5;i++) v.push(v[i-1]+2); return WN('같은 크기로 늘어나요. 다음 날은 몇 cm일까요?',lineG(DAYS,v,2),v[4]+2,'','cm'); },
+ ]],
+]);
+unit(5,'5-2 평균과 가능성',[
+ ['S4-14','고르게 하면 얼마?','평균의 뜻',[
+  ()=>{ const n=rnd(3,5), avg=rnd(3,9); let v=Array(n).fill(avg); for(let i=0;i<n-1;i++){ const d=rnd(0,2); v[i]+=d; v[n-1]-=d; } if(v.some(x=>x<1)) return G36['S4-14'][0](); return WN(`도토리 ${v.join(', ')}개를 고르게 하면 한 사람에 몇 개?`,'',avg,'','개'); },
+ ]],
+ ['S4-15','평균 구하기','평균 구하기',[
+  ()=>{ const n=rnd(3,5), avg=rnd(10,40); let v=Array(n).fill(avg); for(let i=0;i<n-1;i++){ const d=rnd(-5,5); v[i]+=d; v[n-1]-=d; } return WN(`${v.join(', ')}의 평균은?`,tbl(v.map((_,i)=>`${i+1}회`),v,['회','점수']),avg,'','점'); },
+  ()=>{ const n=rnd(3,5), avg=rnd(10,40); return WN(`${n}명의 평균이 ${avg}점이면 점수의 합은?`,'',n*avg,'','점'); },
+ ]],
+ ['S4-16','평균으로 비교해요','평균 활용',[
+  ()=>{ const n=rnd(3,4), avg=rnd(10,30); const v=Array.from({length:n-1},()=>avg+rnd(-6,6)); const last=n*avg-v.reduce((a,b)=>a+b); if(last<1) return G36['S4-16'][0](); return WN(`${n}회 평균이 ${avg}점이에요. ${v.join(', ')}점 다음 마지막 회는 몇 점?`,'',last,'','점'); },
+  ()=>{ const a=[rnd(10,20),rnd(10,20),rnd(10,20)], b=[rnd(10,20),rnd(10,20),rnd(10,20),rnd(10,20)]; const A=a.reduce((x,y)=>x+y)/3, B=b.reduce((x,y)=>x+y)/4; if(A===B) return G36['S4-16'][1](); return CF(`가 모둠 ${a.join(', ')} / 나 모둠 ${b.join(', ')}. 평균이 더 높은 모둠은?`,'',A>B?'가 모둠':'나 모둠',['가 모둠','나 모둠']); },
+ ]],
+ ['S4-17','일어날 가능성','가능성 말로',[
+  pickQ([['내일 해가 서쪽에서 뜰 가능성은?','불가능하다',['불가능하다','반반이다','확실하다']],['동전을 던져 숫자 면이 나올 가능성은?','반반이다',['반반이다','불가능하다','확실하다']],['1월 다음에 2월이 올 가능성은?','확실하다',['확실하다','반반이다','불가능하다']],['주사위를 던져 7이 나올 가능성은?','불가능하다',['불가능하다','반반이다','확실하다']],['빨간 구슬만 든 주머니에서 빨간 구슬을 꺼낼 가능성은?','확실하다',['확실하다','반반이다','불가능하다']]]),
+ ]],
+ ['S4-18','가능성을 수로','가능성 0, 1/2, 1',[
+  pickQ([['흰 바둑돌만 든 통에서 검은 돌을 꺼낼 가능성을 수로?','0',['0','2분의 1','1']],['동전을 던져 그림 면이 나올 가능성을 수로?','2분의 1',['0','2분의 1','1']],['주사위를 던져 6 이하가 나올 가능성을 수로?','1',['0','2분의 1','1']],['주사위를 던져 짝수가 나올 가능성을 수로?','2분의 1',['0','2분의 1','1']]]),
+ ]],
+]);
+unit(6,'6-1 비율그래프',[
+ ['S4-19','띠그래프','띠그래프',[
+  ()=>{ const L=pickN(FRUITS,4); let p=[rnd(2,4)*5,rnd(2,4)*5,rnd(1,3)*5]; p.push(100-p.reduce((a,b)=>a+b)); const k=rnd(0,3); return WN(`${L[k]}는 전체의 몇 %?`,bandG(L,p).replace(`${p[k]}%`,'?%'),p[k],'','%'); },
+  ()=>{ const L=pickN(FRUITS,4); let p=[rnd(2,4)*5,rnd(2,4)*5,rnd(1,3)*5]; p.push(100-p.reduce((a,b)=>a+b)); const mx=Math.max(...p); if(p.filter(x=>x===mx).length>1) return G36['S4-19'][1](); return CF('가장 많이 차지하는 것은?',bandG(L,p),L[p.indexOf(mx)],L); },
+ ]],
+ ['S4-20','원그래프','원그래프',[
+  ()=>{ const tot=rndPick(20,40,50,100,200), p=rndPick(10,20,25,30,40,50); if(tot*p%100) return G36['S4-20'][0](); return WN(`전체 ${tot}명 중 ${p}%는 몇 명?`,'',tot*p/100,'','명'); },
+  ()=>{ const tot=rndPick(20,25,50), k=rnd(1,tot-1); if(k*100%tot) return G36['S4-20'][1](); return WN(`${tot}명 중 ${k}명은 몇 %?`,'',k*100/tot,'','%'); },
+ ]],
+ ['S4-21','비율그래프로 생각해요','비율그래프 해석',[
+  ()=>{ const L=pickN(FRUITS,4); let p=[rnd(2,4)*5,rnd(2,4)*5,rnd(1,3)*5]; p.push(100-p.reduce((a,b)=>a+b)); const i=rnd(0,3); let j=rnd(0,3); if(i===j) j=(i+1)%4; if(p[i]%p[j]!==0||p[i]===p[j]) return G36['S4-21'][0](); return WN(`${L[i]}는 ${L[j]}의 몇 배?`,bandG(L,p),p[i]/p[j],'','배'); },
+  ()=>{ const L=pickN(FRUITS,4); let p=[rnd(2,4)*5,rnd(2,4)*5,rnd(1,3)*5]; p.push(100-p.reduce((a,b)=>a+b)); return WN(`${L[0]}와 ${L[1]}를 합하면 몇 %?`,bandG(L,p),p[0]+p[1],'','%'); },
+ ]],
+ ['S4-22','꽃밭 조사 프로젝트','통계 종합',[ ()=>G36['S4-10'][1](), ()=>G36['S4-15'][0](), ()=>G36['S4-20'][0](), ()=>G36['S4-13'][0](), ()=>G36['S4-18'][0]() ]],
+]);
+
+/* ===== 시즌5 변화와 관계 ===== */
+const EM=['🌰','🍁','🍄','⭐','🌸'];
+unit(2,'1-2 규칙 찾기',[
+ ['S5-01','무늬에 규칙이 있어','반복 규칙',[
+  ()=>{ const [a,b,c]=pickN(EM,3); const pat=rndPick([a,b],[a,a,b],[a,b,c],[a,b,b]); const len=rnd(6,8); const seq=Array.from({length:len},(_,i)=>pat[i%pat.length]); const ans=pat[len%pat.length]; return CF('다음에 올 것은?',big(seq.join(' ')+' ?'),ans,[a,b,c]); },
+  ()=>{ const k=rnd(2,3); const pat=pickN(EM,k); return WN(`몇 개씩 반복될까요?`,big(Array.from({length:k*3},(_,i)=>pat[i%k]).join(' ')),k,'','개'); },
+ ]],
+ ['S5-02','색과 모양 규칙','두 속성 규칙',[
+  ()=>{ const sh=['세모','네모','동그라미'], cl=['빨간','파란']; const len=rnd(5,7); const seq=Array.from({length:len},(_,i)=>({s:sh[i%3],c:cl[i%2]})); const nx={s:sh[len%3],c:cl[len%2]}; return CF('다음에 올 것은?',itemsVis(seq),`${nx.c} ${nx.s}`,[`${nx.c} ${nx.s}`,`${cl[(len+1)%2]} ${nx.s}`,`${nx.c} ${sh[(len+1)%3]}`]); },
+ ]],
+ ['S5-03','수 배열의 규칙','수 배열표',[
+  ()=>{ const st=rnd(1,8)*10+rnd(1,5); const rows=[0,1,2].map(r=>[0,1,2,3,4].map(c=>st+r*10+c)); const r=rnd(0,2), c=rnd(0,4); const ans=rows[r][c]; return WN('빈칸에 알맞은 수는?',`<table class="dt num">${rows.map((rw,i)=>`<tr>${rw.map((v,j)=>`<td>${i===r&&j===c?'?':v}</td>`).join('')}</tr>`).join('')}</table>`,ans); },
+  pickQ([['수 배열표에서 오른쪽으로 한 칸 가면?','1 커진다',['1 커진다','10 커진다','1 작아진다']],['수 배열표에서 아래로 한 칸 가면?','10 커진다',['10 커진다','1 커진다','10 작아진다']]]),
+ ]],
+ ['S5-05','내가 만든 규칙','규칙 만들기',[
+  ()=>{ const s=rnd(1,20), k=rnd(2,9); const seq=[0,1,2,3].map(i=>s+i*k); return WN(`${seq.join(', ')}, 다음 수는?`,'',s+4*k); },
+  ()=>{ const s=rnd(40,90), k=rnd(2,9); const seq=[0,1,2,3].map(i=>s-i*k); return WN(`${seq.join(', ')}, 다음 수는?`,'',s-4*k); },
+ ]],
+]);
+unit(2,'2-2 규칙 찾기',[
+ ['S5-04','덧셈표·곱셈표의 비밀','덧셈표·곱셈표',[
+  ()=>{ const op=rndPick('+','×'); const a=[rnd(1,4),rnd(5,6),rnd(7,9)], b=[rnd(1,3),rnd(4,6),rnd(7,9)]; const f=(x,y)=>op==='+'?x+y:x*y; const r=rnd(0,2), c=rnd(0,2); return WN(`${op==='+'?'덧셈표':'곱셈표'}의 ? 에 알맞은 수는?`,`<table class="dt num"><tr><th>${op}</th>${b.map(x=>`<th>${x}</th>`).join('')}</tr>${a.map((x,i)=>`<tr><th>${x}</th>${b.map((y,j)=>`<td>${i===r&&j===c?'?':f(x,y)}</td>`).join('')}</tr>`).join('')}</table>`,f(a[r],b[c])); },
+  pickQ([['곱셈표에서 5단의 일의 자리 숫자는?','0과 5가 반복',['0과 5가 반복','1씩 커진다','모두 같다']],['덧셈표에서 오른쪽으로 갈수록?','1씩 커진다',['1씩 커진다','2씩 커진다','작아진다']],['곱셈표에서 2단의 수는?','모두 짝수',['모두 짝수','모두 홀수','짝수와 홀수가 섞임']]]),
+ ]],
+]);
+unit(4,'4-1 규칙 찾기',[
+ ['S5-06','늘어나는 모양','모양 배열 규칙',[
+  ()=>{ const s=rnd(1,4), k=rnd(1,4); const seq=[0,1,2].map(i=>s+i*k); return WN(`도토리가 ${seq.join('개, ')}개로 늘어나요. 다음은 몇 개?`,`<div class="grow">${seq.map(n=>`<span>${'🌰'.repeat(n)}</span>`).join('')}</div>`,s+3*k,'','개'); },
+  ()=>{ const seq=[1,4,9]; const nx=rndPick(4,5); return WN(`정사각형 모양으로 1, 4, 9개… ${nx}번째는 몇 개?`,'',nx*nx,'','개'); },
+ ]],
+ ['S5-07','규칙을 식으로','규칙을 식으로',[
+  ()=>{ const k=rnd(2,6), b=rnd(0,5), n=rnd(6,12); const seq=[1,2,3].map(i=>k*i+b); return WN(`${seq.join(', ')}… 순서 × ${k} + ${b} 규칙이에요. ${n}번째 수는?`,'',k*n+b); },
+  ()=>{ const k=rnd(2,6), b=rnd(1,5); return CC(`${k+b}, ${2*k+b}, ${3*k+b}… 를 식으로 나타내면?`,'',`순서 × ${k} + ${b}`,[`순서 + ${k+b}`,`순서 × ${k+b}`,`순서 × ${k} − ${b}`]); },
+ ]],
+ ['S5-08','계산식의 규칙','계산식 배열',[
+  ()=>{ const r=rnd(2,4); const ones=n=>Number('1'.repeat(n)); return CC(`11 × 11 = 121, 111 × 111 = 12321, … ${'1'.repeat(r+1)} × ${'1'.repeat(r+1)} = ?`,'',String(ones(r+1)**2),[String(ones(r+1)**2+10),String(ones(r)*ones(r+2))]); },
+  ()=>{ const a=rnd(1,5); const k=rnd(3,5); return WN(`${a}00 + ${a}0 = ${a*110}, ${a+1}00 + ${a+1}0 = ${(a+1)*110}, ${a+k}00 + ${a+k}0 = ?`,'',(a+k)*110); },
+ ]],
+ ['S5-09',"등호는 '같다'",'등호의 뜻',[
+  ()=>{ const a=rnd(2,9), b=rnd(2,9), c=rnd(1,a+b-1); return WN(`${a} + ${b} = □ + ${c} 의 □는?`,row(a,'+',b,'=','□','+',c),a+b-c); },
+  pickQ([['등호(=)의 뜻은?','양쪽이 같다',['양쪽이 같다','답을 쓰는 곳','더하라는 표시']],['옳은 식은?','5 + 3 = 4 + 4',['5 + 3 = 4 + 4','5 + 3 = 8 + 2','5 + 3 = 4 + 3']]]),
+ ]],
+ ['S5-10','양쪽이 똑같게','등식 만들기',[
+  ()=>{ const a=rnd(10,30), b=rnd(2,9), c=rnd(2,9); if(a-b+c<1) return G36['S5-10'][0](); return WN(`${a} − ${b} = □ − ${c} 의 □는?`,row(a,'−',b,'=','□','−',c),a-b+c); },
+  ()=>{ const a=rnd(2,6), b=rnd(2,6)*2; return WN(`${a} × ${b} = ${a*2} × □ 의 □는?`,row(a,'×',b,'=',a*2,'×','□'),b/2); },
+ ]],
+]);
+unit(5,'5-1 규칙과 대응',[
+ ['S5-11','함께 변하는 두 양','대응 관계',[
+  ()=>{ const k=rnd(2,6); const xs=[1,2,3,4,5]; const r=rnd(2,4); return WN(`세발자전거 대신 다리가 ${k}개인 의자예요. 의자 ${xs[r]}개의 다리는?`,tbl(xs,xs.map((x,i)=>i===r?'?':x*k),['의자 수','다리 수']),xs[r]*k,'','개'); },
+  ()=>{ const k=rnd(3,15); const xs=[1,2,3,4]; return WN(`나이 차이가 ${k}살이에요. 내가 ${xs[3]+5}살이면 언니는?`,tbl(xs,xs.map(x=>x+k),['내 나이','언니 나이']),xs[3]+5+k,'','살'); },
+ ]],
+ ['S5-12','대응을 식으로','대응 식',[
+  ()=>{ const k=rnd(2,6); return CC(`□가 1, 2, 3일 때 △가 ${k}, ${2*k}, ${3*k}. 식은?`,'',`△ = □ × ${k}`,[`△ = □ + ${k}`,`□ = △ × ${k}`,`△ = □ − ${k}`]); },
+  ()=>{ const k=rnd(2,9); return CC(`□가 1, 2, 3일 때 △가 ${1+k}, ${2+k}, ${3+k}. 식은?`,'',`△ = □ + ${k}`,[`△ = □ × ${k}`,`△ = □ − ${k}`,`□ = △ + ${k}`]); },
+ ]],
+]);
+unit(6,'6-1 비와 비율',[
+ ['S5-13','비로 나타내요','비',[
+  ()=>{ const a=rnd(2,9), b=rnd(2,9); if(a===b) return G36['S5-13'][0](); return CC(`사과 ${a}개, 배 ${b}개. 배에 대한 사과의 비는?`,'',`${a} : ${b}`,[`${b} : ${a}`,`${a} : ${a+b}`]); },
+  ()=>{ const a=rnd(2,9), b=rnd(2,9); if(a===b) return G36['S5-13'][1](); return CC(`${a} : ${b}에서 기준량은?`,'',b,[a,a+b]); },
+ ]],
+ ['S5-14','비율','비율',[
+  ()=>{ const b=rndPick(2,4,5,10,20,25), a=rnd(1,b-1); const s=String(+(a/b).toFixed(2)); return W36(WHO(),`${a} : ${b}의 비율을 소수로?`,' ',row(a,'÷',b,'=',decS(s)),s,{ansText:s}); },
+  ()=>{ const b=rnd(3,9), a=rnd(1,b-1); return CC(`${a}의 ${b}에 대한 비율을 분수로?`,'',frTxt(a,b),[frTxt(b,a),frTxt(a,a+b)]); },
+ ]],
+ ['S5-15','생활 속 비율','속력·인구 밀도',[
+  ()=>{ const t=rnd(2,5), v=rnd(4,20)*5; return WN(`${t}시간에 ${v*t} km를 갔어요. 1시간에 몇 km?`,'',v,'','km'); },
+  ()=>{ const s=rnd(2,8), d=rnd(10,60)*10; return WN(`넓이 ${s} km²에 ${s*d}명이 살아요. 1 km²에 몇 명?`,'',d,'','명'); },
+ ]],
+ ['S5-16','백분율','백분율',[
+  ()=>{ const b=rndPick(20,25,50,200), a=rnd(1,b-1); if(a*100%b) return G36['S5-16'][0](); return WN(`${b}명 중 ${a}명은 몇 %?`,'',a*100/b,'','%'); },
+  ()=>{ const p=rnd(1,6)*5, price=rnd(2,20)*1000; return WN(`${price}원짜리를 ${p}% 할인하면 얼마?`,'',price*(100-p)/100,'','원'); },
+ ]],
+]);
+unit(6,'6-2 비례식과 비례배분',[
+ ['S5-17','비의 성질','비의 성질',[
+  ()=>{ const a=rnd(1,9), b=rnd(1,9), k=rnd(2,6); return WN(`${a} : ${b} = ${a*k} : □`,row(`${a} : ${b}`,'=',`${a*k} : □`),b*k); },
+  ()=>{ const a=rnd(1,9), b=rnd(1,9), k=rnd(2,6); return WN(`${a*k} : ${b*k} = □ : ${b}`,row(`${a*k} : ${b*k}`,'=',`□ : ${b}`),a); },
+ ]],
+ ['S5-18','간단한 자연수의 비','간단한 자연수비',[
+  ()=>{ const a=rnd(1,9), b=rnd(1,9); if(gcd(a,b)!==1||a===b) return G36['S5-18'][0](); return CC(`${(a/10).toFixed(1)} : ${(b/10).toFixed(1)}을 간단한 자연수의 비로?`,'',`${a} : ${b}`,[`${b} : ${a}`,`${a*10} : ${b}`]); },
+  ()=>{ const g=rnd(2,6), a=rnd(1,7), b=rnd(1,7); if(gcd(a,b)!==1||a===b) return G36['S5-18'][1](); return CC(`${a*g} : ${b*g}를 간단한 자연수의 비로?`,'',`${a} : ${b}`,[`${b} : ${a}`,`${a+1} : ${b+1}`]); },
+ ]],
+ ['S5-19','비례식','외항·내항의 곱',[
+  ()=>{ const a=rnd(2,9), b=rnd(2,9), k=rnd(2,5); return WN(`${a} : ${b} = □ : ${b*k}`,row(`${a} : ${b}`,'=',`□ : ${b*k}`),a*k); },
+  ()=>{ const a=rnd(2,9), b=rnd(2,9), k=rnd(2,5); return WN(`비례식 ${a} : ${b} = ${a*k} : ${b*k}에서 외항의 곱은?`,'',a*b*k); },
+ ]],
+ ['S5-20','비례식 활용','비례식 문제',[
+  ()=>{ const a=rnd(2,5), b=rnd(1,4)*100, k=rnd(2,6); return WN(`털실 ${a} m가 ${b}원이면 ${a*k} m는 얼마?`,'',b*k,'','원'); },
+  ()=>{ const m=rnd(2,5), d=rnd(3,9), k=rnd(2,5); return WN(`${m}분에 ${m*d} L 나오는 수도, ${m*k}분이면?`,'',m*d*k,'','L'); },
+ ]],
+ ['S5-21','비례배분','비례배분',[
+  ()=>{ const a=rnd(1,5), b=rnd(1,5), u=rnd(2,9); const t=(a+b)*u; return WN(`도토리 ${t}개를 ${a} : ${b}로 나누면 앞사람은?`,'',a*u,'','개'); },
+  ()=>{ const a=rnd(1,5), b=rnd(1,5), u=rnd(2,9)*10; const t=(a+b)*u; return WN(`${t}원을 ${a} : ${b}로 나누면 뒷사람은?`,'',b*u,'','원'); },
+ ]],
+]);
+
+/* ===== 시즌6 도형과 측정 ===== */
+unit(2,'1-1 여러 가지 모양',[
+ ['S6-01','여러 가지 모양','상자·둥근기둥·공',[
+  pickQ([['축구공은 어떤 모양?','공 모양',['공 모양','상자 모양','둥근기둥 모양']],['주사위는 어떤 모양?','상자 모양',['상자 모양','공 모양','둥근기둥 모양']],['풀통은 어떤 모양?','둥근기둥 모양',['둥근기둥 모양','공 모양','상자 모양']],['잘 굴러가고 쌓을 수 없는 모양은?','공 모양',['공 모양','상자 모양','둥근기둥 모양']],['평평한 면만 있는 모양은?','상자 모양',['상자 모양','공 모양','둥근기둥 모양']]]),
+ ]],
+ ['S6-03','세모·네모·동그라미','평면 모양',[
+  ()=>{ const n=rndPick(0,3,4); const ans=n===0?'동그라미':n===3?'세모':'네모'; return CF('어떤 모양일까요?',polySvg(n),ans,['세모','네모','동그라미']); },
+  pickQ([['뾰족한 곳이 없는 모양은?','동그라미',['동그라미','세모','네모']],['뾰족한 곳이 3군데인 모양은?','세모',['세모','네모','동그라미']],['뾰족한 곳이 4군데인 모양은?','네모',['네모','세모','동그라미']]]),
+ ]],
+ ['S6-07','누가 더 길까','길이 비교',[
+  ()=>{ const a=rnd(3,9), b=rnd(3,9); if(a===b) return G36['S6-07'][0](); return CF('누구 연필이 더 길까요?',SV(260,90,`<rect x="10" y="15" width="${a*26}" height="18" rx="6" fill="#F2A65A" stroke="#7A4A1E" stroke-width="2"/><text x="${a*26+18}" y="29" font-size="13">도토</text><rect x="10" y="55" width="${b*26}" height="18" rx="6" fill="#8CC7E8" stroke="#3A6E8F" stroke-width="2"/><text x="${b*26+18}" y="69" font-size="13">람이</text>`),a>b?'도토':'람이',['도토','람이']); },
+  pickQ([['길이를 비교할 때 먼저 할 일은?','한쪽 끝을 맞춘다',['한쪽 끝을 맞춘다','색을 본다','무게를 단다']]]),
+ ]],
+ ['S6-08','무겁고 많고 넓고','무게·들이·넓이 비교',[
+  pickQ([['더 무거운 것은?','수박',['수박','사과']],['물을 더 많이 담을 수 있는 것은?','양동이',['양동이','컵']],['더 넓은 것은?','운동장',['운동장','교실 책상']],['더 가벼운 것은?','깃털',['깃털','돌멩이']],['시소에서 내려간 쪽은?','더 무겁다',['더 무겁다','더 가볍다']]]),
+ ]],
+]);
+unit(2,'2-1 여러 가지 도형',[
+ ['S6-02','쌓기나무 모양','쌓기나무',[
+  ()=>{ const a=rnd(2,5), b=rnd(1,a), c=rnd(0,b); return WN(`1층에 ${a}개, 2층에 ${b}개${c?`, 3층에 ${c}개`:''}. 쌓기나무는 모두?`,'',a+b+c,'','개'); },
+  pickQ([['내 오른손이 있는 쪽은?','오른쪽',['오른쪽','왼쪽','앞']],['빨간 쌓기나무 위에 노란 쌓기나무가 있어요. 노란 것은 빨간 것의 어디?','위',['위','아래','앞']]]),
+ ]],
+ ['S6-04','도형을 그려요','삼각형·사각형·원',[
+  pickQ([['곧은 선 3개로 둘러싸인 도형은?','삼각형',['삼각형','사각형','원']],['곧은 선 4개로 둘러싸인 도형은?','사각형',['사각형','삼각형','원']],['굽은 선으로 둘러싸이고 어디서나 똑같이 둥근 도형은?','원',['원','삼각형','사각형']]]),
+  ()=>{ const n=rndPick(0,3,4); return CF('이 도형의 이름은?',polySvg(n),n===0?'원':n===3?'삼각형':'사각형',['삼각형','사각형','원']); },
+ ]],
+ ['S6-05','변과 꼭짓점','변·꼭짓점',[
+  ()=>{ const n=rnd(3,6); return WN(`${SHAPE_NAME[n]}의 꼭짓점은 몇 개?`,polySvg(n),n,'','개'); },
+  ()=>{ const n=rnd(3,6); return CF('이 도형의 이름은?',polySvg(n),SHAPE_NAME[n],[3,4,5,6].map(x=>SHAPE_NAME[x])); },
+  ()=>{ const a=rnd(3,6), b=rnd(3,6); return WN(`${SHAPE_NAME[a]}과 ${SHAPE_NAME[b]}의 변은 모두 몇 개?`,'',a+b,'','개'); },
+ ]],
+ ['S6-06','칠교로 만들어요','칠교 조각',[
+  pickQ([['칠교 조각은 모두 몇 개?','7개',['7개','5개','6개']],['칠교 조각 중 삼각형은 몇 개?','5개',['5개','3개','7개']],['크기가 같은 삼각형 2개를 붙이면 만들 수 있는 것은?','사각형',['사각형','원','오각형']]]),
+ ]],
+ ['S6-14','뼘으로 재면 달라','1 cm',[
+  ()=>{ const n=rnd(2,9); return WN('막대의 길이는 몇 cm?',ruler(n),n,'','cm'); },
+  pickQ([['뼘으로 재면 사람마다 다른 까닭은?','뼘 길이가 달라서',['뼘 길이가 달라서','책상이 커서','연필이 짧아서']]]),
+ ]],
+ ['S6-15','자로 재요, 1 m','1 m = 100 cm',[
+  ()=>{ const m=rnd(1,4), c=rnd(1,99); return WN(`${m} m ${c} cm는 몇 cm?`,'',m*100+c,'','cm'); },
+  ()=>{ const t=rnd(101,499); return WN2(`${t} cm는 몇 m 몇 cm?`,'',Math.floor(t/100),'m',t%100,'cm'); },
+ ]],
+]);
+unit(2,'1-2·2-2 시각과 시간',[
+ ['S6-09','몇 시, 몇 시 삼십 분','시각(정각·30분)',[
+  ()=>{ const h=rnd(1,12), m=rndPick(0,30); return CF('시계가 가리키는 시각은?',clockSvg(h,m),`${h}시${m?' 30분':''}`,[`${h}시${m?' 30분':''}`,`${h%12+1}시${m?' 30분':''}`,`${h}시${m?'':' 30분'}`]); },
+ ]],
+ ['S6-10','몇 시 몇 분','시각(5분·1분)',[
+  ()=>{ const h=rnd(1,12), m=rnd(1,11)*5; return WN2('시계가 가리키는 시각은?',clockSvg(h,m),h,'시',m,'분'); },
+  ()=>{ const h=rnd(1,12), m=rnd(1,59); return WN2('시계가 가리키는 시각은?',clockSvg(h,m),h,'시',m,'분'); },
+ ]],
+ ['S6-11','한 시간은 육십 분','1시간 = 60분',[
+  ()=>{ const h=rnd(1,3), m=rnd(5,55); return WN(`${h}시간 ${m}분은 몇 분?`,'',h*60+m,'','분'); },
+  ()=>{ const t=rnd(61,179); return WN2(`${t}분은 몇 시간 몇 분?`,'',Math.floor(t/60),'시간',t%60,'분'); },
+ ]],
+ ['S6-12','오전과 오후, 하루','하루 = 24시간',[
+  ()=>{ const a=rnd(6,11), b=rnd(1,6); return WN(`오전 ${a}시부터 오후 ${b}시까지는 몇 시간?`,'',12-a+b,'','시간'); },
+  ()=>{ const d=rnd(2,4); return WN(`${d}일은 몇 시간?`,'',24*d,'','시간'); },
+ ]],
+ ['S6-13','달력과 일주일','1주일·1년',[
+  ()=>{ const w=rnd(2,5), d=rnd(0,6); return WN(`${w}주일 ${d}일은 며칠?`,'',w*7+d,'','일'); },
+  ()=>{ const y=rnd(1,3), m=rnd(1,11); return WN(`${y}년 ${m}개월은 몇 개월?`,'',y*12+m,'','개월'); },
+  pickQ([['날수가 30일인 달은?','4월',['4월','5월','7월']],['날수가 31일인 달은?','8월',['8월','6월','9월']]]),
+ ]],
+]);
+unit(2,'2-2 길이 재기',[
+ ['S6-16','어림하고 더하고 빼고','m와 cm 계산',[
+  ()=>{ const a=rnd(1,4), b=rnd(10,49), c=rnd(1,4), d=rnd(10,49); return WN2(`${a} m ${b} cm + ${c} m ${d} cm`,'',a+c,'m',b+d,'cm'); },
+  ()=>{ const c=rnd(1,3), d=rnd(10,49), a=c+rnd(1,4), b=d+rnd(1,40); return WN2(`${a} m ${b} cm − ${c} m ${d} cm`,'',a-c,'m',b-d,'cm'); },
+  pickQ([['교실 문의 높이는 약 얼마?','약 2 m',['약 2 m','약 2 cm','약 20 m']],['연필의 길이는 약 얼마?','약 15 cm',['약 15 cm','약 15 m','약 150 cm']]]),
+ ]],
+]);
+unit(3,'3-1 평면도형',[
+ ['S6-17','선분·직선·반직선','선분·직선·반직선',[
+  ()=>{ const k=rnd(0,2); const svgs=[`<circle cx="40" cy="30" r="4"/><circle cx="200" cy="30" r="4"/><line x1="40" y1="30" x2="200" y2="30" ${STK}/>`,`<line x1="10" y1="30" x2="230" y2="30" ${STK}/><circle cx="60" cy="30" r="4"/><circle cx="180" cy="30" r="4"/><path d="M10,30 l10,-6 v12z M230,30 l-10,-6 v12z" fill="#6B3E1C"/>`,`<circle cx="40" cy="30" r="4"/><line x1="40" y1="30" x2="230" y2="30" ${STK}/><circle cx="180" cy="30" r="4"/><path d="M230,30 l-10,-6 v12z" fill="#6B3E1C"/>`]; return CF('이 선의 이름은?',SV(240,60,svgs[k]),['선분','직선','반직선'][k],['선분','직선','반직선']); },
+ ]],
+ ['S6-18','각과 직각','각과 직각',[
+  ()=>{ const d=rndPick(30,45,60,90,90,120,150); return CF('이 각은?',angSvg(d),d<90?'직각보다 작다':d===90?'직각':'직각보다 크다',['직각보다 작다','직각','직각보다 크다']); },
+  ()=>{ const k=rndPick(['직사각형',4],['정사각형',4],['직각삼각형',1]); return WN(`${k[0]}에는 직각이 몇 개?`,'',k[1],'','개'); },
+ ]],
+ ['S6-19','직각삼각형·직사각형·정사각형','직각이 있는 도형',[
+  pickQ([['네 각이 모두 직각이고 네 변의 길이가 같은 사각형은?','정사각형',['정사각형','직사각형','사다리꼴']],['네 각이 모두 직각인 사각형은?','직사각형',['직사각형','마름모','사다리꼴']],['한 각이 직각인 삼각형은?','직각삼각형',['직각삼각형','정삼각형','예각삼각형']],['정사각형은 직사각형이라고 할 수 있을까?','있다',['있다','없다']]]),
+  ()=>{ const a=rnd(3,12); return WN(`한 변이 ${a} cm인 정사각형의 네 변 길이의 합은?`,'',4*a,'','cm'); },
+ ]],
+]);
+unit(3,'3-2 원',[
+ ['S6-26','원의 중심과 반지름','반지름·지름',[
+  ()=>{ const r=rnd(2,15); return WN(`반지름이 ${r} cm인 원의 지름은?`,figSvg('circ',r+' cm'),2*r,'','cm'); },
+  ()=>{ const r=rnd(2,15); return WN(`지름이 ${2*r} cm인 원의 반지름은?`,'',r,'','cm'); },
+  pickQ([['한 원에서 반지름은 몇 개 그을 수 있을까?','셀 수 없이 많다',['셀 수 없이 많다','1개','2개']],['원을 똑같이 둘로 나누는 선분은?','지름',['지름','반지름','둘레']]]),
+ ]],
+ ['S6-27','컴퍼스로 원 그리기','컴퍼스',[
+  ()=>{ const r=rnd(2,9); return WN(`지름이 ${2*r} cm인 원을 그리려면 컴퍼스를 몇 cm 벌릴까?`,'',r,'','cm'); },
+  ()=>{ const r=rnd(2,6), n=rnd(2,4); return WN(`반지름 ${r} cm인 원 ${n}개를 한 줄로 맞닿게 그렸어요. 전체 길이는?`,'',2*r*n,'','cm'); },
+ ]],
+]);
+unit(3,'3-1 길이와 시간',[
+ ['S6-34','일 분은 육십 초','1분 = 60초',[
+  ()=>{ const m=rnd(1,4), s=rnd(5,55); return WN(`${m}분 ${s}초는 몇 초?`,'',m*60+s,'','초'); },
+  ()=>{ const t=rnd(61,239); return WN2(`${t}초는 몇 분 몇 초?`,'',Math.floor(t/60),'분',t%60,'초'); },
+ ]],
+ ['S6-35','시간 더하기','시간의 덧셈',[
+  ()=>{ const h=rnd(1,9), m=rnd(10,50), a=rnd(10,50); const T=h*60+m+a; return WN2(`${h}시 ${m}분에서 ${a}분 뒤는?`,'',Math.floor(T/60),'시',T%60,'분'); },
+  ()=>{ const a=rnd(1,3), b=rnd(10,50), c=rnd(1,3), d=rnd(10,50); const T=(a+c)*60+b+d; return WN2(`${a}시간 ${b}분 + ${c}시간 ${d}분`,'',Math.floor(T/60),'시간',T%60,'분'); },
+ ]],
+ ['S6-36','시간 빼기','시간의 뺄셈',[
+  ()=>{ const h=rnd(3,11), m=rnd(0,40), a=rnd(10,59); let T=h*60+m-a; return WN2(`${h}시 ${m}분에서 ${a}분 전은?`,'',Math.floor(T/60),'시',T%60,'분'); },
+  ()=>{ const a=rnd(2,9), b=rnd(0,30), c=rnd(10,59); const T=a*60+b-c; return WN2(`${a}시간 ${b}분 − ${c}분`,'',Math.floor(T/60),'시간',T%60,'분'); },
+ ]],
+ ['S6-37','일 밀리미터','1 cm = 10 mm',[
+  ()=>{ const c=rnd(1,15), m=rnd(1,9); return WN(`${c} cm ${m} mm는 몇 mm?`,'',c*10+m,'','mm'); },
+  ()=>{ const t=rnd(11,99); return WN2(`${t} mm는 몇 cm 몇 mm?`,'',Math.floor(t/10),'cm',t%10,'mm'); },
+ ]],
+ ['S6-38','일 킬로미터','1 km = 1000 m',[
+  ()=>{ const k=rnd(1,5), m=rnd(100,999); return WN(`${k} km ${m} m는 몇 m?`,'',k*1000+m,'','m'); },
+  pickQ([['학교 운동장 한 바퀴 길이는 약?','약 200 m',['약 200 m','약 200 km','약 2 m']],['서울에서 부산까지 거리는 약?','약 400 km',['약 400 km','약 400 m','약 40 m']]]),
+ ]],
+ ['S6-39','길이 계산','길이의 덧셈·뺄셈',[
+  ()=>{ const a=rnd(1,4), b=rnd(100,499), c=rnd(1,4), d=rnd(100,499); return WN2(`${a} km ${b} m + ${c} km ${d} m`,'',a+c,'km',b+d,'m'); },
+  ()=>{ const c=rnd(1,4), d=rnd(1,5), a=c+rnd(1,5), b=d+rnd(1,4); return WN2(`${a} cm ${b} mm − ${c} cm ${d} mm`,'',a-c,'cm',b-d,'mm'); },
+ ]],
+]);
+unit(3,'3-2 들이와 무게',[
+ ['S6-40','리터와 밀리리터','1 L = 1000 mL',[
+  ()=>{ const l=rnd(1,5), m=rnd(100,900); return WN(`${l} L ${m} mL는 몇 mL?`,'',l*1000+m,'','mL'); },
+  ()=>{ const t=rnd(1100,4900); return WN2(`${t} mL는 몇 L 몇 mL?`,'',Math.floor(t/1000),'L',t%1000,'mL'); },
+ ]],
+ ['S6-41','들이 어림하기','들이 어림',[
+  pickQ([['우유갑의 들이는 약?','약 200 mL',['약 200 mL','약 20 L','약 2 mL']],['욕조의 들이는 약?','약 200 L',['약 200 L','약 200 mL','약 2 L']],['물병의 들이는 약?','약 500 mL',['약 500 mL','약 50 L','약 5 mL']]]),
+ ]],
+ ['S6-42','들이 더하고 빼기','들이 계산',[
+  ()=>{ const a=rnd(1,3), b=rnd(100,400), c=rnd(1,3), d=rnd(100,400); return WN2(`${a} L ${b} mL + ${c} L ${d} mL`,'',a+c,'L',b+d,'mL'); },
+  ()=>{ const c=rnd(1,2), d=rnd(100,400), a=c+rnd(1,3), b=d+rnd(100,400); return WN2(`${a} L ${b} mL − ${c} L ${d} mL`,'',a-c,'L',b-d,'mL'); },
+ ]],
+ ['S6-43','그램과 킬로그램','1 kg = 1000 g',[
+  ()=>{ const k=rnd(1,5), g=rnd(100,900); return WN(`${k} kg ${g} g은 몇 g?`,'',k*1000+g,'','g'); },
+  ()=>{ const t=rnd(1100,4900); return WN2(`${t} g은 몇 kg 몇 g?`,'',Math.floor(t/1000),'kg',t%1000,'g'); },
+ ]],
+ ['S6-44','무게 어림하기','무게 어림',[
+  pickQ([['사과 한 개의 무게는 약?','약 300 g',['약 300 g','약 3 kg','약 30 kg']],['초등학생의 몸무게는 약?','약 40 kg',['약 40 kg','약 40 g','약 4 t']],['자동차의 무게는 약?','약 1 t',['약 1 t','약 1 kg','약 10 g']]]),
+ ]],
+ ['S6-45','일 톤','1 t = 1000 kg',[
+  ()=>{ const t=rnd(1,9); return WN(`${t} t은 몇 kg?`,'',t*1000,'','kg'); },
+  ()=>{ const t=rnd(2,9); return WN(`${t*1000} kg은 몇 t?`,'',t,'','t'); },
+ ]],
+ ['S6-46','무게 더하고 빼기','무게 계산',[
+  ()=>{ const a=rnd(1,3), b=rnd(100,400), c=rnd(1,3), d=rnd(100,400); return WN2(`${a} kg ${b} g + ${c} kg ${d} g`,'',a+c,'kg',b+d,'g'); },
+  ()=>{ const c=rnd(1,2), d=rnd(100,400), a=c+rnd(1,3), b=d+rnd(100,400); return WN2(`${a} kg ${b} g − ${c} kg ${d} g`,'',a-c,'kg',b-d,'g'); },
+ ]],
+]);
+unit(4,'4-1 각도',[
+ ['S6-47','각도기로 재요','각도 재기',[
+  ()=>{ const d=rnd(2,17)*10; return WN('각도기로 잰 각도는 몇 도?',protractor(d),d,'','도'); },
+ ]],
+ ['S6-48','예각과 둔각','예각·둔각',[
+  ()=>{ const d=rndPick(rnd(2,8)*10,90,rnd(10,17)*10); return CF(`${d}°는 어떤 각?`,angSvg(d),d<90?'예각':d===90?'직각':'둔각',['예각','직각','둔각']); },
+ ]],
+ ['S6-49','각도 더하고 빼기','각도 계산',[
+  ()=>{ const a=rnd(20,90), b=rnd(20,80); return WN(`${a}° + ${b}°`,'',a+b,'','도'); },
+  ()=>{ const b=rnd(20,80), a=b+rnd(10,90); return WN(`${a}° − ${b}°`,'',a-b,'','도'); },
+ ]],
+ ['S6-50','삼각형 세 각의 합','180°',[
+  ()=>{ const a=rnd(30,90), b=rnd(20,150-a); return WN(`삼각형의 두 각이 ${a}°, ${b}°이면 나머지 한 각은?`,'',180-a-b,'','도'); },
+ ]],
+ ['S6-51','사각형 네 각의 합','360°',[
+  ()=>{ const a=rnd(60,120), b=rnd(60,120), c=rnd(60,110); if(360-a-b-c<30) return G36['S6-51'][0](); return WN(`사각형의 세 각이 ${a}°, ${b}°, ${c}°이면 나머지 한 각은?`,'',360-a-b-c,'','도'); },
+  pickQ([['사각형 네 각의 합은?','360°',['360°','180°','270°']],['사각형을 삼각형 몇 개로 나누어 네 각의 합을 구할까?','2개',['2개','3개','4개']]]),
+ ]],
+]);
+unit(4,'4-1 평면도형의 이동',[
+ ['S6-22','밀어 보아요','밀기',[
+  ()=>{ const a=ARR[rnd(0,3)]; return CF('이 모양을 오른쪽으로 밀면?',big(a),a,ARR); },
+  pickQ([['도형을 밀면 모양과 크기는?','변하지 않는다',['변하지 않는다','커진다','뒤집힌다']]]),
+ ]],
+ ['S6-23','뒤집어 보아요','뒤집기',[
+  ()=>{ const a=ARR[rnd(0,3)]; const lr=rnd(0,1); return CF(`이 화살표를 ${lr?'오른쪽':'아래쪽'}으로 뒤집으면?`,big(a),lr?FLR[a]:FUD[a],ARR); },
+ ]],
+ ['S6-24','돌려 보아요','돌리기',[
+  ()=>{ const a=ARR[rnd(0,3)]; const k=rnd(1,3); let r=a; for(let i=0;i<k;i++) r=ROT[r]; return CF(`이 화살표를 시계 방향으로 ${k*90}° 돌리면?`,big(a),r,ARR); },
+ ]],
+ ['S6-25','점의 이동','점의 이동',[
+  ()=>{ const x=rnd(1,5), y=rnd(1,5), dx=rnd(1,4), dy=rnd(1,4); return WN2(`점이 (가로 ${x}, 세로 ${y})칸에 있어요. 오른쪽으로 ${dx}칸, 위로 ${dy}칸 옮기면?`,'',x+dx,'가로',y+dy,'세로'); },
+ ]],
+]);
+unit(4,'4-2 수직과 평행',[
+ ['S6-20','수직과 평행','수선·평행선',[
+  ()=>{ const k=rndPick(['직사각형',2],['정사각형',2],['평행사변형',2],['사다리꼴',1]); return WN(`${k[0]}에서 평행한 변은 몇 쌍?`,'',k[1],'','쌍'); },
+  pickQ([['두 직선이 만나서 이루는 각이 직각일 때 두 직선의 관계는?','수직',['수직','평행','합동']],['아무리 늘려도 만나지 않는 두 직선은?','평행선',['평행선','수선','대각선']]]),
+ ]],
+ ['S6-21','평행선 사이의 거리','평행선 사이 거리',[
+  pickQ([['평행선 사이의 거리는 어떤 선분의 길이?','수선의 길이',['수선의 길이','가장 긴 선분','비스듬한 선분']],['평행선 사이의 거리는 어디서 재도?','같다',['같다','다르다']]]),
+  ()=>{ const a=rnd(2,5), b=rnd(2,5); return WN(`직선 가와 나 사이 ${a} cm, 나와 다 사이 ${b} cm. 가와 다 사이는? (가, 나, 다 순서로 평행)`,'',a+b,'','cm'); },
+ ]],
+]);
+unit(4,'4-2 삼각형·사각형·다각형',[
+ ['S6-28','이등변삼각형·정삼각형','변으로 분류',[
+  ()=>{ const t=rndPick(['정삼각형',[5,5,5]],['이등변삼각형',[5,5,7]],['이등변삼각형',[6,4,6]],['정삼각형',[8,8,8]]); return CF(`세 변이 ${t[1].join(' cm, ')} cm인 삼각형은?`,'',t[0],['정삼각형','이등변삼각형']); },
+  ()=>{ const a=rnd(30,80); return WN(`이등변삼각형의 꼭지각이 ${180-2*a}°면 한 밑각은?`,'',a,'','도'); },
+  ()=>{ const a=rnd(3,12); return WN(`한 변이 ${a} cm인 정삼각형의 세 변 길이 합은?`,'',3*a,'','cm'); },
+ ]],
+ ['S6-29','예각·직각·둔각삼각형','각으로 분류',[
+  ()=>{ const t=rnd(0,2); let a,b,c; if(t===0){ a=rnd(50,80); b=rnd(50,80); c=180-a-b; if(c>=90||c<=0) return G36['S6-29'][0](); } else if(t===1){ a=90; b=rnd(20,70); c=90-b; } else { a=rnd(100,140); b=rnd(10,30); c=180-a-b; } return CF(`세 각이 ${a}°, ${b}°, ${c}°인 삼각형은?`,'',['예각삼각형','직각삼각형','둔각삼각형'][t],['예각삼각형','직각삼각형','둔각삼각형']); },
+ ]],
+ ['S6-30','사다리꼴·평행사변형·마름모','사각형 성질',[
+  pickQ([['평행한 변이 한 쌍이라도 있는 사각형은?','사다리꼴',['사다리꼴','오각형','삼각형']],['마주 보는 두 쌍의 변이 평행한 사각형은?','평행사변형',['평행사변형','사다리꼴','삼각형']],['네 변의 길이가 모두 같은 사각형은?','마름모',['마름모','사다리꼴','직사각형']]]),
+  ()=>{ const a=rnd(40,80); return WN(`평행사변형의 한 각이 ${a}°이면 이웃한 각은?`,figSvg('para','',''),180-a,'','도'); },
+ ]],
+ ['S6-31','사각형 가족','사각형 관계',[
+  pickQ([['정사각형에 대한 옳은 말은?','마름모이다',['마름모이다','사다리꼴이 아니다','평행한 변이 없다']],['직사각형에 대한 옳은 말은?','평행사변형이다',['평행사변형이다','마름모이다','사다리꼴이 아니다']],['마름모에 대한 옳은 말은?','평행사변형이다',['평행사변형이다','정사각형이다','직사각형이다']]]),
+ ]],
+ ['S6-32','다각형과 대각선','다각형·대각선',[
+  ()=>{ const n=rnd(4,8); return WN(`${SHAPE_NAME[n]}의 대각선은 몇 개?`,polySvg(n),n*(n-3)/2,'','개'); },
+  ()=>{ const n=rnd(5,8), a=rnd(3,9); return WN(`한 변이 ${a} cm인 정${SHAPE_NAME[n]}의 둘레는?`,polySvg(n),n*a,'','cm'); },
+ ]],
+ ['S6-33','빈틈없이 채워요','평면 채우기',[
+  pickQ([['같은 모양으로 빈틈없이 채울 수 없는 정다각형은?','정오각형',['정오각형','정삼각형','정사각형']],['정육각형 한 개를 채우려면 정삼각형이 몇 개?','6개',['6개','3개','4개']],['벌집 모양 정다각형은?','정육각형',['정육각형','정오각형','정팔각형']]]),
+ ]],
+]);
+unit(5,'5-1 다각형의 둘레와 넓이',[
+ ['S6-66','한 바퀴 둘레','둘레',[
+  ()=>{ const a=rnd(3,15), b=rnd(2,12); return WN('직사각형의 둘레는?',figSvg('rect',a,b),2*(a+b),'','cm'); },
+  ()=>{ const n=rnd(3,8), a=rnd(2,9); return WN(`한 변이 ${a} cm인 정${SHAPE_NAME[n]}의 둘레는?`,polySvg(n),n*a,'','cm'); },
+ ]],
+ ['S6-67','넓이를 재는 단위','1 cm²',[
+  ()=>{ const n=rnd(4,10); return WN('작은 정사각형 한 칸이 1 cm². 넓이는?',gridShape(polyomino(n)),n,'','cm²'); },
+ ]],
+ ['S6-68','직사각형과 정사각형 넓이','가로 × 세로',[
+  ()=>{ const a=rnd(3,15), b=rnd(2,12); return WN('직사각형의 넓이는?',figSvg('rect',a,b),a*b,'','cm²'); },
+  ()=>{ const a=rnd(2,12); return WN('정사각형의 넓이는?',figSvg('sq',a),a*a,'','cm²'); },
+  ()=>{ const a=rnd(3,12), b=rnd(2,9); return WN(`넓이가 ${a*b} cm², 가로가 ${a} cm인 직사각형의 세로는?`,'',b,'','cm'); },
+ ]],
+ ['S6-69','더 큰 넓이 단위','m²·km²',[
+  ()=>{ const m=rnd(1,9); return WN(`${m} m²는 몇 cm²?`,'',m*10000,'','cm²'); },
+  ()=>{ const a=rnd(2,9)*100, b=rnd(2,9)*100; return WN(`가로 ${a} m, 세로 ${b} m인 땅은 몇 m²?`,'',a*b,'','m²'); },
+ ]],
+ ['S6-70','평행사변형 넓이','밑변 × 높이',[
+  ()=>{ const a=rnd(4,15), h=rnd(3,10); return WN('평행사변형의 넓이는?',figSvg('para',a,h+' cm'),a*h,'','cm²'); },
+ ]],
+ ['S6-71','삼각형 넓이','밑변 × 높이 ÷ 2',[
+  ()=>{ const a=rnd(2,8)*2, h=rnd(3,12); return WN('삼각형의 넓이는?',figSvg('tri',a,h+' cm'),a*h/2,'','cm²'); },
+ ]],
+ ['S6-72','마름모 넓이','대각선 × 대각선 ÷ 2',[
+  ()=>{ const a=rnd(2,8)*2, b=rnd(3,12); return WN('마름모의 넓이는? (두 대각선)',figSvg('rhom',a,b+' cm'),a*b/2,'','cm²'); },
+ ]],
+ ['S6-73','사다리꼴 넓이','(윗변 + 아랫변) × 높이 ÷ 2',[
+  ()=>{ const a=rnd(3,8), b=a+rnd(2,8), h=rnd(2,6)*2; return WN('사다리꼴의 넓이는?',figSvg('trap',a,b,h+' cm'),(a+b)*h/2,'','cm²'); },
+ ]],
+]);
+unit(5,'5-2 합동과 대칭',[
+ ['S6-52','꼭 맞게 겹쳐요, 합동','합동',[
+  pickQ([['모양과 크기가 같아 포개었을 때 완전히 겹치는 두 도형은?','합동',['합동','닮음','대칭']],['반드시 합동인 것은?','반지름이 같은 두 원',['반지름이 같은 두 원','넓이가 같은 두 직사각형','둘레가 같은 두 삼각형']],['합동인 두 도형에서 대응변의 길이는?','같다',['같다','다르다']],['합동인 두 도형에서 대응각의 크기는?','같다',['같다','다르다']]]),
+  ()=>{ const a=rnd(3,12), b=rnd(3,12); return WN(`합동인 두 직사각형. 하나가 가로 ${a} cm, 세로 ${b} cm이면 다른 하나의 넓이는?`,'',a*b,'','cm²'); },
+ ]],
+ ['S6-53','대응점·대응변·대응각','합동의 성질',[
+  ()=>{ const a=rnd(3,12); return WN(`합동인 두 삼각형에서 한 변이 ${a} cm이면 대응변은?`,'',a,'','cm'); },
+  ()=>{ const a=rnd(30,80), b=rnd(30,80); return WN(`합동인 두 삼각형. 한 삼각형의 두 각이 ${a}°, ${b}°이면 다른 삼각형의 나머지 대응각은?`,'',180-a-b,'','도'); },
+ ]],
+ ['S6-54','선대칭도형','선대칭',[
+  ()=>{ const n=rnd(3,8); return WN(`정${SHAPE_NAME[n]}의 대칭축은 몇 개?`,polySvg(n),n,'','개'); },
+  pickQ([['선대칭도형인 글자는?','A',['A','F','G']],['선대칭도형인 글자는?','H',['H','L','R']],['대칭축으로 접으면 대응변의 길이는?','같다',['같다','다르다']]]),
+ ]],
+ ['S6-55','점대칭도형','점대칭',[
+  pickQ([['점대칭도형은 대칭의 중심으로 몇 도 돌리면 겹칠까?','180°',['180°','90°','360°']],['점대칭도형인 글자는?','S',['S','A','E']],['점대칭도형인 글자는?','N',['N','T','V']],['점대칭도형인 도형은?','평행사변형',['평행사변형','정삼각형','사다리꼴']]]),
+ ]],
+]);
+unit(5,'5-2 직육면체',[
+ ['S6-56','직육면체와 정육면체','면·모서리·꼭짓점',[
+  ()=>{ const k=rndPick(['면',6],['모서리',12],['꼭짓점',8]); return WN(`직육면체의 ${k[0]}은 몇 개?`,boxSvg(),k[1],'','개'); },
+  ()=>{ const a=rnd(2,9); return WN(`한 모서리가 ${a} cm인 정육면체의 모든 모서리 길이의 합은?`,'',12*a,'','cm'); },
+ ]],
+ ['S6-57','보이지 않는 모서리','겨냥도',[
+  ()=>{ const k=rndPick(['보이지 않는 모서리',3],['보이는 모서리',9],['보이지 않는 꼭짓점',1],['보이는 면',3]); return WN(`직육면체 겨냥도에서 ${k[0]}는 몇 개?`,boxSvg(),k[1],'','개'); },
+ ]],
+ ['S6-58','펼쳐 보면 전개도','전개도',[
+  pickQ([['정육면체 전개도의 면은 몇 개?','6개',['6개','4개','8개']],['직육면체에서 서로 마주 보는 면은?','평행하다',['평행하다','수직이다','만난다']],['직육면체 한 면과 수직인 면은 몇 개?','4개',['4개','2개','5개']]]),
+ ]],
+]);
+unit(6,'6-1 각기둥과 각뿔',[
+ ['S6-59','각기둥','각기둥',[
+  ()=>{ const n=rnd(3,8), k=rndPick(['면',n+2],['모서리',3*n],['꼭짓점',2*n]); return WN(`${SHAPE_NAME[n]}기둥(${n}각기둥)의 ${k[0]}은 몇 개?`,'',k[1],'','개'); },
+ ]],
+ ['S6-60','각뿔','각뿔',[
+  ()=>{ const n=rnd(3,8), k=rndPick(['면',n+1],['모서리',2*n],['꼭짓점',n+1]); return WN(`${SHAPE_NAME[n]}뿔(${n}각뿔)의 ${k[0]}은 몇 개?`,'',k[1],'','개'); },
+ ]],
+ ['S6-61','각기둥 전개도','각기둥 전개도',[
+  ()=>{ const n=rnd(3,8); return WN(`${n}각기둥의 전개도에서 옆면은 몇 개?`,'',n,'','개'); },
+  pickQ([['각기둥의 옆면 모양은?','직사각형',['직사각형','삼각형','원']],['각뿔의 옆면 모양은?','삼각형',['삼각형','직사각형','원']]]),
+ ]],
+]);
+unit(6,'6-1 직육면체의 부피와 겉넓이',[
+ ['S6-76','직육면체의 겉넓이','겉넓이',[
+  ()=>{ const a=rnd(2,8), b=rnd(2,8), c=rnd(2,8); return WN('직육면체의 겉넓이는?',boxSvg(a,b,c),2*(a*b+b*c+a*c),'','cm²'); },
+  ()=>{ const a=rnd(2,9); return WN(`한 모서리가 ${a} cm인 정육면체의 겉넓이는?`,'',6*a*a,'','cm²'); },
+ ]],
+ ['S6-77','부피 비교와 1 cm³','1 cm³',[
+  ()=>{ const a=rnd(2,4), b=rnd(2,4), c=rnd(2,4); return WN(`1 cm³ 쌓기나무를 가로 ${a}개, 세로 ${b}개, ${c}층 쌓았어요. 부피는?`,'',a*b*c,'','cm³'); },
+ ]],
+ ['S6-78','직육면체의 부피','가로 × 세로 × 높이',[
+  ()=>{ const a=rnd(2,10), b=rnd(2,10), c=rnd(2,10); return WN('직육면체의 부피는?',boxSvg(a,b,c),a*b*c,'','cm³'); },
+  ()=>{ const a=rnd(2,9); return WN(`한 모서리가 ${a} cm인 정육면체의 부피는?`,'',a*a*a,'','cm³'); },
+ ]],
+ ['S6-79','큰 부피 단위','1 m³',[
+  ()=>{ const m=rnd(1,5); return CC(`${m} m³는 몇 cm³?`,'',`${m}000000 cm³`,[`${m}000 cm³`,`${m}0000 cm³`,`${m}00 cm³`]); },
+  ()=>{ const a=rnd(1,5), b=rnd(1,5), c=rnd(1,5); return WN(`가로 ${a} m, 세로 ${b} m, 높이 ${c} m인 직육면체는 몇 m³?`,'',a*b*c,'','m³'); },
+ ]],
+]);
+unit(6,'6-2 공간과 입체',[
+ ['S6-64','위·앞·옆에서 본 모양','방향에 따른 모양',[
+  pickQ([['원기둥을 위에서 보면?','원',['원','직사각형','삼각형']],['원기둥을 앞에서 보면?','직사각형',['직사각형','원','삼각형']],['원뿔을 앞에서 보면?','삼각형',['삼각형','원','직사각형']],['구를 어느 방향에서 보아도?','원',['원','직사각형','삼각형']]]),
+ ]],
+ ['S6-65','쌓기나무 몇 개?','쌓기나무 개수',[
+  ()=>{ const a=rnd(3,6), b=rnd(1,a), c=rnd(0,b); return WN(`층별로 1층 ${a}개, 2층 ${b}개, 3층 ${c}개. 모두 몇 개?`,'',a+b+c,'','개'); },
+  ()=>{ const g=[rnd(1,3),rnd(1,3),rnd(1,3),rnd(1,3)]; return WN(`위에서 본 모양 각 칸에 쓰인 수가 ${g.join(', ')}. 쌓기나무는 모두?`,`<table class="dt num"><tr><td>${g[0]}</td><td>${g[1]}</td></tr><tr><td>${g[2]}</td><td>${g[3]}</td></tr></table>`,g.reduce((x,y)=>x+y),'','개'); },
+ ]],
+]);
+unit(6,'6-2 원기둥·원뿔·구, 원의 넓이',[
+ ['S6-62','원기둥','원기둥',[
+  pickQ([['원기둥의 밑면은 몇 개?','2개',['2개','1개','3개']],['원기둥 전개도에서 옆면의 모양은?','직사각형',['직사각형','원','삼각형']],['원기둥에 없는 것은?','꼭짓점',['꼭짓점','밑면','옆면']]]),
+ ]],
+ ['S6-63','원뿔과 구','원뿔·구',[
+  pickQ([['원뿔의 밑면은 몇 개?','1개',['1개','2개','0개']],['구의 중심에서 겉면까지의 거리는?','반지름',['반지름','높이','모선']],['원뿔의 꼭짓점과 밑면의 원 둘레를 잇는 선분은?','모선',['모선','지름','높이']]]),
+ ]],
+ ['S6-74','원주와 원주율','원주 = 지름 × 3.14',[
+  ()=>{ const d=rnd(2,20); const s=String(+(d*3.14).toFixed(2)); return W36(WHO(),`지름이 ${d} cm인 원의 원주는? (원주율 3.14)`,' ',figSvg('circ',`${d/2} cm`)+row(d,'×',3.14,'=',decS(s),'cm'),s,{ansText:`${s} cm`}); },
+  pickQ([['원주율은 원주를 무엇으로 나눈 값?','지름',['지름','반지름','넓이']]]),
+ ]],
+ ['S6-75','원의 넓이','반지름 × 반지름 × 3.14',[
+  ()=>{ const r=rnd(2,10); const s=String(+(r*r*3.14).toFixed(2)); return W36(WHO(),`반지름이 ${r} cm인 원의 넓이는? (원주율 3.14)`,' ',figSvg('circ',`${r} cm`)+row(r,'×',r,'×',3.14,'=',decS(s)),s,{ansText:`${s} cm²`}); },
+ ]],
+ ['S6-80','숲 마을 운동회','도형과 측정 종합',[ ()=>G36['S6-68'][0](), ()=>G36['S6-78'][0](), ()=>G36['S6-35'][0](), ()=>G36['S6-43'][0](), ()=>G36['S6-50'][0](), ()=>G36['S6-71'][0]() ]],
+]);
 
 document.body.style.setProperty('--forest',`url(${A['배경_숲']})`);
 home();
