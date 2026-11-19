@@ -866,6 +866,12 @@ body:before{background:
 .result .big{color:var(--brand-deep)}
 .ccard .cc-box{background:#FFF9F1;border:1.5px solid var(--line)}
 .hint1{background:#FFF6DA}.solve{border:1.5px dashed #F2CF84}
+
+.imx{display:inline-flex;align-items:center;gap:2px;vertical-align:middle;margin:0 2px}
+.ifw{font-size:1.05em}
+.ifr{display:inline-flex;flex-direction:column;align-items:center;line-height:1.05;font-size:.82em;vertical-align:middle;margin:0 1px}
+.ifr .ifn{border-bottom:2px solid currentColor;padding:0 3px}.ifr .ifd{padding:0 3px}
+.opt .ifr{font-size:1.15em}.opt.text{line-height:1.2}.bubble .q .ifr{font-size:1em}.bubble .q .imx{margin:0 4px}
 </style>
 </head>
 <body>
@@ -4297,6 +4303,15 @@ ADD('S6-64', pickQ([['원뿔을 위에서 보면?','원',['원','삼각형','사
 ADD('S6-77', ()=>{ const a=rnd(2,5); return WN(`한 모서리가 1 cm인 쌓기나무로 한 모서리가 ${a} cm인 정육면체를 만들려면 몇 개가 필요할까요?`,'',a*a*a,'','개'); },
  pickQ([['부피의 단위 1 cm³는 어떻게 읽을까요?','1 세제곱센티미터',['1 세제곱센티미터','1 제곱센티미터','1 센티미터']],['1 cm³는 한 모서리가 몇 cm인 정육면체의 부피?','1 cm',['1 cm','10 cm','100 cm']]]));
 ADD('S6-74', ()=>{ const d=rnd(2,20); const c=+(d*3.14).toFixed(2); return WN(`원주가 ${c} cm인 원의 지름은? (원주율 3.14)`,'',d,'','cm'); });
+
+
+/* ---------- 글로 쓴 분수를 분수 모양으로 (문제·보기·피드백·풀이) ---------- */
+const FR_RE=/(?:(\d+)[과와] )?(\d+)분의 (\d+)/g;
+const frBox=(n,d)=>`<span class="ifr"><span class="ifn">${n}</span><span class="ifd">${d}</span></span>`;
+function prettyFrac(root){ const sel='.bubble .q, .opt, .fb .msg, .solve, .cc-box, .hint1, .ccard h2, .cc-topic, .wt, .recent .rt, .ep .t, .withadult, .manip .mval, .manip .mlab';
+  root.querySelectorAll(sel).forEach(el=>{ const tw=document.createTreeWalker(el,NodeFilter.SHOW_TEXT,{acceptNode:n=>n.parentElement.closest('svg,.ifr')?NodeFilter.FILTER_REJECT:(/\d+분의 \d+/.test(n.nodeValue)?NodeFilter.FILTER_ACCEPT:NodeFilter.FILTER_SKIP)}); const nodes=[]; while(tw.nextNode()) nodes.push(tw.currentNode);
+    nodes.forEach(t=>{ const html=t.nodeValue.replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c])).replace(FR_RE,(m,w,d,n)=>`<span class="imx">${w?`<span class="ifw">${w}</span>`:''}${frBox(n,d)}</span>`); const sp=document.createElement('span'); sp.innerHTML=html; t.replaceWith(...sp.childNodes); }); }); }
+(function(){ let busy=false; const ob=new MutationObserver(()=>{ if(busy) return; busy=true; try{ prettyFrac(app); }finally{ busy=false; } }); ob.observe(app,{childList:true,subtree:true,characterData:true}); })();
 
 document.body.style.setProperty('--forest',`url(${A['배경_숲']})`);
 home();
