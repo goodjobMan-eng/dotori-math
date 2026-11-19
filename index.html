@@ -888,6 +888,12 @@ body:before{background:
 .scrspace{height:150px;margin:8px 0;border:2px dashed #EAD9BF;border-radius:16px;background:repeating-linear-gradient(#FFFDF8,#FFFDF8 29px,#F4EADB 30px);color:#C9B79C;font-size:.8rem;padding:6px 10px}
 #opts .opt.mdone,.opt.text.mdone{background:linear-gradient(180deg,#FF9A4D,#FF7A1F)!important;color:#fff!important;border-color:#E8650F!important;box-shadow:0 4px 0 #D45F16!important;font-weight:800}
 #opts .opt.mdone:disabled{opacity:.55}
+.give-tip{display:flex;align-items:center;gap:10px;margin:8px auto 0;max-width:420px;padding:10px 14px;border-radius:16px;background:#FFF4D6;border:2px dashed #F2B544;color:#6B3E1C;font-size:.95rem;line-height:1.45;text-align:left}
+.give-tip .gt-ic{font-size:1.6rem;animation:gtTap 1.1s ease-in-out infinite}
+.give-tip.done{opacity:.45;border-style:solid}.give-tip.done .gt-ic{animation:none}
+@keyframes gtTap{0%,100%{transform:translateY(0)}50%{transform:translateY(5px) scale(.92)}}
+.gi.basket.tapme,.bundle.tapme{animation:basketPulse 1.2s ease-in-out infinite;filter:drop-shadow(0 0 6px #FFB347)}
+@keyframes basketPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.12)}}
 </style>
 </head>
 <body>
@@ -1761,7 +1767,8 @@ function gBorrow(){
     const ground=root.querySelector('#ground'), cp=root.querySelector('#cp'); let gave=0;
     const bind=el=>drag(el,(e,x,y)=>{ if(inside(x,y,cp)){ if(gave>=b&&e.dataset.in!=='1'){ bubbleSay(root,who,`청이는 ${GAE(b)}만!`); snapInto(e,ground); return; } if(e.dataset.in!=='1'){ gave++; e.dataset.in='1'; sfx('pop'); sayNum(gave,who); } snapInto(e,cp.querySelector('.zoneimg')); e.style.width='30px'; } else { if(e.dataset.in==='1'){ gave--; e.dataset.in='0'; } e.style.width=''; snapInto(e,ground); } root.querySelector('#pc').textContent=gave; root.querySelector('#gc').textContent=a-gave; if(gave===b){ root.querySelector('#bopts').hidden=false; bubbleSay(root,who,`청이한테 ${GAE(b)} 줬어. 남은 도토리는 몇 개?`); } });
     ground.querySelectorAll('.ac').forEach(bind);
-    root.querySelector('#bundle').onclick=e=>{ const bd=e.currentTarget; bd.remove(); sfx('drop'); say('바구니를 풀었다! 도토리 열 개.',who); for(let i=0;i<10;i++){ const el=document.createElement('img'); el.src=A['소품_도토리']; el.className='ac'; el.style.position='absolute'; el.style.left=(2+(i%5)*10)+'%'; el.style.top=(6+Math.floor(i/5)*40)+'px'; ground.appendChild(el); bind(el); } };
+    root.querySelector('#bundle').classList.add('tapme'); root.querySelector('.gsay').insertAdjacentHTML('afterend',`<div class="give-tip" id="gtip"><span class="gt-ic">👆</span><span><b>바구니를 톡</b> 눌러 보세요. 바구니가 풀려서 <b>도토리 10개</b>가 돼요!</span></div>`);
+    root.querySelector('#bundle').onclick=e=>{ const bd=e.currentTarget; bd.remove(); sfx('drop'); root.querySelector('#gtip')?.classList.add('done'); say('바구니를 풀었다! 도토리 열 개.',who); for(let i=0;i<10;i++){ const el=document.createElement('img'); el.src=A['소품_도토리']; el.className='ac'; el.style.position='absolute'; el.style.left=(2+(i%5)*10)+'%'; el.style.top=(6+Math.floor(i/5)*40)+'px'; ground.appendChild(el); bind(el); } };
     root.querySelectorAll('#bopts .opt').forEach(o=>o.onclick=()=>{ if(+o.dataset.v===a-b){ o.classList.add('ok'); sfx('good'); done(`${sino(a)} 빼기 ${sino(b)}는 ${sino(a-b)}! 바구니를 풀면 뺄 수 있어.`); } else { o.classList.add('no'); sfx('bad'); say('남은 도토리를 다시 세어 봐.',who); setTimeout(()=>o.classList.remove('no'),600); } });
     bubbleSay(root,who,'낱개가 모자라면 바구니를 눌러 풀어 봐!');
   }, '바구니를 누르면 10개로 풀려요');
@@ -2005,9 +2012,10 @@ function gGive(a, b, opts={}){
     root.innerHTML=`<div class="give-top" id="pile"><b class="opnum">${a}</b><div class="give-items" id="items"></div></div>
       <div class="eqbig" id="eqb"><span>${a}</span><i>−</i><span>${b}</span><i>=</i><span class="box" id="ans"></span></div>
       <div class="give-bot" id="bot"><img src="${A['청이_기본']}" class="give-cheong" id="tcimg" alt=""><div class="give-bag" id="bz"><img src="${A['소품_주머니_파랑']}" class="give-bagimg" alt=""><div class="give-got" id="got"></div></div></div>
-      <div class="gsay"></div>
+      <div class="gsay"></div>${borrow?`<div class="give-tip" id="gtip"><span class="gt-ic">👆</span><span>낱개가 모자라면 <b>바구니를 톡</b> 눌러 보세요.<br>바구니가 풀려서 <b>도토리 10개</b>가 돼요!</span></div>`:''}
       <div class="keypad" id="kp" hidden>${[1,2,3,4,5,6,7,8,9,'⌫',0,'✓'].map(k=>`<button class="key${k==='✓'?' ok':k==='⌫'?' del':''}" data-k="${k}">${k}</button>`).join('')}</div>`;
     const items=root.querySelector('#items'), got=root.querySelector('#got'), bz=root.querySelector('#bz'), pile=root.querySelector('#pile'), kp=root.querySelector('#kp'), ans=root.querySelector('#ans');
+    if(borrow) setTimeout(()=>items.querySelectorAll('.gi.basket').forEach(x=>x.classList.add('tapme')),50);
     const mk=kind=>{ const el=document.createElement('img'); el.src=A[kind==='basket'?'소품_바구니':'소품_도토리']; el.className='gi '+kind; el.draggable=false; bind(el); return el; };
     for(let i=0;i<Math.floor(a/10);i++) items.appendChild(mk('basket'));
     for(let i=0;i<a%10;i++) items.appendChild(mk('acorn'));
@@ -2015,7 +2023,7 @@ function gGive(a, b, opts={}){
     let typed='';
     function refresh(){ const v=given(); if(v===b){ kp.hidden=false; typed=''; ans.textContent=''; bubbleSay(root,who,`${nativeCount(b)} 개 줬어. 남은 도토리는 몇 개?`); }
       else { kp.hidden=true; if(v>b){ bubbleSay(root,'cheong','너무 많이 가져왔어!'); } } }
-    function breakBasket(el){ if(!el.classList.contains('basket')||el.parentNode!==items) return; const ref=el.nextSibling; el.remove(); sfx('drop'); say('바구니를 풀었다! 도토리 열 개.',who);
+    function breakBasket(el){ if(!el.classList.contains('basket')||el.parentNode!==items) return; const ref=el.nextSibling; el.remove(); sfx('drop'); say('바구니를 풀었다! 도토리 열 개.',who); items.querySelectorAll('.tapme').forEach(x=>x.classList.remove('tapme')); const gt=root.querySelector('#gtip'); if(gt) gt.classList.add('done');
       for(let i=0;i<10;i++){ const n=mk('acorn'); n.classList.add('pop'); items.insertBefore(n, null); } }
     function bind(el){ el.style.touchAction='none'; let sx,sy,ghost=null,moved=false;
       el.addEventListener('pointerdown',e=>{ if(root.dataset.lock) return; sx=e.clientX; sy=e.clientY; moved=false; el.setPointerCapture(e.pointerId); e.preventDefault(); });
