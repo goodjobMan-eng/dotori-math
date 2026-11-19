@@ -2258,6 +2258,7 @@ function question(q){
   document.getElementById('speak').onclick=()=>say(q.speech,q.who);
   document.querySelectorAll('.opt').forEach(b=>b.onclick=()=>answer(b,q));
   if(q.write) mountWriteQ(q);
+  if(q.onMount) q.onMount(document.getElementById('visual'));
   if(q.manip){ q.manip.mount(document.getElementById('manip')); document.getElementById('mdone').onclick=()=>{ const ok=q.manip.check(); answer({dataset:{v:ok?q.ans:'__no'},classList:{add(){}},disabled:false},q); if(!ok&&S.tries>=2&&q.manip.reveal) q.manip.reveal(); }; }
   if(q.tap){ document.querySelectorAll('#visual .ac[data-tap]').forEach(a=>{ a.onclick=()=>{ if(a.classList.contains('counted')) return; a.classList.add('counted'); S.counted++; sayNum(S.counted+q.base,q.who); }; }); }
   setTimeout(()=>say(q.speech,q.who),250);
@@ -3656,6 +3657,21 @@ addManip('S6-14', ()=>{ const n=rnd(2,11); return MQ(`막대를 끌어서 ${n} c
 addManip('S6-67', ()=>{ const n=rnd(5,12); const g=cellGrid(6,5); g.check=()=>g.cells().length===n; g.reveal=()=>{}; return MQ(`칸을 눌러 색칠해서 넓이가 ${n} cm²인 도형을 만들어 보세요.`,'한 칸은 1 cm²',g,`${n}칸`); });
 addManip('S6-68', ()=>{ const a=rnd(2,6), b=rnd(2,4); const g=cellGrid(7,5); g.check=()=>{ const c=g.cells(); if(c.length!==a*b) return false; const xs=c.map(v=>v[0]), ys=c.map(v=>v[1]); const w=Math.max(...xs)-Math.min(...xs)+1, h=Math.max(...ys)-Math.min(...ys)+1; return w*h===a*b&&((w===a&&h===b)||(w===b&&h===a)); }; g.reveal=()=>{}; return MQ(`가로 ${a} cm, 세로 ${b} cm인 직사각형을 색칠하고 넓이를 생각해 보세요.`,'한 칸은 1 cm × 1 cm',g,`${a} × ${b} = ${a*b} cm²`); });
 addManip('S6-54', ()=>{ const half=[]; for(let y=0;y<5;y++) for(let x=0;x<3;x++) if(Math.random()<0.45) half.push([x,y]); if(half.length<3) return G36['S6-54'][0](); const g=cellGrid(6,5,{lock:half,axis:3}); g.check=()=>{ const c=new Set(g.cells().map(v=>v.join(','))); const need=new Set(half.map(([x,y])=>(5-x)+','+y)); return c.size===need.size&&[...need].every(k=>c.has(k)); }; g.reveal=()=>{}; return MQ('대칭축(점선)을 기준으로 선대칭도형을 완성해 보세요.','오른쪽 칸을 눌러 색칠해요',g,'대칭축으로 접으면 꼭 겹치는 모양'); });
+
+/* 각도기를 끌어서 각 재기 */
+function protDragQ(){ const deg=rnd(2,16)*10+rndPick(0,0,5); const vx=rnd(100,120), vy=170; const a=deg*Math.PI/180;
+  const angle=`<line x1="${vx}" y1="${vy}" x2="${vx+170}" y2="${vy}" stroke="#4A2E14" stroke-width="4" stroke-linecap="round"/><line x1="${vx}" y1="${vy}" x2="${(vx+150*Math.cos(a)).toFixed(1)}" y2="${(vy-150*Math.sin(a)).toFixed(1)}" stroke="#4A2E14" stroke-width="4" stroke-linecap="round"/><circle cx="${vx}" cy="${vy}" r="5" fill="#D45F16"/>`;
+  let pr=`<path d="M-90,0 A90,90 0 0,1 90,0 Z" fill="rgba(140,199,232,.45)" stroke="#2F6E9E" stroke-width="2"/>`;
+  for(let k=0;k<=180;k+=5){ const t=k*Math.PI/180, r2=k%10?84:k%30?80:76; pr+=`<line x1="${(90*Math.cos(t)).toFixed(1)}" y1="${(-90*Math.sin(t)).toFixed(1)}" x2="${(r2*Math.cos(t)).toFixed(1)}" y2="${(-r2*Math.sin(t)).toFixed(1)}" stroke="#2F6E9E" stroke-width="${k%10?1:1.5}"/>`; if(k%10===0) pr+=`<text x="${(68*Math.cos(t)).toFixed(1)}" y="${(-68*Math.sin(t)+3).toFixed(1)}" font-size="${k%30?7:9}" text-anchor="middle" fill="#1E4E73">${k}</text>`; }
+  pr+=`<line x1="-90" y1="0" x2="90" y2="0" stroke="#2F6E9E" stroke-width="2"/><circle cx="0" cy="0" r="3.5" fill="#D45F16"/><rect x="-90" y="0" width="180" height="10" fill="rgba(140,199,232,.45)" stroke="#2F6E9E" stroke-width="1.5"/>`;
+  const vis=`<svg class="pdrag" viewBox="0 0 320 200" style="width:100%;max-width:340px;touch-action:none;background:#fff;border-radius:12px">${angle}<g id="prot" transform="translate(225,185)" style="cursor:grab">${pr}</g></svg><div class="hint" style="text-align:center">파란 각도기를 끌어서 가운데 점을 각의 꼭짓점에 맞춰요</div>`;
+  const q=W36(WHO(),'각도기를 끌어 와서 각도를 재어 보세요.',' ',vis+row(slotsN(deg),'도'),deg,{ansText:`${deg}°`});
+  q.onMount=root=>{ const svg=root.querySelector('svg.pdrag'), g=svg.querySelector('#prot'); let px=225, py=185, off=null;
+    const mv=e=>{ e.preventDefault(); const p=svgPt(svg,e); if(!off) return; px=p.x-off[0]; py=p.y-off[1]; if(Math.hypot(px-vx,py-vy)<12){ px=vx; py=vy; } g.setAttribute('transform',`translate(${px},${py})`); };
+    const up=()=>{ off=null; window.removeEventListener('pointermove',mv); window.removeEventListener('pointerup',up); };
+    g.addEventListener('pointerdown',e=>{ e.preventDefault(); const p=svgPt(svg,e); off=[p.x-px,p.y-py]; window.addEventListener('pointermove',mv,{passive:false}); window.addEventListener('pointerup',up); }); };
+  return q; }
+G36['S6-47'].unshift(protDragQ,protDragQ);
 
 document.body.style.setProperty('--forest',`url(${A['배경_숲']})`);
 home();
