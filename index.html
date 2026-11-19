@@ -723,6 +723,14 @@ svg.fig{display:block;margin:6px auto}
 
 .items.pick{gap:8px}.pitem{background:#fff;border:3px solid #E5D3B5;border-radius:12px;padding:4px;line-height:0}.pitem.on{border-color:#D45F16;background:#FFE3C7;transform:scale(1.08)}
 .pcell{font-size:2.2rem;background:#fff;border:3px dashed #D45F16;border-radius:12px;color:#D45F16;font-family:"Jua",sans-serif;line-height:1.4;padding:0}.pcell.on{border-style:solid}
+
+.upan{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;min-height:52px;width:100%;box-sizing:border-box;padding:8px;background:#F4F9FF;border:3px dashed #8CC7E8;border-radius:16px;margin:4px auto}
+.uchip{font-family:"Jua",sans-serif;font-size:.95rem;padding:6px 10px;border-radius:12px;border:2px solid #4A8FE8;background:#fff;color:#1E4E73}
+
+.manip{background:linear-gradient(180deg,#FFFDF6,#FFF6E4);border:3px solid #F1DDB8;border-radius:22px;padding:12px 8px 10px;margin:4px 0;box-shadow:inset 0 2px 0 #fff}
+.manip svg{box-shadow:0 2px 0 #EAD5B0}
+.mval{background:#fff;border:2px solid #F1DDB8;border-radius:14px;padding:2px 14px;min-width:90px;text-align:center}
+.manip .hint{font-size:.85rem;color:#8A6A48;margin-top:2px}
 </style>
 </head>
 <body>
@@ -2119,6 +2127,15 @@ function gMatch(nums, o={}){
 /* ---------- 활동 섞기: 게임 + 손으로 하는 문제 ---------- */
 const handsRank=q=>q.trace||q.write?3:q.tap?2:q.text?0:1;
 function uniqueTemplates(fs){ const seen=new Set(); return fs.filter(f=>{ if(seen.has(f)) return false; seen.add(f); return true; }); }
+
+/* 영역별: 같은 유형이 몰리지 않게 — 틀마다 한 번씩 돌고, 같은 틀이 이웃하지 않게 섞기 */
+function pickProblems36(fs,n){ const tpl=shuffle(fs.map((f,i)=>({f,i}))); const manip=tpl.filter(t=>{ try{ const q=t.f(); return !!(q.manip||q.onMount); }catch(e){ return false; } });
+  const order=[]; if(manip.length) order.push(manip[0]); tpl.forEach(t=>{ if(!order.includes(t)) order.push(t); });
+  const out=[], keys=new Set(), used=[]; let round=0;
+  while(out.length<n&&round<6){ for(const t of order){ if(out.length>=n) break; for(let k=0;k<8;k++){ const q=t.f(); const key=keyOf(q); if(keys.has(key)) continue; keys.add(key); out.push({q,i:t.i}); break; } } round++; }
+  // 같은 틀이 이웃하지 않게 재배치
+  const res=[]; const pool=shuffle(out); while(pool.length){ let j=pool.findIndex(x=>!res.length||x.i!==res[res.length-1].i); if(j<0) j=0; res.push(pool.splice(j,1)[0]); }
+  return res.map(x=>x.q); }
 function pickProblems(fs, n){
   const out=[], keys=new Set(); const tpl=shuffle(uniqueTemplates(fs)).map(f=>({f,r:handsRank(f())}));
   const add=f=>{ for(let t=0;t<8;t++){ const q=f(); const k=keyOf(q); if(keys.has(k)) continue; keys.add(k); out.push(q); return true; } return false; };
@@ -2262,7 +2279,7 @@ function question(q){
   document.querySelectorAll('.opt').forEach(b=>b.onclick=()=>answer(b,q));
   if(q.write) mountWriteQ(q);
   if(q.onMount) q.onMount(document.getElementById('visual'));
-  if(q.manip){ q.manip.mount(document.getElementById('manip')); document.getElementById('mdone').onclick=()=>{ const ok=q.manip.check(); answer({dataset:{v:ok?q.ans:'__no'},classList:{add(){}},disabled:false},q); if(!ok&&S.tries>=2&&q.manip.reveal) q.manip.reveal(); }; }
+  if(q.manip){ q.manip.mount(document.getElementById('manip')); document.getElementById('mdone').onclick=()=>{ const ok=q.manip.check(); answer({dataset:{v:ok?q.ans:'__no'},classList:{add(){}},disabled:false},q); if(!ok&&S.tries>=2&&q.manip.reveal){ q.manip.reveal(); const mv=document.getElementById('mval'); if(mv) mv.textContent='정답 모양이에요'; } }; }
   if(q.tap){ document.querySelectorAll('#visual .ac[data-tap]').forEach(a=>{ a.onclick=()=>{ if(a.classList.contains('counted')) return; a.classList.add('counted'); S.counted++; sayNum(S.counted+q.base,q.who); }; }); }
   setTimeout(()=>say(q.speech,q.who),250);
 }
@@ -2762,7 +2779,7 @@ unit(5,'5-2 수의 범위와 어림하기',[
  ]],
  ['S3-87','반올림','반올림',[
   ()=>{ const n=rnd(101,999); const r=roundTo(n,1,'near'); return W36('rami',`${n}을 반올림하여 십의 자리까지`,`${sino(n)}을 반올림해요. 일의 자리가 영, 일, 이, 삼, 사면 버리고 오, 육, 칠, 팔, 구면 올려요.`,row(n,'→',`<span class="vgrp">${SL(r)}</span>`),r,{ansText:String(r)}); },
-  ()=>{ const n=rnd(1001,9999); const r=roundTo(n,2,'near'); return C36('cheong',`${n}을 반올림하여 백의 자리까지?`,`십의 자리 숫자를 보고 결정해요.`,row(n),r,optsFrom(r,[roundTo(n,2,'up'),roundTo(n,2,'down'),roundTo(n,3,'near')])); },
+  ()=>{ const n=rnd(1001,9999); if(n%100===0) return G36['S3-87'][1](); const r=roundTo(n,2,'near'); return C36('cheong',`${n}을 반올림하여 백의 자리까지?`,`십의 자리 숫자를 보고 결정해요.`,row(n),r,optsFrom(r,[roundTo(n,2,'up'),roundTo(n,2,'down'),roundTo(n,3,'near')])); },
  ]],
  ['S3-88','어떤 어림을 쓸까','상황에 맞는 어림',[
   ()=>{ return C36('halmi',`사람 ${rnd(102,199)}명이 10명씩 타는 배, 배는 몇 척? 어떤 어림?`,`모두 타야 하니까 남는 사람도 배가 필요하지. 어떤 어림을 쓸까?`,row('모두 타려면?'),'올림',['올림','버림','반올림']); },
@@ -2918,7 +2935,7 @@ function startEp36(ep,ui){
   const u=UNITS36[ui]; const steps=[];
   if(VIDEOS[ep]) steps.push({kind:'video',key:ep,label:`${ep} ${EPS36[ep][0]}`});
   steps.push({kind:'acts'});
-  S={mode:'ep36',ep,ui,ch:0,steps,si:0,acts:pickProblems(G36[ep],10).map(q=>({kind:'q',q})),i:0,results:[],tries:0,counted:0,title:`${ep} ${EPS36[ep][0]}`,saveKey:'EP'+ep};
+  S={mode:'ep36',ep,ui,ch:0,steps,si:0,acts:pickProblems36(G36[ep],10).map(q=>({kind:'q',q})),i:0,results:[],tries:0,counted:0,title:`${ep} ${EPS36[ep][0]}`,saveKey:'EP'+ep};
   say(' ','rami'); step();
 }
 /* 뒤로 가기·다음 편 공용 */
@@ -3007,8 +3024,18 @@ const PNAME=['','','','삼','사','오','육','칠','팔'];
 const SHAPE_NAME={3:'삼각형',4:'사각형',5:'오각형',6:'육각형',7:'칠각형',8:'팔각형'};
 function angSvg(deg){ const r=70, a=deg*Math.PI/180; const x2=20+r*Math.cos(a), y2=90-r*Math.sin(a); const ar=22; const ax=20+ar*Math.cos(a), ay=90-ar*Math.sin(a);
   return SV(170,100,`<line x1="20" y1="90" x2="160" y2="90" ${STK}/><line x1="20" y1="90" x2="${x2.toFixed(1)}" y2="${y2.toFixed(1)}" ${STK}/>`+(deg===90?`<path d="M20,72 h18 v18" fill="none" stroke="#D45F16" stroke-width="2"/>`:`<path d="M42,90 A22,22 0 ${deg>180?1:0},0 ${ax.toFixed(1)},${ay.toFixed(1)}" fill="none" stroke="#D45F16" stroke-width="2"/>`),200); }
-function protractor(deg){ let s=`<path d="M10,110 A100,100 0 0,1 210,110 Z" fill="#EAF6FF" stroke="#4A8FE8" stroke-width="2"/>`; for(let d=0;d<=180;d+=10){ const a=d*Math.PI/180; s+=`<line x1="${(110+100*Math.cos(a)).toFixed(1)}" y1="${(110-100*Math.sin(a)).toFixed(1)}" x2="${(110+88*Math.cos(a)).toFixed(1)}" y2="${(110-88*Math.sin(a)).toFixed(1)}" stroke="#4A8FE8"/>`; if(d%30===0) s+=`<text x="${(110+78*Math.cos(a)).toFixed(1)}" y="${(114-78*Math.sin(a)).toFixed(1)}" font-size="10" text-anchor="middle">${d}</text>`; }
-  const a=deg*Math.PI/180; s+=`<line x1="110" y1="110" x2="215" y2="110" stroke="#6B3E1C" stroke-width="3"/><line x1="110" y1="110" x2="${(110+105*Math.cos(a)).toFixed(1)}" y2="${(110-105*Math.sin(a)).toFixed(1)}" stroke="#D45F16" stroke-width="3"/>`; return SV(220,118,s,300); }
+
+/* 실제 각도기 모양: 1° 눈금, 안쪽·바깥쪽 두 줄 눈금 */
+function protG(R,{fill='rgba(214,236,250,.55)'}={}){ const f=v=>v.toFixed(1); let g=`<path d="M${-R},0 A${R},${R} 0 0,1 ${R},0 Z" fill="${fill}" stroke="#1E4E73" stroke-width="1.6"/>`;
+  for(let d=0;d<=180;d++){ const t=d*Math.PI/180, L=d%10===0?R*0.15:d%5===0?R*0.10:R*0.055; g+=`<line x1="${f(R*Math.cos(t))}" y1="${f(-R*Math.sin(t))}" x2="${f((R-L)*Math.cos(t))}" y2="${f(-(R-L)*Math.sin(t))}" stroke="#1E2A33" stroke-width="${d%10===0?1.2:0.6}"/>`; }
+  const fs=Math.max(7,R*0.075);
+  for(let d=0;d<=180;d+=10){ const t=d*Math.PI/180; const ro=R*0.77, ri=R*0.645; g+=`<text x="${f(ro*Math.cos(t))}" y="${f(-ro*Math.sin(t)+fs*0.35)}" font-size="${fs}" text-anchor="middle" fill="#1E2A33" font-weight="${d===90?700:400}" transform="rotate(${90-d} ${f(ro*Math.cos(t))} ${f(-ro*Math.sin(t))})">${180-d}</text>`;
+    if(d!==90) g+=`<text x="${f(ri*Math.cos(t))}" y="${f(-ri*Math.sin(t)+fs*0.35)}" font-size="${fs*0.8}" text-anchor="middle" fill="#2F6E9E" transform="rotate(${90-d} ${f(ri*Math.cos(t))} ${f(-ri*Math.sin(t))})">${d}</text>`;
+    const r1=R*0.52, r2=R*0.56; g+=`<line x1="${f(r1*Math.cos(t))}" y1="${f(-r1*Math.sin(t))}" x2="${f(r2*Math.cos(t))}" y2="${f(-r2*Math.sin(t))}" stroke="#2F6E9E" stroke-width="1"/>`; }
+  g+=`<path d="M${f(-R*0.56)},0 A${f(R*0.56)},${f(R*0.56)} 0 0,1 ${f(R*0.56)},0" fill="none" stroke="#2F6E9E" stroke-width="1"/><path d="M${f(-R*0.52)},0 A${f(R*0.52)},${f(R*0.52)} 0 0,1 ${f(R*0.52)},0" fill="none" stroke="#2F6E9E" stroke-width="1"/>`;
+  g+=`<line x1="${-R}" y1="0" x2="${R}" y2="0" stroke="#1E2A33" stroke-width="1.4"/><line x1="0" y1="0" x2="0" y2="${f(-R*0.5)}" stroke="#1E2A33" stroke-width="0.8"/><rect x="${-R}" y="0" width="${2*R}" height="${R*0.08}" fill="${fill}" stroke="#1E4E73" stroke-width="1.2"/><circle cx="0" cy="0" r="${R*0.03}" fill="none" stroke="#D45F16" stroke-width="2"/><line x1="${-R*0.06}" y1="0" x2="${R*0.06}" y2="0" stroke="#D45F16" stroke-width="2"/><line x1="0" y1="${-R*0.06}" x2="0" y2="${R*0.06}" stroke="#D45F16" stroke-width="2"/>`;
+  return g; }
+function protractor(deg){ const a=deg*Math.PI/180; const s=`<g transform="translate(160,150)">${protG(140)}</g><line x1="160" y1="150" x2="315" y2="150" stroke="#6B3E1C" stroke-width="3"/><line x1="160" y1="150" x2="${(160+155*Math.cos(a)).toFixed(1)}" y2="${(150-155*Math.sin(a)).toFixed(1)}" stroke="#D45F16" stroke-width="3"/>`; return SV(320,160,s,340); }
 function ruler(len){ const u=24, W=u*(len+2)+20; let s=`<rect x="10" y="40" width="${W-20}" height="34" fill="#FFF3C4" stroke="#6B3E1C" stroke-width="2"/>`; for(let i=0;i<=len+1;i++){ s+=`<line x1="${10+i*u}" y1="40" x2="${10+i*u}" y2="58" stroke="#6B3E1C" stroke-width="2"/><text x="${10+i*u}" y="70" font-size="11" text-anchor="middle">${i}</text>`; if(i<=len) s+=`<line x1="${10+i*u+u/2}" y1="40" x2="${10+i*u+u/2}" y2="49" stroke="#6B3E1C"/>`; }
   s+=`<rect x="10" y="18" width="${len*u}" height="14" rx="4" fill="#F2A65A" stroke="#7A4A1E" stroke-width="2"/>`; return SV(W,80,s,Math.min(340,W)); }
 function gridShape(cells){ const u=22; const xs=cells.map(c=>c[0]), ys=cells.map(c=>c[1]); const W=(Math.max(...xs)+3)*u, H=(Math.max(...ys)+3)*u; let s=''; for(let x=0;x<=W;x+=u) s+=`<line x1="${x}" y1="0" x2="${x}" y2="${H}" stroke="#E5D3B5"/>`; for(let y=0;y<=H;y+=u) s+=`<line x1="0" y1="${y}" x2="${W}" y2="${y}" stroke="#E5D3B5"/>`;
@@ -3605,7 +3632,7 @@ function cellGrid(cols,rows,{pre=[],lock=[],axis=null,u=34}={}){ const W=cols*u,
     mount(root){ const svg=root.querySelector('svg.mgrid'); const re=()=>{ svg.innerHTML=draw(); }; let mode=null;
       const hit=pt=>{ const x=Math.floor(pt.x/u), y=Math.floor(pt.y/u); if(x<0||y<0||x>=cols||y>=rows) return; const k=x+','+y; if(locked.has(k)) return; if(mode===null) mode=!st.has(k); mode?st.add(k):st.delete(k); re(); };
       dragOn(svg,hit,()=>{ mode=null; }); },
-    set(cells){ st=new Set(cells.map(c=>c.join(','))); } };
+    set(cells){ st=new Set(cells.map(c=>c.join(','))); const sv=document.querySelector('svg.mgrid'); if(sv) sv.innerHTML=draw(); } };
   return obj; }
 /* 시계 바늘 */
 function clockManip(th,tm){ let h=12, m=0; const draw=()=>{ const ha=((h%12)+m/60)*Math.PI/6, ma=m*Math.PI/30; let s=`<circle cx="60" cy="60" r="54" fill="#FFFDF4" stroke="#6B3E1C" stroke-width="4"/>`; for(let i=1;i<=12;i++){ const a=i*Math.PI/6; s+=`<text x="${(60+42*Math.sin(a)).toFixed(1)}" y="${(60-42*Math.cos(a)+5).toFixed(1)}" text-anchor="middle" font-size="13" font-weight="700">${i}</text>`; } for(let i=0;i<60;i++){ const a=i*Math.PI/30, r1=i%5?50:46; s+=`<line x1="${(60+r1*Math.sin(a)).toFixed(1)}" y1="${(60-r1*Math.cos(a)).toFixed(1)}" x2="${(60+53*Math.sin(a)).toFixed(1)}" y2="${(60-53*Math.cos(a)).toFixed(1)}" stroke="#6B3E1C" stroke-width="${i%5?1:2}"/>`; }
@@ -3616,13 +3643,12 @@ function clockManip(th,tm){ let h=12, m=0; const draw=()=>{ const ha=((h%12)+m/6
       root.querySelectorAll('[data-h]').forEach(b=>b.onclick=()=>{ h=((h-1+(+b.dataset.h)+12)%12)+1; re(); }); },
     check:()=>h===th&&m===tm, reveal(){ h=th; m=tm; const s=document.querySelector('svg.mclock'); if(s) s.innerHTML=draw(); } }; }
 /* 각도기 반직선 */
-function angleManip(target){ let d=0; const draw=()=>{ let s=`<path d="M10,110 A100,100 0 0,1 210,110 Z" fill="#EAF6FF" stroke="#4A8FE8" stroke-width="2"/>`; for(let k=0;k<=180;k+=10){ const a=k*Math.PI/180; s+=`<line x1="${(110+100*Math.cos(a)).toFixed(1)}" y1="${(110-100*Math.sin(a)).toFixed(1)}" x2="${(110+88*Math.cos(a)).toFixed(1)}" y2="${(110-88*Math.sin(a)).toFixed(1)}" stroke="#4A8FE8"/>`; if(k%30===0) s+=`<text x="${(110+78*Math.cos(a)).toFixed(1)}" y="${(114-78*Math.sin(a)).toFixed(1)}" font-size="10" text-anchor="middle">${k}</text>`; }
-    const a=d*Math.PI/180; s+=`<line x1="110" y1="110" x2="215" y2="110" stroke="#6B3E1C" stroke-width="3"/><line x1="110" y1="110" x2="${(110+105*Math.cos(a)).toFixed(1)}" y2="${(110-105*Math.sin(a)).toFixed(1)}" stroke="#D45F16" stroke-width="4"/><circle cx="${(110+105*Math.cos(a)).toFixed(1)}" cy="${(110-105*Math.sin(a)).toFixed(1)}" r="8" fill="#D45F16"/>`; return s; };
-  return { html:`<svg class="mang" viewBox="0 0 225 120" style="width:100%;max-width:320px;touch-action:none">${draw()}</svg><div class="mval" id="mval">0°</div>`,
-    mount(root){ const svg=root.querySelector('svg.mang'); dragOn(svg,pt=>{ let a=Math.atan2(110-pt.y,pt.x-110)*180/Math.PI; a=Math.max(0,Math.min(180,a)); d=Math.round(a/10)*10; svg.innerHTML=draw(); root.querySelector('#mval').textContent=d+'°'; }); },
+function angleManip(target){ let d=0; const draw=()=>{ const a=d*Math.PI/180; return `<g transform="translate(160,150)">${protG(140)}</g><line x1="160" y1="150" x2="315" y2="150" stroke="#6B3E1C" stroke-width="3"/><line x1="160" y1="150" x2="${(160+155*Math.cos(a)).toFixed(1)}" y2="${(150-155*Math.sin(a)).toFixed(1)}" stroke="#D45F16" stroke-width="4"/><circle cx="${(160+150*Math.cos(a)).toFixed(1)}" cy="${(150-150*Math.sin(a)).toFixed(1)}" r="11" fill="#D45F16"/>`; return s; };
+  return { html:`<svg class="mang" viewBox="0 0 320 165" style="width:100%;max-width:360px;touch-action:none">${draw()}</svg><div class="mval" id="mval">0°</div>`,
+    mount(root){ const svg=root.querySelector('svg.mang'); dragOn(svg,pt=>{ let a=Math.atan2(150-pt.y,pt.x-160)*180/Math.PI; a=Math.max(0,Math.min(180,a)); d=Math.round(a/10)*10; svg.innerHTML=draw(); root.querySelector('#mval').textContent=d+'°'; }); },
     check:()=>d===target, reveal(){ d=target; const s=document.querySelector('svg.mang'); if(s){ s.innerHTML=draw(); document.getElementById('mval').textContent=d+'°'; } } }; }
 /* 자로 길이 만들기 */
-function rulerManip(target){ const u=24, N=12; let len=1; const draw=()=>{ let s=`<rect x="10" y="44" width="${u*N+10}" height="32" fill="#FFF3C4" stroke="#6B3E1C" stroke-width="2"/>`; for(let i=0;i<=N;i++){ s+=`<line x1="${10+i*u}" y1="44" x2="${10+i*u}" y2="60" stroke="#6B3E1C" stroke-width="2"/><text x="${10+i*u}" y="72" font-size="11" text-anchor="middle">${i}</text>`; }
+function rulerManip(target){ const u=30, N=10; let len=1; const draw=()=>{ let s=`<rect x="10" y="44" width="${u*N+10}" height="32" fill="#FFF3C4" stroke="#6B3E1C" stroke-width="2"/>`; for(let i=0;i<=N;i++){ s+=`<line x1="${10+i*u}" y1="44" x2="${10+i*u}" y2="60" stroke="#6B3E1C" stroke-width="2"/><text x="${10+i*u}" y="74" font-size="13" font-weight="700" text-anchor="middle">${i}</text>`; }
     s+=`<rect x="10" y="16" width="${len*u}" height="18" rx="5" fill="#F2A65A" stroke="#7A4A1E" stroke-width="2"/><circle cx="${10+len*u}" cy="25" r="11" fill="#D45F16"/>`; return s; };
   return { html:`<svg class="mrul" viewBox="0 0 ${u*N+30} 80" style="width:100%;max-width:340px;touch-action:none">${draw()}</svg><div class="mval" id="mval">1 cm</div>`,
     mount(root){ const svg=root.querySelector('svg.mrul'); dragOn(svg,pt=>{ len=Math.max(1,Math.min(N,Math.round((pt.x-10)/u))); svg.innerHTML=draw(); root.querySelector('#mval').textContent=len+' cm'; }); },
@@ -3650,26 +3676,24 @@ addManip('S6-22',
 addManip('S6-23',
   ()=>{ const f=tRand(); const lr=rnd(0,1); const t=tApply(f,lr?tLR:tUD); if(tKey(t)===tKey(f)) return G36['S6-23'][0](); return MQ(`버튼으로 도형을 뒤집어 '만들 모양'을 만들어 보세요.`,'',transManip(f,t,['lr','ud']),lr?'좌우로 뒤집기':'위아래로 뒤집기'); });
 addManip('S6-24',
-  ()=>{ const f=tRand(); const k=rnd(1,3); const t=tApply(f,c=>tRot(c,k)); return MQ(`버튼으로 도형을 돌려 '만들 모양'을 만들어 보세요. 몇 도 돌렸을까요?`,'',transManip(f,t,['cw','ccw']),`시계 방향으로 ${k*90}°`); },
-  ()=>{ const f=tRand(); const t=tApply(tApply(f,tLR),c=>tRot(c,1)); return MQ(`뒤집기와 돌리기를 섞어서 '만들 모양'을 만들어 보세요.`,'',transManip(f,t,['cw','lr','ud']),'뒤집고 돌리기'); });
+  ()=>{ const f=tRand(); const k=rnd(1,3); const t=tApply(f,c=>tRot(c,k)); if(tKey(t)===tKey(f)) return G36['S6-24'][0](); return MQ(`버튼으로 도형을 돌려 '만들 모양'을 만들어 보세요. 몇 도 돌렸을까요?`,'',transManip(f,t,['cw','ccw']),`시계 방향으로 ${k*90}°`); },
+  ()=>{ const f=tRand(); const t=tApply(tApply(f,tLR),c=>tRot(c,1)); if(tKey(t)===tKey(f)) return G36['S6-24'][1](); return MQ(`뒤집기와 돌리기를 섞어서 '만들 모양'을 만들어 보세요.`,'',transManip(f,t,['cw','lr','ud']),'뒤집고 돌리기'); });
 addManip('S6-47', ()=>{ const d=rnd(2,17)*10; return MQ(`빨간 선을 끌어서 ${d}°인 각을 만들어 보세요.`,'',angleManip(d),`${d}°`); });
 addManip('S6-48', ()=>{ const ac=rnd(0,1); const d=ac?rnd(2,8)*10:rnd(10,17)*10; const m=angleManip(d); m.check=function(){ const v=+document.getElementById('mval').textContent.replace('°',''); return ac?(v>0&&v<90):(v>90&&v<180); }; return MQ(`${ac?'예각':'둔각'}을 하나 만들어 보세요.`,ac?'0°보다 크고 90°보다 작은 각':'90°보다 크고 180°보다 작은 각',m,ac?'예각':'둔각'); });
-addManip('S6-10', ()=>{ const h=rnd(1,12), m=rnd(0,11)*5; return MQ(`시계를 ${h}시 ${m?m+'분':''}으로 맞춰 보세요.`.replace('시 으로','시로'),'',clockManip(h,m),`${h}시 ${m}분`); });
-addManip('S6-09', ()=>{ const h=rnd(1,12), m=rndPick(0,30); return MQ(`시계를 ${h}시${m?' 30분':''}으로 맞춰 보세요.`.replace(/(\d)시으로/,'$1시로'),'',clockManip(h,m),`${h}시${m?' 30분':''}`); });
-addManip('S6-14', ()=>{ const n=rnd(2,11); return MQ(`막대를 끌어서 ${n} cm로 만들어 보세요.`,'',rulerManip(n),`${n} cm`); });
-addManip('S6-67', ()=>{ const n=rnd(5,12); const g=cellGrid(6,5); g.check=()=>g.cells().length===n; g.reveal=()=>{}; return MQ(`칸을 눌러 색칠해서 넓이가 ${n} cm²인 도형을 만들어 보세요.`,'한 칸은 1 cm²',g,`${n}칸`); });
-addManip('S6-68', ()=>{ const a=rnd(2,6), b=rnd(2,4); const g=cellGrid(7,5); g.check=()=>{ const c=g.cells(); if(c.length!==a*b) return false; const xs=c.map(v=>v[0]), ys=c.map(v=>v[1]); const w=Math.max(...xs)-Math.min(...xs)+1, h=Math.max(...ys)-Math.min(...ys)+1; return w*h===a*b&&((w===a&&h===b)||(w===b&&h===a)); }; g.reveal=()=>{}; return MQ(`가로 ${a} cm, 세로 ${b} cm인 직사각형을 색칠하고 넓이를 생각해 보세요.`,'한 칸은 1 cm × 1 cm',g,`${a} × ${b} = ${a*b} cm²`); });
-addManip('S6-54', ()=>{ const half=[]; for(let y=0;y<5;y++) for(let x=0;x<3;x++) if(Math.random()<0.45) half.push([x,y]); if(half.length<3) return G36['S6-54'][0](); const g=cellGrid(6,5,{lock:half,axis:3}); g.check=()=>{ const c=new Set(g.cells().map(v=>v.join(','))); const need=new Set(half.map(([x,y])=>(5-x)+','+y)); return c.size===need.size&&[...need].every(k=>c.has(k)); }; g.reveal=()=>{}; return MQ('대칭축(점선)을 기준으로 선대칭도형을 완성해 보세요.','오른쪽 칸을 눌러 색칠해요',g,'대칭축으로 접으면 꼭 겹치는 모양'); });
+addManip('S6-10', ()=>{ const h=rnd(1,11), m=rnd(0,11)*5; return MQ(`시계를 ${h}시 ${m?m+'분':''}으로 맞춰 보세요.`.replace('시 으로','시로'),'',clockManip(h,m),`${h}시 ${m}분`); });
+addManip('S6-09', ()=>{ const h=rnd(1,11), m=rndPick(0,30); return MQ(`시계를 ${h}시${m?' 30분':''}으로 맞춰 보세요.`.replace(/(\d)시으로/,'$1시로'),'',clockManip(h,m),`${h}시${m?' 30분':''}`); });
+addManip('S6-14', ()=>{ const n=rnd(2,9); return MQ(`막대를 끌어서 ${n} cm로 만들어 보세요.`,'',rulerManip(n),`${n} cm`); });
+addManip('S6-67', ()=>{ const n=rnd(5,12); const g=cellGrid(6,5); g.check=()=>g.cells().length===n; g.reveal=()=>g.set(Array.from({length:n},(_,i)=>[i%6,Math.floor(i/6)])); return MQ(`칸을 눌러 색칠해서 넓이가 ${n} cm²인 도형을 만들어 보세요.`,'한 칸은 1 cm²',g,`${n}칸`); });
+addManip('S6-68', ()=>{ const a=rnd(2,6), b=rnd(2,4); const g=cellGrid(7,5); g.check=()=>{ const c=g.cells(); if(c.length!==a*b) return false; const xs=c.map(v=>v[0]), ys=c.map(v=>v[1]); const w=Math.max(...xs)-Math.min(...xs)+1, h=Math.max(...ys)-Math.min(...ys)+1; return w*h===a*b&&((w===a&&h===b)||(w===b&&h===a)); }; g.reveal=()=>{ const c=[]; for(let y=0;y<b;y++) for(let x=0;x<a;x++) c.push([x,y]); g.set(c); }; return MQ(`가로 ${a} cm, 세로 ${b} cm인 직사각형을 색칠하고 넓이를 생각해 보세요.`,'한 칸은 1 cm × 1 cm',g,`${a} × ${b} = ${a*b} cm²`); });
+addManip('S6-54', ()=>{ const half=[]; for(let y=0;y<5;y++) for(let x=0;x<3;x++) if(Math.random()<0.45) half.push([x,y]); if(half.length<3) return G36['S6-54'][0](); const g=cellGrid(6,5,{lock:half,axis:3}); g.check=()=>{ const c=new Set(g.cells().map(v=>v.join(','))); const need=new Set(half.map(([x,y])=>(5-x)+','+y)); return c.size===need.size&&[...need].every(k=>c.has(k)); }; g.reveal=()=>g.set(half.map(([x,y])=>[5-x,y])); return MQ('대칭축(점선)을 기준으로 선대칭도형을 완성해 보세요.','오른쪽 칸을 눌러 색칠해요',g,'대칭축으로 접으면 꼭 겹치는 모양'); });
 
 /* 각도기를 끌어서 각 재기 */
-function protDragQ(){ const deg=rnd(2,16)*10+rndPick(0,0,5); const vx=rnd(100,120), vy=170; const a=deg*Math.PI/180;
-  const angle=`<line x1="${vx}" y1="${vy}" x2="${vx+170}" y2="${vy}" stroke="#4A2E14" stroke-width="4" stroke-linecap="round"/><line x1="${vx}" y1="${vy}" x2="${(vx+150*Math.cos(a)).toFixed(1)}" y2="${(vy-150*Math.sin(a)).toFixed(1)}" stroke="#4A2E14" stroke-width="4" stroke-linecap="round"/><circle cx="${vx}" cy="${vy}" r="5" fill="#D45F16"/>`;
-  let pr=`<path d="M-90,0 A90,90 0 0,1 90,0 Z" fill="rgba(140,199,232,.45)" stroke="#2F6E9E" stroke-width="2"/>`;
-  for(let k=0;k<=180;k+=5){ const t=k*Math.PI/180, r2=k%10?84:k%30?80:76; pr+=`<line x1="${(90*Math.cos(t)).toFixed(1)}" y1="${(-90*Math.sin(t)).toFixed(1)}" x2="${(r2*Math.cos(t)).toFixed(1)}" y2="${(-r2*Math.sin(t)).toFixed(1)}" stroke="#2F6E9E" stroke-width="${k%10?1:1.5}"/>`; if(k%10===0) pr+=`<text x="${(68*Math.cos(t)).toFixed(1)}" y="${(-68*Math.sin(t)+3).toFixed(1)}" font-size="${k%30?7:9}" text-anchor="middle" fill="#1E4E73">${k}</text>`; }
-  pr+=`<line x1="-90" y1="0" x2="90" y2="0" stroke="#2F6E9E" stroke-width="2"/><circle cx="0" cy="0" r="3.5" fill="#D45F16"/><rect x="-90" y="0" width="180" height="10" fill="rgba(140,199,232,.45)" stroke="#2F6E9E" stroke-width="1.5"/>`;
-  const vis=`<svg class="pdrag" viewBox="0 0 320 200" style="width:100%;max-width:340px;touch-action:none;background:#fff;border-radius:12px">${angle}<g id="prot" transform="translate(225,185)" style="cursor:grab">${pr}</g></svg><div class="hint" style="text-align:center">파란 각도기를 끌어서 가운데 점을 각의 꼭짓점에 맞춰요</div>`;
+function protDragQ(){ const deg=rnd(10,170); const vx=rnd(150,175), vy=185; const a=deg*Math.PI/180;
+  const angle=`<line x1="${vx}" y1="${vy}" x2="${vx+175}" y2="${vy}" stroke="#4A2E14" stroke-width="3" stroke-linecap="round"/><line x1="${vx}" y1="${vy}" x2="${(vx+165*Math.cos(a)).toFixed(1)}" y2="${(vy-165*Math.sin(a)).toFixed(1)}" stroke="#4A2E14" stroke-width="3" stroke-linecap="round"/><circle cx="${vx}" cy="${vy}" r="4" fill="#4A2E14"/>`;
+  const pr=protG(140);
+  const vis=`<svg class="pdrag" viewBox="0 0 360 400" style="width:100%;max-width:360px;touch-action:none;background:#fff;border-radius:12px">${angle}<g id="prot" transform="translate(180,390)" style="cursor:grab">${pr}</g></svg><div class="hint" style="text-align:center">파란 각도기를 끌어서 가운데 점을 각의 꼭짓점에 맞춰요</div>`;
   const q=W36(WHO(),'각도기를 끌어 와서 각도를 재어 보세요.',' ',vis+row(slotsN(deg),'도'),deg,{ansText:`${deg}°`});
-  q.onMount=root=>{ const svg=root.querySelector('svg.pdrag'), g=svg.querySelector('#prot'); let px=225, py=185, off=null;
+  q.onMount=root=>{ const svg=root.querySelector('svg.pdrag'), g=svg.querySelector('#prot'); let px=180, py=390, off=null;
     const mv=e=>{ e.preventDefault(); const p=svgPt(svg,e); if(!off) return; px=p.x-off[0]; py=p.y-off[1]; if(Math.hypot(px-vx,py-vy)<12){ px=vx; py=vy; } g.setAttribute('transform',`translate(${px},${py})`); };
     const up=()=>{ off=null; window.removeEventListener('pointermove',mv); window.removeEventListener('pointerup',up); };
     g.addEventListener('pointerdown',e=>{ e.preventDefault(); const p=svgPt(svg,e); off=[p.x-px,p.y-py]; window.addEventListener('pointermove',mv,{passive:false}); window.addEventListener('pointerup',up); }); };
@@ -3680,14 +3704,14 @@ G36['S6-47'].unshift(protDragQ,protDragQ);
 const tapSvg=(svg,fn)=>svg.addEventListener('pointerdown',e=>{ e.preventDefault(); fn(svgPt(svg,e),e); });
 /* 분수 막대 칠하기 */
 function fracManip(d,n,{dec=false}={}){ const on=new Set(); const W=300, u=W/d;
-  const draw=()=>Array.from({length:d},(_,i)=>`<rect x="${i*u}" y="0" width="${u}" height="54" fill="${on.has(i)?'#F2A65A':'#fff'}" stroke="#7A4A1E" stroke-width="2.5"/>`).join('');
-  return { html:`<svg class="mfrac" viewBox="-2 -2 ${W+4} 58" style="width:100%;max-width:340px;touch-action:none">${draw()}</svg><div class="mval" id="mval">0칸</div>`,
+  const draw=()=>Array.from({length:d},(_,i)=>`<rect x="${i*u}" y="0" width="${u}" height="64" fill="${on.has(i)?'#F2A65A':'#fff'}" stroke="#7A4A1E" stroke-width="2.5"/>`).join('');
+  return { html:`<svg class="mfrac" viewBox="-2 -2 ${W+4} 68" style="width:100%;max-width:340px;touch-action:none">${draw()}</svg><div class="mval" id="mval">0칸</div>`,
     mount(root){ const svg=root.querySelector('svg.mfrac'); tapSvg(svg,pt=>{ const i=Math.floor(pt.x/u); if(i<0||i>=d) return; on.has(i)?on.delete(i):on.add(i); svg.innerHTML=draw(); root.querySelector('#mval').textContent=dec?`${(on.size/10).toFixed(1)}`:`${d}칸 중 ${on.size}칸`; }); },
     check:()=>on.size===n, reveal(){ on.clear(); for(let i=0;i<n;i++) on.add(i); const s=document.querySelector('svg.mfrac'); if(s) s.innerHTML=draw(); } }; }
 /* 그림 고르기(분류) */
 function pickManip(items,want){ const sel=new Set(); const html=`<div class="items pick">${items.map((it,i)=>`<button class="pitem" data-i="${i}">${shp(it.s,COLORS[it.c])}</button>`).join('')}</div><div class="mval" id="mval">0개 골랐어요</div>`;
   return { html, mount(root){ root.querySelectorAll('.pitem').forEach(b=>b.onclick=()=>{ const i=+b.dataset.i; sel.has(i)?sel.delete(i):sel.add(i); b.classList.toggle('on'); root.querySelector('#mval').textContent=`${sel.size}개 골랐어요`; }); },
-    check:()=>items.every((it,i)=>want(it)===sel.has(i)), reveal(){ document.querySelectorAll('.pitem').forEach((b,i)=>b.classList.toggle('on',want(items[i]))); } }; }
+    check:()=>items.every((it,i)=>want(it)===sel.has(i)), reveal(){ sel.clear(); items.forEach((it,i)=>{ if(want(it)) sel.add(i); }); document.querySelectorAll('.pitem').forEach((b,i)=>b.classList.toggle('on',want(items[i]))); } }; }
 /* 그래프 그리기: 칸을 눌러 높이 정하기 (○ 또는 막대) */
 function graphManip(labels,target,{step=1,kind='bar'}={}){ const top=Math.max(...target)/step+1, n=labels.length, u=26, L=34, B=24, W=L+n*44+6, H=top*u+B+6; const h=labels.map(()=>0);
   const draw=()=>{ let g=''; for(let k=0;k<=top;k++){ const y=H-B-k*u; g+=`<line x1="${L}" y1="${y}" x2="${W}" y2="${y}" stroke="#E5D3B5"/>`+(kind==='bar'?`<text x="${L-4}" y="${y+4}" font-size="11" text-anchor="end">${k*step}</text>`:''); }
@@ -3707,7 +3731,7 @@ function stackManip(check,reveal){ const v=Array(9).fill(0); const u=60;
 function patManip(seq,holes,choices){ const val={}; holes.forEach(h=>val[h]=null);
   const html=`<div class="seqgrid" style="grid-template-columns:repeat(${seq.length%4===0?4:3},1fr)">${seq.map((x,i)=>holes.includes(i)?`<button class="pcell" data-h="${i}">?</button>`:`<span>${x}</span>`).join('')}</div><div class="hint" style="text-align:center">? 칸을 누를 때마다 모양이 바뀌어요</div>`;
   return { html, mount(root){ root.querySelectorAll('.pcell').forEach(b=>b.onclick=()=>{ const h=+b.dataset.h; const k=val[h]==null?0:(choices.indexOf(val[h])+1)%choices.length; val[h]=choices[k]; b.textContent=val[h]; b.classList.add('on'); }); },
-    check:()=>holes.every(h=>val[h]===seq[h]), reveal(){ document.querySelectorAll('.pcell').forEach(b=>{ b.textContent=seq[+b.dataset.h]; }); } }; }
+    check:()=>holes.every(h=>val[h]===seq[h]), reveal(){ holes.forEach(h=>val[h]=seq[h]); document.querySelectorAll('.pcell').forEach(b=>{ b.textContent=seq[+b.dataset.h]; b.classList.add('on'); }); } }; }
 /* 다각형: 꼭짓점 누르기 / 대각선 긋기 */
 function polyManip(n,mode){ const P=Array.from({length:n},(_,i)=>{ const a=-Math.PI/2+2*Math.PI*i/n; return [110+85*Math.cos(a),105+85*Math.sin(a)]; }); const tapped=new Set(), lines=new Set(); let first=null;
   const isDiag=(a,b)=>{ const d=Math.abs(a-b); return d>1&&d<n-1; };
@@ -3733,9 +3757,85 @@ addManip('S4-09', ()=>{ const st=rndPick(1,2), L=pickN(FRUITS,3), v=L.map(()=>st
 addManip('S5-01', ()=>{ const [a,b,c]=pickN(EM,3); const pat=rndPick([a,b],[a,a,b],[a,b,c],[a,b,b]); const p=pat.length, cols=p===2?4:p, n=cols*3; const seq=Array.from({length:n},(_,i)=>pat[i%p]); const holes=shuffle([...Array(n-cols).keys()].map(k=>k+cols)).slice(0,3); return MQ('규칙에 맞게 ? 칸을 채워 보세요.','',patManip(seq,holes,[a,b,c]),seq.join('')); });
 addManip('S5-02', ()=>{ const [a,b,c]=pickN(EM,3); const seq=Array.from({length:8},(_,i)=>[a,b][i%2]); return MQ('내가 규칙을 이어 가요! ? 칸을 채워 보세요.','',patManip(seq,[5,6,7],[a,b,c]),seq.join('')); });
 addManip('S6-02', ()=>{ const n=rnd(4,9); return MQ(`쌓기나무 ${n}개로 모양을 만들어 보세요.`,'위에서 본 칸에 쌓은 개수가 쓰여요',stackManip(v=>v.reduce((a,b)=>a+b,0)===n,v=>{ v.fill(0); for(let i=0;i<n;i++) v[i%9]++; }),`${n}개`); });
-addManip('S6-65', ()=>{ const a=rnd(3,6), b=rnd(1,a), c=rnd(0,b); return MQ(`1층 ${a}개, 2층 ${b}개, 3층 ${c}개가 되도록 쌓아 보세요.`,'',stackManip(v=>v.filter(x=>x>=1).length===a&&v.filter(x=>x>=2).length===b&&v.filter(x=>x>=3).length===c,v=>{ v.fill(0); for(let i=0;i<a;i++) v[i]=1; for(let i=0;i<b;i++) v[i]=2; for(let i=0;i<c;i++) v[i]=3; }),`모두 ${a+b+c}개`); });
+addManip('S6-65', ()=>{ const a=rnd(3,6), b=rnd(1,a), c=rnd(0,b); return MQ(`1층 ${a}개, 2층 ${b}개${c?`, 3층 ${c}개`:''}가 되도록 쌓아 보세요.`,'',stackManip(v=>v.filter(x=>x>=1).length===a&&v.filter(x=>x>=2).length===b&&v.filter(x=>x>=3).length===c,v=>{ v.fill(0); for(let i=0;i<a;i++) v[i]=1; for(let i=0;i<b;i++) v[i]=2; for(let i=0;i<c;i++) v[i]=3; }),`모두 ${a+b+c}개`); });
 addManip('S6-05', ()=>{ const n=rnd(3,8); return MQ(`${SHAPE_NAME[n]}의 꼭짓점을 모두 눌러 세어 보세요.`,'',polyManip(n,'vertex'),`${n}개`); });
 addManip('S6-32', ()=>{ const n=rnd(4,6); return MQ(`${SHAPE_NAME[n]}의 대각선을 모두 그어 보세요.`,'꼭짓점 두 개를 차례로 누르면 선이 그어져요',polyManip(n,'diag'),`${n*(n-3)/2}개`); });
+
+/* ================= 조작 활동 3 ================= */
+/* 삼각형·사각형 각 모으기: 조각을 누르면 한 점에 차례로 붙음 */
+function angleCollectQ(n){ const COL=['#F2A65A','#8CC7E8','#A6D98C','#E8A6D9'];
+  const pts=n===3?[[rnd(40,80),rnd(200,220)],[rnd(240,280),rnd(200,220)],[rnd(90,220),rnd(50,100)]]:[[rnd(40,70),rnd(200,225)],[rnd(220,250),rnd(205,230)],[rnd(250,285),rnd(90,130)],[rnd(70,120),rnd(60,100)]];
+  const ang=pts.map((P,i)=>{ const A=pts[(i+n-1)%n], B=pts[(i+1)%n]; const v1=[A[0]-P[0],A[1]-P[1]], v2=[B[0]-P[0],B[1]-P[1]]; return Math.acos((v1[0]*v2[0]+v1[1]*v2[1])/Math.hypot(...v1)/Math.hypot(...v2))*180/Math.PI; });
+  if(ang.some(a=>a<25)) return angleCollectQ(n);
+  /* 도형 꼭짓점 각 쐐기 */
+  const wedgeAt=(i,r=28)=>{ const P=pts[i], A=pts[(i+n-1)%n], B=pts[(i+1)%n]; const a1=Math.atan2(A[1]-P[1],A[0]-P[0]), a2=Math.atan2(B[1]-P[1],B[0]-P[0]); let d=a2-a1; while(d<0) d+=2*Math.PI; if(d>Math.PI){ return `<path d="M${P[0]},${P[1]} L${P[0]+r*Math.cos(a2)},${P[1]+r*Math.sin(a2)} A${r},${r} 0 0,1 ${P[0]+r*Math.cos(a1)},${P[1]+r*Math.sin(a1)} Z" fill="${COL[i]}" stroke="#6B3E1C"/>`; } return `<path d="M${P[0]},${P[1]} L${P[0]+r*Math.cos(a1)},${P[1]+r*Math.sin(a1)} A${r},${r} 0 0,1 ${P[0]+r*Math.cos(a2)},${P[1]+r*Math.sin(a2)} Z" fill="${COL[i]}" stroke="#6B3E1C"/>`; };
+  /* 실제 각 크기를 쓰는 대신 그림은 모양만, 모으는 곳은 ang 값으로 */
+  const placed=[]; const cx=160, cy=n===3?300:330, R=45;
+  const drawCollect=()=>{ let g=`<line x1="${cx-110}" y1="${cy}" x2="${cx+110}" y2="${cy}" stroke="#B9A285" stroke-width="2" stroke-dasharray="6 4"/><circle cx="${cx}" cy="${cy}" r="4" fill="#4A2E14"/>`; let start=0;
+    placed.forEach(i=>{ const s=start*Math.PI/180, e=(start+ang[i])*Math.PI/180; const large=ang[i]>180?1:0; g+=`<path d="M${cx},${cy} L${(cx+R*Math.cos(Math.PI-s)).toFixed(1)},${(cy-R*Math.sin(Math.PI-s)).toFixed(1)} A${R},${R} 0 ${large},1 ${(cx+R*Math.cos(Math.PI-e)).toFixed(1)},${(cy-R*Math.sin(Math.PI-e)).toFixed(1)} Z" fill="${COL[i]}" stroke="#6B3E1C" stroke-width="1.5"/>`; start+=ang[i]; });
+    if(placed.length===n) g+=n===3?`<line x1="${cx-100}" y1="${cy}" x2="${cx+100}" y2="${cy}" stroke="#D45F16" stroke-width="3"/><text x="${cx}" y="${cy+26}" font-size="15" text-anchor="middle" fill="#D45F16" font-weight="700">곧은 선이 됐어요!</text>`:`<text x="${cx}" y="${cy+R+24}" font-size="15" text-anchor="middle" fill="#D45F16" font-weight="700">한 바퀴가 꽉 찼어요!</text>`;
+    return g; };
+  const shape=`<polygon points="${pts.map(p=>p.join(',')).join(' ')}" fill="#FFF3DA" stroke="#6B3E1C" stroke-width="3"/>`;
+  const drawAll=()=>shape+pts.map((_,i)=>placed.includes(i)?'':`<g data-w="${i}">${wedgeAt(i)}</g>`).join('')+drawCollect();
+  const vis=`<svg class="mwedge" viewBox="0 0 320 ${n===3?340:400}" style="width:100%;max-width:320px;touch-action:none;background:#fff;border-radius:12px">${drawAll()}</svg><div class="hint" style="text-align:center">색칠한 각을 하나씩 눌러 아래 한 점에 모아 보세요</div>`;
+  const q=W36(WHO(),n===3?'삼각형의 세 각을 모아 보고, 세 각의 크기의 합을 쓰세요.':'사각형의 네 각을 모아 보고, 네 각의 크기의 합을 쓰세요.',' ',vis+row(slotsN(n===3?180:360),'도'),n===3?180:360,{ansText:n===3?'180°':'360°'});
+  q.onMount=root=>{ const svg=root.querySelector('svg.mwedge'); svg.addEventListener('pointerdown',e=>{ const g=e.target.closest('[data-w]'); if(!g) return; placed.push(+g.dataset.w); svg.innerHTML=drawAll(); }); };
+  return q; }
+/* 수직선 위 점 끌기 */
+function numLineManip(lo,hi,step,target,fmt){ const W=300, x0=10, n=Math.round((hi-lo)/step); let v=lo; const X=val=>x0+(val-lo)/(hi-lo)*W;
+  const draw=()=>{ let g=`<line x1="${x0}" y1="40" x2="${x0+W}" y2="40" stroke="#6B3E1C" stroke-width="3"/>`; for(let i=0;i<=n;i++){ const val=lo+i*step, big=Math.abs(val-Math.round(val))<1e-9; g+=`<line x1="${X(val)}" y1="${big?28:33}" x2="${X(val)}" y2="${big?52:47}" stroke="#6B3E1C" stroke-width="${big?2.5:1.5}"/>`; if(big||i===0||i===n) g+=`<text x="${X(val)}" y="72" font-size="14" font-weight="700" text-anchor="middle">${big?Math.round(val):+val.toFixed(2)}</text>`; }
+    g+=`<circle cx="${X(v)}" cy="40" r="13" fill="#D45F16" stroke="#fff" stroke-width="3"/><path d="M${X(v)},18 l-6,-9 h12 z" fill="#D45F16"/>`; return g; };
+  return { html:`<svg class="mnl" viewBox="0 0 320 80" style="width:100%;max-width:340px;touch-action:none;background:#fff;border-radius:12px">${draw()}</svg><div class="mval" id="mval">${fmt(lo)}</div>`,
+    mount(root){ const svg=root.querySelector('svg.mnl'); dragOn(svg,pt=>{ const k=Math.round((pt.x-x0)/W*n); v=lo+Math.max(0,Math.min(n,k))*step; svg.innerHTML=draw(); root.querySelector('#mval').textContent=fmt(v); }); },
+    check:()=>Math.abs(v-target)<step/2, reveal(){ v=target; const s=document.querySelector('svg.mnl'); if(s){ s.innerHTML=draw(); document.getElementById('mval').textContent=fmt(v); } } }; }
+/* 단위 모으기: 추·컵 버튼으로 무게·들이 만들기 */
+function unitsManip(units,target,fmt,icon){ const cnt=units.map(()=>0); const tot=()=>units.reduce((a,u,i)=>a+u.v*cnt[i],0);
+  const show=()=>`<div class="upan">${units.map((u,i)=>Array.from({length:cnt[i]},()=>`<button class="uchip" data-r="${i}">${icon} ${u.t}</button>`).join('')).join('')||'<span class="hint">비어 있어요</span>'}</div><div class="mval">${fmt(tot())}</div>`;
+  return { html:`<div class="mrow">${units.map((u,i)=>`<button class="mbtn" data-a="${i}">+ ${u.t}</button>`).join('')}</div><div id="upanw">${show()}</div><div class="hint" style="text-align:center">버튼으로 넣고, 넣은 것을 누르면 빠져요</div>`,
+    mount(root){ const re=()=>{ root.querySelector('#upanw').innerHTML=show(); root.querySelectorAll('[data-r]').forEach(b=>b.onclick=()=>{ cnt[+b.dataset.r]--; re(); }); };
+      root.querySelectorAll('[data-a]').forEach(b=>b.onclick=()=>{ cnt[+b.dataset.a]++; re(); }); re(); },
+    check:()=>tot()===target, reveal(){ let r=target; units.forEach((u,i)=>{ cnt[i]=Math.floor(r/u.v); r-=cnt[i]*u.v; }); const w=document.getElementById('upanw'); if(w) w.innerHTML=show(); } }; }
+const gfmt=g=>g>=1000?`${Math.floor(g/1000)} kg ${g%1000} g`:`${g} g`, mlfmt=m=>m>=1000?`${Math.floor(m/1000)} L ${m%1000} mL`:`${m} mL`;
+/* 전개도: 마주 보는 면 찾기 */
+const NETS=[[[1,0],[0,1],[1,1],[2,1],[1,2],[1,3]],[[0,0],[0,1],[1,1],[2,1],[3,1],[3,2]],[[0,0],[1,0],[1,1],[2,1],[3,1],[2,2]],[[1,0],[0,1],[1,1],[2,1],[3,1],[1,2]],[[0,0],[1,0],[1,1],[2,1],[2,2],[3,2]],[[0,1],[1,1],[1,0],[2,1],[3,1],[3,2]]];
+function foldNet(cells){ const key=c=>c.join(','); const S=new Set(cells.map(key)); const pos={}; const start=cells[0]; const q=[[start,{U:'U',D:'D',N:'N',S:'S',E:'E',W:'W'}]]; pos[key(start)]='D';
+  while(q.length){ const [c,o]=q.shift(); for(const [dx,dy,dir] of [[1,0,'E'],[-1,0,'W'],[0,-1,'N'],[0,1,'S']]){ const nc=[c[0]+dx,c[1]+dy], k=key(nc); if(!S.has(k)||pos[k]) continue; let n;
+    if(dir==='E') n={...o,D:o.E,E:o.U,U:o.W,W:o.D}; if(dir==='W') n={...o,D:o.W,W:o.U,U:o.E,E:o.D}; if(dir==='N') n={...o,D:o.N,N:o.U,U:o.S,S:o.D}; if(dir==='S') n={...o,D:o.S,S:o.U,U:o.N,N:o.D}; pos[k]=n.D; q.push([nc,n]); } }
+  return pos; }
+const OPP={U:'D',D:'U',N:'S',S:'N',E:'W',W:'E'};
+function netManip(){ const cells=rndPick(...NETS); const pos=foldNet(cells); const star=rndPick(...cells); const target=cells.find(c=>pos[c.join(',')]===OPP[pos[star.join(',')]]); let sel=null; const u=46;
+  const W=Math.max(...cells.map(c=>c[0]))+1, H=Math.max(...cells.map(c=>c[1]))+1;
+  const draw=()=>cells.map(c=>{ const k=c.join(','), isS=k===star.join(','), on=sel===k; return `<rect data-k="${k}" x="${c[0]*u}" y="${c[1]*u}" width="${u}" height="${u}" fill="${isS?'#FFD54F':on?'#8CC7E8':'#FFF3DA'}" stroke="#6B3E1C" stroke-width="3"/>`+(isS?`<text x="${c[0]*u+u/2}" y="${c[1]*u+u/2+9}" font-size="26" text-anchor="middle" pointer-events="none">★</text>`:''); }).join('');
+  return { html:`<svg class="mnet" viewBox="-3 -3 ${W*u+6} ${H*u+6}" style="width:${W*u+6}px;max-width:100%;touch-action:none">${draw()}</svg><div class="hint" style="text-align:center">접었을 때 ★과 마주 보는 면을 눌러요</div>`,
+    mount(root){ const svg=root.querySelector('svg.mnet'); svg.addEventListener('pointerdown',e=>{ const k=e.target.getAttribute&&e.target.getAttribute('data-k'); if(!k||k===star.join(',')) return; sel=k; svg.innerHTML=draw(); }); },
+    check:()=>sel===target.join(','), reveal(){ sel=target.join(','); const s=document.querySelector('svg.mnet'); if(s) s.innerHTML=draw(); } }; }
+/* 컴퍼스: 반지름 늘이기 */
+function compassManip(r){ const u=14, cx=150, cy=110; let rad=1;
+  const draw=()=>{ let g=''; for(let i=0;i<=10;i++){ g+=`<line x1="${cx+i*u}" y1="${cy}" x2="${cx+i*u}" y2="${cy+(i%5?6:10)}" stroke="#6B3E1C"/>`; if(i%5===0) g+=`<text x="${cx+i*u}" y="${cy+22}" font-size="10" text-anchor="middle">${i}</text>`; }
+    return g+`<circle cx="${cx}" cy="${cy}" r="${rad*u}" fill="rgba(242,166,90,.25)" stroke="#D45F16" stroke-width="3"/><line x1="${cx}" y1="${cy}" x2="${cx+rad*u}" y2="${cy}" stroke="#4A2E14" stroke-width="3"/><circle cx="${cx}" cy="${cy}" r="4" fill="#4A2E14"/><circle cx="${cx+rad*u}" cy="${cy}" r="10" fill="#D45F16"/>`; };
+  return { html:`<svg class="mcomp" viewBox="0 0 300 230" style="width:100%;max-width:320px;touch-action:none;background:#fff;border-radius:12px">${draw()}</svg><div class="mval" id="mval">반지름 1 cm</div>`,
+    mount(root){ const svg=root.querySelector('svg.mcomp'); dragOn(svg,pt=>{ rad=Math.max(1,Math.min(10,Math.round(Math.hypot(pt.x-cx,pt.y-cy)/u))); svg.innerHTML=draw(); root.querySelector('#mval').textContent=`반지름 ${rad} cm · 지름 ${rad*2} cm`; }); },
+    check:()=>rad===r, reveal(){ rad=r; const s=document.querySelector('svg.mcomp'); if(s) s.innerHTML=draw(); } }; }
+/* 평균: 높은 탑에서 낮은 탑으로 옮겨 고르게 */
+function levelManip(vals){ const v=[...vals]; let sel=null; const avg=v.reduce((a,b)=>a+b)/v.length; const u=22, n=v.length, top=Math.max(...v);
+  const draw=()=>{ let g=''; v.forEach((c,i)=>{ const x=20+i*60; for(let k=0;k<c;k++) g+=`<rect x="${x}" y="${(top-k-1)*u+10}" width="44" height="${u-2}" rx="4" fill="${sel===i?'#8CC7E8':'#F2A65A'}" stroke="#7A4A1E" stroke-width="2"/>`; g+=`<rect data-c="${i}" x="${x-6}" y="0" width="56" height="${top*u+40}" fill="transparent"/><text x="${x+22}" y="${top*u+32}" font-size="15" text-anchor="middle" font-weight="700">${c}</text>`; }); return g; };
+  return { html:`<svg class="mlevel" viewBox="0 0 ${n*60+30} ${top*u+40}" style="width:100%;max-width:320px;touch-action:none;background:#fff;border-radius:12px">${draw()}</svg><div class="hint" style="text-align:center">높은 탑을 누르고, 낮은 탑을 누르면 하나가 옮겨져요</div>`,
+    mount(root){ const svg=root.querySelector('svg.mlevel'); svg.addEventListener('pointerdown',e=>{ const t=e.target.closest('[data-c]')||e.target; const c=t.getAttribute('data-c'); let i=c!=null?+c:null; if(i==null){ const p=svgPt(svg,e); i=Math.floor((p.x-14)/60); if(i<0||i>=n) return; } if(sel===null){ if(v[i]>0) sel=i; } else { if(i!==sel){ v[sel]--; v[i]++; } sel=null; } svg.innerHTML=draw(); }); },
+    check:()=>v.every(x=>x===avg), reveal(){ v.fill(avg); sel=null; const s=document.querySelector('svg.mlevel'); if(s) s.innerHTML=draw(); } }; }
+/* ----- 편에 넣기 ----- */
+addManip('S6-50', ()=>angleCollectQ(3));
+addManip('S6-51', ()=>angleCollectQ(4));
+addManip('S3-22', ()=>{ const t=rnd(1,29)/10; return MQ(`수직선에 ${t.toFixed(1)}을 나타내 보세요.`,'점을 끌어 옮겨요 (작은 눈금 한 칸 0.1)',numLineManip(0,3,0.1,t,x=>x.toFixed(1)),t.toFixed(1)); });
+addManip('S3-56', ()=>{ const t=rnd(1,99)/100; if(Math.round(t*100)%10===0) return G36['S3-56'][0](); const lo=Math.floor(t*10)/10; return MQ(`수직선에 ${t.toFixed(2)}을 나타내 보세요.`,`${lo.toFixed(1)}와 ${(lo+0.1).toFixed(1)} 사이를 10칸으로 나눴어요`,numLineManip(lo,lo+0.1,0.01,t,x=>x.toFixed(2)),t.toFixed(2)); });
+addManip('S3-37', ()=>{ const d=rnd(2,5), N=rnd(d+1,3*d-1); if(N%d===0) return G36['S3-37'][0](); return MQ(`수직선에 ${frTxt(N,d)}을 나타내 보세요.`,`1을 ${d}칸으로 나눴어요`,numLineManip(0,3,1/d,N/d,x=>{ const k=Math.round(x*d); return k%d?`${Math.floor(k/d)?Math.floor(k/d)+'과 ':''}${d}분의 ${k%d}`:`${k/d}`; }),mixTxt(Math.floor(N/d),N%d,d)); });
+addManip('S3-84', ()=>{ const k=rnd(3,7); return MQ(`${k} 초과인 가장 작은 자연수를 수직선에 나타내 보세요.`,'',numLineManip(0,10,1,k+1,x=>String(Math.round(x))),String(k+1)); });
+addManip('S6-43', ()=>{ const t=rnd(2,9)*100+rnd(1,4)*1000; return MQ(`추를 올려 ${gfmt(t)}을 만들어 보세요.`,'',unitsManip([{t:'1 kg',v:1000},{t:'500 g',v:500},{t:'100 g',v:100}],t,gfmt,'⚖️'),gfmt(t)); });
+addManip('S6-46', ()=>{ const a=rnd(11,25)*100, b=rnd(3,9)*100; return MQ(`${gfmt(a)} + ${gfmt(b)}만큼 추를 올려 보세요.`,'',unitsManip([{t:'1 kg',v:1000},{t:'100 g',v:100}],a+b,gfmt,'⚖️'),gfmt(a+b)); });
+addManip('S6-40', ()=>{ const t=rnd(1,3)*1000+rnd(1,9)*100; return MQ(`물을 부어 ${mlfmt(t)}를 만들어 보세요.`,'',unitsManip([{t:'1 L',v:1000},{t:'100 mL',v:100}],t,mlfmt,'💧'),mlfmt(t)); });
+addManip('S6-42', ()=>{ const a=rnd(11,25)*100, b=rnd(3,9)*100; return MQ(`${mlfmt(a)} + ${mlfmt(b)}만큼 물을 부어 보세요.`,'',unitsManip([{t:'1 L',v:1000},{t:'100 mL',v:100}],a+b,mlfmt,'💧'),mlfmt(a+b)); });
+addManip('S6-58', ()=>MQ('전개도를 접었을 때 ★ 면과 마주 보는 면을 눌러 보세요.','',netManip(),'마주 보는 면'));
+addManip('S6-27', ()=>{ const r=rnd(2,8); return MQ(`컴퍼스를 벌려 지름이 ${2*r} cm인 원을 그려 보세요.`,'주황 점을 끌어 벌려요',compassManip(r),`반지름 ${r} cm`); });
+addManip('S4-14', ()=>{ const n=rnd(3,4), avg=rnd(2,4); const v=Array(n).fill(avg); for(let i=0;i<n-1;i++){ const d=rnd(0,Math.min(2,avg-1)); v[i]-=d; v[n-1]+=d; } if(v.every(x=>x===avg)) return G36['S4-14'][0](); return MQ('도토리 탑의 높이를 고르게 만들어 보세요. 평균은 몇 개일까요?','',levelManip(shuffle(v)),`한 탑에 ${avg}개`); });
 
 document.body.style.setProperty('--forest',`url(${A['배경_숲']})`);
 home();
