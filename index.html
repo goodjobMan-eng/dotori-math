@@ -4348,6 +4348,85 @@ function addScratch(){ const stage=app.querySelector('.stage'); if(!stage||stage
   bar.querySelector('[data-x]').onclick=()=>ctx.clearRect(0,0,cv.width,cv.height);
   const gone=new MutationObserver(()=>{ if(!document.body.contains(stage)){ bar.remove(); gone.disconnect(); } }); gone.observe(app,{childList:true}); }
 
+/* ================= 5-2 합동과 대칭: 그림으로 묻기 ================= */
+const JM=['ㄱ','ㄴ','ㄷ','ㄹ','ㅁ','ㅂ','ㅅ','ㅇ'];
+const TRIS=[[5,6,7],[4,6,7],[5,7,8],[6,8,9],[4,5,7],[5,6,8],[6,7,9],[7,8,10]];
+function triPts(a,b,c){ // BC=a, CA=b, AB=c
+  const x=(c*c-b*b+a*a)/(2*a), y=-Math.sqrt(Math.max(0,c*c-x*x)); return [[x,y],[0,0],[a,0]]; } // A,B,C
+const angAt=(P,Q,R)=>{ const v1=[Q[0]-P[0],Q[1]-P[1]], v2=[R[0]-P[0],R[1]-P[1]]; return Math.acos((v1[0]*v2[0]+v1[1]*v2[1])/Math.hypot(...v1)/Math.hypot(...v2))*180/Math.PI; };
+function fitPts(P,box){ const xs=P.map(p=>p[0]), ys=P.map(p=>p[1]); const w=Math.max(...xs)-Math.min(...xs)||1, h=Math.max(...ys)-Math.min(...ys)||1; const s=Math.min(box.w/w,box.h/h); const ox=box.x+(box.w-w*s)/2-Math.min(...xs)*s, oy=box.y+(box.h-h*s)/2-Math.min(...ys)*s; return P.map(p=>[p[0]*s+ox,p[1]*s+oy]); }
+function polyDraw(P,names,{side={},ang={},fill='#FFE3B0',stroke='#6B3E1C'}={}){ const n=P.length, cx=P.reduce((a,p)=>a+p[0],0)/n, cy=P.reduce((a,p)=>a+p[1],0)/n; let g=`<polygon points="${P.map(p=>p.map(v=>v.toFixed(1)).join(',')).join(' ')}" fill="${fill}" stroke="${stroke}" stroke-width="2.5" stroke-linejoin="round"/>`;
+  P.forEach((p,i)=>{ const dx=p[0]-cx, dy=p[1]-cy, L=Math.hypot(dx,dy)||1; g+=`<text x="${(p[0]+dx/L*16).toFixed(1)}" y="${(p[1]+dy/L*16+6).toFixed(1)}" font-size="17" font-weight="700" text-anchor="middle" fill="#2E2620">${names[i]}</text>`; if(ang[i]!=null){ g+=`<text x="${(p[0]-dx/L*30).toFixed(1)}" y="${(p[1]-dy/L*30+5).toFixed(1)}" font-size="14" text-anchor="middle" fill="#2F6E9E" font-weight="700">${ang[i]}°</text>`; } });
+  Object.entries(side).forEach(([k,v])=>{ const i=+k, j=(i+1)%n; const mx=(P[i][0]+P[j][0])/2, my=(P[i][1]+P[j][1])/2; const dx=mx-cx, dy=my-cy, L=Math.hypot(dx,dy)||1; g+=`<text x="${(mx+dx/L*16).toFixed(1)}" y="${(my+dy/L*16+5).toFixed(1)}" font-size="14" text-anchor="middle" fill="#D45F16" font-weight="700">${v} cm</text>`; });
+  return g; }
+const mkTri=()=>{ const [a,b,c]=shuffle(rndPick(...TRIS).slice()); const P=triPts(a,b,c); const A=[angAt(P[0],P[1],P[2]),angAt(P[1],P[2],P[0]),angAt(P[2],P[0],P[1])].map(Math.round); A[2]=180-A[0]-A[1]; return {P,sides:[c,a,b],ang:A}; }; // sides: AB,BC,CA
+/* 합동: 왼쪽 ㄱㄴㄷ, 오른쪽은 돌리거나 뒤집은 똑같은 삼각형 ㄹㅁㅂ(이름 순서는 섞음) */
+function congFig(){ const T=mkTri(); const rot=rnd(0,3)*90+(rnd(0,1)?0:180), flip=rnd(0,1); const t=rot*Math.PI/180;
+  let Q=T.P.map(([x,y])=>{ const fx=flip?-x:x; return [fx*Math.cos(t)-y*Math.sin(t), fx*Math.sin(t)+y*Math.cos(t)]; });
+  const L=fitPts(T.P,{x:42,y:24,w:118,h:125}), R=fitPts(Q,{x:212,y:24,w:118,h:125});
+  const nm2=shuffle(['ㄹ','ㅁ','ㅂ']); // nm2[i] = 오른쪽에서 A,B,C의 대응점 이름
+  return {T,L,R,nm1:['ㄱ','ㄴ','ㄷ'],nm2}; }
+const svgWrap=(g,h=175)=>`<svg class="fig" viewBox="0 0 360 ${h}" style="width:100%;max-width:360px">${g}</svg>`;
+const sideName=(nm,i,j)=>nm[i]+nm[j];
+ADD('S6-52',
+ ()=>{ const F=congFig(); const k=rnd(0,2), i=k, j=(k+1)%3; const vis=svgWrap(polyDraw(F.L,F.nm1,{side:{0:F.T.sides[0],1:F.T.sides[1],2:F.T.sides[2]}})+polyDraw(F.R,F.nm2,{fill:'#DCEEFF'}));
+   return WN(`두 삼각형은 서로 합동이에요. 변 ${sideName(F.nm2,i,j)}의 길이는?`,vis,F.T.sides[k],'','cm'); },
+ ()=>{ const F=congFig(); const k=rnd(0,2); const vis=svgWrap(polyDraw(F.L,F.nm1,{side:{0:F.T.sides[0],1:F.T.sides[1],2:F.T.sides[2]}})+polyDraw(F.R,F.nm2,{fill:'#DCEEFF'}));
+   return CF(`두 삼각형은 서로 합동이에요. 점 ${F.nm1[k]}의 대응점은?`,vis,F.nm2[k],['ㄹ','ㅁ','ㅂ']); },
+ ()=>{ const T=mkTri(); const ext=Math.max(...T.P.map(p=>p[0]))-Math.min(...T.P.map(p=>p[0])), eyt=Math.max(...T.P.map(p=>p[1]))-Math.min(...T.P.map(p=>p[1])); const s=78/Math.max(ext,eyt);
+   const make=k=>{ let P=T.P.map(([x,y])=>k===1?[x*1.3,y*1.3]:[x,y]); if(k===2){ P=P.map(([x,y],i)=>i===0?[x+ext*0.35,y*0.8]:[x,y]); } const t=Math.PI/2*rnd(0,3), f=rnd(0,1)?-1:1; return P.map(([x,y])=>[f*x*Math.cos(t)-y*Math.sin(t),f*x*Math.sin(t)+y*Math.cos(t)]); };
+   const place=(P,cx,cy)=>{ const xs=P.map(p=>p[0]*s), ys=P.map(p=>p[1]*s); const ox=cx-(Math.max(...xs)+Math.min(...xs))/2, oy=cy-(Math.max(...ys)+Math.min(...ys))/2; return P.map(([x,y])=>[x*s+ox,y*s+oy]); };
+   const pg=(Q,fill,st)=>`<polygon points="${Q.map(p=>p.map(v=>v.toFixed(1)).join(',')).join(' ')}" fill="${fill}" stroke="${st}" stroke-width="2.5" stroke-linejoin="round"/>`;
+   const order=shuffle([0,1,2]); const labs=['가','나','다'];
+   let g=pg(place(T.P,180,56),'#FFE3B0','#6B3E1C')+`<line x1="10" y1="118" x2="350" y2="118" stroke="#EADBC8" stroke-dasharray="4 4"/>`;
+   order.forEach((k,j)=>{ const cx=62+j*118; g+=pg(place(make(k),cx,182),'#DCEEFF','#2F6E9E')+`<text x="${cx}" y="262" font-size="17" font-weight="700" text-anchor="middle" fill="#2E2620">${labs[j]}</text>`; });
+   return CF('위 삼각형과 합동인 도형은 어느 것일까요?',svgWrap(g,272),labs[order.indexOf(0)],labs); });
+ADD('S6-53',
+ ()=>{ const F=congFig(); const k=rnd(0,2); const vis=svgWrap(polyDraw(F.L,F.nm1,{ang:{0:F.T.ang[0],1:F.T.ang[1],2:F.T.ang[2]}})+polyDraw(F.R,F.nm2,{fill:'#DCEEFF'}));
+   const p=F.nm2, a=p[(k+2)%3], v=p[k], b=p[(k+1)%3]; return WN(`두 삼각형은 서로 합동이에요. 각 ${a}${v}${b}는 몇 도일까요?`,vis,F.T.ang[k],'','°'); },
+ ()=>{ const F=congFig(); const k=rnd(0,2); const vis=svgWrap(polyDraw(F.L,F.nm1,{ang:{0:F.T.ang[0],1:F.T.ang[1]}})+polyDraw(F.R,F.nm2,{fill:'#DCEEFF'}));
+   const p=F.nm2; return WN(`두 삼각형은 서로 합동이에요. 각 ${p[1]}${p[2]}${p[0]}는 몇 도일까요?`,vis,F.T.ang[2],'','°'); },
+ ()=>{ const F=congFig(); const k=rnd(0,2), i=k, j=(k+1)%3; const vis=svgWrap(polyDraw(F.L,F.nm1)+polyDraw(F.R,F.nm2,{fill:'#DCEEFF'}));
+   const ans=F.nm2[i]+F.nm2[j]; const alt=[F.nm2[j]+F.nm2[(j+1)%3],F.nm2[(j+1)%3]+F.nm2[i]]; return CF(`변 ${F.nm1[i]}${F.nm1[j]}의 대응변은 어느 것일까요?`,vis,`변 ${ans}`,[`변 ${ans}`,`변 ${alt[0]}`,`변 ${alt[1]}`]); });
+/* 선대칭: 세로 대칭축 */
+function lineSymFig(){ const h1=rnd(2,4), w1=rnd(2,4), w2=rnd(1,3), y1=rnd(0,1), h2=rnd(2,3);
+  const T=[0,-h1], L1=[-w1,y1], L2=[-w2,y1+h2], B=[0,y1+h2+rnd(1,2)]; const Rr=p=>[-p[0],p[1]];
+  const P=[T,Rr(L1),Rr(L2),B,L2,L1]; const S=fitPts(P,{x:110,y:20,w:140,h:140}); const names=JM.slice(0,6);
+  const len={0:rnd(4,9),1:rnd(3,8),2:rnd(3,8)}; // ㄱㄴ, ㄴㄷ, ㄷㄹ (오른쪽 반)
+  const angR={1:intAng(S,1),2:intAng(S,2)}; return {S,names,len,angR}; }
+function intAng(S,i){ const n=S.length, a=S[(i+n-1)%n], p=S[i], b=S[(i+1)%n]; let v=Math.round(angAt(p,a,b)); const ar=S.reduce((t,q,j)=>t+q[0]*S[(j+1)%n][1]-S[(j+1)%n][0]*q[1],0); const cr=(p[0]-a[0])*(b[1]-p[1])-(p[1]-a[1])*(b[0]-p[0]); if(Math.sign(cr)!==Math.sign(ar)) v=360-v; return v; }
+const axisLine=(S)=>{ const x=S[0][0]; return `<line x1="${x}" y1="6" x2="${x}" y2="170" stroke="#D45F16" stroke-width="2" stroke-dasharray="6 5"/>`; };
+ADD('S6-54',
+ ()=>{ const F=lineSymFig(); const k=rnd(0,2); const vis=svgWrap(polyDraw(F.S,F.names,{side:{0:F.len[0],1:F.len[1],2:F.len[2]}})+axisLine(F.S),180);
+   const mir={0:'ㄱㅂ',1:'ㅂㅁ',2:'ㅁㄹ'}[k]; return WN(`선대칭도형이에요(점선은 대칭축). 변 ${mir}의 길이는?`,vis,F.len[k],'','cm'); },
+ ()=>{ const F=lineSymFig(); const k=rnd(1,2); const vis=svgWrap(polyDraw(F.S,F.names,{ang:{[k]:F.angR[k]}})+axisLine(F.S),180);
+   const q=k===1?'각 ㄱㅂㅁ':'각 ㅂㅁㄹ'; return WN(`선대칭도형이에요(점선은 대칭축). ${q}은 몇 도일까요?`,vis,F.angR[k],'','°'); },
+ ()=>{ const F=lineSymFig(); const vis=svgWrap(polyDraw(F.S,F.names)+axisLine(F.S),180); const k=rnd(0,2); const pr=[['변 ㄱㄴ','변 ㄱㅂ'],['변 ㄴㄷ','변 ㅂㅁ'],['변 ㄷㄹ','변 ㅁㄹ']][k];
+   return CF(`선대칭도형이에요. ${pr[0]}의 대응변은?`,vis,pr[1],[pr[1],'변 ㄹㅁ'===pr[1]?'변 ㄴㄷ':'변 ㄹㅁ','변 ㄷㄹ'===pr[1]?'변 ㄱㄴ':'변 ㄷㄹ'].filter((x,i,a)=>a.indexOf(x)===i).concat(['변 ㄴㄷ']).filter((x,i,a)=>a.indexOf(x)===i).slice(0,3)); },
+ ()=>{ const F=lineSymFig(); const vis=svgWrap(polyDraw(F.S,F.names)+axisLine(F.S)+`<line x1="${F.S[1][0]}" y1="${F.S[1][1]}" x2="${F.S[5][0]}" y2="${F.S[5][1]}" stroke="#2F6E9E" stroke-width="2"/>`,180);
+   return WN('선분 ㄴㅂ과 대칭축이 만나서 이루는 각은 몇 도일까요?',vis,90,'','°'); });
+/* 점대칭: 평행사변형·육각형 */
+function pointSymFig(){ const six=rnd(0,1); let P; if(six){ const a=[rnd(2,4),-rnd(1,2)], b=[rnd(1,3),rnd(1,3)], c=[-rnd(1,2),rnd(2,3)]; P=[a,b,c].concat([a,b,c].map(p=>[-p[0],-p[1]])); } else { const a=[rnd(2,4),-rnd(1,2)], b=[rnd(0,2),rnd(1,3)]; P=[a,b,[-a[0],-a[1]],[-b[0],-b[1]]]; }
+  const S=fitPts(P,{x:100,y:15,w:160,h:150}); const n=P.length; const C=[S.reduce((a,p)=>a+p[0],0)/n,S.reduce((a,p)=>a+p[1],0)/n]; return {S,n,C,names:JM.slice(0,n)}; }
+const centerDot=C=>`<circle cx="${C[0]}" cy="${C[1]}" r="4" fill="#D45F16"/><text x="${C[0]+8}" y="${C[1]-6}" font-size="14" font-weight="700" fill="#D45F16">ㅇ</text>`;
+ADD('S6-55',
+ ()=>{ const F=pointSymFig(); const k=rnd(0,F.n-1); const vis=svgWrap(polyDraw(F.S,F.names)+centerDot(F.C),180); const ans=F.names[(k+F.n/2)%F.n];
+   return CF(`점 ㅇ을 대칭의 중심으로 하는 점대칭도형이에요. 점 ${F.names[k]}의 대응점은?`,vis,`점 ${ans}`,[`점 ${ans}`,`점 ${F.names[(k+1)%F.n]}`,`점 ${F.names[(k+F.n-1)%F.n]}`]); },
+ ()=>{ const F=pointSymFig(); const k=rnd(0,F.n/2-1), j=(k+1)%F.n; const len=rnd(3,9); const side={[k]:len}; const vis=svgWrap(polyDraw(F.S,F.names,{side})+centerDot(F.C),180);
+   const a=F.names[(k+F.n/2)%F.n], b=F.names[(j+F.n/2)%F.n]; return WN(`점대칭도형이에요. 변 ${a}${b}의 길이는?`,vis,len,'','cm'); },
+ ()=>{ const F=pointSymFig(); const k=rnd(0,F.n-1); const d=rnd(2,8); const vis=svgWrap(polyDraw(F.S,F.names)+centerDot(F.C)+`<line x1="${F.S[k][0]}" y1="${F.S[k][1]}" x2="${F.C[0]}" y2="${F.C[1]}" stroke="#2F6E9E" stroke-width="2" stroke-dasharray="4 3"/>`,180);
+   const o=F.names[(k+F.n/2)%F.n]; return WN(`점대칭도형에서 선분 ${F.names[k]}ㅇ이 ${d} cm예요. 선분 ${F.names[k]}${o}은 몇 cm일까요?`,vis,2*d,'','cm'); });
+/* 글로만 묻던 문제는 그림 문제 뒤로: 그림 문제가 먼저 뽑히게 함 */
+/* 더 다양하게: 대응각 고르기, 둘레, 점대칭 대응각 */
+ADD('S6-53', ()=>{ const F=congFig(); const k=rnd(0,2); const vis=svgWrap(polyDraw(F.L,F.nm1)+polyDraw(F.R,F.nm2,{fill:'#DCEEFF'})); const n1=F.nm1, n2=F.nm2;
+  const nm=(p,k)=>`각 ${p[(k+2)%3]}${p[k]}${p[(k+1)%3]}`; return CF(`두 삼각형은 서로 합동이에요. ${nm(n1,k)}의 대응각은?`,vis,nm(n2,k),[nm(n2,k),nm(n2,(k+1)%3),nm(n2,(k+2)%3)]); });
+ADD('S6-52', ()=>{ const F=congFig(); const vis=svgWrap(polyDraw(F.L,F.nm1,{side:{0:F.T.sides[0],1:F.T.sides[1],2:F.T.sides[2]}})+polyDraw(F.R,F.nm2,{fill:'#DCEEFF'}));
+  return WN(`두 삼각형은 서로 합동이에요. 삼각형 ${F.nm2.join('')}의 세 변의 길이의 합은?`,vis,F.T.sides.reduce((a,b)=>a+b,0),'','cm'); });
+ADD('S6-55', ()=>{ const F=pointSymFig(); const k=rnd(0,F.n-1); const v=intAng(F.S,k); const vis=svgWrap(polyDraw(F.S,F.names,{ang:{[k]:v}})+centerDot(F.C),180); const n=F.n, o=(k+n/2)%n, N=F.names;
+  return WN(`점대칭도형이에요. 각 ${N[(o+n-1)%n]}${N[o]}${N[(o+1)%n]}은 몇 도일까요?`,vis,v,'','°'); });
+
+['S6-52','S6-53','S6-54','S6-55'].forEach(ep=>{ const g=G36[ep]; const pic=g.filter(f=>{ try{ const q=f(); return /<svg|<table|grid/.test((q.visual||'')+(q.html||''))||q.manip; }catch(e){ return false; } }); const txt=g.filter(f=>!pic.includes(f)); G36[ep]=pic; });
+
 document.body.style.setProperty('--forest',`url(${A['배경_숲']})`);
 home();
 </script>
