@@ -2316,9 +2316,11 @@ const decS=s=>`<span class="vgrp">${String(s).split('').map(c=>c==='.'?'<em clas
 const row=(...parts)=>{ const L=Math.max(0,...parts.map(x=>/^</.test(String(x))?0:String(x).length)); return `<div class="eqrow${L>11?' xl':(parts.length>6||L>7)?' long':''}">${parts.map(p=>typeof p==='string'&&/^[+−×÷=…>]$/.test(p)?`<i>${p}</i>`:/^<|<span/.test(String(p))?p:`<b>${p}</b>`).join('')}</div>`; };
 const digitsOf=s=>String(s).replace(/[^0-9]/g,'');
 /* 쓰기 문제: ans는 숫자만 모은 문자열, visual의 칸 수와 같아야 함 */
-const W36=(who,q,speech,visual,ans,x={})=>PW(who,q,speech,visual,digitsOf(ans),Object.assign({ansText:x.ansText||String(ans),ansSpeech:x.ansSpeech||' ',hint:x.hint||''},x));
-const C36=(who,q,speech,visual,ans,opts,x={})=>P(who,q,speech,visual,ans,opts,Object.assign({text:true,ansSpeech:' '},x));
-const optsFrom=(ans,cands)=>{ const s=new Set([String(ans)]); for(const c of shuffle(cands)){ if(s.size>=3) break; if(c!=null&&String(c)!==String(ans)) s.add(String(c)); } return shuffle([...s]); };
+const fixJ=t=>typeof t!=='string'?t:t.replace(/(\d)(으로|와|과|을|를|은|는|이|가|로)(?=$|[\s,.?!'’)\]])/g,(m,d,j)=>{ const b=!'2459'.includes(d), l='178'.includes(d); const P={'와':['과','와'],'과':['과','와'],'을':['을','를'],'를':['을','를'],'은':['은','는'],'는':['은','는'],'이':['이','가'],'가':['이','가']}; if(j==='로'||j==='으로') return d+((b&&!l)?'으로':'로'); return d+P[j][b?0:1]; });
+const jo=(w,a,b)=>{ const c=w.charCodeAt(w.length-1); const has=c>=0xAC00&&c<=0xD7A3&&(c-0xAC00)%28!==0; return w+(has?a:b); };
+const W36=(who,q,speech,visual,ans,x={})=>PW(who,fixJ(q),speech,visual,digitsOf(ans),Object.assign({ansText:fixJ(x.ansText||String(ans)),ansSpeech:x.ansSpeech||' ',hint:x.hint||''},x,{ansText:fixJ(x.ansText||String(ans))}));
+const C36=(who,q,speech,visual,ans,opts,x={})=>P(who,fixJ(q),speech,visual,fixJ(ans),opts.map(fixJ),Object.assign({text:true,ansSpeech:' '},x));
+const optsFrom=(ans,cands)=>{ const s=new Set([String(ans)]); for(const c of shuffle(cands)){ if(s.size>=3) break; if(c!=null&&String(c)!==String(ans)&&!/^-|= -/.test(String(c))) s.add(String(c)); } return shuffle([...s]); };
 const nOpts=(ans,spread=10)=>{ const s=new Set([ans]); let t=0; while(s.size<3&&t++<50){ const v=ans+rnd(-spread,spread); if(v!==ans&&v>=0) s.add(v); } return shuffle([...s]); };
 /* 세로셈(두 수) 답 칸 */
 function vert2(a,op,b,ans,o={}){ const A=String(a),B=String(b),R=String(ans); const w=Math.max(A.length,B.length,R.length);
@@ -2467,9 +2469,9 @@ unit(3,'3-2 곱셈',[
 ]);
 unit(3,'3-2 나눗셈',[
  ['S3-28','몇십 나누기 몇','(몇십)÷(몇)',[
-  ()=>{ const b=rnd(2,4), q=rnd(1,4), a=q*b*10; return W36('halmi',`${a} ÷ ${b}`,`${sino(a)} 나누기 ${sn(b)} 얼마일까? 바구니 ${nativeCount(a/10)} 개를 ${nativeCount(b)} 곳에 나눠 보렴.`,row(a,'÷',b,'=',`<span class="vgrp">${SL(a/b)}</span>`),a/b,{ansText:`${a} ÷ ${b} = ${a/b}`}); },
+  ()=>{ const [a,b]=rndPick([20,2],[40,2],[60,2],[80,2],[30,3],[60,3],[90,3],[40,4],[80,4],[50,5]); return W36('halmi',`${a} ÷ ${b}`,`${sino(a)} 나누기 ${sn(b)} 얼마일까? 바구니 ${nativeCount(a/10)} 개를 ${nativeCount(b)} 곳에 나눠 보렴.`,row(a,'÷',b,'=',`<span class="vgrp">${SL(a/b)}</span>`),a/b,{ansText:`${a} ÷ ${b} = ${a/b}`}); },
   ()=>{ const b=rnd(2,5), q=rnd(11,19); const a=q*b; if(a%10!==0) return G36['S3-28'][0](); return W36('doto',`${a} ÷ ${b}`,`${sino(a)} 나누기 ${sn(b)} 얼마일까요?`,row(a,'÷',b,'=',`<span class="vgrp">${SL(q)}</span>`),q,{ansText:`${a} ÷ ${b} = ${q}`}); },
-  ()=>{ const b=rnd(2,5), q=rnd(12,25); const a=q*b; return W36('rami',`${a} ÷ ${b}`,`${sino(a)} 나누기 ${sn(b)} 얼마일까요? 십의 자리부터 나누어요.`,row(a,'÷',b,'=',`<span class="vgrp">${SL(q)}</span>`),q,{ansText:`${a} ÷ ${b} = ${q}`}); },
+  ()=>{ const [a,b]=rndPick([30,2],[50,2],[70,2],[90,2],[60,4],[60,5],[70,5],[90,5],[90,6],[80,5]); const q=a/b; return W36('rami',`${a} ÷ ${b}`,`${sino(a)} 나누기 ${sn(b)} 얼마일까요? 바구니를 먼저 나누고 남은 바구니는 풀어서 나누어요.`,row(a,'÷',b,'=',`<span class="vgrp">${SL(q)}</span>`),q,{ansText:`${a} ÷ ${b} = ${q}`}); },
  ]],
  ['S3-29','남는 도토리','나머지가 있는 나눗셈',[
   ()=>{ const b=rnd(2,6), q=rnd(2,6), r=rnd(1,b-1), a=q*b+r; return W36('cheong',`${a} ÷ ${b}`,`도토리 ${GAE(a)}를 ${nativeCount(b)} 개씩 묶으면 몇 묶음이고 몇 개가 남을까요?`,groupsVis(q,b)+`<div class="grps"><span class="grp left">${Array.from({length:r},()=>`<img src="${A['소품_도토리']}" class="ac" alt="">`).join('')}</span></div>`+row(a,'÷',b,'=',`<span class="vgrp">${SL(q)}</span>`,'…',`<span class="vgrp">${SL(r)}</span>`),`${q}${r}`,{ansText:`${a} ÷ ${b} = ${q} … ${r}`}); },
@@ -2485,7 +2487,7 @@ unit(3,'3-2 나눗셈',[
  ]],
  ['S3-32','상자도 나눠요','(세 자리)÷(한 자리)',[
   ()=>{ const b=rnd(2,6), q=rnd(101,199); const a=q*b; return W36('halmi',`${a} ÷ ${b}`,`${sino(a)} 나누기 ${sn(b)} 얼마일까? 백의 자리부터 차례로.`,row(a,'÷',b,'=',`<span class="vgrp">${SL(q)}</span>`),q,{ansText:`${a} ÷ ${b} = ${q}`}); },
-  ()=>{ const b=rnd(3,8), q=rnd(50,160), r=rnd(1,b-1); const a=q*b+r; return W36('rami',`${a} ÷ ${b}`,`${sino(a)} 나누기 ${sino(b)}. 몫과 나머지를 쓰세요.`,row(a,'÷',b,'=',`<span class="vgrp">${SL(q)}</span>`,'…',`<span class="vgrp">${SL(r)}</span>`),`${q}${r}`,{ansText:`${a} ÷ ${b} = ${q} … ${r}`}); },
+  ()=>{ const b=rnd(3,8), r=rnd(1,b-1), q=rnd(Math.ceil(100/b),Math.floor((999-r)/b)); const a=q*b+r; return W36('rami',`${a} ÷ ${b}`,`${sino(a)} 나누기 ${sino(b)}. 몫과 나머지를 쓰세요.`,row(a,'÷',b,'=',`<span class="vgrp">${SL(q)}</span>`,'…',`<span class="vgrp">${SL(r)}</span>`),`${q}${r}`,{ansText:`${a} ÷ ${b} = ${q} … ${r}`}); },
  ]],
  ['S3-33','맞게 나눴을까','검산',[
   ()=>{ const b=rnd(3,8), q=rnd(5,20), r=rnd(1,b-1), a=q*b+r; return C36('doto',`${a} ÷ ${b} = ${q} … ${r}의 검산식은?`,`나누는 수 곱하기 몫에 나머지를 더하면 나누어지는 수가 돼요. 알맞은 검산식은?`,row(a,'÷',b,'=',q,'…',r),`${b} × ${q} + ${r} = ${a}`,optsFrom(`${b} × ${q} + ${r} = ${a}`,[`${b} × ${q} − ${r} = ${a-2*r}`,`${q} × ${r} + ${b} = ${q*r+b}`])); },
@@ -2638,7 +2640,7 @@ unit(4,'4-2 소수의 덧셈과 뺄셈',[
 unit(5,'5-1 자연수의 혼합 계산',[
  ['S3-63','더하고 빼는 순서','덧셈·뺄셈 섞인 식',[
   ()=>{ const a=rnd(20,60), b=rnd(5,19), c=rnd(5,19); return W36('rami',`${a} − ${b} + ${c}`,`${sino(a)} 빼기 ${sino(b)} 더하기 ${sino(c)}. 앞에서부터 차례로 계산해요.`,row(a,'−',b,'+',c,'=',`<span class="vgrp">${SL(a-b+c)}</span>`),a-b+c,{ansText:`${a} − ${b} + ${c} = ${a-b+c}`}); },
-  ()=>{ const a=rnd(20,60), b=rnd(5,19), c=rnd(5,19); const wrong=a-(b+c); return C36('cheong',`${a} − ${b} + ${c}, 청이는 ${wrong}이래`,`청이는 뒤에서부터 계산했어요. 앞에서부터 하면?`,row(a,'−',b,'+',c),a-b+c,optsFrom(a-b+c,[wrong,a+b-c])); },
+  ()=>{ const a=rnd(30,60), b=rnd(5,12), c=rnd(5,12); const wrong=a-(b+c); return C36('cheong',`${a} − ${b} + ${c}, 청이는 ${wrong}이래`,`청이는 뒤에서부터 계산했어요. 앞에서부터 하면?`,row(a,'−',b,'+',c),a-b+c,optsFrom(a-b+c,[wrong,a+b-c])); },
  ]],
  ['S3-64','곱하고 나누는 순서','곱셈·나눗셈 섞인 식',[
   ()=>{ const b=rnd(2,6), q=rnd(2,9), a=b*q, c=rnd(2,9); return W36('rami',`${a} ÷ ${b} × ${c}`,`${sino(a)} 나누기 ${sino(b)} 곱하기 ${sino(c)}. 앞에서부터 차례로.`,row(a,'÷',b,'×',c,'=',`<span class="vgrp">${SL(q*c)}</span>`),q*c,{ansText:`${a} ÷ ${b} × ${c} = ${q*c}`}); },
@@ -2654,7 +2656,7 @@ unit(5,'5-1 자연수의 혼합 계산',[
  ]],
  ['S3-67','계산 순서 총정리','사칙연산과 괄호',[
   ()=>{ const b=rnd(2,5), q=rnd(2,6), c=rnd(2,9), a=rnd(5,30); const r=a+b*q*c- (b*q); return W36('halmi',`${a} + ${b*q} ÷ ${b} × ${c} − ${b*q}`,`괄호 없으면 곱셈과 나눗셈을 먼저, 앞에서부터. 그다음 덧셈과 뺄셈.`,row(a,'+',b*q,'÷',b,'×',c,'−',b*q,'=',`<span class="vgrp">${SL(r)}</span>`),r,{ansText:`= ${r}`}); },
-  ()=>{ const a=rnd(2,6), b=rnd(2,6), c=rnd(2,5), d=rnd(1,9); const r=(a+b)*c-d; return C36('rami',`(${a} + ${b}) × ${c} − ${d}`,`괄호 먼저, 곱셈, 그다음 뺄셈.`,row(`(${a} + ${b})`,'×',c,'−',d),r,optsFrom(r,[a+b*c-d,(a+b)*(c-d)])); },
+  ()=>{ const a=rnd(2,6), b=rnd(2,6), c=rnd(2,5), d=rnd(1,9); const r=(a+b)*c-d; return C36('rami',`(${a} + ${b}) × ${c} − ${d}`,`괄호 먼저, 곱셈, 그다음 뺄셈.`,row(`(${a} + ${b})`,'×',c,'−',d),r,optsFrom(r,[a+b*c-d,(a+b)*(c-d),(a+b)*c+d,a+b*(c-d)])); },
  ]],
 ]);
 const divisors=n=>{ const r=[]; for(let i=1;i<=n;i++) if(n%i===0) r.push(i); return r; };
@@ -2767,8 +2769,8 @@ unit(5,'5-2 분수의 곱셈',[
   ()=>{ const a=rnd(2,5), b=rnd(2,5), n1=rnd(1,a-1), n2=rnd(1,b-1); const [rn,rd]=red(n1*n2,a*b); return W36('doto',`${frTxt(n1,a)} × ${frTxt(n2,b)} (기약분수로)`,`분자끼리, 분모끼리 곱하고 약분해요.`,row(fr(n1,a),'×',fr(n2,b),'=',frQ(rn,rd,'nd')),`${rn}${rd}`,{ansText:frTxt(rn,rd)}); },
  ]],
  ['S3-92','대분수의 곱셈','대분수를 가분수로',[
-  ()=>{ const d=rnd(2,4), w=rnd(1,2), n=rnd(1,d-1), k=rnd(2,4); const N=(w*d+n)*k; const [rn,rd]=red(N,d); const [cw,cm]=toMix(rn,rd); return W36('rami',`${mixTxt(w,n,d)} × ${k}`,`대분수를 가분수 ${frSp(w*d+n,d)}로 바꿔서 곱해요.`,row(mix(w,n,d),'×',k,'=',cm?mixQ(cw,cm,rd,'wn'):`<span class="vgrp">${SL(cw)}</span>`),cm?`${cw}${cm}`:`${cw}`,{ansText:mixTxt(cw,cm,rd)}); },
-  ()=>{ const d=rnd(2,4), w=rnd(1,2), n=rnd(1,d-1), b=rnd(2,5), n2=rnd(1,b-1); const N=(w*d+n)*n2, D=d*b; const [rn,rd]=red(N,D); const [cw,cm]=toMix(rn,rd); return C36('doto',`${mixTxt(w,n,d)} × ${frTxt(n2,b)}`,`대분수를 가분수로 바꾼 뒤 분자끼리, 분모끼리 곱해요.`,row(mix(w,n,d),'×',fr(n2,b)),cw?mixTxt(cw,cm,rd):frTxt(rn,rd),optsFrom(cw?mixTxt(cw,cm,rd):frTxt(rn,rd),[mixTxt(w,n*n2,d*b),frTxt(N+1,D)])); },
+  ()=>{ const d=rnd(2,4), w=rnd(1,2), n=rnd(1,d-1), k=rnd(2,4); if(gcd(n,d)!==1) return G36['S3-92'][0](); const N=(w*d+n)*k; const [rn,rd]=red(N,d); const [cw,cm]=toMix(rn,rd); return W36('rami',`${mixTxt(w,n,d)} × ${k}`,`대분수를 가분수 ${frSp(w*d+n,d)}로 바꿔서 곱해요.`,row(mix(w,n,d),'×',k,'=',cm?mixQ(cw,cm,rd,'wn'):`<span class="vgrp">${SL(cw)}</span>`),cm?`${cw}${cm}`:`${cw}`,{ansText:mixTxt(cw,cm,rd)}); },
+  ()=>{ const d=rnd(2,4), w=rnd(1,2), n=rnd(1,d-1), b=rnd(2,5), n2=rnd(1,b-1); if(gcd(n,d)!==1) return G36['S3-92'][1](); const N=(w*d+n)*n2, D=d*b; const [rn,rd]=red(N,D); const [cw,cm]=toMix(rn,rd); return C36('doto',`${mixTxt(w,n,d)} × ${frTxt(n2,b)}`,`대분수를 가분수로 바꾼 뒤 분자끼리, 분모끼리 곱해요.`,row(mix(w,n,d),'×',fr(n2,b)),cw?mixTxt(cw,cm,rd):frTxt(rn,rd),optsFrom(cw?mixTxt(cw,cm,rd):frTxt(rn,rd),[mixTxt(w,n*n2,d*b),frTxt(N+1,D)])); },
  ]],
 ]);
 unit(5,'5-2 소수의 곱셈',[
@@ -2834,8 +2836,8 @@ unit(6,'6-2 분수의 나눗셈',[
   ()=>{ const d=rnd(2,5), k=rnd(2,6); return C36('cheong',`${k} ÷ ${frTxt(1,d)}은 ${k}보다?`,`일보다 작은 수로 나누면 몫은 어떻게 될까요?`,row(k,'÷',fr(1,d)),`${k}보다 크다 (${k*d})`,[`${k}보다 크다 (${k*d})`,`${k}보다 작다`,`${k}와 같다`]); },
  ]],
  ['S3-107','뒤집어서 곱하기','(분수)÷(분수)를 곱셈으로',[
-  ()=>{ const a=rnd(2,5), b=rnd(2,5), n1=rnd(1,a-1), n2=rnd(1,b-1); const [rn,rd]=red(n1*b,a*n2); const [w,m]=toMix(rn,rd); return W36('rami',`${frTxt(n1,a)} ÷ ${frTxt(n2,b)}`,`나누는 분수의 분모와 분자를 뒤집어 곱해요. ${frSp(n1,a)} 곱하기 ${frSp(b,n2)}.`,row(fr(n1,a),'÷',fr(n2,b),'=',fr(n1,a),'×',fr(b,n2),'=',w?(m?mixQ(w,m,rd,'wn'):`<span class="vgrp">${SL(w)}</span>`):frQ(rn,rd,'nd')),w?(m?`${w}${m}`:`${w}`):`${rn}${rd}`,{ansText:w?mixTxt(w,m,rd):frTxt(rn,rd)}); },
-  ()=>{ const a=rnd(2,5), b=rnd(2,5), n1=rnd(1,a-1), n2=rnd(1,b-1); return C36('doto',`${frTxt(n1,a)} ÷ ${frTxt(n2,b)}과 같은 식은?`,`나눗셈을 곱셈으로 바꾸면?`,row(fr(n1,a),'÷',fr(n2,b)),`${frTxt(n1,a)} × ${frTxt(b,n2)}`,[`${frTxt(n1,a)} × ${frTxt(b,n2)}`,`${frTxt(n1,a)} × ${frTxt(n2,b)}`,`${frTxt(a,n1)} × ${frTxt(n2,b)}`]); },
+  ()=>{ const a=rnd(2,5), b=rnd(2,5), n1=rnd(1,a-1), n2=rnd(1,b-1); if(gcd(n1,a)!==1||gcd(n2,b)!==1) return G36['S3-107'][0](); const [rn,rd]=red(n1*b,a*n2); const [w,m]=toMix(rn,rd); return W36('rami',`${frTxt(n1,a)} ÷ ${frTxt(n2,b)}`,`나누는 분수의 분모와 분자를 뒤집어 곱해요. ${frSp(n1,a)} 곱하기 ${frSp(b,n2)}.`,row(fr(n1,a),'÷',fr(n2,b),'=',fr(n1,a),'×',fr(b,n2),'=',w?(m?mixQ(w,m,rd,'wn'):`<span class="vgrp">${SL(w)}</span>`):frQ(rn,rd,'nd')),w?(m?`${w}${m}`:`${w}`):`${rn}${rd}`,{ansText:w?mixTxt(w,m,rd):frTxt(rn,rd)}); },
+  ()=>{ const a=rnd(2,5), b=rnd(2,5), n1=rnd(1,a-1), n2=rnd(1,b-1); if(gcd(n1,a)!==1||gcd(n2,b)!==1) return G36['S3-107'][0](); return C36('doto',`${frTxt(n1,a)} ÷ ${frTxt(n2,b)}과 같은 식은?`,`나눗셈을 곱셈으로 바꾸면?`,row(fr(n1,a),'÷',fr(n2,b)),`${frTxt(n1,a)} × ${n2===1?b:frTxt(b,n2)}`,[`${frTxt(n1,a)} × ${n2===1?b:frTxt(b,n2)}`,`${frTxt(n1,a)} × ${frTxt(n2,b)}`,`${n1===1?a:frTxt(a,n1)} × ${frTxt(n2,b)}`]); },
  ]],
 ]);
 unit(6,'6-2 소수의 나눗셈',[
@@ -2986,6 +2988,7 @@ function clockSvg(h,m){ let s=`<circle cx="60" cy="60" r="54" fill="#FFFDF4" str
   return SV(120,120,s,160); }
 const regPts=(n,r=44,cx=50,cy=52)=>Array.from({length:n},(_,i)=>{ const a=-Math.PI/2+2*Math.PI*i/n; return `${(cx+r*Math.cos(a)).toFixed(1)},${(cy+r*Math.sin(a)).toFixed(1)}`; }).join(' ');
 const polySvg=(n)=>n===0?SV(100,100,`<circle cx="50" cy="52" r="42" fill="#FFE3B0" ${STK}/>`,130):n===4?SV(100,100,`<rect x="14" y="16" width="72" height="72" fill="#FFE3B0" ${STK}/>`,130):SV(100,100,`<polygon points="${regPts(n)}" fill="#FFE3B0" ${STK}/>`,130);
+const PNAME=['','','','삼','사','오','육','칠','팔'];
 const SHAPE_NAME={3:'삼각형',4:'사각형',5:'오각형',6:'육각형',7:'칠각형',8:'팔각형'};
 function angSvg(deg){ const r=70, a=deg*Math.PI/180; const x2=20+r*Math.cos(a), y2=90-r*Math.sin(a); const ar=22; const ax=20+ar*Math.cos(a), ay=90-ar*Math.sin(a);
   return SV(170,100,`<line x1="20" y1="90" x2="160" y2="90" ${STK}/><line x1="20" y1="90" x2="${x2.toFixed(1)}" y2="${y2.toFixed(1)}" ${STK}/>`+(deg===90?`<path d="M20,72 h18 v18" fill="none" stroke="#D45F16" stroke-width="2"/>`:`<path d="M42,90 A22,22 0 ${deg>180?1:0},0 ${ax.toFixed(1)},${ay.toFixed(1)}" fill="none" stroke="#D45F16" stroke-width="2"/>`),200); }
@@ -3031,7 +3034,7 @@ unit(2,'2-2 표와 그래프',[
  ]],
  ['S4-04','○로 그래프 그리기','○ 그래프',[
   ()=>{ const L=pickN(FRUITS,3), v=L.map(()=>rnd(1,6)); const k=rnd(0,2); return WN(`${L[k]}에는 ○를 몇 개 그려야 할까요?`,tbl(L,v,['과일','학생 수']),v[k],'','개'); },
-  ()=>{ const L=pickN(FRUITS,3), v=L.map(()=>rnd(1,6)); const k=rnd(0,2); return WN(`그래프에서 ${L[k]}를 좋아하는 학생은 몇 명?`,oGraph(L,v),v[k],'','명'); },
+  ()=>{ const L=pickN(FRUITS,3), v=L.map(()=>rnd(1,6)); const k=rnd(0,2); return WN(`그래프에서 ${jo(L[k],'을','를')} 좋아하는 학생은 몇 명?`,oGraph(L,v),v[k],'','명'); },
  ]],
  ['S4-05','그래프를 읽어요','그래프 해석',[
   ()=>{ const L=pickN(FRUITS,3), v=distinct(3,1,7); const mx=Math.max(...v); return CF('가장 많은 학생이 좋아하는 과일은?',oGraph(L,v),L[v.indexOf(mx)],L); },
@@ -3058,7 +3061,7 @@ unit(4,'4-1 막대그래프',[
   ()=>{ const st=rndPick(2,5,10), k=rnd(2,9); return WN(`눈금 한 칸이 ${st}명일 때 막대가 ${k}칸이면 몇 명?`,'',st*k,'','명'); },
  ]],
  ['S4-10','막대그래프 읽기','막대그래프 해석',[
-  ()=>{ const st=rndPick(1,2,5), L=pickN(FRUITS,4), v=L.map(()=>st*rnd(1,9)); const k=rnd(0,3); return WN(`${L[k]}를 좋아하는 학생은 몇 명?`,barG(L,v,st),v[k],'','명'); },
+  ()=>{ const st=rndPick(1,2,5), L=pickN(FRUITS,4), v=L.map(()=>st*rnd(1,9)); const k=rnd(0,3); return WN(`${jo(L[k],'을','를')} 좋아하는 학생은 몇 명?`,barG(L,v,st),v[k],'','명'); },
   ()=>{ const st=rndPick(1,2,5), L=pickN(FRUITS,4), v=distinct(4,1,9).map(x=>x*st); return WN('가장 많은 것과 가장 적은 것의 차이는?',barG(L,v,st),Math.max(...v)-Math.min(...v),'','명'); },
   ()=>{ const st=rndPick(1,2,5), L=pickN(FRUITS,4), v=distinct(4,1,9).map(x=>x*st); return CF('두 번째로 많은 것은?',barG(L,v,st),L[v.indexOf([...v].sort((a,b)=>b-a)[1])],L); },
  ]],
@@ -3098,7 +3101,7 @@ unit(5,'5-2 평균과 가능성',[
 ]);
 unit(6,'6-1 비율그래프',[
  ['S4-19','띠그래프','띠그래프',[
-  ()=>{ const L=pickN(FRUITS,4); let p=[rnd(2,4)*5,rnd(2,4)*5,rnd(1,3)*5]; p.push(100-p.reduce((a,b)=>a+b)); const k=rnd(0,3); return WN(`${L[k]}는 전체의 몇 %?`,bandG(L,p).replace(`${p[k]}%`,'?%'),p[k],'','%'); },
+  ()=>{ const L=pickN(FRUITS,4); let p=[rnd(2,4)*5,rnd(2,4)*5,rnd(1,3)*5]; p.push(100-p.reduce((a,b)=>a+b)); const k=rnd(0,3); return WN(`${jo(L[k],'은','는')} 전체의 몇 %?`,bandG(L,p).replace(`${p[k]}%`,'?%'),p[k],'','%'); },
   ()=>{ const L=pickN(FRUITS,4); let p=[rnd(2,4)*5,rnd(2,4)*5,rnd(1,3)*5]; p.push(100-p.reduce((a,b)=>a+b)); const mx=Math.max(...p); if(p.filter(x=>x===mx).length>1) return G36['S4-19'][1](); return CF('가장 많이 차지하는 것은?',bandG(L,p),L[p.indexOf(mx)],L); },
  ]],
  ['S4-20','원그래프','원그래프',[
@@ -3106,8 +3109,8 @@ unit(6,'6-1 비율그래프',[
   ()=>{ const tot=rndPick(20,25,50), k=rnd(1,tot-1); if(k*100%tot) return G36['S4-20'][1](); return WN(`${tot}명 중 ${k}명은 몇 %?`,'',k*100/tot,'','%'); },
  ]],
  ['S4-21','비율그래프로 생각해요','비율그래프 해석',[
-  ()=>{ const L=pickN(FRUITS,4); let p=[rnd(2,4)*5,rnd(2,4)*5,rnd(1,3)*5]; p.push(100-p.reduce((a,b)=>a+b)); const i=rnd(0,3); let j=rnd(0,3); if(i===j) j=(i+1)%4; if(p[i]%p[j]!==0||p[i]===p[j]) return G36['S4-21'][0](); return WN(`${L[i]}는 ${L[j]}의 몇 배?`,bandG(L,p),p[i]/p[j],'','배'); },
-  ()=>{ const L=pickN(FRUITS,4); let p=[rnd(2,4)*5,rnd(2,4)*5,rnd(1,3)*5]; p.push(100-p.reduce((a,b)=>a+b)); return WN(`${L[0]}와 ${L[1]}를 합하면 몇 %?`,bandG(L,p),p[0]+p[1],'','%'); },
+  ()=>{ const L=pickN(FRUITS,4); let p=[rnd(2,4)*5,rnd(2,4)*5,rnd(1,3)*5]; p.push(100-p.reduce((a,b)=>a+b)); const i=rnd(0,3); let j=rnd(0,3); if(i===j) j=(i+1)%4; if(p[i]%p[j]!==0||p[i]===p[j]) return G36['S4-21'][0](); return WN(`${jo(L[i],'은','는')} ${L[j]}의 몇 배?`,bandG(L,p),p[i]/p[j],'','배'); },
+  ()=>{ const L=pickN(FRUITS,4); let p=[rnd(2,4)*5,rnd(2,4)*5,rnd(1,3)*5]; p.push(100-p.reduce((a,b)=>a+b)); return WN(`${jo(L[0],'과','와')} ${jo(L[1],'을','를')} 합하면 몇 %?`,bandG(L,p),p[0]+p[1],'','%'); },
  ]],
  ['S4-22','꽃밭 조사 프로젝트','통계 종합',[ ()=>G36['S4-10'][1](), ()=>G36['S4-15'][0](), ()=>G36['S4-20'][0](), ()=>G36['S4-13'][0](), ()=>G36['S4-18'][0]() ]],
 ]);
@@ -3156,11 +3159,11 @@ unit(4,'4-1 규칙 찾기',[
   ()=>{ const seq=[1,4,9]; const nx=rndPick(4,5); return WN(`정사각형 모양으로 1, 4, 9개… ${nx}번째는 몇 개?`,'',nx*nx,'','개'); },
  ]],
  ['S5-07','규칙을 식으로','규칙을 식으로',[
-  ()=>{ const k=rnd(2,6), b=rnd(0,5), n=rnd(6,12); const seq=[1,2,3].map(i=>k*i+b); return WN(`${seq.join(', ')}… 순서 × ${k} + ${b} 규칙이에요. ${n}번째 수는?`,'',k*n+b); },
+  ()=>{ const k=rnd(2,6), b=rnd(1,5), n=rnd(6,12); const seq=[1,2,3].map(i=>k*i+b); return WN(`${seq.join(', ')}… 순서 × ${k} + ${b} 규칙이에요. ${n}번째 수는?`,'',k*n+b); },
   ()=>{ const k=rnd(2,6), b=rnd(1,5); return CC(`${k+b}, ${2*k+b}, ${3*k+b}… 를 식으로 나타내면?`,'',`순서 × ${k} + ${b}`,[`순서 + ${k+b}`,`순서 × ${k+b}`,`순서 × ${k} − ${b}`]); },
  ]],
  ['S5-08','계산식의 규칙','계산식 배열',[
-  ()=>{ const r=rnd(2,4); const ones=n=>Number('1'.repeat(n)); return CC(`11 × 11 = 121, 111 × 111 = 12321, … ${'1'.repeat(r+1)} × ${'1'.repeat(r+1)} = ?`,'',String(ones(r+1)**2),[String(ones(r+1)**2+10),String(ones(r)*ones(r+2))]); },
+  ()=>{ const r=rnd(3,4); const ones=n=>Number('1'.repeat(n)); return CC(`11 × 11 = 121, 111 × 111 = 12321, … ${'1'.repeat(r+1)} × ${'1'.repeat(r+1)} = ?`,'',String(ones(r+1)**2),[String(ones(r+1)**2+10),String(ones(r)*ones(r+2))]); },
   ()=>{ const a=rnd(1,5); const k=rnd(3,5); return WN(`${a}00 + ${a}0 = ${a*110}, ${a+1}00 + ${a+1}0 = ${(a+1)*110}, ${a+k}00 + ${a+k}0 = ?`,'',(a+k)*110); },
  ]],
  ['S5-09',"등호는 '같다'",'등호의 뜻',[
@@ -3174,7 +3177,7 @@ unit(4,'4-1 규칙 찾기',[
 ]);
 unit(5,'5-1 규칙과 대응',[
  ['S5-11','함께 변하는 두 양','대응 관계',[
-  ()=>{ const k=rnd(2,6); const xs=[1,2,3,4,5]; const r=rnd(2,4); return WN(`세발자전거 대신 다리가 ${k}개인 의자예요. 의자 ${xs[r]}개의 다리는?`,tbl(xs,xs.map((x,i)=>i===r?'?':x*k),['의자 수','다리 수']),xs[r]*k,'','개'); },
+  ()=>{ const k=rnd(2,6); const xs=[1,2,3,4,5]; const r=rnd(2,4); return WN(`다리가 ${k}개인 의자가 있어요. 의자 ${xs[r]}개의 다리는 모두 몇 개?`,tbl(xs,xs.map((x,i)=>i===r?'?':x*k),['의자 수','다리 수']),xs[r]*k,'','개'); },
   ()=>{ const k=rnd(3,15); const xs=[1,2,3,4]; return WN(`나이 차이가 ${k}살이에요. 내가 ${xs[3]+5}살이면 언니는?`,tbl(xs,xs.map(x=>x+k),['내 나이','언니 나이']),xs[3]+5+k,'','살'); },
  ]],
  ['S5-12','대응을 식으로','대응 식',[
@@ -3202,15 +3205,15 @@ unit(6,'6-1 비와 비율',[
 ]);
 unit(6,'6-2 비례식과 비례배분',[
  ['S5-17','비의 성질','비의 성질',[
-  ()=>{ const a=rnd(1,9), b=rnd(1,9), k=rnd(2,6); return WN(`${a} : ${b} = ${a*k} : □`,row(`${a} : ${b}`,'=',`${a*k} : □`),b*k); },
-  ()=>{ const a=rnd(1,9), b=rnd(1,9), k=rnd(2,6); return WN(`${a*k} : ${b*k} = □ : ${b}`,row(`${a*k} : ${b*k}`,'=',`□ : ${b}`),a); },
+  ()=>{ const a=rnd(1,9), b=rnd(1,9), k=rnd(2,6); if(a===b) return G36['S5-17'][0](); return WN(`${a} : ${b} = ${a*k} : □`,row(`${a} : ${b}`,'=',`${a*k} : □`),b*k); },
+  ()=>{ const a=rnd(1,9), b=rnd(1,9), k=rnd(2,6); if(a===b) return G36['S5-17'][1](); return WN(`${a*k} : ${b*k} = □ : ${b}`,row(`${a*k} : ${b*k}`,'=',`□ : ${b}`),a); },
  ]],
  ['S5-18','간단한 자연수의 비','간단한 자연수비',[
   ()=>{ const a=rnd(1,9), b=rnd(1,9); if(gcd(a,b)!==1||a===b) return G36['S5-18'][0](); return CC(`${(a/10).toFixed(1)} : ${(b/10).toFixed(1)}을 간단한 자연수의 비로?`,'',`${a} : ${b}`,[`${b} : ${a}`,`${a*10} : ${b}`]); },
   ()=>{ const g=rnd(2,6), a=rnd(1,7), b=rnd(1,7); if(gcd(a,b)!==1||a===b) return G36['S5-18'][1](); return CC(`${a*g} : ${b*g}를 간단한 자연수의 비로?`,'',`${a} : ${b}`,[`${b} : ${a}`,`${a+1} : ${b+1}`]); },
  ]],
  ['S5-19','비례식','외항·내항의 곱',[
-  ()=>{ const a=rnd(2,9), b=rnd(2,9), k=rnd(2,5); return WN(`${a} : ${b} = □ : ${b*k}`,row(`${a} : ${b}`,'=',`□ : ${b*k}`),a*k); },
+  ()=>{ const a=rnd(2,9), b=rnd(2,9), k=rnd(2,5); if(a===b) return G36['S5-19'][0](); return WN(`${a} : ${b} = □ : ${b*k}`,row(`${a} : ${b}`,'=',`□ : ${b*k}`),a*k); },
   ()=>{ const a=rnd(2,9), b=rnd(2,9), k=rnd(2,5); return WN(`비례식 ${a} : ${b} = ${a*k} : ${b*k}에서 외항의 곱은?`,'',a*b*k); },
  ]],
  ['S5-20','비례식 활용','비례식 문제',[
@@ -3218,13 +3221,13 @@ unit(6,'6-2 비례식과 비례배분',[
   ()=>{ const m=rnd(2,5), d=rnd(3,9), k=rnd(2,5); return WN(`${m}분에 ${m*d} L 나오는 수도, ${m*k}분이면?`,'',m*d*k,'','L'); },
  ]],
  ['S5-21','비례배분','비례배분',[
-  ()=>{ const a=rnd(1,5), b=rnd(1,5), u=rnd(2,9); const t=(a+b)*u; return WN(`도토리 ${t}개를 ${a} : ${b}로 나누면 앞사람은?`,'',a*u,'','개'); },
-  ()=>{ const a=rnd(1,5), b=rnd(1,5), u=rnd(2,9)*10; const t=(a+b)*u; return WN(`${t}원을 ${a} : ${b}로 나누면 뒷사람은?`,'',b*u,'','원'); },
+  ()=>{ const a=rnd(1,5), b=rnd(1,5), u=rnd(2,9); if(a===b) return G36['S5-21'][0](); const t=(a+b)*u; return WN(`도토리 ${t}개를 ${a} : ${b}로 나누면 앞사람은?`,'',a*u,'','개'); },
+  ()=>{ const a=rnd(1,5), b=rnd(1,5), u=rnd(2,9)*10; if(a===b) return G36['S5-21'][1](); const t=(a+b)*u; return WN(`${t}원을 ${a} : ${b}로 나누면 뒷사람은?`,'',b*u,'','원'); },
  ]],
 ]);
 
 /* ===== 시즌6 도형과 측정 ===== */
-unit(2,'1-1 여러 가지 모양',[
+unit(2,'1-1·1-2 모양과 비교하기',[
  ['S6-01','여러 가지 모양','상자·둥근기둥·공',[
   pickQ([['축구공은 어떤 모양?','공 모양',['공 모양','상자 모양','둥근기둥 모양']],['주사위는 어떤 모양?','상자 모양',['상자 모양','공 모양','둥근기둥 모양']],['풀통은 어떤 모양?','둥근기둥 모양',['둥근기둥 모양','공 모양','상자 모양']],['잘 굴러가고 쌓을 수 없는 모양은?','공 모양',['공 모양','상자 모양','둥근기둥 모양']],['평평한 면만 있는 모양은?','상자 모양',['상자 모양','공 모양','둥근기둥 모양']]]),
  ]],
@@ -3330,7 +3333,7 @@ unit(3,'3-1 길이와 시간',[
  ]],
  ['S6-36','시간 빼기','시간의 뺄셈',[
   ()=>{ const h=rnd(3,11), m=rnd(0,40), a=rnd(10,59); let T=h*60+m-a; return WN2(`${h}시 ${m}분에서 ${a}분 전은?`,'',Math.floor(T/60),'시',T%60,'분'); },
-  ()=>{ const a=rnd(2,9), b=rnd(0,30), c=rnd(10,59); const T=a*60+b-c; return WN2(`${a}시간 ${b}분 − ${c}분`,'',Math.floor(T/60),'시간',T%60,'분'); },
+  ()=>{ const a=rnd(2,9), b=rnd(0,30), c=rnd(10,59); const T=a*60+b-c; return WN2(`${a}시간${b?` ${b}분`:''} − ${c}분`,'',Math.floor(T/60),'시간',T%60,'분'); },
  ]],
  ['S6-37','일 밀리미터','1 cm = 10 mm',[
   ()=>{ const c=rnd(1,15), m=rnd(1,9); return WN(`${c} cm ${m} mm는 몇 mm?`,'',c*10+m,'','mm'); },
@@ -3422,7 +3425,7 @@ unit(4,'4-1 평면도형의 이동',[
   tGen(()=>{ const f=tRand(); return tQ('시계 반대 방향으로 90° 돌리면?',f,tApply(f,c=>tRot(c,3)),[tApply(f,c=>tRot(c,1)),tApply(f,tLR)]); }),
  ]],
  ['S6-25','점의 이동','점의 이동',[
-  ()=>{ const x=rnd(1,5), y=rnd(1,5), dx=rnd(1,4), dy=rnd(1,4); return WN2(`점이 (가로 ${x}, 세로 ${y})칸에 있어요. 오른쪽으로 ${dx}칸, 위로 ${dy}칸 옮기면?`,'',x+dx,'가로',y+dy,'세로'); },
+  ()=>{ const x=rnd(1,5), y=rnd(1,5), dx=rnd(1,4), dy=rnd(1,4); return W36(WHO(),`점이 왼쪽에서 ${x}번째, 아래에서 ${y}번째 칸에 있어요. 오른쪽으로 ${dx}칸, 위로 ${dy}칸 옮기면?`,' ',row('왼쪽에서',slotsN(x+dx),'번째')+row('아래에서',slotsN(y+dy),'번째'),`${x+dx}${y+dy}`,{ansText:`왼쪽에서 ${x+dx}번째, 아래에서 ${y+dy}번째`}); },
  ]],
 ]);
 unit(4,'4-2 수직과 평행',[
@@ -3508,11 +3511,11 @@ unit(5,'5-2 합동과 대칭',[
 ]);
 unit(5,'5-2 직육면체',[
  ['S6-56','직육면체와 정육면체','면·모서리·꼭짓점',[
-  ()=>{ const k=rndPick(['면',6],['모서리',12],['꼭짓점',8]); return WN(`직육면체의 ${k[0]}은 몇 개?`,boxSvg(),k[1],'','개'); },
+  ()=>{ const k=rndPick(['면',6],['모서리',12],['꼭짓점',8]); return WN(`직육면체의 ${jo(k[0],'은','는')} 몇 개?`,boxSvg(),k[1],'','개'); },
   ()=>{ const a=rnd(2,9); return WN(`한 모서리가 ${a} cm인 정육면체의 모든 모서리 길이의 합은?`,'',12*a,'','cm'); },
  ]],
  ['S6-57','보이지 않는 모서리','겨냥도',[
-  ()=>{ const k=rndPick(['보이지 않는 모서리',3],['보이는 모서리',9],['보이지 않는 꼭짓점',1],['보이는 면',3]); return WN(`직육면체 겨냥도에서 ${k[0]}는 몇 개?`,boxSvg(),k[1],'','개'); },
+  ()=>{ const k=rndPick(['보이지 않는 모서리',3],['보이는 모서리',9],['보이지 않는 꼭짓점',1],['보이는 면',3]); return WN(`직육면체 겨냥도에서 ${jo(k[0],'은','는')} 몇 개?`,boxSvg(),k[1],'','개'); },
  ]],
  ['S6-58','펼쳐 보면 전개도','전개도',[
   pickQ([['정육면체 전개도의 면은 몇 개?','6개',['6개','4개','8개']],['직육면체에서 서로 마주 보는 면은?','평행하다',['평행하다','수직이다','만난다']],['직육면체 한 면과 수직인 면은 몇 개?','4개',['4개','2개','5개']]]),
@@ -3520,13 +3523,13 @@ unit(5,'5-2 직육면체',[
 ]);
 unit(6,'6-1 각기둥과 각뿔',[
  ['S6-59','각기둥','각기둥',[
-  ()=>{ const n=rnd(3,8), k=rndPick(['면',n+2],['모서리',3*n],['꼭짓점',2*n]); return WN(`${SHAPE_NAME[n]}기둥(${n}각기둥)의 ${k[0]}은 몇 개?`,'',k[1],'','개'); },
+  ()=>{ const n=rnd(3,8), k=rndPick(['면',n+2],['모서리',3*n],['꼭짓점',2*n]); return WN(`${PNAME[n]}각기둥의 ${jo(k[0],'은','는')} 몇 개?`,'',k[1],'','개'); },
  ]],
  ['S6-60','각뿔','각뿔',[
-  ()=>{ const n=rnd(3,8), k=rndPick(['면',n+1],['모서리',2*n],['꼭짓점',n+1]); return WN(`${SHAPE_NAME[n]}뿔(${n}각뿔)의 ${k[0]}은 몇 개?`,'',k[1],'','개'); },
+  ()=>{ const n=rnd(3,8), k=rndPick(['면',n+1],['모서리',2*n],['꼭짓점',n+1]); return WN(`${PNAME[n]}각뿔의 ${jo(k[0],'은','는')} 몇 개?`,'',k[1],'','개'); },
  ]],
  ['S6-61','각기둥 전개도','각기둥 전개도',[
-  ()=>{ const n=rnd(3,8); return WN(`${n}각기둥의 전개도에서 옆면은 몇 개?`,'',n,'','개'); },
+  ()=>{ const n=rnd(3,8); return WN(`${PNAME[n]}각기둥의 전개도에서 옆면은 몇 개?`,'',n,'','개'); },
   pickQ([['각기둥의 옆면 모양은?','직사각형',['직사각형','삼각형','원']],['각뿔의 옆면 모양은?','삼각형',['삼각형','직사각형','원']]]),
  ]],
 ]);
