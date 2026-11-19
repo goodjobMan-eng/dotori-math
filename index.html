@@ -2321,12 +2321,12 @@ function home(){
     <div class="hero" style="background-image:url(${A['팻말']})">${logoSVG()}<div><h1>도토리 숲 수학 퀴즈</h1><p class="sub">영상 보고 · 노래 듣고 · 게임 하고 · 문제 풀기</p></div></div>
     <div class="parade">${['도토','대롱이','붕붕이','부엉 박사님','째깍이','길쭉이','쏙쏙이','콩알이','람이'].map((n,k)=>juImg(n,k%3===0?'wave':k%3===1?'yay':'base','pj')).join('')}</div>
     ${statsCard()}
-    <h2 class="sec">📺 1~2학년 · 영상 보고 풀기 <small>도토리 숲 숏츠와 함께</small></h2>
+    <h2 class="sec">📺 1~2학년 · 영상 보고 풀기</h2>
     ${loadWrong().length?`<button class="retrychip" id="retryhome">🔁 틀린 문제 다시 도전 <b>${loadWrong().length}</b></button>`:''}
     <div class="chapters">
       ${[1,2,3].map(c=>{ const [lo,hi]=CHAPTERS[c].eps; let done=0; for(let e=lo;e<=hi;e++) if(best['EP'+e]!=null) done++; return `<button class="chap" data-ch="${c}">${chip(CHAPTERS[c].who,'base')}<div><div class="t">${c}장 · ${CHAPTERS[c].title}</div><div class="d">${CHAPTERS[c].desc}</div><div class="stars">에피소드 ${done}/17 완료 · 종합 ${best['CH'+c]!=null?best['CH'+c]+'/10':'-'}</div></div></button>`; }).join('')}
     </div>
-    <h2 class="sec">🧩 영역별 문제 <small>1~6학년 · 조작 활동과 문장제</small></h2>
+    <h2 class="sec">🧩 영역별 문제</h2>
     ${homeGrades()}
     ${warn}
     <div class="note">📺 영상 → 🎵 노래 → 🎮 활동 10개 순서예요.${location.protocol==='file:'?'<br>⚠️ 파일로 바로 열면 유튜브 영상이 안 나올 수 있어요. 영상 아래 <b>유튜브에서 보기</b>를 누르세요.':''}</div>`;
