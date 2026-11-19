@@ -872,6 +872,20 @@ body:before{background:
 .ifr{display:inline-flex;flex-direction:column;align-items:center;line-height:1.05;font-size:.82em;vertical-align:middle;margin:0 1px}
 .ifr .ifn{border-bottom:2px solid currentColor;padding:0 3px}.ifr .ifd{padding:0 3px}
 .opt .ifr{font-size:1.15em}.opt.text{line-height:1.2}.bubble .q .ifr{font-size:1em}.bubble .q .imx{margin:0 4px}
+
+.scr{position:absolute;left:0;top:0;pointer-events:none;z-index:6;border-radius:var(--r-lg)}
+.scr.active{pointer-events:auto;touch-action:none;cursor:crosshair}
+.stage.scr-on{outline:3px dashed #F2B880;outline-offset:2px}
+.scrbar{position:fixed;right:12px;bottom:16px;z-index:50;display:flex;flex-direction:column;align-items:flex-end;gap:8px}
+.scr-toggle{font-family:"Jua",sans-serif;font-size:1.05rem;padding:12px 16px;border-radius:999px;background:#2E2620;color:#fff;box-shadow:0 6px 18px rgba(0,0,0,.2)}
+.scrbar.open .scr-toggle{background:var(--brand)}
+.scr-tools{display:none;gap:8px;background:#fff;border:1.5px solid var(--line-strong);border-radius:999px;padding:6px 8px;box-shadow:0 6px 18px rgba(0,0,0,.12)}
+.scrbar.open .scr-tools{display:flex}
+.scr-tools button{width:36px;height:36px;border-radius:50%;border:3px solid transparent;font-size:1.1rem;background:#fff}
+.scr-tools button[data-c]{background:var(--c)}
+.scr-tools button[data-c="#2E2620"]{background:#2E2620}.scr-tools button[data-c="#E2681E"]{background:#E2681E}.scr-tools button[data-c="#2F7DD6"]{background:#2F7DD6}
+.scr-tools button.on{border-color:#FFC53D;box-shadow:0 0 0 2px #fff inset}
+.scrspace{height:150px;margin:8px 0;border:2px dashed #EAD9BF;border-radius:16px;background:repeating-linear-gradient(#FFFDF8,#FFFDF8 29px,#F4EADB 30px);color:#C9B79C;font-size:.8rem;padding:6px 10px}
 </style>
 </head>
 <body>
@@ -2439,6 +2453,7 @@ function question(q){
   if(q.write) (S.mode==='ep36'?mountWriteQ36:mountWriteQ)(q);
   if(S.mode==='ep36'){ const vz=document.getElementById('visual'); mountMemos(vz); if((UNITS36[S.ui]||{}).grade===2&&!S.retry) vz.insertAdjacentHTML('afterbegin','<div class="withadult sm">👨‍👩‍👧 어른과 함께 읽어요</div>'); }
   if(q.onMount) q.onMount(document.getElementById('visual'));
+  if(S.mode==='ep36') addScratch();
   if(q.manip){ q.manip.mount(document.getElementById('manip')); document.getElementById('mdone').onclick=()=>{ const ok=q.manip.check(); answer({dataset:{v:ok?q.ans:'__no'},classList:{add(){}},disabled:false},q); if(!ok&&S.tries>=2&&q.manip.reveal){ q.manip.reveal(); const mv=document.getElementById('mval'); if(mv) mv.textContent='정답 모양이에요'; } }; }
   if(q.tap){ document.querySelectorAll('#visual .ac[data-tap]').forEach(a=>{ a.onclick=()=>{ if(a.classList.contains('counted')) return; a.classList.add('counted'); S.counted++; sayNum(S.counted+q.base,q.who); }; }); }
   setTimeout(()=>say(q.speech,q.who),250);
@@ -4312,6 +4327,26 @@ function prettyFrac(root){ const sel='.bubble .q, .opt, .fb .msg, .solve, .cc-bo
   root.querySelectorAll(sel).forEach(el=>{ const tw=document.createTreeWalker(el,NodeFilter.SHOW_TEXT,{acceptNode:n=>n.parentElement.closest('svg,.ifr')?NodeFilter.FILTER_REJECT:(/\d+분의 \d+/.test(n.nodeValue)?NodeFilter.FILTER_ACCEPT:NodeFilter.FILTER_SKIP)}); const nodes=[]; while(tw.nextNode()) nodes.push(tw.currentNode);
     nodes.forEach(t=>{ const html=t.nodeValue.replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c])).replace(FR_RE,(m,w,d,n)=>`<span class="imx">${w?`<span class="ifw">${w}</span>`:''}${frBox(n,d)}</span>`); const sp=document.createElement('span'); sp.innerHTML=html; t.replaceWith(...sp.childNodes); }); }); }
 (function(){ let busy=false; const ob=new MutationObserver(()=>{ if(busy) return; busy=true; try{ prettyFrac(app); }finally{ busy=false; } }); ob.observe(app,{childList:true,subtree:true,characterData:true}); })();
+
+
+/* ---------- 연습장 펜: 문제 위에 직접 써 보기 ---------- */
+function addScratch(){ const stage=app.querySelector('.stage'); if(!stage||stage.querySelector('.scr')) return;
+  stage.style.position='relative';
+  const cv=document.createElement('canvas'); cv.className='scr'; stage.appendChild(cv);
+  const bar=document.createElement('div'); bar.className='scrbar'; bar.innerHTML=`<button class="scr-toggle" aria-label="연습장 펜">✏️ 펜</button><span class="scr-tools"><button data-c="#2E2620" class="on" aria-label="검정"></button><button data-c="#E2681E" aria-label="주황"></button><button data-c="#2F7DD6" aria-label="파랑"></button><button data-e="1" aria-label="지우개">🧽</button><button data-x="1" aria-label="모두 지우기">🗑️</button></span>`; document.body.appendChild(bar);
+  const ctx=cv.getContext('2d'); let on=false, drawing=false, color='#2E2620', erase=false, last=null; const dpr=Math.min(2,window.devicePixelRatio||1);
+  const fit=()=>{ const r=stage.getBoundingClientRect(); const img=cv.width?ctx.getImageData(0,0,cv.width,cv.height):null; cv.width=r.width*dpr; cv.height=r.height*dpr; cv.style.width=r.width+'px'; cv.style.height=r.height+'px'; if(img) ctx.putImageData(img,0,0); };
+  fit(); new ResizeObserver(fit).observe(stage);
+  const pt=e=>{ const r=cv.getBoundingClientRect(); return [(e.clientX-r.left)*dpr,(e.clientY-r.top)*dpr]; };
+  cv.addEventListener('pointerdown',e=>{ if(!on) return; e.preventDefault(); drawing=true; cv.setPointerCapture(e.pointerId); last=pt(e); });
+  cv.addEventListener('pointermove',e=>{ if(!drawing) return; const p=pt(e); ctx.globalCompositeOperation=erase?'destination-out':'source-over'; ctx.strokeStyle=color; ctx.lineWidth=(erase?26:4)*dpr; ctx.lineCap='round'; ctx.lineJoin='round'; ctx.beginPath(); ctx.moveTo(...last); ctx.lineTo(...p); ctx.stroke(); last=p; });
+  const end=()=>{ drawing=false; }; cv.addEventListener('pointerup',end); cv.addEventListener('pointercancel',end);
+  const setOn=v=>{ if(v&&!stage.querySelector('.scrspace')){ const vz=stage.querySelector('#visual'); if(vz) vz.insertAdjacentHTML('afterend','<div class="scrspace">여기에 자유롭게 계산해 보세요</div>'); } on=v; cv.classList.toggle('active',on); bar.classList.toggle('open',on); stage.classList.toggle('scr-on',on); bar.querySelector('.scr-toggle').textContent=on?'✋ 펜 끄고 답하기':'✏️ 펜'; };
+  bar.querySelector('.scr-toggle').onclick=()=>setOn(!on);
+  bar.querySelectorAll('[data-c]').forEach(b=>b.onclick=()=>{ color=b.dataset.c; erase=false; bar.querySelectorAll('.scr-tools button').forEach(x=>x.classList.toggle('on',x===b)); });
+  bar.querySelector('[data-e]').onclick=e=>{ erase=true; bar.querySelectorAll('.scr-tools button').forEach(x=>x.classList.toggle('on',x===e.currentTarget)); };
+  bar.querySelector('[data-x]').onclick=()=>ctx.clearRect(0,0,cv.width,cv.height);
+  const gone=new MutationObserver(()=>{ if(!document.body.contains(stage)){ bar.remove(); gone.disconnect(); } }); gone.observe(app,{childList:true}); }
 
 document.body.style.setProperty('--forest',`url(${A['배경_숲']})`);
 home();
