@@ -774,6 +774,98 @@ img.chr.ju{object-fit:contain}
 .wbar{height:10px;background:#F3E5D0;border-radius:6px;overflow:hidden}.wbar i{display:block;height:100%;background:#F2A65A}.wp{font-family:"Jua",sans-serif;color:#D45F16}
 .next.retry{margin-top:10px;width:100%}
 .retrychip{display:block;width:100%;margin-top:8px;font-family:"Jua",sans-serif;font-size:1.05rem;padding:10px;border-radius:16px;border:3px solid #E9A06B;background:#FFF1E4;color:#A04A10}
+
+/* =================== 디자인 v2 : 숲속 그림책 앱 =================== */
+:root{
+  --bg:#FFF7EC; --paper:#FFFFFF; --ink:#2E2620; --ink-soft:#857565;
+  --line:#EFE3D2; --line-strong:#E2D2BA;
+  --brand:#FF8A3D; --brand-deep:#E2681E; --brand-soft:#FFF0E3;
+  --leaf:#34B77A; --leaf-deep:#1F8F5B; --sky:#4AA3F2; --sun:#FFC53D; --sun-deep:#E8A000; --pink:#FF7EAD; --purple:#9B7BFF;
+  --ok:#22A866; --ok-bg:#E3F7EC; --no:#F0644A; --no-bg:#FFEDE8;
+  --r-lg:26px; --r-md:18px; --r-sm:12px;
+  --sh-1:0 2px 0 rgba(46,38,32,.05), 0 8px 24px rgba(120,80,30,.08);
+  --sh-2:0 3px 0 rgba(46,38,32,.06), 0 14px 34px rgba(120,80,30,.12);
+  --shadow:var(--sh-1); --card-shadow:var(--sh-1);
+}
+body{background:var(--bg);color:var(--ink);font-size:18px}
+body:before{background:
+  radial-gradient(1200px 420px at 50% -120px, #FFE3C4 0%, rgba(255,227,196,0) 70%),
+  radial-gradient(500px 300px at 110% 30%, rgba(196,236,214,.55), transparent 70%),
+  radial-gradient(500px 300px at -10% 70%, rgba(204,230,255,.55), transparent 70%),
+  linear-gradient(#FFF7EC,#FFF7EC)!important;}
+.wrap{max-width:620px;padding:10px 14px 40px}
+/* 상단 바 */
+.top{position:sticky;top:0;z-index:20;margin:0 -14px 10px;padding:10px 14px;background:rgba(255,247,236,.86);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-bottom:1px solid rgba(226,210,186,.6)}
+.back{background:#fff;border:1.5px solid var(--line-strong);border-radius:999px;padding:8px 14px;font-size:.95rem;color:var(--ink);box-shadow:0 2px 0 rgba(0,0,0,.04)}
+.back:active{transform:translateY(1px);box-shadow:none}
+.crumb{font-size:1rem;color:var(--ink);text-shadow:none}
+.speak{background:var(--sun);border:0;border-radius:999px;padding:8px 13px;box-shadow:0 3px 0 var(--sun-deep)}
+.dots{gap:5px}.dot{width:12px;height:12px;border:0;background:#EADCC8;border-radius:6px;transition:all .2s}
+.dot.now{width:26px;background:var(--brand);transform:none}.dot.ok{background:var(--ok)}.dot.no{background:var(--no)}
+/* 카드 */
+.stage{background:var(--paper);border:1.5px solid var(--line);border-radius:var(--r-lg);padding:16px;box-shadow:var(--sh-2)}
+.talker{gap:10px;align-items:center}
+.talker img.chr{width:84px;height:auto;filter:drop-shadow(0 4px 6px rgba(0,0,0,.08))}
+.bubble{background:var(--brand-soft);border:0;border-radius:20px;padding:12px 16px}
+.bubble:before{border-right-color:var(--brand-soft)}
+.bubble .q{font-size:1.4rem;line-height:1.35;color:var(--ink)}
+.bubble .who{color:var(--brand-deep)}
+/* 답 버튼 */
+.opts{gap:10px}
+.opt{background:#fff;border:2px solid var(--line-strong);border-radius:var(--r-md);box-shadow:0 4px 0 #EADCC8;color:var(--ink);font-size:1.75rem}
+.opt:nth-child(1),.opt:nth-child(2),.opt:nth-child(3){background:#fff}
+.opt:active{transform:translateY(3px);box-shadow:0 1px 0 #EADCC8}
+.opt.ok{background:var(--ok-bg)!important;border-color:var(--ok);box-shadow:0 4px 0 #A6DDBF}
+.opt.no{background:var(--no-bg)!important;border-color:var(--no);box-shadow:0 4px 0 #F5B9AC}
+.opt.text{font-size:1.25rem}
+.next{background:linear-gradient(180deg,#FF9B54,var(--brand));border-radius:var(--r-md);box-shadow:0 5px 0 var(--brand-deep);font-size:1.3rem;letter-spacing:.5px}
+.next:active{transform:translateY(3px);box-shadow:0 2px 0 var(--brand-deep)}
+.ghost{background:#fff;border:1.5px solid var(--line-strong);border-radius:var(--r-md)}
+.fb{gap:8px}.fb img.chr{width:62px}
+.fb .msg{border-radius:var(--r-md);padding:12px 14px;font-size:1.1rem;line-height:1.4}
+.fb.ok .msg{background:var(--ok-bg);color:#14593A}.fb.no .msg{background:var(--no-bg);color:#7A2A18}
+/* 식·세로셈 */
+.vert,.ldiv{background:#FFFCF6;border:1.5px solid var(--line-strong);border-radius:var(--r-md);box-shadow:inset 0 2px 0 #fff}
+.eqrow i{color:var(--brand)}
+.vslot .wbox,.wbox.sm{border-radius:12px}
+.manip{background:#FFFCF6;border:1.5px solid var(--line);border-radius:22px}
+.mbtn{border:1.5px solid var(--line-strong);background:#fff;box-shadow:0 3px 0 #EADCC8;border-radius:14px}
+.numpad .nk{border:1.5px solid var(--line-strong);box-shadow:0 3px 0 #EADCC8}
+/* 홈 */
+.hero{background:none!important;padding:18px 10px 6px;margin:0}
+.hero h1{font-size:2.1rem;color:var(--ink);text-shadow:none;letter-spacing:-.5px}
+.hero .sub{color:var(--ink-soft);text-shadow:none;font-size:.95rem}
+.hero svg,.hero img{width:56px!important}
+.parade{margin:2px 0 12px;padding:10px 6px 4px;background:linear-gradient(180deg,rgba(255,255,255,0),rgba(255,255,255,.7));border-radius:0 0 24px 24px}
+.sec{font-family:"Jua",sans-serif;font-size:1.15rem;color:var(--ink);margin:18px 4px 8px;display:flex;align-items:center;gap:6px}
+.sec small{font-family:"Gowun Dodum",sans-serif;font-size:.8rem;color:var(--ink-soft)}
+.chapters{gap:10px;margin-top:0}
+.chap{position:relative;overflow:hidden;background:#fff!important;border:1.5px solid var(--line);border-radius:var(--r-lg);box-shadow:var(--sh-1);padding:12px 14px 12px 18px}
+.chap:before{content:"";position:absolute;left:0;top:0;bottom:0;width:7px;background:var(--leaf)}
+.chap[data-ch="2"]:before{background:var(--brand)}.chap[data-ch="3"]:before{background:var(--purple)}
+.chap img.chr{width:78px}
+.chap .t{font-size:1.25rem}.chap .d{font-size:.9rem}.chap .stars{font-size:.85rem;color:var(--brand-deep)}
+.chap:active,.grade:active{transform:translateY(2px);box-shadow:none}
+.grades{gap:10px;margin-top:0}.gtitle{display:none}
+.grade{background:#fff!important;border:1.5px solid var(--line);border-radius:var(--r-lg);box-shadow:var(--sh-1);padding:10px 14px}
+.grade .t{font-size:1.25rem}.grade .d{font-size:.85rem}.grade .stars{font-size:.85rem;color:var(--brand-deep)}
+.grade[data-g="2"]{box-shadow:inset 6px 0 0 #FFC53D,var(--sh-1)}.grade[data-g="3"]{box-shadow:inset 6px 0 0 #34B77A,var(--sh-1)}.grade[data-g="4"]{box-shadow:inset 6px 0 0 #4AA3F2,var(--sh-1)}.grade[data-g="5"]{box-shadow:inset 6px 0 0 #FF8A3D,var(--sh-1)}.grade[data-g="6"]{box-shadow:inset 6px 0 0 #9B7BFF,var(--sh-1)}
+.statcard{background:#fff;border:1.5px solid var(--line);border-radius:var(--r-lg);box-shadow:var(--sh-1);margin-top:4px}
+.sc-item b{color:var(--brand-deep)}.sc-foot{border-top:1px dashed var(--line-strong)}
+.retrychip{border:1.5px solid #F7C3A0;background:#FFF3EA;color:var(--brand-deep);border-radius:var(--r-md)}
+.note{background:rgba(255,255,255,.7);border:1px solid var(--line);border-radius:var(--r-md);color:var(--ink-soft)}
+/* 편 목록 */
+.eps{gap:10px}
+.ep{background:#fff;border:1.5px solid var(--line);border-radius:var(--r-md);box-shadow:var(--sh-1);color:var(--ink)}
+.ep .n{align-self:flex-start;background:var(--brand-soft);color:var(--brand-deep);border-radius:999px;padding:1px 9px;font-size:.75rem;max-width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ep .t{font-size:1.02rem;line-height:1.3}
+.ep.done{border-color:#BFE6CF;background:linear-gradient(180deg,#fff,#F3FBF6)}
+.domh{background:var(--ink);color:#fff;border-radius:999px;padding:3px 14px;font-size:.95rem}
+/* 기록·결과 */
+.sc-box,.recent,.bars,.weak .wk{background:#fff;border:1.5px solid var(--line);border-radius:var(--r-md);box-shadow:none}
+.result .big{color:var(--brand-deep)}
+.ccard .cc-box{background:#FFF9F1;border:1.5px solid var(--line)}
+.hint1{background:#FFF6DA}.solve{border:1.5px dashed #F2CF84}
 </style>
 </head>
 <body>
@@ -899,9 +991,9 @@ function charsFor(u){ const t=u.title, d=domOf(u);
 const WHO_IDX={doto:0,rami:1,halmi:2,cheong:3};
 const GRADE_JU={2:['째깍이','도토','붕붕이'],3:['람이','대롱이','길쭉이'],4:['반반이','부엉 박사님','윙윙이'],5:['구리 아저씨','쏙쏙이','콩알이'],6:['대롱이','할머니','개미 반장']};
 const CH_KO={doto:'도토',rami:'람이',halmi:'할머니',cheong:'청이'}, MOOD_KO={base:'기본',happy:'기쁨',oops:'놀람',point:'가리키기'};
-const chip=(who,mood)=>(typeof S!=='undefined'&&S&&S.mode==='ep36'&&S.chars)?juImg(S.chars[WHO_IDX[who]??0],mood):chip0(who,mood);
+const chip=(who,mood)=>(typeof S!=='undefined'&&S&&S.mode==='ep36'&&S.chars&&!S.idle)?juImg(S.chars[WHO_IDX[who]??0],mood):chip0(who,mood);
 function chip0(who, mood){ return `<img class="chr" src="${A[CH_KO[who]+'_'+(MOOD_KO[mood]||'기본')]}" alt="${CH_KO[who]}">`; }
-function talker(who){ if(typeof S!=='undefined'&&S&&S.mode==='ep36'&&S.chars) return juImg(S.chars[WHO_IDX[who]??0],rndPick('point','one','base','wave')); const k=CH_KO[who]+'_'+POSE_OF[who]+'_closed'; return `<img class="chr" data-who="${who}" src="${POSE[k]||A[CH_KO[who]+'_가리키기']}" alt="${CH_KO[who]}">`; }
+function talker(who){ if(typeof S!=='undefined'&&S&&S.mode==='ep36'&&S.chars&&!S.idle) return juImg(S.chars[WHO_IDX[who]??0],rndPick('point','one','base','wave')); const k=CH_KO[who]+'_'+POSE_OF[who]+'_closed'; return `<img class="chr" data-who="${who}" src="${POSE[k]||A[CH_KO[who]+'_가리키기']}" alt="${CH_KO[who]}">`; }
 const NAMES = {doto:'도토', rami:'람이', halmi:'할머니', cheong:'청이'};
 const PITCH = {doto:1.25, rami:1.5, halmi:0.85, cheong:1.1};
 const RATE  = {doto:0.95, rami:0.9, halmi:0.8, cheong:1.0};
@@ -2222,16 +2314,19 @@ const starsOf = sc => sc==null?'☆☆☆':'★'.repeat(Math.min(3,Math.ceil(sc/
 
 /* ---------- 화면: 홈 ---------- */
 function home(){
+  if(typeof S!=='undefined'&&S) S.idle=true;
   hush(); const best=load(); app.className='wrap';
   const warn=!('speechSynthesis' in window)?`<div class="voicewarn">이 브라우저는 소리 읽기를 지원하지 않아요. 크롬·사파리·삼성 브라우저에서 열면 문제를 읽어 줘요.</div>`:'';
   app.innerHTML=`
     <div class="hero" style="background-image:url(${A['팻말']})">${logoSVG()}<div><h1>도토리 숲 수학 퀴즈</h1><p class="sub">영상 보고 · 노래 듣고 · 게임 하고 · 문제 풀기</p></div></div>
     <div class="parade">${['도토','대롱이','붕붕이','부엉 박사님','째깍이','길쭉이','쏙쏙이','콩알이','람이'].map((n,k)=>juImg(n,k%3===0?'wave':k%3===1?'yay':'base','pj')).join('')}</div>
     ${statsCard()}
+    <h2 class="sec">📺 1~2학년 · 영상 보고 풀기 <small>도토리 숲 숏츠와 함께</small></h2>
     ${loadWrong().length?`<button class="retrychip" id="retryhome">🔁 틀린 문제 다시 도전 <b>${loadWrong().length}</b></button>`:''}
     <div class="chapters">
       ${[1,2,3].map(c=>{ const [lo,hi]=CHAPTERS[c].eps; let done=0; for(let e=lo;e<=hi;e++) if(best['EP'+e]!=null) done++; return `<button class="chap" data-ch="${c}">${chip(CHAPTERS[c].who,'base')}<div><div class="t">${c}장 · ${CHAPTERS[c].title}</div><div class="d">${CHAPTERS[c].desc}</div><div class="stars">에피소드 ${done}/17 완료 · 종합 ${best['CH'+c]!=null?best['CH'+c]+'/10':'-'}</div></div></button>`; }).join('')}
     </div>
+    <h2 class="sec">🧩 영역별 문제 <small>1~6학년 · 조작 활동과 문장제</small></h2>
     ${homeGrades()}
     ${warn}
     <div class="note">📺 영상 → 🎵 노래 → 🎮 활동 10개 순서예요.${location.protocol==='file:'?'<br>⚠️ 파일로 바로 열면 유튜브 영상이 안 나올 수 있어요. 영상 아래 <b>유튜브에서 보기</b>를 누르세요.':''}</div>`;
@@ -2241,7 +2336,7 @@ function home(){
 }
 
 /* ---------- 화면: 에피소드 목록 ---------- */
-function chapter(ch){
+function chapter(ch){ if(typeof S!=='undefined'&&S) S.idle=true; 
   hush(); const best=load(); app.className='wrap'; const [lo,hi]=CHAPTERS[ch].eps; let cards='';
   for(const e of EP_ORDER[ch]){ const sc=best['EP'+e]; cards+=`<button class="ep${sc!=null?' done':''}" data-ep="${e}"><span class="n">EP${String(e).padStart(2,'0')}${SONG_AFTER[e]?' · ♪ '+SONG_AFTER[e].map(k=>SONG_NAME[k]).join('·'):''}</span><span class="t">${EPS[e][0]}</span><span class="s">${starsOf(sc)}${sc!=null?` <span style="color:var(--ink-soft)">${sc}/10</span>`:''}</span></button>`; }
   cards+=`<button class="ep final" data-ep="final"><span class="n">단원 마무리</span><span class="t">${ch}장 종합 활동 10개</span><span class="s">${starsOf(best['CH'+ch])}${best['CH'+ch]!=null?` <span style="color:var(--ink-soft)">${best['CH'+ch]}/10</span>`:''}</span></button>`;
@@ -2974,6 +3069,7 @@ function homeGrades(){
   return `<div class="grades"><div class="gtitle">영역별 문제 · 1~6학년</div>${[2,3,4,5,6].map(g=>{ const [n,all]=gradeDone(g); return `<button class="grade" data-g="${g}"><span class="gju">${GRADE_JU[g].map((n,k)=>juImg(n,k===1?'wave':'base','gj')).join('')}</span><div><div class="t">${GNAME(g)}</div><div class="d">${GRADE_DESC[g]}</div><div class="stars">편 ${n}/${all} 완료</div></div></button>`; }).join('')}</div>`;
 }
 function grade36(g){
+  if(typeof S!=='undefined'&&S) S.idle=true;
   hush(); const best=load(); app.className='wrap';
   let lastDom=''; const cards=unitsOfGrade(g).map(u=>{ let n=0; u.eps.forEach(e=>{ if(best['EP'+e]!=null) n++; }); const hd=u.dom!==lastDom?`<div class="domh">${u.dom}</div>`:''; lastDom=u.dom; return hd+`<button class="ep${n===u.eps.length?' done':''}" data-u="${u.i}"><span class="n">${u.title.split(' ')[0]}</span><span class="t">${u.title.replace(/^\S+\s/,'')}</span><span class="s">${n}/${u.eps.length} 편</span></button>`; }).join('');
   app.innerHTML=`
@@ -2984,6 +3080,7 @@ function grade36(g){
   app.querySelectorAll('.ep').forEach(b=>b.onclick=()=>unit36(+b.dataset.u));
 }
 function unit36(ui){
+  if(typeof S!=='undefined'&&S) S.idle=true;
   hush(); const best=load(); app.className='wrap'; const u=UNITS36[ui];
   const cards=u.eps.map(e=>{ const sc=best['EP'+e]; return `<button class="ep${sc!=null?' done':''}" data-ep="${e}"><span class="n">${e}${VIDEOS[e]?' · 📺':''}</span><span class="t">${EPS36[e][0]}</span><span class="s">${starsOf(sc)}${sc!=null?` <span style="color:var(--ink-soft)">${sc}/10</span>`:''}</span></button>`; }).join('');
   app.innerHTML=`
@@ -3015,7 +3112,7 @@ function logSet(score){ const st=loadStats(); st.sets.push({k:S.saveKey,t:S.titl
 const avgSet=st=>st.sets.length?Math.round(st.sets.reduce((a,x)=>a+x.s,0)/st.sets.length*10)/10:null;
 function statsCard(){ const st=loadStats(); if(!st.n) return ''; const t=st.days[todayKey()]||{n:0,ok:0}; const pct=Math.round(st.ok/st.n*100);
   return `<button class="statcard" id="statsbtn"><div class="sc-row"><div class="sc-item"><b>${st.n}</b><span>푼 활동</span></div><div class="sc-item"><b>${pct}%</b><span>정답률</span></div><div class="sc-item"><b>${avgSet(st)??'-'}</b><span>평균 점수</span></div><div class="sc-item"><b>${st.streak}</b><span>연속 정답${st.streak>=5?' 🔥':''}</span></div></div><div class="sc-foot">오늘 ${t.n}개 풀고 ${t.ok}개 맞았어요 · 최고 연속 ${st.best} · 자세히 보기 →</div></button>`; }
-function statsPage(){ hush(); app.className='wrap'; const st=loadStats(); const best=load(); const pct=st.n?Math.round(st.ok/st.n*100):0;
+function statsPage(){ if(typeof S!=='undefined'&&S) S.idle=true; hush(); app.className='wrap'; const st=loadStats(); const best=load(); const pct=st.n?Math.round(st.ok/st.n*100):0;
   const days=[]; for(let i=6;i>=0;i--){ const d=new Date(); d.setDate(d.getDate()-i); const k=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; days.push({k,lab:['일','월','화','수','목','금','토'][d.getDay()],v:st.days[k]||{n:0,ok:0}}); }
   const mx=Math.max(1,...days.map(d=>d.v.n));
   const bars=days.map(d=>`<div class="dbar"><div class="bcol"><div class="bok" style="height:${Math.round(d.v.ok/mx*100)}%"></div><div class="bno" style="height:${Math.round((d.v.n-d.v.ok)/mx*100)}%"></div></div><em>${d.v.n||''}</em><span>${d.lab}</span></div>`).join('');
