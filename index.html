@@ -700,6 +700,10 @@ table.og td,table.pg td{text-align:left;letter-spacing:2px;color:#D45F16;min-wid
 .bigsym{font-size:4rem;text-align:center;line-height:1.2;letter-spacing:4px}
 .grow{display:flex;gap:14px;justify-content:center;align-items:flex-end;flex-wrap:wrap}.grow span{max-width:90px;word-break:break-all;line-height:1.1}
 svg.fig{display:block;margin:6px auto}
+.tfrow{display:flex;justify-content:center;align-items:center;gap:12px;margin:8px 0;flex-wrap:nowrap}
+.tf{display:flex;flex-direction:column;align-items:center;background:#fff;border-radius:12px;padding:4px}
+.tf b{font-family:"Jua",sans-serif;font-size:1.3rem;color:#6B3E1C}
+.tarrow{font-family:"Jua",sans-serif;font-size:1.6rem;color:#D45F16}
 .seqrow{display:flex;flex-wrap:nowrap;justify-content:center;gap:2px;margin:14px 0;font-size:clamp(1.3rem,7.5vw,2.2rem)}
 .seqrow span{width:1.25em;text-align:center}
 .seqgrid{display:grid;gap:6px;max-width:300px;margin:12px auto;font-size:2.4rem;text-align:center}
@@ -3388,16 +3392,34 @@ unit(4,'4-1 각도',[
   pickQ([['사각형 네 각의 합은?','360°',['360°','180°','270°']],['사각형을 삼각형 몇 개로 나누어 네 각의 합을 구할까?','2개',['2개','3개','4개']]]),
  ]],
 ]);
+const TSHAPES=[[[0,0],[1,0],[2,0],[0,1],[0,2]],[[0,0],[1,0],[1,1],[1,2],[2,2]],[[0,0],[0,1],[1,1],[2,1],[0,2]],[[1,0],[0,1],[1,1],[1,2],[2,2]],[[0,0],[1,0],[0,1],[0,2]],[[0,0],[1,0],[2,0],[1,1],[1,2]],[[0,0],[1,0],[1,1],[2,1],[2,2]]];
+const tLR=c=>c.map(([x,y])=>[2-x,y]), tUD=c=>c.map(([x,y])=>[x,2-y]), tR=c=>c.map(([x,y])=>[2-y,x]);
+const tRot=(c,k)=>{ for(let i=0;i<k;i++) c=tR(c); return c; };
+const tKey=f=>f.cells.map(c=>c.join(',')).sort().join('|')+'#'+f.dot.join(',');
+const tApply=(f,fn)=>({cells:fn(f.cells),dot:fn([f.dot])[0]});
+const tFig=(f,label,big)=>{ const u=big?34:26, W=u*3; let g=''; for(let k=0;k<=3;k++) g+=`<line x1="${k*u}" y1="0" x2="${k*u}" y2="${W}" stroke="#E5D3B5"/><line x1="0" y1="${k*u}" x2="${W}" y2="${k*u}" stroke="#E5D3B5"/>`;
+  f.cells.forEach(([x,y])=>g+=`<rect x="${x*u}" y="${y*u}" width="${u}" height="${u}" fill="#F2A65A" stroke="#7A4A1E" stroke-width="2"/>`);
+  g+=`<circle cx="${f.dot[0]*u+u/2}" cy="${f.dot[1]*u+u/2}" r="${u*0.22}" fill="#3A6E8F"/>`;
+  return `<div class="tf"><svg viewBox="-2 -2 ${W+4} ${W+4}" width="${W+4}" height="${W+4}">${g}</svg>${label?`<b>${label}</b>`:''}</div>`; };
+const tRand=()=>{ const cells=rndPick(...TSHAPES); return {cells, dot:rndPick(...cells)}; };
+function tQ(q,f,correct,wrongs){ const all=[correct,...wrongs]; const keys=all.map(tKey); if(new Set(keys).size<3||keys.slice(1).includes(tKey(correct))) return null;
+  const order=shuffle([0,1,2]); const labs=['가','나','다']; const ans=labs[order.indexOf(0)];
+  const vis=`<div class="tfrow">${tFig(f,'',true)}<span class="tarrow">→ ?</span></div><div class="tfrow">${order.map((k,j)=>tFig(all[k],labs[j])).join('')}</div>`;
+  return CF(q,vis,ans,labs); }
+const tGen=(make)=>()=>{ for(let t=0;t<40;t++){ const r=make(); if(r) return r; } return make(); };
+
 unit(4,'4-1 평면도형의 이동',[
  ['S6-22','밀어 보아요','밀기',[
-  ()=>{ const a=ARR[rnd(0,3)]; return CF('이 모양을 오른쪽으로 밀면?',big(a),a,ARR); },
+  tGen(()=>{ const f=tRand(); const d=rndPick('오른쪽','왼쪽','위쪽','아래쪽'); return tQ(`이 도형을 ${d}으로 밀면 어떤 모양이 될까요?`,f,f,[tApply(f,tLR),tApply(f,c=>tRot(c,1))]); }),
   pickQ([['도형을 밀면 모양과 크기는?','변하지 않는다',['변하지 않는다','커진다','뒤집힌다']]]),
  ]],
  ['S6-23','뒤집어 보아요','뒤집기',[
-  ()=>{ const a=ARR[rnd(0,3)]; const lr=rnd(0,1); return CF(`이 화살표를 ${lr?'오른쪽':'아래쪽'}으로 뒤집으면?`,big(a),lr?FLR[a]:FUD[a],ARR); },
+  tGen(()=>{ const f=tRand(); const lr=rnd(0,1); return tQ(`이 도형을 ${lr?'오른쪽(또는 왼쪽)':'아래쪽(또는 위쪽)'}으로 뒤집으면?`,f,tApply(f,lr?tLR:tUD),[tApply(f,lr?tUD:tLR),tApply(f,c=>tRot(c,1))]); }),
+  tGen(()=>{ const f=tRand(); const g=tApply(f,tLR); return tQ('오른쪽으로 두 번 뒤집으면?',f,f,[g,tApply(f,tUD)]); }),
  ]],
  ['S6-24','돌려 보아요','돌리기',[
-  ()=>{ const a=ARR[rnd(0,3)]; const k=rnd(1,3); let r=a; for(let i=0;i<k;i++) r=ROT[r]; return CF(`이 화살표를 시계 방향으로 ${k*90}° 돌리면?`,big(a),r,ARR); },
+  tGen(()=>{ const f=tRand(); const k=rnd(1,3); const others=[1,2,3].filter(x=>x!==k); return tQ(`이 도형을 시계 방향으로 ${k*90}° 돌리면?`,f,tApply(f,c=>tRot(c,k)),[tApply(f,c=>tRot(c,others[0])),tApply(f,c=>tRot(c,others[1]))]); }),
+  tGen(()=>{ const f=tRand(); return tQ('시계 반대 방향으로 90° 돌리면?',f,tApply(f,c=>tRot(c,3)),[tApply(f,c=>tRot(c,1)),tApply(f,tLR)]); }),
  ]],
  ['S6-25','점의 이동','점의 이동',[
   ()=>{ const x=rnd(1,5), y=rnd(1,5), dx=rnd(1,4), dy=rnd(1,4); return WN2(`점이 (가로 ${x}, 세로 ${y})칸에 있어요. 오른쪽으로 ${dx}칸, 위로 ${dy}칸 옮기면?`,'',x+dx,'가로',y+dy,'세로'); },
