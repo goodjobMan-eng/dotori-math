@@ -133,8 +133,19 @@ const CAST=['도토','대롱이','부엉 박사님','붕붕이'];
    정보량 = 단원 숙달의 불확실함 × (1 − 찍어서 맞힐 확률) + 보기에 든 오개념이 가리키는 조각마다의 불확실함.
    불확실함은 숙달이 0.5에 가까울수록 크다(이미 아는 것, 이미 모른다고 확인된 것은 다시 물어도 얻는 것이 적다). */
 const H2=p=>{ p=Math.min(.98,Math.max(.02,p)); return -(p*Math.log2(p)+(1-p)*Math.log2(1-p)); };
-function qInfo(q,st){ st=st||state(); const kc=epKC(q._ep), n=(q.opts&&q.opts.length)||0, G=n?1/n:.05; let v=H2(kc&&st.kc[kc]!=null?st.kc[kc]:BKT.L0)*(1-G);
-  const ps=new Set(); Object.values(q.mis||{}).forEach(c=>{ if(MISC[c]) ps.add(MISC[c][0][0]); }); ps.forEach(c=>{ v+=H2(pieceL(st,c)); }); return v; }
+// 이 아이가 이 문제에 어떻게 답할지를 먼저 어림한다: 맞힐 확률은 단원 숙달에서, 틀릴 때 어느 오답으로 갈지는 그 오답이 가리키는 조각이 빈 정도에 비례.
+// 정보량은 그 답 분포의 엔트로피다. 보기는 하나만 고를 수 있으므로 조각별 불확실함을 그냥 더하지 않고, 고를 가능성이 거의 없는 보기는 저절로 값이 작아진다.
+// 코드 없는 오답들은 한 칸("그 밖")으로 묶는다(골라도 어느 개념이 비었는지 알려 주지 않으므로).
+// 선수 조각이 이미 '비어 있음'으로 확정된 아이에게 그 위의 문제를 내면 틀릴 것이 뻔하므로 값을 크게 깎는다.
+function qInfo(q,st){ st=st||state(); const kc=epKC(q._ep), n=(q.opts&&q.opts.length)||0, G=n?1/n:.05, L=_clip(kc&&st.kc[kc]!=null?st.kc[kc]:BKT.L0);
+  const pc=L*(1-BKT.S)+(1-L)*G, byPiece={}; let other=0, nUn=0; const mis=q.mis||{};
+  if(n){ for(const o of q.opts){ const k=String(o); if(k===String(q.ans)) continue; const c=mis[k]; if(c&&MISC[c]){ const pz=MISC[c][0][0]; byPiece[pz]=(byPiece[pz]||0)+(1-pieceL(st,pz))+.05; } else { other+=.15; nUn++; } } }
+  else { Object.values(mis).forEach(c=>{ if(MISC[c]){ const pz=MISC[c][0][0]; byPiece[pz]=(byPiece[pz]||0)+(1-pieceL(st,pz))+.05; } }); other=.5; }
+  const tot=Object.values(byPiece).reduce((a,b)=>a+b,0)+other||1, ps=[pc,...Object.values(byPiece).map(w=>(1-pc)*w/tot),(1-pc)*other/tot].filter(x=>x>1e-6);
+  let H=-ps.reduce((a,x)=>a+x*Math.log2(x),0);
+  const cv=st.cpv||{}, weak=c=>cv[c]&&cv[c].s==='weak'; const pcs=Object.keys(byPiece);
+  if(pcs.some(c=>CPC[c]&&CPC[c][2].some(weak))) H*=.3;            // 선수 조각이 비어 있음: 이 문제는 뒤로
+  return H; }
 // 여러 편의 틀을 하나씩 만들어 보고 정보량이 큰 것 가운데서 고른다(늘 같은 문제가 나오지 않게, 가장 큰 것의 80% 이상인 것 중에서 뽑음).
 function bestQ(eps,ok,st){ st=st||state(); const cs=[]; for(const ep of eps){ const seen=new Set(); (G36[ep]||[]).forEach((g,i)=>{ if(seen.has(g)||cs.length>60) return; seen.add(g); for(let t=0;t<2;t++){ let q; try{ q=g(); }catch(e){ return; }
       if(!q||q.manip||q.onMount) return; if(ok&&!ok(q)) continue; q._ep=ep; q._ti=i; cs.push([qInfo(q,st),q]); return; } }); }
