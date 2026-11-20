@@ -33,7 +33,7 @@ function codeEP(q){ const k=exprOf(q); if(!k||!/^\d+$/.test(String(q.ans))) retu
   if(!Object.keys(mis).length) return;
   if(q.opts&&q.opts.length){ const num=typeof q.opts[0]==='number';
     for(const v of Object.keys(mis)){ if(q.opts.map(String).includes(v)) continue; const j=q.opts.findIndex(o=>String(o)!==String(q.ans)&&!(String(o) in mis)); if(j<0){ delete mis[v]; continue; } q.opts[j]=num?+v:v; } }
-  if(Object.keys(mis).length) q.mis=mis; }
+  if(Object.keys(mis).length) q.mis=Object.assign(mis,q.mis||{}); }
 
 function gen1(e,i,seed){ const q=withSeed(seed,RAW1[e][i]); if(q&&typeof q==='object'){ q._seed=seed; q._e=+e; q._ei=i; try{ codeEP(q); }catch(x){} } return q; }
 // 같은 틀이 여러 번 들어 있는 편이 있어(뽑힐 확률 조절), 같은 함수에는 같은 포장을 씌운다.
@@ -52,7 +52,7 @@ function recEP(q,given,ok){ if(!q||q._kt) return; q._kt=1; const ep=epLabel(q._e
   const ms=q._t0?Math.min(600000,Date.now()-q._t0):0, key=factUpdate(q,ok);
   const r={d:today(),ep,ti:q._ei,v:0,sd:q._seed||0,g:clean(given),ok:ok?1:0,m,ms,dg:0}; if(key) r.f=key; if(!ok) r.qt=plain(q.q).slice(0,70);
   const log=J(LK,[]); log.push(r); W(LK,log.slice(-3000));
-  if(q.mis){ const st=state(); for(const c of new Set(Object.values(q.mis))){ const e=st.mis[c]||(st.mis[c]={h:[],n:0,ep:[]}); e.h.push([fk,c===m?1:0,ok?1:0]); e.h=e.h.slice(-8);
+  if(q.mis){ const st=state(); for(const c of new Set(Object.values(q.mis))){ const e=st.mis[c]||(st.mis[c]={h:[],n:0,ep:[]}); e.h.push([fk,c===m?1:0,ok?1:0,(q.opts&&q.opts.length)||20]); e.h=e.h.slice(-8);
       if(c===m){ e.n++; if(!e.ep.includes(ep)) e.ep.push(ep); e.ep=e.ep.slice(-5); } } W(SK,st); }
   try{ const st2=state(); pieceUpdate(st2,q,m,ok,(q.opts&&q.opts.length)?1/q.opts.length:.05,ms,fk); W(SK,st2); }catch(e){}
   afterRec(q,given,ok,m);

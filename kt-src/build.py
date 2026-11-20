@@ -9,7 +9,9 @@ HELP = r'''function MC(q, vis, ans, wr, extra){
   const A = String(ans), seen = new Set([A]), pool = [];
   const order = shuffle(wr.slice()).sort((x,y)=>(x[1]?0:1)-(y[1]?0:1));          // 코드가 붙은 오답을 먼저 넣는다
   for(const [v,c] of order){ if(v==null) continue; const s=String(v); if(s===''||seen.has(s)) continue; seen.add(s); pool.push([s,c]); }
-  const pk = pool.slice(0,2);
+  // 오개념 유형 수만큼 보기를 둔다: 코드가 서로 다른 오답은 모두(최대 4개), 모자라면 코드 없는 오답으로 2개까지 채운다.
+  const used = new Set(), pk = []; for(const x of pool){ if(pk.length>=4) break; if(x[1]){ if(used.has(x[1])) continue; used.add(x[1]); pk.push(x); } }
+  for(const x of pool){ if(pk.length>=2) break; if(!pk.includes(x)) pk.push(x); }
   for(const f of (extra||[])){ if(pk.length>=2) break; const s=String(f); if(!seen.has(s)){ seen.add(s); pk.push([s,null]); } }
   const o = CF(q, vis||'', A, [A, ...pk.map(x=>x[0])]); o.mis = {};
   pk.forEach(([s,c])=>{ if(c) o.mis[String(fixJ(s))] = c; });

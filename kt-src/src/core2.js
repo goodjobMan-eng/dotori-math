@@ -102,19 +102,25 @@ function rec(q, given, ok){
   const wk=ok?1:shield?.7:(m&&MISC[m])?.4*pieceL(st,MISC[m][0][0])+.1:(q.fx&&(q.fx[String(given)]||q.fx[gk]))?.3:.7;   // 선수 조각이 이미 비어 있으면 이 단원 숙달은 덜 깎는다
   if(kc){ st.kc[kc]=bktW(st.kc[kc]==null?BKT.L0:st.kc[kc],ok,G,wk); st.kn[kc]=(st.kn[kc]||0)+1; }
   if(!shield) pieceUpdate(st,q,m,ok,G,ms,fk); pieceCheck(st,q,ok,m,ms);
-  if(q.mis){ for(const c of new Set(Object.values(q.mis))){ const e=st.mis[c]||(st.mis[c]={h:[],n:0,ep:[]}); e.h.push([fk,c===m?1:0,ok?1:0]); e.h=e.h.slice(-8);
+  if(q.mis){ for(const c of new Set(Object.values(q.mis))){ const e=st.mis[c]||(st.mis[c]={h:[],n:0,ep:[]}); e.h.push([fk,c===m?1:0,ok?1:0,nOpt||20]); e.h=e.h.slice(-8);
     if(c===m){ e.n++; if(!e.ep.includes(ep)) e.ep.push(ep); e.ep=e.ep.slice(-5); } } }
   W(SK,st);
   afterRec(q,given,ok,m);
   if(cfg().share&&KT_ENDPOINT){ const qu=J(QK,[]); qu.push([r.d,ep,ti,v,r.sd,maskG(q,r.g),r.ok,m,ms,r.dg,...recExtra(q)]); W(QK,qu.slice(-3000)); }
 }
 // 최근 8번의 기회(그 오개념의 오답이 보기에 있던 문제) 안에서 판정한다. 기록 한 칸 = [문항, 그 오답을 골랐나, 맞혔나].
-// 확인: 서로 다른 문항 2종 이상에서 3번 이상 골랐고, (노출의 70% 이상) 또는 (틀릴 때마다 대부분 그 오답: 오답 4번 이상 중 80% 이상이면서 정답률 40% 이상 = 찍는 아이가 아님).
+// 확인: 서로 다른 문항 2종 이상에서 3번 이상 골랐고, 그 횟수가 찍어서 나올 횟수보다 뚜렷이 많을 때(기댓값 + 표준편차의 2배 이상). 대체로 맞히는 아이는 틀린 문제만 놓고 같은 방식으로 본다.
 // 의심: 2종 이상에서 2번. 해소: 그 오답이 있던 문제를 3번 이어서 맞힘(다른 오답을 고른 것은 해소가 아님).
-function status(code,st){ const e=(st||state()).mis[code]; if(!e||!e.h||!e.h.length) return null; const h=e.h, n=h.length, picks=h.filter(x=>x[1]), k=picks.length, distinct=new Set(picks.map(x=>x[0])).size;
-  const w=h.filter(x=>x[1]||x[2]===0).length, last3=h.slice(-3); if(last3.length===3&&last3.every(x=>x[2]===1)) return null;
+function status(code,st){ const e=(st||state()).mis[code]; if(!e||!e.h||!e.h.length) return null; const h=e.h, picks=h.filter(x=>x[1]), K=picks.length, distinct=new Set(picks.map(x=>x[0])).size;
+  const last3=h.slice(-3); if(last3.length===3&&last3.every(x=>x[2]===1)) return null;
   if(MISC[code]&&pieceL(st||state(),MISC[code][0][0])>=.75) return null;                 // 그 오개념이 가리키는 조각이 채워졌으면 해소
-  if(k>=3&&distinct>=2&&(k/n>=.7||(w>=4&&k/w>=.8&&(n-w)/n>=.4))) return '확인'; if(k>=2&&distinct>=2) return '의심'; return null; }
+  if(distinct<2||K<2) return null;
+  // 보기 수가 문항마다 다르므로(3~5지선다, 쓰기·조작은 20으로 침) "찍어서 그 보기를 고를 횟수"의 기댓값과 분산을 문항별로 더해 견준다.
+  const m=x=>x[3]||3; let E1=0,V1=0; h.forEach(x=>{ const p=1/m(x); E1+=p; V1+=p*(1-p); });
+  const wrong=h.filter(x=>x[1]||x[2]===0); let E2=0,V2=0; wrong.forEach(x=>{ const q=1/Math.max(1,m(x)-1); E2+=q; V2+=q*(1-q); });
+  const acc=(h.length-wrong.length)/h.length, z1=K>E1?(K-E1)*(K-E1):0, z2=K>E2?(K-E2)*(K-E2):0;
+  if(K>=3&&(z1>=4*V1||(acc>=.4&&wrong.length>=3&&z2>=4*Math.max(V2,.01)))) return '확인';
+  return z1>=V1?'의심':null; }
 // 문제 3개 미만으로는 숙달·미숙달을 단정하지 않는다.
 function kcStatus(k,st){ const p=st.kc[k], n=(st.kn||{})[k]||0; if(p==null) return st.est[k]?'추정':'모름'; if(n<3) return p>=.4&&st.est[k]?'추정':'연습'; return p>=.85?'숙달':p>=.4?'연습':'미숙달'; }
 function report(){ const st=state(); const mis=Object.keys(st.mis).map(c=>({c,s:status(c,st),n:st.mis[c].n,ep:st.mis[c].ep||[]})).filter(x=>x.s&&MIS[x.c]).sort((a,b)=>(a.s==='확인'?0:1)-(b.s==='확인'?0:1)||b.n-a.n);
