@@ -249,7 +249,22 @@ function codeW2(q){ if(!q||q.opts&&q.opts.length||q.manip||q.onMount||q.mis) ret
   else if(/^\s*\d+ : \d+ = \d+ : □/.test(Q)){ const m=Q.match(/\d+/g).map(Number); if(m[1]*m[2]/m[0]===Av) add(m[1]*m[2],'R6-15'); }
   else if(/생활 속 문제/.test(t)){ const m=(Q.match(/\d+/g)||[]).map(Number); if(m.length===2){ const [a,b]=m; if(a*b===Av&&a>1&&b>1) add(a+b,'N2-05'); else if(b&&a/b===Av&&b>1) add(a-b,'N3-11'); } }
   clash.forEach(k=>delete mis[k]); if(Object.keys(mis).length) q.mis=mis; return q; }
-const _tagQ0=tagQ; tagQ=function(ep,i,q){ q=_tagQ0(ep,i,q); try{ if(q&&typeof q==='object'&&!TAG3[ep+'#'+i]){ codeW(q); codeW2(q); } }catch(e){} return q; };
+/* 쓰기형 3: 분수의 덧셈·뺄셈(칸에 쓴 숫자를 이어 붙인 답)과 단위 환산. 정답을 같은 방식으로 다시 만들어 맞을 때만 오답 값을 단다. */
+function codeW3(q){ if(!q||q.opts&&q.opts.length||q.manip||q.onMount||q.mis) return q; const A=String(q.ans), Q=_pl(q.q), V=_pl(q.visual), mis={}, clash=new Set();
+  const add=(k,c)=>{ k=String(k); if(k===A||/-|NaN|\./.test(k)) return; if(k in mis){ if(mis[k]!==c) clash.add(k); return; } mis[k]=c; }; let m;
+  const fr=[...Q.matchAll(/(?:(\d+)[과와] )?(\d+)분의 (\d+)/g)].map(x=>({w:+(x[1]||0),d:+x[2],n:+x[3]})), op=/\+/.test(Q)?1:/−/.test(Q)?-1:0;
+  if(fr.length===2&&op&&!/생활 속 문제/.test(V)&&!/^\s*1 −/.test(Q)){ const [x,y]=fr, g=(a,b)=>b?g(b,a%b):a, L=x.d*y.d/g(x.d,y.d), X=x.n*L/x.d, Y=y.n*L/y.d, given=(V.match(/=\s*(\d+)\s*$/)||[])[1];
+    if(!x.w&&!y.w&&!given&&x.d!==y.d){ const N=X+op*Y, k=g(N,L); if(N>0&&N<L&&A===`${N/k}${L/k}`){ add(`${x.n+op*y.n}${Math.abs(x.d+op*y.d)}`,'N5-04'); if(k>1) add(`${N}${L}`,'N5-12'); if(x.n+op*y.n>0) add(`${x.n+op*y.n}${L}`,'N5-13'); } }
+    else if(x.w&&y.w&&given&&+given===L){ const W=x.w+op*y.w;
+      if(op>0&&X+Y<L&&A===`${W}${X+Y}`){ if(x.d!==y.d) add(`${W}${x.n+y.n}`,'N5-13'); }
+      else if(op<0&&X>Y&&A===`${W}${X-Y}`){ if(x.d!==y.d&&x.n>y.n) add(`${W}${x.n-y.n}`,'N5-13'); }
+      else if(op<0&&X<Y&&A===`${W-1}${L+X-Y}`){ add(`${W}${Y-X}`,'N2-02'); if(L!==10) add(`${W-1}${10+X-Y}`,'N4-05'); } } }
+  else if((m=Q.match(/^(\d+) ?(시간|분) (\d+) ?(분|초)[은는] 몇 (분|초)\?/))){ if(A===String(60*m[1]+ +m[3])) add(100*m[1]+ +m[3],'G2-03'); }
+  else if((m=Q.match(/^(\d+) ?(분|초)[은는] 몇 (시간|분) 몇 (분|초)\?/))){ const x=+m[1]; if(x>=100&&A===`${Math.floor(x/60)}${x%60}`) add(`${Math.floor(x/100)}${x%100}`,'G2-03'); }
+  else if((m=Q.match(/^(\d+) (km|kg|L|cm) (\d+) (m|g|mL|mm)[은는] 몇 (m|g|mL|mm)\?/))){ const K=m[2]==='cm'?10:1000; if(A===String(K*m[1]+ +m[3])) add(100*m[1]+ +m[3],'G3-05'); }
+  else if((m=Q.match(/^(\d+) t[은는] 몇 kg\?/))){ if(A===String(1000*m[1])) add(100*m[1],'G3-05'); }
+  clash.forEach(k=>delete mis[k]); if(Object.keys(mis).length) q.mis=mis; return q; }
+const _tagQ0=tagQ; tagQ=function(ep,i,q){ q=_tagQ0(ep,i,q); try{ if(q&&typeof q==='object'&&!TAG3[ep+'#'+i]){ codeW(q); codeW2(q); codeW3(q); } }catch(e){} return q; };
 
 /* ---------- 3-14. 도형과 측정 (Claude·Gemini 교차 검토 4차) ---------- */
 Object.assign(MIS, {
