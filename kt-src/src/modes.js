@@ -66,7 +66,7 @@ function ktResult(S0){ const box=document.querySelector('.result'); if(!box) ret
 function bandPage(next){ hush(); app.className='wrap';
   app.innerHTML=`<div class="top"><button class="back" id="back">← 처음</button><div class="crumb">어떤 내용을 풀까요?</div><span style="width:70px"></span></div>
     <div class="stage"><div style="font-family:Jua;font-size:1.25rem;margin-bottom:12px">풀고 싶은 내용을 골라요. 나중에 바꿀 수 있어요.</div>
-    <div class="kt-modes" style="grid-template-columns:1fr">${BANDS.map(([b,n])=>`<button class="kt-mode" data-band="${b}"><b>${n}</b></button>`).join('')}</div></div>`;
+    <div class="kt-modes" style="grid-template-columns:1fr">${BANDS.map(([b,n])=>`<button class="kt-mode kt-band" data-band="${b}"><b>${n}</b></button>`).join('')}</div></div>`;
   document.getElementById('back').onclick=home;
   app.querySelectorAll('[data-band]').forEach(x=>x.onclick=()=>{ const b=+x.dataset.band; setPref({band:b});
     if(b>=3){ const st=state(); Object.values(LADDER).flat().forEach(k=>{ if(+k[2]<b) st.est[k]=1; else if(st.kc[k]==null) delete st.est[k]; }); W(SK,st); }
