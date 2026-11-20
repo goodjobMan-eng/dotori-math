@@ -11,7 +11,7 @@ const RE = {
   ep:   /^(S\d-\d{1,3}|EP\d{2})$/,
   code: /^[NRGD]\d-\d{2}$/,
   codes:/^([NRGD]\d-\d{2}(\|[NRGD]\d-\d{2}){0,3})?$/,
-  mode: /^[ugfdqr]$/,
+  mode: /^[ugfdqrkAB]$/,
   given:/^[0-9A-Za-z가-힣ㄱ-ㅎ .:,/%°²³+×÷=−\-~()←→↑↓]{0,24}$/,
 };
 

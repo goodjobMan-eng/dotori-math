@@ -3833,7 +3833,7 @@ function clockManip(th,tm){ let h=12, m=0; const draw=()=>{ const ha=((h%12)+m/6
     mount(root){ const svg=root.querySelector('svg.mclock'); const re=()=>svg.innerHTML=draw();
       dragOn(svg,pt=>{ let a=Math.atan2(pt.x-60,-(pt.y-60)); if(a<0) a+=2*Math.PI; const nm=Math.round(a/(2*Math.PI)*60)%60; const step=tm%5?1:5; m=Math.round(nm/step)*step%60; re(); });
       root.querySelectorAll('[data-h]').forEach(b=>b.onclick=()=>{ h=((h-1+(+b.dataset.h)+12)%12)+1; re(); }); },
-    check:()=>h===th&&m===tm, state:()=>h+':'+m, mcode:()=>(h%12===Math.round(tm/5)%12&&Math.abs(m-(th%12)*5)<=2&&h%12!==th%12)?'G2-10':(tm>=40&&h%12===(th%12+1)%12&&Math.abs(m-tm)<=1)?'G2-06':(tm>0&&tm%5===0&&h%12===th%12&&m===tm/5)?'G2-07':null, reveal(){ h=th; m=tm; const s=document.querySelector('svg.mclock'); if(s) s.innerHTML=draw(); } }; }
+    check:()=>h===th&&m===tm, state:()=>h+':'+m, mcode:()=>(h%12===Math.round(tm/5)%12&&Math.abs(m-(th%12)*5)<=2&&h%12!==th%12)?'G2-10':(tm>=35&&h%12===(th%12+1)%12&&Math.abs(m-tm)<=1)?'G2-06':(tm>0&&tm%5===0&&h%12===th%12&&m===tm/5)?'G2-07':null, reveal(){ h=th; m=tm; const s=document.querySelector('svg.mclock'); if(s) s.innerHTML=draw(); } }; }
 /* 각도기 반직선 */
 function angleManip(target){ let d=0; const draw=()=>{ const a=d*Math.PI/180; return `<g transform="translate(160,150)">${protG(140)}</g><line x1="160" y1="150" x2="315" y2="150" stroke="#6B3E1C" stroke-width="3"/><line x1="160" y1="150" x2="${(160+155*Math.cos(a)).toFixed(1)}" y2="${(150-155*Math.sin(a)).toFixed(1)}" stroke="#D45F16" stroke-width="4"/><circle cx="${(160+150*Math.cos(a)).toFixed(1)}" cy="${(150-150*Math.sin(a)).toFixed(1)}" r="11" fill="#D45F16"/>`; return s; };
   return { html:`<svg class="mang" viewBox="0 0 320 165" style="width:100%;max-width:360px;touch-action:none">${draw()}</svg><div class="mval" id="mval">0°</div>`,
@@ -3911,7 +3911,7 @@ function graphManip(labels,target,{step=1,kind='bar'}={}){ const top=Math.max(..
     return g+`<line x1="${L}" y1="${H-B}" x2="${W}" y2="${H-B}" stroke="#6B3E1C" stroke-width="2"/>`; };
   return { html:`<svg class="mgraph" viewBox="0 0 ${W} ${H}" style="width:100%;max-width:330px;touch-action:none;background:#fff;border-radius:12px">${draw()}</svg><div class="hint" style="text-align:center">칸을 누르면 그 높이까지 채워져요 (맨 아래를 누르면 0)</div>`,
     mount(root){ const svg=root.querySelector('svg.mgraph'); tapSvg(svg,pt=>{ const i=Math.floor((pt.x-L-6+6)/44); if(i<0||i>=n) return; const k=Math.max(0,Math.min(top,Math.ceil((H-B-pt.y)/u))); h[i]=(pt.y>H-B)?0:k; svg.innerHTML=draw(); }); },
-    check:()=>h.every((v,i)=>v*step===target[i]), state:()=>h.map(v=>v*step).join(','), mcode:()=>(step>1&&h.filter((v,i)=>v===target[i]).length>=2)?'D4-01':null, reveal(){ target.forEach((v,i)=>h[i]=v/step); const s=document.querySelector('svg.mgraph'); if(s) s.innerHTML=draw(); } }; }
+    check:()=>h.every((v,i)=>v*step===target[i]), state:()=>h.map(v=>v*step).join(','), mcode:()=>(step>1&&h.filter((v,i)=>target[i]>0&&v===target[i]).length>=Math.ceil(target.filter(x=>x>0).length*.6))?'D4-01':null, reveal(){ target.forEach((v,i)=>h[i]=v/step); const s=document.querySelector('svg.mgraph'); if(s) s.innerHTML=draw(); } }; }
 /* 쌓기나무: 위에서 본 칸을 눌러 쌓기 */
 function stackManip(check,reveal){ const v=Array(9).fill(0); const u=60;
   const draw=()=>v.map((c,i)=>{ const x=(i%3)*u, y=Math.floor(i/3)*u; return `<rect x="${x}" y="${y}" width="${u}" height="${u}" fill="${['#fff','#FFD9A8','#F2A65A','#C9702A'][c]}" stroke="#7A4A1E" stroke-width="2"/>`+(c?`<text x="${x+u/2}" y="${y+u/2+9}" font-size="26" text-anchor="middle" font-weight="700" fill="#4A2E14">${c}</text>`:''); }).join('');
@@ -4007,7 +4007,7 @@ function compassManip(r){ const u=14, cx=150, cy=110; let rad=1;
     return g+`<circle cx="${cx}" cy="${cy}" r="${rad*u}" fill="rgba(242,166,90,.25)" stroke="#D45F16" stroke-width="3"/><line x1="${cx}" y1="${cy}" x2="${cx+rad*u}" y2="${cy}" stroke="#4A2E14" stroke-width="3"/><circle cx="${cx}" cy="${cy}" r="4" fill="#4A2E14"/><circle cx="${cx+rad*u}" cy="${cy}" r="10" fill="#D45F16"/>`; };
   return { html:`<svg class="mcomp" viewBox="0 0 300 230" style="width:100%;max-width:320px;touch-action:none;background:#fff;border-radius:12px">${draw()}</svg><div class="mval" id="mval">반지름 1 cm</div>`,
     mount(root){ const svg=root.querySelector('svg.mcomp'); dragOn(svg,pt=>{ rad=Math.max(1,Math.min(10,Math.round(Math.hypot(pt.x-cx,pt.y-cy)/u))); svg.innerHTML=draw(); root.querySelector('#mval').textContent=`반지름 ${rad} cm · 지름 ${rad*2} cm`; }); },
-    check:()=>rad===r, state:()=>''+rad, mcode:()=>rad===2*r?'G3-04':null, reveal(){ rad=r; const s=document.querySelector('svg.mcomp'); if(s) s.innerHTML=draw(); } }; }
+    check:()=>rad===r, state:()=>''+rad, mcode:()=>(rad===2*r||rad*2===r)?'G3-04':null, reveal(){ rad=r; const s=document.querySelector('svg.mcomp'); if(s) s.innerHTML=draw(); } }; }
 /* 평균: 높은 탑에서 낮은 탑으로 옮겨 고르게 */
 function levelManip(vals){ const v=[...vals]; let sel=null; const avg=v.reduce((a,b)=>a+b)/v.length; const u=22, n=v.length, top=Math.max(...v);
   const draw=()=>{ let g=''; v.forEach((c,i)=>{ const x=20+i*60; for(let k=0;k<c;k++) g+=`<rect x="${x}" y="${(top-k-1)*u+10}" width="44" height="${u-2}" rx="4" fill="${sel===i?'#8CC7E8':'#F2A65A'}" stroke="#7A4A1E" stroke-width="2"/>`; g+=`<rect data-c="${i}" x="${x-6}" y="0" width="56" height="${top*u+40}" fill="transparent"/><text x="${x+22}" y="${top*u+32}" font-size="15" text-anchor="middle" font-weight="700">${c}</text>`; }); return g; };
@@ -5988,6 +5988,7 @@ const pieceL=(st,c)=>(st.cp&&st.cp[c]!=null)?st.cp[c]:.5;
 //   주 조각이 이미 비어 있으면 그것으로 오답이 설명되므로 부 조각까지 끌어내리지 않는다.
 // 맞음: 보기에 있었지만 고르지 않은 오개념의 주 조각에 약한 긍정 증거(0.1). 찍었을 수 있으니 3초 넘게 풀었을 때만.
 function pieceUpdate(st,q,m,ok,G,ms,fk){ st.cp=st.cp||{}; st.cpn=st.cpn||{}; st.cph=st.cph||{}; const up=(c,good,w)=>{ if(!CPC[c]||w<=0) return; st.cp[c]=bktW(pieceL(st,c),good,G,w); st.cpn[c]=(st.cpn[c]||0)+1; };
+  if(q._arm&&q._lec&&st.lec&&st.lec[q._lec]){ const L=st.lec[q._lec]; L.mr=[...(L.mr||[]),ok?1:0].slice(0,2); }
   if(!ok){ const ps=m&&MISC[m]; if(ps){ const L0=pieceL(st,ps[0][0]); ps.forEach(([c,w],i)=>up(c,false,i?w*L0:w)); const c0=ps[0][0], hs=st.cph[c0]||(st.cph[c0]=[]); if(fk&&!hs.includes(fk)){ hs.push(fk); st.cph[c0]=hs.slice(-4); } } }
   else if(q.mis&&(ms==null||ms>=3000)){ const seen={}; Object.values(q.mis).forEach(code=>(MISC[code]||[]).slice(0,1).forEach(([c])=>{ if(!seen[c]){ seen[c]=1; up(c,true,.1); } })); } }
 // 약한 조각: 증거 2번 이상이고 숙달 0.35 미만. 다만 곧바로 "비어 있다"고 하지 않는다.
@@ -5995,16 +5996,26 @@ function pieceUpdate(st,q,m,ok,G,ms,fk){ st.cp=st.cp||{}; st.cpn=st.cpn||{}; st.
 //   확인 중(chk) → 둘 다 맞히면 '맥락에서만 틀림(ctx)'으로 두고 숙달을 0.6으로 되돌림 / 하나라도 틀리면 '비어 있음(weak)' 확정.
 //   ctx가 된 뒤 다시 약해지면 확인 없이 확정.
 // '약함'의 조건: 그 조각을 가리키는 오답을 서로 다른 문항 2종 이상에서 골랐고 숙달이 0.35 미만.
-function pieceStage(st,c){ st.cpv=st.cpv||{}; const cp=st.cp||{}, n=st.cpn||{}; const low=CPC[c]&&((st.cph||{})[c]||[]).length>=2&&cp[c]<.35; const v=st.cpv[c];
-  if(!low) return v&&v.s==='ctx'?'ctx':null; if(!v){ st.cpv[c]={s:'chk',n:0,ok:0}; return 'chk'; } if(v.s==='ctx'){ st.cpv[c]={s:'weak'}; return 'weak'; } return v.s; }
-function pieceCheck(st,q,ok){ const c=q._chk; if(!c) return; st.cpv=st.cpv||{}; const v=st.cpv[c]; if(!v||v.s!=='chk') return; v.n++; if(ok) v.ok++;
-  if(!ok) st.cpv[c]={s:'weak'}; else if(v.n>=2){ st.cpv[c]={s:'ctx'}; st.cp[c]=.65; st.cph[c]=[]; } }
+const fkGrade=fk=>{ const ep=String(fk).split(':')[0]; if(/^EP/.test(ep)) return 1; const u=UNITS36[uix(ep)]; return u?gradeOfUnit(u):9; };
+function pieceStage(st,c){ st.cpv=st.cpv||{}; const cp=st.cp||{}, hs=(st.cph||{})[c]||[]; const low=CPC[c]&&hs.length>=2&&cp[c]<.35; const v=st.cpv[c];
+  if(!low) return v&&v.s==='ctx'?'ctx':null; if(v&&v.s==='ctx'){ if(v.left>0) return 'ctx'; st.cpv[c]={s:'weak'}; return 'weak'; }
+  if(!v){ const g0=+CPC[c][1][0], upper=hs.some(fk=>fkGrade(fk)>g0), has=codesOfPiece(c).some(code=>MISC[code].length===1&&formsOf(code).length);
+    st.cpv[c]=(upper&&has)?{s:'chk',ok:0,lose:0}:{s:'weak'}; return st.cpv[c].s; }                 // 제 학년 문제에서 틀린 것이면 확인 없이 확정
+  return v.s; }
+// 확인 문제 판정: 2번 맞히면 통과(윗학년 맥락에서만 틀림), 그 조각의 오개념 보기를 고르면 바로 확정, 다른 까닭으로 틀리면 한 문제 더(3판 2선승). 2초 안에 맞힌 것은 찍은 것으로 보고 세지 않는다.
+function pieceCheck(st,q,ok,m,ms){ const c=q._chk; if(!c) return; st.cpv=st.cpv||{}; const v=st.cpv[c]; if(!v||v.s!=='chk') return;
+  if(ok){ if(ms==null||ms>=2000) v.ok++; } else if(m&&MISC[m]&&MISC[m][0][0]===c){ st.cpv[c]={s:'weak'}; return; } else v.lose++;
+  if(v.ok>=2){ st.cpv[c]={s:'ctx',left:10}; st.cp[c]=.65; st.cph[c]=[]; } else if(v.lose>=2) st.cpv[c]={s:'weak'}; }
+// 통과한 조각(ctx)은 그 뒤 윗학년 문제에서 같은 오답이 나와도 10번까지는 아랫학년 조각을 깎지 않는다(확인 → 복원 → 다시 추락의 되풀이를 막음).
+function ctxShield(st,m,fk){ const ps=m&&MISC[m]; if(!ps) return false; const c=ps[0][0], v=(st.cpv||{})[c]; if(!v||v.s!=='ctx'||!(v.left>0)||fkGrade(fk)<=+CPC[c][1][0]) return false; v.left--; return true; }
 function weakPieces(st,all){ const own=!st; st=st||state(); const cp=st.cp||{}; const rows=Object.keys(cp).filter(c=>CPC[c]).map(c=>({c,name:CPC[c][0],when:CPC[c][1],L:cp[c],s:pieceStage(st,c)})).filter(x=>x.s);
   if(own) W(SK,st); const weak=rows.filter(x=>x.s==='weak').map(x=>x.c); rows.forEach(x=>x.pre=CPC[x.c][2].filter(p=>weak.includes(p)));
   const ord=x=>+x.when.replace('-','.'); return rows.filter(x=>all||x.s==='weak').sort((a,b)=>a.pre.length-b.pre.length||ord(a)-ord(b)); }
 const checkPieces=st=>weakPieces(st,true).filter(x=>x.s==='chk');
 // 공개 데이터에 더 싣는 칸: 보기에 있던 오개념 코드들(보기별 무게를 다시 추정하는 데 꼭 필요), 푸는 방식, 세트 안 순서, 다시 나온 문제인지.
-function recExtra(q){ let mode='u'; try{ mode=q.diag?'g':S.focus?'f':S.kt==='daily'?'d':S.kt==='quick'?'q':S.review?'r':'u'; }catch(e){}
+// 쓰기형 답은 아이가 이름·전화번호를 적을 수 있으므로, 숫자와 기호가 아니거나 12자를 넘으면 내보내지 않는다.
+const maskG=(q,g)=>(q.opts&&q.opts.length)||q.manip?g:(/^[0-9\-−.\/: ]{0,12}$/.test(String(g))?g:'STR');
+function recExtra(q){ let mode='u'; try{ mode=q._arm?q._arm:q._chk?'k':q.diag?'g':S.focus?'f':S.kt==='daily'?'d':S.kt==='quick'?'q':S.review?'r':'u'; }catch(e){}
   const ex=[...new Set(Object.values(q.mis||{}))].sort().slice(0,4).join('|'); let seq=0; try{ seq=Math.max(0,Math.min(99,S.i|0)); }catch(e){}
   return [ex,mode,seq,q._review?1:0,q.manip?'m':(q.opts&&q.opts.length)?'c':'w']; }
 function rec(q, given, ok){
@@ -6020,14 +6031,15 @@ function rec(q, given, ok){
   const st=state();
   const nOpt=(q.opts&&q.opts.length)||0, G=nOpt?1/nOpt:.05;
   // 보기마다 무게가 다르다: 오개념 보기를 골랐으면 원인은 그 오개념이 가리키는 개념 조각에 있으므로 단원 숙달은 약하게, 조각은 세게 깎는다.
-  const wk=ok?1:(m&&MISC[m])?.4*pieceL(st,MISC[m][0][0])+.1:(q.fx&&(q.fx[String(given)]||q.fx[gk]))?.3:.7;   // 선수 조각이 이미 비어 있으면 이 단원 숙달은 덜 깎는다
+  const shield=!ok&&ctxShield(st,m,fk);
+  const wk=ok?1:shield?.7:(m&&MISC[m])?.4*pieceL(st,MISC[m][0][0])+.1:(q.fx&&(q.fx[String(given)]||q.fx[gk]))?.3:.7;   // 선수 조각이 이미 비어 있으면 이 단원 숙달은 덜 깎는다
   if(kc){ st.kc[kc]=bktW(st.kc[kc]==null?BKT.L0:st.kc[kc],ok,G,wk); st.kn[kc]=(st.kn[kc]||0)+1; }
-  pieceUpdate(st,q,m,ok,G,ms,fk); pieceCheck(st,q,ok);
+  if(!shield) pieceUpdate(st,q,m,ok,G,ms,fk); pieceCheck(st,q,ok,m,ms);
   if(q.mis){ for(const c of new Set(Object.values(q.mis))){ const e=st.mis[c]||(st.mis[c]={h:[],n:0,ep:[]}); e.h.push([fk,c===m?1:0,ok?1:0]); e.h=e.h.slice(-8);
     if(c===m){ e.n++; if(!e.ep.includes(ep)) e.ep.push(ep); e.ep=e.ep.slice(-5); } } }
   W(SK,st);
   afterRec(q,given,ok,m);
-  if(cfg().share&&KT_ENDPOINT){ const qu=J(QK,[]); qu.push([r.d,ep,ti,v,r.sd,r.g,r.ok,m,ms,r.dg,...recExtra(q)]); W(QK,qu.slice(-3000)); }
+  if(cfg().share&&KT_ENDPOINT){ const qu=J(QK,[]); qu.push([r.d,ep,ti,v,r.sd,maskG(q,r.g),r.ok,m,ms,r.dg,...recExtra(q)]); W(QK,qu.slice(-3000)); }
 }
 // 최근 8번의 기회(그 오개념의 오답이 보기에 있던 문제) 안에서 판정한다. 기록 한 칸 = [문항, 그 오답을 골랐나, 맞혔나].
 // 확인: 서로 다른 문항 2종 이상에서 3번 이상 골랐고, (노출의 70% 이상) 또는 (틀릴 때마다 대부분 그 오답: 오답 4번 이상 중 80% 이상이면서 정답률 40% 이상 = 찍는 아이가 아님).
@@ -6103,6 +6115,7 @@ function teacherPage(){ if(typeof S!=='undefined'&&S) S.idle=true; hush(); app.c
       <p class="kt-ex">최근 8번의 기회에서 서로 다른 문항 2종 이상에 걸쳐 3번 이상 나오면 확인, 2번이면 의심입니다. 바르게 풀면 사라집니다.</p>
       <h2 class="sec">비어 있는 개념</h2><ul class="recent kt-list">${(w=>w.length?w.map(x=>`<li><b>${esc(x.name)}</b> <span class="rd">${x.when.replace('-','학년 ')}학기에 처음 배움${x.pre.length?' · 먼저 '+x.pre.map(p=>CPC[p][0]).join(', '):''}</span><div class="kt-ex">강의: ${(CPL[x.c]||[]).map(k=>`${k} ${esc(lecName(k))}${lecHas(k)?'':'(준비 중)'}`).join(', ')}</div></li>`).join(''):'<li>아직 비어 있다고 볼 개념이 없습니다.</li>')(weakPieces(st))}${weakPieces(st,true).filter(x=>x.s!=='weak').map(x=>`<li><b>${esc(x.name)}</b> <span class="rd">${x.s==='chk'?'확인 중: 처음 배우는 단원의 문제 2개로 다시 봅니다':'처음 배우는 단원에서는 맞힘. 윗학년 문제에서만 틀립니다'}</span></li>`).join('')}</ul>
       <p class="kt-ex">오답 보기마다 "이 답을 고르면 어떤 개념을 모르는 것"인지와 그 무게를 정해 두었습니다. 같은 개념을 가리키는 오답이 두 번 이상 쌓이면 여기에 나옵니다. 위에 있을수록 먼저 채워야 하는 개념입니다.</p>
+${(L=>{ const ks=Object.keys(L).filter(c=>CPC[c]&&(L[c].mr||[]).length); return ks.length?`<h2 class="sec">강의와 문제의 순서</h2><ul class="recent kt-list">${ks.map(c=>`<li><b>${esc(CPC[c][0])}</b> <span class="rd">${L[c].arm==='A'?'강의 먼저':'문제 먼저'} · 바로 뒤 두 문제 ${L[c].mr.filter(x=>x).length}/${L[c].mr.length}${L[c].k?' · '+L[c].k:''}</span></li>`).join('')}</ul><p class="kt-ex">비어 있는 개념이 확정되면 절반은 강의부터, 절반은 문제부터 봅니다(모두 강의는 봄). 바로 뒤 두 문제의 결과를 견주면 강의가 실제로 도움이 되는지 알 수 있습니다.</p>`:''; })(st.lec||{})}
       <h2 class="sec">자주 틀리는 단순 지식 (1~2학년)</h2><ul class="recent kt-list">${factsHTML()}</ul>
       <p class="kt-ex">틀리면 같은 세트 뒤쪽에 한 번 더 나오고, 그 뒤 10분 → 다음 날 → 3일 간격으로 다시 나옵니다. 네 번 이어서 맞히면 익힘으로 바뀝니다.</p>
       <h2 class="sec">영역별 수준 (3~6학년)</h2>${lad}
@@ -6178,7 +6191,7 @@ function recEP(q,given,ok){ if(!q||q._kt) return; q._kt=1; const ep=epLabel(q._e
       if(c===m){ e.n++; if(!e.ep.includes(ep)) e.ep.push(ep); e.ep=e.ep.slice(-5); } } W(SK,st); }
   try{ const st2=state(); pieceUpdate(st2,q,m,ok,(q.opts&&q.opts.length)?1/q.opts.length:.05,ms,fk); W(SK,st2); }catch(e){}
   afterRec(q,given,ok,m);
-  if(cfg().share&&KT_ENDPOINT){ const qu=J(QK,[]); qu.push([r.d,ep,q._ei,0,r.sd,r.g,r.ok,m,ms,0,...recExtra(q)]); W(QK,qu.slice(-3000)); }
+  if(cfg().share&&KT_ENDPOINT){ const qu=J(QK,[]); qu.push([r.d,ep,q._ei,0,r.sd,maskG(q,r.g),r.ok,m,ms,0,...recExtra(q)]); W(QK,qu.slice(-3000)); }
   // 틀린 단순 지식은 이번 세트 뒤쪽에 똑같이 한 번 더 낸다.
   if(!ok&&key&&S&&S.acts&&(S.mode==='ep'||S.mode==='final')){ S._rv=S._rv||{};
     if(!S._rv[key]){ let j=-1; for(let k=S.acts.length-1;k>S.i+1;k--){ if(S.acts[k].kind==='q'&&!S.acts[k].q._review){ j=k; break; } }
@@ -6232,10 +6245,17 @@ function pieceActs(B,limit,c){ const fs=shuffle(codesOfPiece(c).flatMap(code=>fo
 // 확인 문제: 그 조각을 처음 배우는 학년(없으면 가장 낮은 학년)의 문제 2개.
 function checkActs(B,c){ const g0=+CPC[c][1][0], gradeOf=ep=>{ const u=UNITS36[uix(ep)]; return u?gradeOfUnit(u):9; };
   const fs=codesOfPiece(c).filter(code=>MISC[code].length===1).flatMap(code=>formsOf(code).map(f=>({f,code}))); if(!fs.length) return 0;
-  const lo=Math.min(...fs.map(x=>gradeOf(x.f.ep))), want=fs.some(x=>gradeOf(x.f.ep)===g0)?g0:lo; let n=0;
-  for(const {f,code} of shuffle(fs.filter(x=>gradeOf(x.f.ep)===want))){ if(n>=2) break; for(let t=0;t<6;t++){ let q; try{ q=G36[f.ep][f.i](); }catch(e){ break; } if(q&&q.mis&&Object.values(q.mis).includes(code)){ q._ep=f.ep; q._ti=f.i; q._chk=c; if(B.push(q)) n++; break; } } }
+  const lo=Math.min(...fs.map(x=>gradeOf(x.f.ep))), want=fs.some(x=>gradeOf(x.f.ep)===g0)?g0:lo; let n=0; const v=(state().cpv||{})[c]||{ok:0,lose:0}, need=v.ok+v.lose>=2?1:2;
+  for(const {f,code} of shuffle(fs.filter(x=>gradeOf(x.f.ep)===want))){ if(n>=need) break; for(let t=0;t<6;t++){ let q; try{ q=G36[f.ep][f.i](); }catch(e){ break; } if(q&&q.mis&&Object.values(q.mis).includes(code)){ q._ep=f.ep; q._ti=f.i; q._chk=c; if(B.push(q)) n++; break; } } }
   return n; }
-function pieceVideo(c){ const P=pref(), seen=P.seenP||{}, t=dstr(Date.now()); if(seen[c]===t) return null; const k=(CPL[c]||[]).find(lecHas); if(!k) return null; seen[c]=t; setPref({seenP:seen}); return {kind:'video',key:k,label:`${k} ${lecName(k)}`}; }
+// 강의 효과를 견줄 수 있게, 비어 있는 조각이 확정되면 (익명 번호 + 조각)으로 정해지는 절반은 강의 먼저(A), 절반은 문제 먼저(B)로 나눈다.
+// 두 쪽 모두 '확정 직후 그 조각의 문제 2개'를 푼다(A는 강의를 본 뒤, B는 보기 전). B도 그 두 문제에서 하나라도 틀리면 다음 세트에서 강의를 본다.
+const armOf=c=>{ let h=0; for(const ch of did()+c) h=(h*31+ch.charCodeAt(0))>>>0; return h%2?'B':'A'; };
+function lecPlan(st,c){ st.lec=st.lec||{}; let L=st.lec[c]; if(!L) L=st.lec[c]={arm:armOf(c),mr:[],k:(CPL[c]||[]).find(lecHas)||''}; return L; }
+function pieceVideo(c,L){ if(!L.k||L.v) return null; const t=dstr(Date.now());
+  if(L.arm==='B'){ if(L.mr.length<2) return null; if(L.mr.every(x=>x)){ L.v='skip'; return null; } }       // 문제 먼저: 두 문제를 다 맞혔으면 강의는 건너뜀
+  L.v=t; if(cfg().share&&KT_ENDPOINT){ const qu=J(QK,[]); qu.push([t,L.k,-1,0,0,'V '+c,1,null,0,0,'',L.arm,0,0,'c']); W(QK,qu.slice(-3000)); }
+  return {kind:'video',key:L.k,label:`${L.k} ${lecName(L.k)}`}; }
 function frontier(st){ const fr=Object.keys(LADDER).map(s=>LADDER[s].find(k=>!['숙달','추정'].includes(kcStatus(k,st)))||LADDER[s][LADDER[s].length-1]); return fr; }
 
 // 가볍게 풀기: 이미 아는 내용에서 5문제. 복습할 것이 있으면 먼저 넣는다.
@@ -6253,7 +6273,7 @@ function startDaily(){ const P=pref(); if(!P.band) return bandPage(startDaily); 
     while(B.acts.length<want&&g++<80) B.push(qFromEp(cur),'_new');
     while(B.acts.length<N&&g++<240) B.push(qFromEp(i>0?EPO[rnd(0,i-1)]:cur));
     if(!P.seen[cur]){ video={kind:'video',key:epLabel(cur),label:`${epLabel(cur)} ${EPS[cur][0]}`}; const seen=P.seen; seen[cur]=1; setPref({seen}); } }
-  else { const st=state(); const ck=checkPieces(st)[0]; if(ck) checkActs(B,ck.c); W(SK,st); const wp=weakPieces(st)[0]; if(wp){ pieceActs(B,Math.ceil(N*.4),wp.c); if(B.acts.length) video=pieceVideo(wp.c); } misActs(B,Math.max(B.acts.length,Math.ceil(N*.4))); const fr=frontier(st);
+  else { const st=state(); const ck=checkPieces(st)[0]; if(ck) checkActs(B,ck.c); W(SK,st); const wp=weakPieces(st)[0]; if(wp){ const L=lecPlan(st,wp.c), n0=B.acts.length; video=pieceVideo(wp.c,L); pieceActs(B,Math.max(n0+2,Math.ceil(N*.4)),wp.c); if(L.mr.length<2&&!L.m){ B.acts.slice(n0,n0+2).forEach(a=>{ a.q._arm=L.arm; a.q._lec=wp.c; }); L.m=1; } W(SK,st); } misActs(B,Math.max(B.acts.length,Math.ceil(N*.4))); const fr=frontier(st);
     while(B.acts.length<N&&g++<N*10){ const eps=epsOf(fr[g%fr.length]); if(eps.length) B.push(qFromEp36(eps[rnd(0,eps.length-1)]),'_new'); } }
   runSet(P.band===1?B.acts:shuffle(B.acts),'오늘의 문제',{kt:'daily'},video); }
 function finishDaily(S0){ const st=state(), t=dstr(Date.now());

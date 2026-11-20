@@ -55,6 +55,7 @@ const pieceL=(st,c)=>(st.cp&&st.cp[c]!=null)?st.cp[c]:.5;
 //   주 조각이 이미 비어 있으면 그것으로 오답이 설명되므로 부 조각까지 끌어내리지 않는다.
 // 맞음: 보기에 있었지만 고르지 않은 오개념의 주 조각에 약한 긍정 증거(0.1). 찍었을 수 있으니 3초 넘게 풀었을 때만.
 function pieceUpdate(st,q,m,ok,G,ms,fk){ st.cp=st.cp||{}; st.cpn=st.cpn||{}; st.cph=st.cph||{}; const up=(c,good,w)=>{ if(!CPC[c]||w<=0) return; st.cp[c]=bktW(pieceL(st,c),good,G,w); st.cpn[c]=(st.cpn[c]||0)+1; };
+  if(q._arm&&q._lec&&st.lec&&st.lec[q._lec]){ const L=st.lec[q._lec]; L.mr=[...(L.mr||[]),ok?1:0].slice(0,2); }
   if(!ok){ const ps=m&&MISC[m]; if(ps){ const L0=pieceL(st,ps[0][0]); ps.forEach(([c,w],i)=>up(c,false,i?w*L0:w)); const c0=ps[0][0], hs=st.cph[c0]||(st.cph[c0]=[]); if(fk&&!hs.includes(fk)){ hs.push(fk); st.cph[c0]=hs.slice(-4); } } }
   else if(q.mis&&(ms==null||ms>=3000)){ const seen={}; Object.values(q.mis).forEach(code=>(MISC[code]||[]).slice(0,1).forEach(([c])=>{ if(!seen[c]){ seen[c]=1; up(c,true,.1); } })); } }
 // 약한 조각: 증거 2번 이상이고 숙달 0.35 미만. 다만 곧바로 "비어 있다"고 하지 않는다.
@@ -62,16 +63,26 @@ function pieceUpdate(st,q,m,ok,G,ms,fk){ st.cp=st.cp||{}; st.cpn=st.cpn||{}; st.
 //   확인 중(chk) → 둘 다 맞히면 '맥락에서만 틀림(ctx)'으로 두고 숙달을 0.6으로 되돌림 / 하나라도 틀리면 '비어 있음(weak)' 확정.
 //   ctx가 된 뒤 다시 약해지면 확인 없이 확정.
 // '약함'의 조건: 그 조각을 가리키는 오답을 서로 다른 문항 2종 이상에서 골랐고 숙달이 0.35 미만.
-function pieceStage(st,c){ st.cpv=st.cpv||{}; const cp=st.cp||{}, n=st.cpn||{}; const low=CPC[c]&&((st.cph||{})[c]||[]).length>=2&&cp[c]<.35; const v=st.cpv[c];
-  if(!low) return v&&v.s==='ctx'?'ctx':null; if(!v){ st.cpv[c]={s:'chk',n:0,ok:0}; return 'chk'; } if(v.s==='ctx'){ st.cpv[c]={s:'weak'}; return 'weak'; } return v.s; }
-function pieceCheck(st,q,ok){ const c=q._chk; if(!c) return; st.cpv=st.cpv||{}; const v=st.cpv[c]; if(!v||v.s!=='chk') return; v.n++; if(ok) v.ok++;
-  if(!ok) st.cpv[c]={s:'weak'}; else if(v.n>=2){ st.cpv[c]={s:'ctx'}; st.cp[c]=.65; st.cph[c]=[]; } }
+const fkGrade=fk=>{ const ep=String(fk).split(':')[0]; if(/^EP/.test(ep)) return 1; const u=UNITS36[uix(ep)]; return u?gradeOfUnit(u):9; };
+function pieceStage(st,c){ st.cpv=st.cpv||{}; const cp=st.cp||{}, hs=(st.cph||{})[c]||[]; const low=CPC[c]&&hs.length>=2&&cp[c]<.35; const v=st.cpv[c];
+  if(!low) return v&&v.s==='ctx'?'ctx':null; if(v&&v.s==='ctx'){ if(v.left>0) return 'ctx'; st.cpv[c]={s:'weak'}; return 'weak'; }
+  if(!v){ const g0=+CPC[c][1][0], upper=hs.some(fk=>fkGrade(fk)>g0), has=codesOfPiece(c).some(code=>MISC[code].length===1&&formsOf(code).length);
+    st.cpv[c]=(upper&&has)?{s:'chk',ok:0,lose:0}:{s:'weak'}; return st.cpv[c].s; }                 // 제 학년 문제에서 틀린 것이면 확인 없이 확정
+  return v.s; }
+// 확인 문제 판정: 2번 맞히면 통과(윗학년 맥락에서만 틀림), 그 조각의 오개념 보기를 고르면 바로 확정, 다른 까닭으로 틀리면 한 문제 더(3판 2선승). 2초 안에 맞힌 것은 찍은 것으로 보고 세지 않는다.
+function pieceCheck(st,q,ok,m,ms){ const c=q._chk; if(!c) return; st.cpv=st.cpv||{}; const v=st.cpv[c]; if(!v||v.s!=='chk') return;
+  if(ok){ if(ms==null||ms>=2000) v.ok++; } else if(m&&MISC[m]&&MISC[m][0][0]===c){ st.cpv[c]={s:'weak'}; return; } else v.lose++;
+  if(v.ok>=2){ st.cpv[c]={s:'ctx',left:10}; st.cp[c]=.65; st.cph[c]=[]; } else if(v.lose>=2) st.cpv[c]={s:'weak'}; }
+// 통과한 조각(ctx)은 그 뒤 윗학년 문제에서 같은 오답이 나와도 10번까지는 아랫학년 조각을 깎지 않는다(확인 → 복원 → 다시 추락의 되풀이를 막음).
+function ctxShield(st,m,fk){ const ps=m&&MISC[m]; if(!ps) return false; const c=ps[0][0], v=(st.cpv||{})[c]; if(!v||v.s!=='ctx'||!(v.left>0)||fkGrade(fk)<=+CPC[c][1][0]) return false; v.left--; return true; }
 function weakPieces(st,all){ const own=!st; st=st||state(); const cp=st.cp||{}; const rows=Object.keys(cp).filter(c=>CPC[c]).map(c=>({c,name:CPC[c][0],when:CPC[c][1],L:cp[c],s:pieceStage(st,c)})).filter(x=>x.s);
   if(own) W(SK,st); const weak=rows.filter(x=>x.s==='weak').map(x=>x.c); rows.forEach(x=>x.pre=CPC[x.c][2].filter(p=>weak.includes(p)));
   const ord=x=>+x.when.replace('-','.'); return rows.filter(x=>all||x.s==='weak').sort((a,b)=>a.pre.length-b.pre.length||ord(a)-ord(b)); }
 const checkPieces=st=>weakPieces(st,true).filter(x=>x.s==='chk');
 // 공개 데이터에 더 싣는 칸: 보기에 있던 오개념 코드들(보기별 무게를 다시 추정하는 데 꼭 필요), 푸는 방식, 세트 안 순서, 다시 나온 문제인지.
-function recExtra(q){ let mode='u'; try{ mode=q.diag?'g':S.focus?'f':S.kt==='daily'?'d':S.kt==='quick'?'q':S.review?'r':'u'; }catch(e){}
+// 쓰기형 답은 아이가 이름·전화번호를 적을 수 있으므로, 숫자와 기호가 아니거나 12자를 넘으면 내보내지 않는다.
+const maskG=(q,g)=>(q.opts&&q.opts.length)||q.manip?g:(/^[0-9\-−.\/: ]{0,12}$/.test(String(g))?g:'STR');
+function recExtra(q){ let mode='u'; try{ mode=q._arm?q._arm:q._chk?'k':q.diag?'g':S.focus?'f':S.kt==='daily'?'d':S.kt==='quick'?'q':S.review?'r':'u'; }catch(e){}
   const ex=[...new Set(Object.values(q.mis||{}))].sort().slice(0,4).join('|'); let seq=0; try{ seq=Math.max(0,Math.min(99,S.i|0)); }catch(e){}
   return [ex,mode,seq,q._review?1:0,q.manip?'m':(q.opts&&q.opts.length)?'c':'w']; }
 function rec(q, given, ok){
@@ -87,14 +98,15 @@ function rec(q, given, ok){
   const st=state();
   const nOpt=(q.opts&&q.opts.length)||0, G=nOpt?1/nOpt:.05;
   // 보기마다 무게가 다르다: 오개념 보기를 골랐으면 원인은 그 오개념이 가리키는 개념 조각에 있으므로 단원 숙달은 약하게, 조각은 세게 깎는다.
-  const wk=ok?1:(m&&MISC[m])?.4*pieceL(st,MISC[m][0][0])+.1:(q.fx&&(q.fx[String(given)]||q.fx[gk]))?.3:.7;   // 선수 조각이 이미 비어 있으면 이 단원 숙달은 덜 깎는다
+  const shield=!ok&&ctxShield(st,m,fk);
+  const wk=ok?1:shield?.7:(m&&MISC[m])?.4*pieceL(st,MISC[m][0][0])+.1:(q.fx&&(q.fx[String(given)]||q.fx[gk]))?.3:.7;   // 선수 조각이 이미 비어 있으면 이 단원 숙달은 덜 깎는다
   if(kc){ st.kc[kc]=bktW(st.kc[kc]==null?BKT.L0:st.kc[kc],ok,G,wk); st.kn[kc]=(st.kn[kc]||0)+1; }
-  pieceUpdate(st,q,m,ok,G,ms,fk); pieceCheck(st,q,ok);
+  if(!shield) pieceUpdate(st,q,m,ok,G,ms,fk); pieceCheck(st,q,ok,m,ms);
   if(q.mis){ for(const c of new Set(Object.values(q.mis))){ const e=st.mis[c]||(st.mis[c]={h:[],n:0,ep:[]}); e.h.push([fk,c===m?1:0,ok?1:0]); e.h=e.h.slice(-8);
     if(c===m){ e.n++; if(!e.ep.includes(ep)) e.ep.push(ep); e.ep=e.ep.slice(-5); } } }
   W(SK,st);
   afterRec(q,given,ok,m);
-  if(cfg().share&&KT_ENDPOINT){ const qu=J(QK,[]); qu.push([r.d,ep,ti,v,r.sd,r.g,r.ok,m,ms,r.dg,...recExtra(q)]); W(QK,qu.slice(-3000)); }
+  if(cfg().share&&KT_ENDPOINT){ const qu=J(QK,[]); qu.push([r.d,ep,ti,v,r.sd,maskG(q,r.g),r.ok,m,ms,r.dg,...recExtra(q)]); W(QK,qu.slice(-3000)); }
 }
 // 최근 8번의 기회(그 오개념의 오답이 보기에 있던 문제) 안에서 판정한다. 기록 한 칸 = [문항, 그 오답을 골랐나, 맞혔나].
 // 확인: 서로 다른 문항 2종 이상에서 3번 이상 골랐고, (노출의 70% 이상) 또는 (틀릴 때마다 대부분 그 오답: 오답 4번 이상 중 80% 이상이면서 정답률 40% 이상 = 찍는 아이가 아님).
@@ -170,6 +182,7 @@ function teacherPage(){ if(typeof S!=='undefined'&&S) S.idle=true; hush(); app.c
       <p class="kt-ex">최근 8번의 기회에서 서로 다른 문항 2종 이상에 걸쳐 3번 이상 나오면 확인, 2번이면 의심입니다. 바르게 풀면 사라집니다.</p>
       <h2 class="sec">비어 있는 개념</h2><ul class="recent kt-list">${(w=>w.length?w.map(x=>`<li><b>${esc(x.name)}</b> <span class="rd">${x.when.replace('-','학년 ')}학기에 처음 배움${x.pre.length?' · 먼저 '+x.pre.map(p=>CPC[p][0]).join(', '):''}</span><div class="kt-ex">강의: ${(CPL[x.c]||[]).map(k=>`${k} ${esc(lecName(k))}${lecHas(k)?'':'(준비 중)'}`).join(', ')}</div></li>`).join(''):'<li>아직 비어 있다고 볼 개념이 없습니다.</li>')(weakPieces(st))}${weakPieces(st,true).filter(x=>x.s!=='weak').map(x=>`<li><b>${esc(x.name)}</b> <span class="rd">${x.s==='chk'?'확인 중: 처음 배우는 단원의 문제 2개로 다시 봅니다':'처음 배우는 단원에서는 맞힘. 윗학년 문제에서만 틀립니다'}</span></li>`).join('')}</ul>
       <p class="kt-ex">오답 보기마다 "이 답을 고르면 어떤 개념을 모르는 것"인지와 그 무게를 정해 두었습니다. 같은 개념을 가리키는 오답이 두 번 이상 쌓이면 여기에 나옵니다. 위에 있을수록 먼저 채워야 하는 개념입니다.</p>
+${(L=>{ const ks=Object.keys(L).filter(c=>CPC[c]&&(L[c].mr||[]).length); return ks.length?`<h2 class="sec">강의와 문제의 순서</h2><ul class="recent kt-list">${ks.map(c=>`<li><b>${esc(CPC[c][0])}</b> <span class="rd">${L[c].arm==='A'?'강의 먼저':'문제 먼저'} · 바로 뒤 두 문제 ${L[c].mr.filter(x=>x).length}/${L[c].mr.length}${L[c].k?' · '+L[c].k:''}</span></li>`).join('')}</ul><p class="kt-ex">비어 있는 개념이 확정되면 절반은 강의부터, 절반은 문제부터 봅니다(모두 강의는 봄). 바로 뒤 두 문제의 결과를 견주면 강의가 실제로 도움이 되는지 알 수 있습니다.</p>`:''; })(st.lec||{})}
       <h2 class="sec">자주 틀리는 단순 지식 (1~2학년)</h2><ul class="recent kt-list">${factsHTML()}</ul>
       <p class="kt-ex">틀리면 같은 세트 뒤쪽에 한 번 더 나오고, 그 뒤 10분 → 다음 날 → 3일 간격으로 다시 나옵니다. 네 번 이어서 맞히면 익힘으로 바뀝니다.</p>
       <h2 class="sec">영역별 수준 (3~6학년)</h2>${lad}

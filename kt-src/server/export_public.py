@@ -43,7 +43,7 @@ def main(src, out, month):
             d0 = date.fromisoformat(days[0])
             lid = hmac.new(salt.encode(), did.encode(), hashlib.sha256).hexdigest()[:16]
             for i, r in enumerate(recs):
-                w.writerow([lid, (date.fromisoformat(r[0]) - d0).days, i, r[1], r[2], r[3], r[4], r[5], r[6], r[7] or '', r[8], r[9], 3] + (list(r[10:15]) if len(r) >= 15 else ['', '', '', '', '']))
+                w.writerow([lid, (date.fromisoformat(r[0]) - d0).days, i, r[1], r[2], r[3], r[4], r[5], r[6], r[7] or '', min(180000, round(r[8] / 100) * 100), r[9], 3] + (list(r[10:15]) if len(r) >= 15 else ['', '', '', '', '']))
             kept += 1
     print(f'{path}: 기기 {kept}대 포함, {dropped}대 제외')
 

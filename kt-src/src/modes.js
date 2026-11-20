@@ -32,10 +32,17 @@ function pieceActs(B,limit,c){ const fs=shuffle(codesOfPiece(c).flatMap(code=>fo
 // 확인 문제: 그 조각을 처음 배우는 학년(없으면 가장 낮은 학년)의 문제 2개.
 function checkActs(B,c){ const g0=+CPC[c][1][0], gradeOf=ep=>{ const u=UNITS36[uix(ep)]; return u?gradeOfUnit(u):9; };
   const fs=codesOfPiece(c).filter(code=>MISC[code].length===1).flatMap(code=>formsOf(code).map(f=>({f,code}))); if(!fs.length) return 0;
-  const lo=Math.min(...fs.map(x=>gradeOf(x.f.ep))), want=fs.some(x=>gradeOf(x.f.ep)===g0)?g0:lo; let n=0;
-  for(const {f,code} of shuffle(fs.filter(x=>gradeOf(x.f.ep)===want))){ if(n>=2) break; for(let t=0;t<6;t++){ let q; try{ q=G36[f.ep][f.i](); }catch(e){ break; } if(q&&q.mis&&Object.values(q.mis).includes(code)){ q._ep=f.ep; q._ti=f.i; q._chk=c; if(B.push(q)) n++; break; } } }
+  const lo=Math.min(...fs.map(x=>gradeOf(x.f.ep))), want=fs.some(x=>gradeOf(x.f.ep)===g0)?g0:lo; let n=0; const v=(state().cpv||{})[c]||{ok:0,lose:0}, need=v.ok+v.lose>=2?1:2;
+  for(const {f,code} of shuffle(fs.filter(x=>gradeOf(x.f.ep)===want))){ if(n>=need) break; for(let t=0;t<6;t++){ let q; try{ q=G36[f.ep][f.i](); }catch(e){ break; } if(q&&q.mis&&Object.values(q.mis).includes(code)){ q._ep=f.ep; q._ti=f.i; q._chk=c; if(B.push(q)) n++; break; } } }
   return n; }
-function pieceVideo(c){ const P=pref(), seen=P.seenP||{}, t=dstr(Date.now()); if(seen[c]===t) return null; const k=(CPL[c]||[]).find(lecHas); if(!k) return null; seen[c]=t; setPref({seenP:seen}); return {kind:'video',key:k,label:`${k} ${lecName(k)}`}; }
+// 강의 효과를 견줄 수 있게, 비어 있는 조각이 확정되면 (익명 번호 + 조각)으로 정해지는 절반은 강의 먼저(A), 절반은 문제 먼저(B)로 나눈다.
+// 두 쪽 모두 '확정 직후 그 조각의 문제 2개'를 푼다(A는 강의를 본 뒤, B는 보기 전). B도 그 두 문제에서 하나라도 틀리면 다음 세트에서 강의를 본다.
+const armOf=c=>{ let h=0; for(const ch of did()+c) h=(h*31+ch.charCodeAt(0))>>>0; return h%2?'B':'A'; };
+function lecPlan(st,c){ st.lec=st.lec||{}; let L=st.lec[c]; if(!L) L=st.lec[c]={arm:armOf(c),mr:[],k:(CPL[c]||[]).find(lecHas)||''}; return L; }
+function pieceVideo(c,L){ if(!L.k||L.v) return null; const t=dstr(Date.now());
+  if(L.arm==='B'){ if(L.mr.length<2) return null; if(L.mr.every(x=>x)){ L.v='skip'; return null; } }       // 문제 먼저: 두 문제를 다 맞혔으면 강의는 건너뜀
+  L.v=t; if(cfg().share&&KT_ENDPOINT){ const qu=J(QK,[]); qu.push([t,L.k,-1,0,0,'V '+c,1,null,0,0,'',L.arm,0,0,'c']); W(QK,qu.slice(-3000)); }
+  return {kind:'video',key:L.k,label:`${L.k} ${lecName(L.k)}`}; }
 function frontier(st){ const fr=Object.keys(LADDER).map(s=>LADDER[s].find(k=>!['숙달','추정'].includes(kcStatus(k,st)))||LADDER[s][LADDER[s].length-1]); return fr; }
 
 // 가볍게 풀기: 이미 아는 내용에서 5문제. 복습할 것이 있으면 먼저 넣는다.
@@ -53,7 +60,7 @@ function startDaily(){ const P=pref(); if(!P.band) return bandPage(startDaily); 
     while(B.acts.length<want&&g++<80) B.push(qFromEp(cur),'_new');
     while(B.acts.length<N&&g++<240) B.push(qFromEp(i>0?EPO[rnd(0,i-1)]:cur));
     if(!P.seen[cur]){ video={kind:'video',key:epLabel(cur),label:`${epLabel(cur)} ${EPS[cur][0]}`}; const seen=P.seen; seen[cur]=1; setPref({seen}); } }
-  else { const st=state(); const ck=checkPieces(st)[0]; if(ck) checkActs(B,ck.c); W(SK,st); const wp=weakPieces(st)[0]; if(wp){ pieceActs(B,Math.ceil(N*.4),wp.c); if(B.acts.length) video=pieceVideo(wp.c); } misActs(B,Math.max(B.acts.length,Math.ceil(N*.4))); const fr=frontier(st);
+  else { const st=state(); const ck=checkPieces(st)[0]; if(ck) checkActs(B,ck.c); W(SK,st); const wp=weakPieces(st)[0]; if(wp){ const L=lecPlan(st,wp.c), n0=B.acts.length; video=pieceVideo(wp.c,L); pieceActs(B,Math.max(n0+2,Math.ceil(N*.4)),wp.c); if(L.mr.length<2&&!L.m){ B.acts.slice(n0,n0+2).forEach(a=>{ a.q._arm=L.arm; a.q._lec=wp.c; }); L.m=1; } W(SK,st); } misActs(B,Math.max(B.acts.length,Math.ceil(N*.4))); const fr=frontier(st);
     while(B.acts.length<N&&g++<N*10){ const eps=epsOf(fr[g%fr.length]); if(eps.length) B.push(qFromEp36(eps[rnd(0,eps.length-1)]),'_new'); } }
   runSet(P.band===1?B.acts:shuffle(B.acts),'오늘의 문제',{kt:'daily'},video); }
 function finishDaily(S0){ const st=state(), t=dstr(Date.now());
