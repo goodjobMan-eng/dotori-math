@@ -226,7 +226,30 @@ function codeW(q){ if(!q||q.opts&&q.opts.length||q.manip||q.onMount||q.mis) retu
     else if(op==='÷'&&eq(a/b,+A)&&db===0){ add(String(+(ia/b).toFixed(6)),'N3-08'); add(String(+(+A/10).toFixed(6)),'N6-07'); if(/^\d+\.0\d+$/.test(A)) add(A.replace('.0','.'),'N6-08'); } }
   clash.forEach(k=>delete mis[k]);                                // 서로 다른 오개념이 같은 답을 내면 어느 쪽인지 알 수 없으므로 코드를 달지 않는다
   if(Object.keys(mis).length) q.mis=mis; return q; }
-const _tagQ0=tagQ; tagQ=function(ep,i,q){ q=_tagQ0(ep,i,q); try{ if(q&&typeof q==='object'&&!TAG3[ep+'#'+i]) codeW(q); }catch(e){} return q; };
+/* 쓰기형 2: 식이 드러나지 않는 문제(도형 공식, 평균, 백분율, 비례식, 문장제)에서 아이들이 흔히 내는 값을 계산해 코드를 단다. 수의 역할은 정답이 나오는 배치를 찾아 정한다. */
+const _perm=a=>a.length<=1?[a]:a.flatMap((x,i)=>_perm([...a.slice(0,i),...a.slice(i+1)]).map(r=>[x,...r]));
+function codeW2(q){ if(!q||q.opts&&q.opts.length||q.manip||q.onMount||q.mis) return q; const A=String(q.ans); if(!/^\d+$/.test(A)) return q; const Av=+A;
+  const Q=_pl(q.q), t=(Q+' | '+_pl(q.visual)).replace(/,/g,''), ns=(t.match(/\d+(?:\.\d+)?/g)||[]).map(Number), mis={}, clash=new Set();
+  const add=(v,c)=>{ if(v==null||!Number.isFinite(v)||v<=0||!Number.isInteger(v)) return; const k=String(v); if(k===A) return; if(k in mis){ if(mis[k]!==c) clash.add(k); return; } mis[k]=c; };
+  const find=(n,f)=>{ if(ns.length<n||ns.length>n+1) return null; for(const pm of _perm(ns.slice(0,4))){ const x=pm.slice(0,n); if(Math.abs(f(...x)-Av)<1e-9) return x; } return null; }; let x;
+  if(/사다리꼴/.test(Q)&&/넓이/.test(Q)){ if((x=find(3,(a,b,h)=>(a+b)*h/2))){ add((x[0]+x[1])*x[2],'G5-03'); add(x[0]*x[1]*x[2]/2,'G5-12'); } }
+  else if(/삼각형|마름모/.test(Q)&&/넓이는/.test(Q)){ if((x=find(2,(a,b)=>a*b/2))) add(x[0]*x[1],'G5-03'); }
+  else if(/직사각형|평행사변형/.test(Q)&&/넓이는/.test(Q)){ if(ns.length===2&&ns[0]*ns[1]===Av){ add(2*(ns[0]+ns[1]),'G5-01'); add(ns[0]+ns[1],'G5-01'); } }
+  else if(/정사각형/.test(Q)&&/넓이는/.test(Q)){ if(ns.length===1&&ns[0]*ns[0]===Av) add(4*ns[0],'G5-01'); }
+  else if(/직사각형/.test(Q)&&/둘레/.test(Q)){ if(ns.length===2&&2*(ns[0]+ns[1])===Av) add(ns[0]*ns[1],'G5-01'); }
+  else if(/정사각형/.test(Q)&&/둘레/.test(Q)){ if(ns.length===1&&4*ns[0]===Av) add(ns[0]*ns[0],'G5-01'); }
+  else if(/직육면체/.test(Q)&&/부피는/.test(Q)){ if(ns.length===3&&ns[0]*ns[1]*ns[2]===Av) add(2*(ns[0]*ns[1]+ns[1]*ns[2]+ns[2]*ns[0]),'G6-05'); }
+  else if(/정육면체/.test(Q)&&/부피는/.test(Q)){ if(ns.length===1&&ns[0]**3===Av) add(6*ns[0]*ns[0],'G6-05'); }
+  else if(/직육면체/.test(Q)&&/겉넓이/.test(Q)){ if(ns.length===3&&2*(ns[0]*ns[1]+ns[1]*ns[2]+ns[2]*ns[0])===Av){ add(ns[0]*ns[1]*ns[2],'G6-05'); add(ns[0]*ns[1]+ns[1]*ns[2]+ns[2]*ns[0],'G6-06'); } }
+  else if(/정육면체/.test(Q)&&/겉넓이/.test(Q)){ if(ns.length===1&&6*ns[0]*ns[0]===Av){ add(ns[0]**3,'G6-05'); add(ns[0]*ns[0],'G6-06'); } }
+  else if(/평균은\?|평균 몇/.test(Q)){ const m=(Q.match(/\d+/g)||[]).map(Number), v=/평균은\?/.test(Q)?m:m.slice(1); if(v.length>=3&&Math.abs(v.reduce((a,b)=>a+b,0)/v.length-Av)<1e-9){ add(v.reduce((a,b)=>a+b,0),'D5-04'); add((Math.max(...v)+Math.min(...v))/2,'D5-02'); } }
+  else if(/삼각형/.test(Q)&&/나머지 한 각/.test(Q)){ if(ns.length===2&&180-ns[0]-ns[1]===Av) add(360-ns[0]-ns[1],'G4-12'); }
+  else if(/명 중 \d+명은 몇 %/.test(Q)){ if(ns.length===2&&ns[1]/ns[0]*100===Av) add(ns[1],'D6-01'); }
+  else if(/% 할인하면 얼마/.test(Q)){ if(ns.length===2&&ns[0]*(100-ns[1])/100===Av) add(ns[0]*ns[1]/100,'R6-07'); }
+  else if(/^\s*\d+ : \d+ = \d+ : □/.test(Q)){ const m=Q.match(/\d+/g).map(Number); if(m[1]*m[2]/m[0]===Av) add(m[1]*m[2],'R6-15'); }
+  else if(/생활 속 문제/.test(t)){ const m=(Q.match(/\d+/g)||[]).map(Number); if(m.length===2){ const [a,b]=m; if(a*b===Av&&a>1&&b>1) add(a+b,'N2-05'); else if(b&&a/b===Av&&b>1) add(a-b,'N3-11'); } }
+  clash.forEach(k=>delete mis[k]); if(Object.keys(mis).length) q.mis=mis; return q; }
+const _tagQ0=tagQ; tagQ=function(ep,i,q){ q=_tagQ0(ep,i,q); try{ if(q&&typeof q==='object'&&!TAG3[ep+'#'+i]){ codeW(q); codeW2(q); } }catch(e){} return q; };
 
 /* ---------- 3-14. 도형과 측정 (Claude·Gemini 교차 검토 4차) ---------- */
 Object.assign(MIS, {
