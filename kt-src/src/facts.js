@@ -54,9 +54,9 @@ function recEP(q,given,ok){ if(!q||q._kt) return; q._kt=1; const ep=epLabel(q._e
   const log=J(LK,[]); log.push(r); W(LK,log.slice(-3000));
   if(q.mis){ const st=state(); for(const c of new Set(Object.values(q.mis))){ const e=st.mis[c]||(st.mis[c]={h:[],n:0,ep:[]}); e.h.push([fk,c===m?1:0,ok?1:0]); e.h=e.h.slice(-8);
       if(c===m){ e.n++; if(!e.ep.includes(ep)) e.ep.push(ep); e.ep=e.ep.slice(-5); } } W(SK,st); }
-  try{ const st2=state(); pieceUpdate(st2,q,m,ok,(q.opts&&q.opts.length)?1/q.opts.length:.05,ms); W(SK,st2); }catch(e){}
+  try{ const st2=state(); pieceUpdate(st2,q,m,ok,(q.opts&&q.opts.length)?1/q.opts.length:.05,ms,fk); W(SK,st2); }catch(e){}
   afterRec(q,given,ok,m);
-  if(cfg().share&&KT_ENDPOINT){ const qu=J(QK,[]); qu.push([r.d,ep,q._ei,0,r.sd,r.g,r.ok,m,ms,0]); W(QK,qu.slice(-3000)); }
+  if(cfg().share&&KT_ENDPOINT){ const qu=J(QK,[]); qu.push([r.d,ep,q._ei,0,r.sd,r.g,r.ok,m,ms,0,...recExtra(q)]); W(QK,qu.slice(-3000)); }
   // 틀린 단순 지식은 이번 세트 뒤쪽에 똑같이 한 번 더 낸다.
   if(!ok&&key&&S&&S.acts&&(S.mode==='ep'||S.mode==='final')){ S._rv=S._rv||{};
     if(!S._rv[key]){ let j=-1; for(let k=S.acts.length-1;k>S.i+1;k--){ if(S.acts[k].kind==='q'&&!S.acts[k].q._review){ j=k; break; } }

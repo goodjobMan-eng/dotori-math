@@ -54,12 +54,26 @@ const pieceL=(st,c)=>(st.cp&&st.cp[c]!=null)?st.cp[c]:.5;
 // 개념 조각 숙달. 틀림: 고른 오답의 코드가 가리키는 주 조각을 그 무게로 깎고, 부 조각은 (무게 × 주 조각의 지금 숙달)만큼만 깎는다.
 //   주 조각이 이미 비어 있으면 그것으로 오답이 설명되므로 부 조각까지 끌어내리지 않는다.
 // 맞음: 보기에 있었지만 고르지 않은 오개념의 주 조각에 약한 긍정 증거(0.1). 찍었을 수 있으니 3초 넘게 풀었을 때만.
-function pieceUpdate(st,q,m,ok,G,ms){ st.cp=st.cp||{}; st.cpn=st.cpn||{}; const up=(c,good,w)=>{ if(!CPC[c]||w<=0) return; st.cp[c]=bktW(pieceL(st,c),good,G,w); st.cpn[c]=(st.cpn[c]||0)+1; };
-  if(!ok){ const ps=m&&MISC[m]; if(ps){ const L0=pieceL(st,ps[0][0]); ps.forEach(([c,w],i)=>up(c,false,i?w*L0:w)); } }
+function pieceUpdate(st,q,m,ok,G,ms,fk){ st.cp=st.cp||{}; st.cpn=st.cpn||{}; st.cph=st.cph||{}; const up=(c,good,w)=>{ if(!CPC[c]||w<=0) return; st.cp[c]=bktW(pieceL(st,c),good,G,w); st.cpn[c]=(st.cpn[c]||0)+1; };
+  if(!ok){ const ps=m&&MISC[m]; if(ps){ const L0=pieceL(st,ps[0][0]); ps.forEach(([c,w],i)=>up(c,false,i?w*L0:w)); const c0=ps[0][0], hs=st.cph[c0]||(st.cph[c0]=[]); if(fk&&!hs.includes(fk)){ hs.push(fk); st.cph[c0]=hs.slice(-4); } } }
   else if(q.mis&&(ms==null||ms>=3000)){ const seen={}; Object.values(q.mis).forEach(code=>(MISC[code]||[]).slice(0,1).forEach(([c])=>{ if(!seen[c]){ seen[c]=1; up(c,true,.1); } })); } }
-// 약한 조각: 증거 2번 이상이고 숙달 0.35 미만. 선수 조각도 약하면 선수부터.
-function weakPieces(st){ st=st||state(); const cp=st.cp||{}, n=st.cpn||{}; const weak=Object.keys(cp).filter(c=>CPC[c]&&(n[c]||0)>=2&&cp[c]<.35);
-  return weak.map(c=>({c,name:CPC[c][0],when:CPC[c][1],L:cp[c],pre:CPC[c][2].filter(p=>weak.includes(p))})).sort((a,b)=>a.pre.length-b.pre.length||(a.when<b.when?-1:1)); }
+// 약한 조각: 증거 2번 이상이고 숙달 0.35 미만. 다만 곧바로 "비어 있다"고 하지 않는다.
+// 고학년 문제의 오답만으로 저학년 조각이 깎였을 수 있으므로(예: 분수 나눗셈에서만 나누는 수를 바꿈), 먼저 그 조각을 처음 배우는 단원의 문제 2개로 확인한다.
+//   확인 중(chk) → 둘 다 맞히면 '맥락에서만 틀림(ctx)'으로 두고 숙달을 0.6으로 되돌림 / 하나라도 틀리면 '비어 있음(weak)' 확정.
+//   ctx가 된 뒤 다시 약해지면 확인 없이 확정.
+// '약함'의 조건: 그 조각을 가리키는 오답을 서로 다른 문항 2종 이상에서 골랐고 숙달이 0.35 미만.
+function pieceStage(st,c){ st.cpv=st.cpv||{}; const cp=st.cp||{}, n=st.cpn||{}; const low=CPC[c]&&((st.cph||{})[c]||[]).length>=2&&cp[c]<.35; const v=st.cpv[c];
+  if(!low) return v&&v.s==='ctx'?'ctx':null; if(!v){ st.cpv[c]={s:'chk',n:0,ok:0}; return 'chk'; } if(v.s==='ctx'){ st.cpv[c]={s:'weak'}; return 'weak'; } return v.s; }
+function pieceCheck(st,q,ok){ const c=q._chk; if(!c) return; st.cpv=st.cpv||{}; const v=st.cpv[c]; if(!v||v.s!=='chk') return; v.n++; if(ok) v.ok++;
+  if(!ok) st.cpv[c]={s:'weak'}; else if(v.n>=2){ st.cpv[c]={s:'ctx'}; st.cp[c]=.65; st.cph[c]=[]; } }
+function weakPieces(st,all){ const own=!st; st=st||state(); const cp=st.cp||{}; const rows=Object.keys(cp).filter(c=>CPC[c]).map(c=>({c,name:CPC[c][0],when:CPC[c][1],L:cp[c],s:pieceStage(st,c)})).filter(x=>x.s);
+  if(own) W(SK,st); const weak=rows.filter(x=>x.s==='weak').map(x=>x.c); rows.forEach(x=>x.pre=CPC[x.c][2].filter(p=>weak.includes(p)));
+  const ord=x=>+x.when.replace('-','.'); return rows.filter(x=>all||x.s==='weak').sort((a,b)=>a.pre.length-b.pre.length||ord(a)-ord(b)); }
+const checkPieces=st=>weakPieces(st,true).filter(x=>x.s==='chk');
+// 공개 데이터에 더 싣는 칸: 보기에 있던 오개념 코드들(보기별 무게를 다시 추정하는 데 꼭 필요), 푸는 방식, 세트 안 순서, 다시 나온 문제인지.
+function recExtra(q){ let mode='u'; try{ mode=q.diag?'g':S.focus?'f':S.kt==='daily'?'d':S.kt==='quick'?'q':S.review?'r':'u'; }catch(e){}
+  const ex=[...new Set(Object.values(q.mis||{}))].sort().slice(0,4).join('|'); let seq=0; try{ seq=Math.max(0,Math.min(99,S.i|0)); }catch(e){}
+  return [ex,mode,seq,q._review?1:0,q.manip?'m':(q.opts&&q.opts.length)?'c':'w']; }
 function rec(q, given, ok){
   if(!q||q._kt) return; q._kt=1;
   const ep=q._ep||(S&&S.ep)||''; if(!/^S\d-\d{1,3}$/.test(String(ep))) return;       // 3~6학년 영역 문항만
@@ -75,18 +89,19 @@ function rec(q, given, ok){
   // 보기마다 무게가 다르다: 오개념 보기를 골랐으면 원인은 그 오개념이 가리키는 개념 조각에 있으므로 단원 숙달은 약하게, 조각은 세게 깎는다.
   const wk=ok?1:(m&&MISC[m])?.4*pieceL(st,MISC[m][0][0])+.1:(q.fx&&(q.fx[String(given)]||q.fx[gk]))?.3:.7;   // 선수 조각이 이미 비어 있으면 이 단원 숙달은 덜 깎는다
   if(kc){ st.kc[kc]=bktW(st.kc[kc]==null?BKT.L0:st.kc[kc],ok,G,wk); st.kn[kc]=(st.kn[kc]||0)+1; }
-  pieceUpdate(st,q,m,ok,G,ms);
+  pieceUpdate(st,q,m,ok,G,ms,fk); pieceCheck(st,q,ok);
   if(q.mis){ for(const c of new Set(Object.values(q.mis))){ const e=st.mis[c]||(st.mis[c]={h:[],n:0,ep:[]}); e.h.push([fk,c===m?1:0,ok?1:0]); e.h=e.h.slice(-8);
     if(c===m){ e.n++; if(!e.ep.includes(ep)) e.ep.push(ep); e.ep=e.ep.slice(-5); } } }
   W(SK,st);
   afterRec(q,given,ok,m);
-  if(cfg().share&&KT_ENDPOINT){ const qu=J(QK,[]); qu.push([r.d,ep,ti,v,r.sd,r.g,r.ok,m,ms,r.dg]); W(QK,qu.slice(-3000)); }
+  if(cfg().share&&KT_ENDPOINT){ const qu=J(QK,[]); qu.push([r.d,ep,ti,v,r.sd,r.g,r.ok,m,ms,r.dg,...recExtra(q)]); W(QK,qu.slice(-3000)); }
 }
 // 최근 8번의 기회(그 오개념의 오답이 보기에 있던 문제) 안에서 판정한다. 기록 한 칸 = [문항, 그 오답을 골랐나, 맞혔나].
 // 확인: 서로 다른 문항 2종 이상에서 3번 이상 골랐고, (노출의 70% 이상) 또는 (틀릴 때마다 대부분 그 오답: 오답 4번 이상 중 80% 이상이면서 정답률 40% 이상 = 찍는 아이가 아님).
 // 의심: 2종 이상에서 2번. 해소: 그 오답이 있던 문제를 3번 이어서 맞힘(다른 오답을 고른 것은 해소가 아님).
 function status(code,st){ const e=(st||state()).mis[code]; if(!e||!e.h||!e.h.length) return null; const h=e.h, n=h.length, picks=h.filter(x=>x[1]), k=picks.length, distinct=new Set(picks.map(x=>x[0])).size;
   const w=h.filter(x=>x[1]||x[2]===0).length, last3=h.slice(-3); if(last3.length===3&&last3.every(x=>x[2]===1)) return null;
+  if(MISC[code]&&pieceL(st||state(),MISC[code][0][0])>=.75) return null;                 // 그 오개념이 가리키는 조각이 채워졌으면 해소
   if(k>=3&&distinct>=2&&(k/n>=.7||(w>=4&&k/w>=.8&&(n-w)/n>=.4))) return '확인'; if(k>=2&&distinct>=2) return '의심'; return null; }
 // 문제 3개 미만으로는 숙달·미숙달을 단정하지 않는다.
 function kcStatus(k,st){ const p=st.kc[k], n=(st.kn||{})[k]||0; if(p==null) return st.est[k]?'추정':'모름'; if(n<3) return p>=.4&&st.est[k]?'추정':'연습'; return p>=.85?'숙달':p>=.4?'연습':'미숙달'; }
@@ -153,19 +168,24 @@ function teacherPage(){ if(typeof S!=='undefined'&&S) S.idle=true; hush(); app.c
       <p style="font-size:.95rem;color:var(--ink-soft)">이 기기에 쌓인 기록 ${log.length}건 · 수준 찾기 ${st.diagAt||'아직 안 함'}${cfg().share?' · 익명 기록 공유 켜짐':''}</p>
       <h2 class="sec">오개념</h2><ul class="recent kt-list">${misH}</ul>
       <p class="kt-ex">최근 8번의 기회에서 서로 다른 문항 2종 이상에 걸쳐 3번 이상 나오면 확인, 2번이면 의심입니다. 바르게 풀면 사라집니다.</p>
-      <h2 class="sec">비어 있는 개념</h2><ul class="recent kt-list">${(w=>w.length?w.map(x=>`<li><b>${esc(x.name)}</b> <span class="rd">${x.when.replace('-','학년 ')}학기에 처음 배움${x.pre.length?' · 먼저 '+x.pre.map(p=>CPC[p][0]).join(', '):''}</span><div class="kt-ex">강의: ${(CPL[x.c]||[]).map(k=>`${k} ${esc(lecName(k))}${lecHas(k)?'':'(준비 중)'}`).join(', ')}</div></li>`).join(''):'<li>아직 비어 있다고 볼 개념이 없습니다.</li>')(weakPieces(st))}</ul>
+      <h2 class="sec">비어 있는 개념</h2><ul class="recent kt-list">${(w=>w.length?w.map(x=>`<li><b>${esc(x.name)}</b> <span class="rd">${x.when.replace('-','학년 ')}학기에 처음 배움${x.pre.length?' · 먼저 '+x.pre.map(p=>CPC[p][0]).join(', '):''}</span><div class="kt-ex">강의: ${(CPL[x.c]||[]).map(k=>`${k} ${esc(lecName(k))}${lecHas(k)?'':'(준비 중)'}`).join(', ')}</div></li>`).join(''):'<li>아직 비어 있다고 볼 개념이 없습니다.</li>')(weakPieces(st))}${weakPieces(st,true).filter(x=>x.s!=='weak').map(x=>`<li><b>${esc(x.name)}</b> <span class="rd">${x.s==='chk'?'확인 중: 처음 배우는 단원의 문제 2개로 다시 봅니다':'처음 배우는 단원에서는 맞힘. 윗학년 문제에서만 틀립니다'}</span></li>`).join('')}</ul>
       <p class="kt-ex">오답 보기마다 "이 답을 고르면 어떤 개념을 모르는 것"인지와 그 무게를 정해 두었습니다. 같은 개념을 가리키는 오답이 두 번 이상 쌓이면 여기에 나옵니다. 위에 있을수록 먼저 채워야 하는 개념입니다.</p>
       <h2 class="sec">자주 틀리는 단순 지식 (1~2학년)</h2><ul class="recent kt-list">${factsHTML()}</ul>
       <p class="kt-ex">틀리면 같은 세트 뒤쪽에 한 번 더 나오고, 그 뒤 10분 → 다음 날 → 3일 간격으로 다시 나옵니다. 네 번 이어서 맞히면 익힘으로 바뀝니다.</p>
       <h2 class="sec">영역별 수준 (3~6학년)</h2>${lad}
       <p class="kt-ex">숙달·미숙달은 문제를 3개 이상 푼 뒤에만 표시합니다. 추정은 수준 찾기에서 맞혔거나 더 어려운 내용을 맞혀 건너뛴 내용입니다.</p>
       <h2 class="sec">추천 코스</h2><ul class="recent kt-list">${cr||'<li>추천할 내용이 없습니다.</li>'}</ul>
-      <div class="btns" style="margin-top:14px"><button class="ghost" id="kt-rediag">수준 다시 찾기</button><button class="ghost" id="kt-reset">이 기기의 학습 기록 모두 지우기</button></div>
+      <div class="btns" style="margin-top:14px"><button class="ghost" id="kt-rediag">수준 다시 찾기</button><button class="ghost" id="kt-reset">${curSlot()}번 자리의 학습 기록 지우기</button></div>
+      <h2 class="sec">기록 옮기기</h2><p class="kt-ex">아이패드 사파리는 홈 화면에 추가하지 않으면 7일 안 쓸 때 기록을 지웁니다. 꺼낸 글자를 메모장에 보관했다가 다시 넣을 수 있습니다(이 기기의 모든 자리).</p>
+      <textarea id="kt-io" rows="3" style="width:100%;font-size:.8rem;border:2px solid var(--line);border-radius:12px;padding:8px" aria-label="기록 글자"></textarea>
+      <div class="btns" style="margin-top:8px"><button class="ghost" id="kt-exp">기록 꺼내기</button><button class="ghost" id="kt-imp">기록 넣기</button></div>
     </div>`;
   document.getElementById('back').onclick=home; document.getElementById('kt-rediag').onclick=startDiag;
   const rb=document.getElementById('kt-reset'); let armed=false;
   rb.onclick=()=>{ if(!armed){ armed=true; rb.textContent='한 번 더 누르면 지웁니다 (새 학생이 쓸 때)'; return; }
-    try{ Object.keys(localStorage).filter(k=>k.startsWith('dotori-')&&k!==CK&&k!=='dotori-input').forEach(k=>localStorage.removeItem(k)); }catch(e){} FORM_IDX=null; teacherPage(); }; }
+    try{ learnerKeys().forEach(k=>localStorage.removeItem(k)); }catch(e){} FORM_IDX=null; teacherPage(); };
+  const io=document.getElementById('kt-io'); document.getElementById('kt-exp').onclick=()=>{ io.value=exportAll(); io.select(); };
+  document.getElementById('kt-imp').onclick=()=>{ const b=document.getElementById('kt-imp'); if(importAll(io.value)) location.reload(); else b.textContent='붙여 넣은 글자를 읽을 수 없어요'; }; }
 
 /*__FACTS__*/
 /*__MODES__*/
@@ -187,6 +207,7 @@ body{background-image:none}body:before{background:#FFF7EC var(--kt-grain)!import
 .kt-mode .who{position:absolute;right:4px;top:-34px;height:68px;pointer-events:none}
 .kt-mode .stamp{position:absolute;right:14px;bottom:12px;transform:rotate(-8deg);border:2px solid #3F7A34;border-radius:7px;padding:0 7px;font-style:normal;font-size:.8rem;color:#3F7A34}
 .kt-mode:active{transform:translateY(3px);filter:none}.kt-mode:focus-visible,.kt-tree:focus-visible,.kt-chip:focus-visible{outline:3px solid #3F7A34;outline-offset:3px}
+.kt-slots{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}.kt-slot{position:relative;aspect-ratio:1.25;border:0;background:var(--kt-sign) center/100% 100% no-repeat;font-family:"Jua",sans-serif;font-size:1.3rem;color:#5A3516;cursor:pointer}.kt-slot.used::after{content:"";position:absolute;right:16%;top:18%;width:8px;height:8px;border-radius:50%;background:#3F7A34}.kt-slot.on{outline:3px solid #3F7A34;outline-offset:1px;border-radius:14px}.kt-slot:focus-visible{outline:3px solid #3F7A34}
 .kt-chips{display:flex;flex-wrap:wrap;gap:8px;margin:4px 2px 8px}
 .kt-chip{position:relative;padding:7px 13px 7px 25px;border:0;background:#E9D2A6;color:#5A3516;font-family:"Jua",sans-serif;font-size:.88rem;cursor:pointer;clip-path:polygon(11px 0,100% 0,100% 100%,11px 100%,0 50%)}
 .kt-chip::before{content:"";position:absolute;left:12px;top:50%;width:6px;height:6px;margin-top:-3px;border-radius:50%;background:var(--bg)}
@@ -250,9 +271,30 @@ function maybeSend(){ if(!KT_ENDPOINT||!navigator.sendBeacon) return; const c=cf
 addEventListener('pagehide',maybeSend);
 document.addEventListener('visibilitychange',()=>{ if(document.visibilityState==='hidden') maybeSend(); });
 
-window.KT={CPL,CPC,MISC,weakPieces,state,gradePage:g=>gradePage(g),startQuick,startDaily,pref,setPref,rec:(q,g,ok)=>(q&&q._e!=null?recEP:rec)(q,g,ok),factKey,dueFacts,startReview,report,status,epKC,MIS,LADDER,regen,formsOf,startDiag,startFocus,teacherPage,course};
+/* ---------- 12. 자리 바꾸기: 한 기기를 여러 아이가 쓸 때 기록이 섞이지 않게 ---------- */
+// 이름 없이 번호만 고른다. 자리마다 기록 묶음을 따로 두고, 바꿀 때 지금 기록을 접어 넣고 그 자리 기록을 편다. 익명 기기 번호도 자리마다 다르다.
+const SLOT_CUR='dotori-slot-cur', SLOT_AT='dotori-slot-at', slotKey=n=>'dotori-slot-'+n;
+const curSlot=()=>{ try{ return +(localStorage.getItem(SLOT_CUR)||1); }catch(e){ return 1; } };
+const learnerKeys=()=>Object.keys(localStorage).filter(k=>k.startsWith('dotori-')&&!k.startsWith('dotori-slot-')&&k!==CK&&k!=='dotori-input');
+function switchSlot(n){ const cur=curSlot(); if(n===cur) return home(); try{ const pack={}; learnerKeys().forEach(k=>{ pack[k]=localStorage.getItem(k); localStorage.removeItem(k); }); localStorage.setItem(slotKey(cur),JSON.stringify(pack));
+    const nx=J(slotKey(n),{}); Object.entries(nx).forEach(([k,v])=>localStorage.setItem(k,v)); localStorage.removeItem(slotKey(n)); localStorage.setItem(SLOT_CUR,String(n)); localStorage.setItem(SLOT_AT,String(Date.now())); }catch(e){} location.reload(); }
+const slotUsed=n=>n===curSlot()?learnerKeys().length>0:!!localStorage.getItem(slotKey(n));
+function slotPage(ask){ hush(); app.className='wrap'; const cur=curSlot();
+  app.innerHTML=`<div class="top"><button class="back" id="back">← 처음</button><div class="crumb">자리 고르기</div><span style="width:70px"></span></div>
+    <div class="stage"><div style="font-family:Jua;font-size:1.25rem;margin-bottom:6px">${ask?`방금 쓰던 ${cur}번 자리가 맞나요?`:'내 번호를 골라요'}</div>
+    <p class="kt-ex" style="margin-bottom:12px">여럿이 함께 쓰는 기기에서는 자리마다 기록이 따로 쌓여요. 이름은 적지 않아요.</p>
+    <div class="kt-slots">${Array.from({length:30},(_,i)=>i+1).map(n=>`<button class="kt-slot${n===cur?' on':''}${slotUsed(n)?' used':''}" data-slot="${n}">${n}</button>`).join('')}</div></div>`;
+  document.getElementById('back').onclick=()=>{ try{ localStorage.setItem(SLOT_AT,String(Date.now())); }catch(e){} home(); };
+  app.querySelectorAll('[data-slot]').forEach(b=>b.onclick=()=>{ try{ localStorage.setItem(SLOT_AT,String(Date.now())); }catch(e){} switchSlot(+b.dataset.slot); }); }
+// 기록 옮기기: 이 기기의 모든 자리 기록을 글자로 꺼내거나 다시 넣는다(브라우저가 저장소를 지웠을 때, 기기를 바꿀 때).
+function exportAll(){ const o={}; try{ Object.keys(localStorage).filter(k=>k.startsWith('dotori-')).forEach(k=>o[k]=localStorage.getItem(k)); }catch(e){} return JSON.stringify(o); }
+function importAll(txt){ let o; try{ o=JSON.parse(txt); }catch(e){ return false; } if(!o||typeof o!=='object') return false; const ks=Object.keys(o).filter(k=>k.startsWith('dotori-')&&typeof o[k]==='string'); if(!ks.length) return false;
+  try{ Object.keys(localStorage).filter(k=>k.startsWith('dotori-')).forEach(k=>localStorage.removeItem(k)); ks.forEach(k=>localStorage.setItem(k,o[k])); }catch(e){ return false; } return true; }
+window.KT={slotPage,switchSlot,curSlot,exportAll,importAll,checkPieces,pieceStage,CPL,CPC,MISC,weakPieces,state,gradePage:g=>gradePage(g),startQuick,startDaily,pref,setPref,rec:(q,g,ok)=>(q&&q._e!=null?recEP:rec)(q,g,ok),factKey,dueFacts,startReview,report,status,epKC,MIS,LADDER,regen,formsOf,startDiag,startFocus,teacherPage,course};
 (function boot(){ const h=location.hash; const c=cfg();
   if(h==='#kt-share-on'){ c.share=true; did(); setCfg(c); } else if(h==='#kt-share-off'){ c.share=false; W(QK,[]); setCfg(c); } else if(h==='#kt-reset'){ try{ localStorage.removeItem(DK); }catch(e){} did(); }
   if(h.startsWith('#kt-')) history.replaceState(null,'',location.pathname+location.search);
-  if(h==='#teacher') teacherPage(); else home(); })();
+  try{ if(navigator.storage&&navigator.storage.persist) navigator.storage.persist(); }catch(e){}
+  let ask=false; try{ const at=+(localStorage.getItem(SLOT_AT)||0); ask=at>0&&Date.now()-at>2*3600e3&&Array.from({length:30},(_,i)=>i+1).filter(slotUsed).length>1; }catch(e){}
+  if(h==='#teacher') teacherPage(); else if(ask) slotPage(true); else home(); })();
 })();

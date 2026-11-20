@@ -29,6 +29,12 @@ function misActs(B,limit){ for(const x of report().mis.filter(x=>formsOf(x.c).le
 // 비어 있는 개념 조각을 가르는 문제(그 조각을 가리키는 오개념 보기가 든 문제)를 먼저 넣는다.
 function pieceActs(B,limit,c){ const fs=shuffle(codesOfPiece(c).flatMap(code=>formsOf(code).map(f=>({f,code})))); for(const {f,code} of fs){ if(B.acts.length>=limit) return;
     for(let t=0;t<6;t++){ let q; try{ q=G36[f.ep][f.i](); }catch(e){ break; } if(q&&q.mis&&Object.values(q.mis).includes(code)){ q._ep=f.ep; q._ti=f.i; B.push(q); break; } } } }
+// 확인 문제: 그 조각을 처음 배우는 학년(없으면 가장 낮은 학년)의 문제 2개.
+function checkActs(B,c){ const g0=+CPC[c][1][0], gradeOf=ep=>{ const u=UNITS36[uix(ep)]; return u?gradeOfUnit(u):9; };
+  const fs=codesOfPiece(c).filter(code=>MISC[code].length===1).flatMap(code=>formsOf(code).map(f=>({f,code}))); if(!fs.length) return 0;
+  const lo=Math.min(...fs.map(x=>gradeOf(x.f.ep))), want=fs.some(x=>gradeOf(x.f.ep)===g0)?g0:lo; let n=0;
+  for(const {f,code} of shuffle(fs.filter(x=>gradeOf(x.f.ep)===want))){ if(n>=2) break; for(let t=0;t<6;t++){ let q; try{ q=G36[f.ep][f.i](); }catch(e){ break; } if(q&&q.mis&&Object.values(q.mis).includes(code)){ q._ep=f.ep; q._ti=f.i; q._chk=c; if(B.push(q)) n++; break; } } }
+  return n; }
 function pieceVideo(c){ const P=pref(), seen=P.seenP||{}, t=dstr(Date.now()); if(seen[c]===t) return null; const k=(CPL[c]||[]).find(lecHas); if(!k) return null; seen[c]=t; setPref({seenP:seen}); return {kind:'video',key:k,label:`${k} ${lecName(k)}`}; }
 function frontier(st){ const fr=Object.keys(LADDER).map(s=>LADDER[s].find(k=>!['숙달','추정'].includes(kcStatus(k,st)))||LADDER[s][LADDER[s].length-1]); return fr; }
 
@@ -40,13 +46,14 @@ function startQuick(){ const P=pref(); if(!P.band) return bandPage(startQuick); 
   runSet(shuffle(B.acts),'가볍게 풀기',{kt:'quick'}); }
 
 // 오늘의 문제: 복습 + 틀린 이유 다시 다지기 + 지금 수준의 새 내용. 잘하면 앞으로, 어려우면 뒤로.
+// 3~6학년: 확인 문제·약한 조각·다시 다지기를 합쳐 40%까지만 넣고, 나머지는 지금 배우는 단원에서 낸다.
 function startDaily(){ const P=pref(); if(!P.band) return bandPage(startDaily); const N=P.pace||10, B=bag(); let g=0, video=null;
   if(P.band===1){ for(const [k,f] of dueFacts()){ if(B.acts.length>=Math.ceil(N*.4)) break; B.push(regenFact(k,f)); }
     const i=ptr(), cur=EPO[i], want=B.acts.length+Math.ceil((N-B.acts.length)*.7);
     while(B.acts.length<want&&g++<80) B.push(qFromEp(cur),'_new');
     while(B.acts.length<N&&g++<240) B.push(qFromEp(i>0?EPO[rnd(0,i-1)]:cur));
     if(!P.seen[cur]){ video={kind:'video',key:epLabel(cur),label:`${epLabel(cur)} ${EPS[cur][0]}`}; const seen=P.seen; seen[cur]=1; setPref({seen}); } }
-  else { const st=state(), wp=weakPieces(st)[0]; if(wp){ pieceActs(B,Math.ceil(N*.4),wp.c); if(B.acts.length) video=pieceVideo(wp.c); } misActs(B,B.acts.length+Math.ceil(N*.3)); const fr=frontier(st);
+  else { const st=state(); const ck=checkPieces(st)[0]; if(ck) checkActs(B,ck.c); W(SK,st); const wp=weakPieces(st)[0]; if(wp){ pieceActs(B,Math.ceil(N*.4),wp.c); if(B.acts.length) video=pieceVideo(wp.c); } misActs(B,Math.max(B.acts.length,Math.ceil(N*.4))); const fr=frontier(st);
     while(B.acts.length<N&&g++<N*10){ const eps=epsOf(fr[g%fr.length]); if(eps.length) B.push(qFromEp36(eps[rnd(0,eps.length-1)]),'_new'); } }
   runSet(P.band===1?B.acts:shuffle(B.acts),'오늘의 문제',{kt:'daily'},video); }
 function finishDaily(S0){ const st=state(), t=dstr(Date.now());
@@ -76,13 +83,13 @@ function modesHTML(){ const P=pref(), st=state(), done=st.daily&&st.daily.d===ds
   const sub=done?`${st.streak||1}일째 이어서 풀고 있어요`:P.band?`내 수준에 맞춘 ${P.pace}문제`:'내 수준에 맞춰 매일 조금씩';
   return `<div class="kt-modes"><button class="kt-mode" id="kt-quick"><img class="who" src="${JU['청이']['자세_만세']}" alt=""><b>가볍게 풀기</b><span>5문제만 풀고 끝</span></button>
     <button class="kt-mode" id="kt-daily"><img class="who" src="${JU['부엉 박사님']['자세_손가락하나']}" alt=""><b>오늘의 문제</b><span>${sub}</span>${done?'<i class="stamp">다 풀었어요</i>':''}</button></div>
-    <div class="kt-chips"><button class="kt-chip${P.why?' on':''}" id="kt-why">틀린 이유 보기 ${P.why?'켜짐':'꺼짐'}</button><button class="kt-chip" id="kt-pace">하루 ${P.pace}문제</button><button class="kt-chip" id="kt-band">${bandName(P.band)}</button>${P.band>=3&&!st.lvl?'<button class="kt-chip" id="kt-diag">내 수준 정확히 찾기</button>':''}</div>
+    <div class="kt-chips"><button class="kt-chip${P.why?' on':''}" id="kt-why">틀린 이유 보기 ${P.why?'켜짐':'꺼짐'}</button><button class="kt-chip" id="kt-pace">하루 ${P.pace}문제</button><button class="kt-chip" id="kt-slot">${curSlot()}번 자리</button><button class="kt-chip" id="kt-band">${bandName(P.band)}</button>${P.band>=3&&!st.lvl?'<button class="kt-chip" id="kt-diag">내 수준 정확히 찾기</button>':''}</div>
     <h2 class="sec">골라서 풀기</h2>`; }
 function bindModes(){ const on=(id,f)=>{ const b=document.getElementById(id); if(b) b.onclick=f; };
   on('kt-quick',startQuick); on('kt-daily',startDaily); on('kt-diag',startDiag);
   on('kt-why',()=>{ setPref({why:!pref().why}); home(); });
   on('kt-pace',()=>{ const p=pref().pace; setPref({pace:p===5?10:p===10?15:5}); home(); });
-  on('kt-band',()=>bandPage(home)); }
+  on('kt-band',()=>bandPage(home)); on('kt-slot',()=>slotPage(false)); }
 
 /* ---------- 10-3. 골라서 풀기: 영상이 있든 없든 학년 → 영역 → 단원 순서(계열)로 한 줄에 ---------- */
 const DOMS=['수와 연산','변화와 관계','도형과 측정','자료와 가능성'];

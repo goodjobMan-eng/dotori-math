@@ -128,6 +128,13 @@ for a, st in MST:
     assert h.count(a) == 1, a
     h = h.replace(a, a + " state:()=>" + st + ",")
 h = h.replace("check:()=>on.size===n, state:()=>on.size+'/'+d,", "check:()=>on.size===n, state:()=>on.size+'/'+d, mcode:()=>(!dec&&on.size===d-n&&d-n!==n)?'N3-16':(!dec&&on.size===d)?'N3-17':null,")
+# 조작 상태 → 오개념 코드 규칙(Gemini 제안을 도구의 변수에 맞춤). 위에서부터 먼저 맞는 것.
+MC = [("state:()=>h+':'+m,", "(h%12===Math.round(tm/5)%12&&Math.abs(m-(th%12)*5)<=2&&h%12!==th%12)?'G2-10':(tm>=40&&h%12===(th%12+1)%12&&Math.abs(m-tm)<=1)?'G2-06':(tm>0&&tm%5===0&&h%12===th%12&&m===tm/5)?'G2-07':null"),
+ ("state:()=>''+d,", "(target!==90&&Math.abs(d-(180-target))<=3)?'G4-01':null"), ("state:()=>''+len,", "len===target+1?'G2-09':null"), ("state:()=>''+rad,", "rad===2*r?'G3-04':null"),
+ ("state:()=>h.map(v=>v*step).join(','),", "(step>1&&h.filter((v,i)=>v===target[i]).length>=2)?'D4-01':null")]
+for a, mc in MC:
+    assert h.count(a) == 1, a
+    h = h.replace(a, a + " mcode:()=>" + mc + ",")
 a = "const ok=q.manip.check(); answer("; assert h.count(a) == 1
 h = h.replace(a, "const ok=q.manip.check(); try{ if(S.tries===0&&q.manip.state){ q._mstate=String(q.manip.state()).slice(0,24); if(!ok&&q.manip.mcode) q._mcode=q.manip.mcode(); } }catch(e){} answer(")
 k = h.rindex('</body>'); h = h[:k] + '<script>\n' + out + '\n</script>\n' + h[k:]

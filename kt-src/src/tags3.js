@@ -206,7 +206,7 @@ B('S3-112', ['2.6 ÷ 0.4의 몫을 자연수까지 구하면 나머지는?','0.2
 /* ---------- 3-13. 쓰기형(손글씨) 계산 문제: 식에서 '오개념이면 쓰는 답'을 계산해 예상 오답으로 달아 둔다 ---------- */
 function codeW(q){ if(!q||q.opts&&q.opts.length||q.manip||q.onMount||q.mis) return q; const A=String(q.ans); if(!/^\d+(\.\d+)?$/.test(A)) return q;
   const t=(_pl(q.visual)+' | '+_pl(q.q)).replace(/,/g,''); const m=t.match(/(\d+(?:\.\d+)?)\s*([+−×÷])\s*(\d+(?:\.\d+)?)(?!\s*[+−×÷\d(])/); if(!m||/[()]/.test(t.split('|')[0])) return q;
-  const as=m[1], op=m[2], bs=m[3], a=+as, b=+bs, mis={}, add=(v,c)=>{ if(v==null) return; const s=String(v); if(s!==A&&!/NaN|-|e/.test(s)&&!(s in mis)) mis[s]=c; }, dec=as.includes('.')||bs.includes('.');
+  const as=m[1], op=m[2], bs=m[3], a=+as, b=+bs, mis={}, clash=new Set(), add=(v,c)=>{ if(v==null) return; const s=String(v); if(s===A||/NaN|-|e/.test(s)) return; if(s in mis){ if(mis[s]!==c) clash.add(s); return; } mis[s]=c; }, dec=as.includes('.')||bs.includes('.');
   const eq=(x,y)=>Math.abs(x-y)<1e-9;
   if(!dec){
     if(op==='+'&&a+b===+A){ const L=Math.max(as.length,bs.length), x=dg(as.padStart(L,'0')), y=dg(bs.padStart(L,'0')), s=x.map((d,i)=>d+y[i]); if(s.some(v=>v>9)){ add(+s.map(v=>v%10).join(''),'N2-01'); add(+s.join(''),'N2-07'); } }
@@ -223,6 +223,7 @@ function codeW(q){ if(!q||q.opts&&q.opts.length||q.manip||q.onMount||q.mis) retu
     else if(op==='−'&&eq(a-b,+A)){ if(da!==db&&ia>ib) add(fx(ia-ib,Math.max(da,db)),'N4-03'); }
     else if(op==='×'&&eq(a*b,+A)){ add(String(ia*ib),'N3-08'); if(da&&db) add(fx(ia*ib,Math.max(da,db)),'N5-07'); }
     else if(op==='÷'&&eq(a/b,+A)&&db===0){ add(String(+(ia/b).toFixed(6)),'N3-08'); add(String(+(+A/10).toFixed(6)),'N6-07'); if(/^\d+\.0\d+$/.test(A)) add(A.replace('.0','.'),'N6-08'); } }
+  clash.forEach(k=>delete mis[k]);                                // 서로 다른 오개념이 같은 답을 내면 어느 쪽인지 알 수 없으므로 코드를 달지 않는다
   if(Object.keys(mis).length) q.mis=mis; return q; }
 const _tagQ0=tagQ; tagQ=function(ep,i,q){ q=_tagQ0(ep,i,q); try{ if(q&&typeof q==='object'&&!TAG3[ep+'#'+i]) codeW(q); }catch(e){} return q; };
 

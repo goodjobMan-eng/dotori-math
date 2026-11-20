@@ -30,7 +30,7 @@ def main(src, out, month):
     path = os.path.join(out, f'responses_{month}.csv')
     with open(path, 'w', newline='', encoding='utf-8') as f:
         w = csv.writer(f)
-        w.writerow(['learner', 'day_index', 'seq', 'episode', 'template', 'variant', 'seed', 'given', 'correct', 'misconception', 'ms', 'diagnostic', 'app_version'])
+        w.writerow(['learner', 'day_index', 'seq', 'episode', 'template', 'variant', 'seed', 'given', 'correct', 'misconception', 'ms', 'diagnostic', 'app_version', 'exposed_codes', 'mode', 'set_pos', 'repeat', 'resp_type'])
         for did, recs in by_dev.items():
             n = len(recs)
             fast = sum(1 for r in recs if r[8] < 300) / n if n else 0
@@ -43,7 +43,7 @@ def main(src, out, month):
             d0 = date.fromisoformat(days[0])
             lid = hmac.new(salt.encode(), did.encode(), hashlib.sha256).hexdigest()[:16]
             for i, r in enumerate(recs):
-                w.writerow([lid, (date.fromisoformat(r[0]) - d0).days, i, r[1], r[2], r[3], r[4], r[5], r[6], r[7] or '', r[8], r[9], 2])
+                w.writerow([lid, (date.fromisoformat(r[0]) - d0).days, i, r[1], r[2], r[3], r[4], r[5], r[6], r[7] or '', r[8], r[9], 3] + (list(r[10:15]) if len(r) >= 15 else ['', '', '', '', '']))
             kept += 1
     print(f'{path}: 기기 {kept}대 포함, {dropped}대 제외')
 

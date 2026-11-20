@@ -10,6 +10,8 @@ const RE = {
   day:  /^\d{4}-\d{2}-\d{2}$/,
   ep:   /^(S\d-\d{1,3}|EP\d{2})$/,
   code: /^[NRGD]\d-\d{2}$/,
+  codes:/^([NRGD]\d-\d{2}(\|[NRGD]\d-\d{2}){0,3})?$/,
+  mode: /^[ugfdqr]$/,
   given:/^[0-9A-Za-z가-힣ㄱ-ㅎ .:,/%°²³+×÷=−\-~()←→↑↓]{0,24}$/,
 };
 
@@ -24,8 +26,8 @@ function dayOk(day) {
   const t = Date.parse(day + 'T00:00:00Z'); if (Number.isNaN(t)) return false;
   return Math.abs(Date.now() - t) <= 3 * 864e5;                        // 서버 날짜 ±3일만
 }
-function recOk(r) {                                                     // [day, ep, ti, v, seed, given, ok, code, ms, diag]
-  return Array.isArray(r) && r.length === 10
+function recOk(r) {                                                     // [day, ep, ti, v, seed, given, ok, code, ms, diag, 노출 코드들, 방식, 세트 안 순서, 다시 나온 문제, 응답 형태(c 고르기·w 쓰기·m 조작)]
+  return Array.isArray(r) && r.length === 15
     && typeof r[0] === 'string' && RE.day.test(r[0])
     && typeof r[1] === 'string' && RE.ep.test(r[1])
     && Number.isInteger(r[2]) && r[2] >= -1 && r[2] < 200
@@ -35,7 +37,12 @@ function recOk(r) {                                                     // [day,
     && (r[6] === 0 || r[6] === 1)
     && (r[7] === null || (typeof r[7] === 'string' && RE.code.test(r[7])))
     && Number.isInteger(r[8]) && r[8] >= 0 && r[8] <= 600000
-    && (r[9] === 0 || r[9] === 1);
+    && (r[9] === 0 || r[9] === 1)
+    && typeof r[10] === 'string' && RE.codes.test(r[10])
+    && typeof r[11] === 'string' && RE.mode.test(r[11])
+    && Number.isInteger(r[12]) && r[12] >= 0 && r[12] < 100
+    && (r[13] === 0 || r[13] === 1)
+    && (r[14] === 'c' || r[14] === 'w' || r[14] === 'm');
 }
 
 export default {
