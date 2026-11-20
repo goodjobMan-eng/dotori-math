@@ -46,6 +46,20 @@ const clean=s=>String(s==null?'':s).replace(/[^0-9A-Za-z가-힣ㄱ-ㅎ .:,/%°²
 const plain=s=>String(s||'').replace(/<[^>]*>/g,' ').replace(/\s+/g,' ').trim();
 const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 
+// 무게를 준 갱신. 확률을 그대로 섞지 않고 로그오즈에 (무게 × 로그우도비)를 더한다(푸는 순서와 무관하고, 높은 숙달에서도 증거가 같은 세기로 작동).
+// 0.02~0.95로 묶어 둔다: 저학년 조각이 0.999로 굳으면 고학년에서 그 오개념이 나와도 내려가지 않기 때문.
+const _lg=p=>Math.log(p/(1-p)), _clip=p=>Math.min(.95,Math.max(.02,p));
+function bktW(L,ok,G,w){ L=_clip(L); const lr=ok?Math.log((1-BKT.S)/G):Math.log(BKT.S/(1-G)); const x=1/(1+Math.exp(-(_lg(L)+w*lr))); return +_clip(x+(1-x)*BKT.T*(ok?w:0)).toFixed(4); }
+const pieceL=(st,c)=>(st.cp&&st.cp[c]!=null)?st.cp[c]:.5;
+// 개념 조각 숙달. 틀림: 고른 오답의 코드가 가리키는 주 조각을 그 무게로 깎고, 부 조각은 (무게 × 주 조각의 지금 숙달)만큼만 깎는다.
+//   주 조각이 이미 비어 있으면 그것으로 오답이 설명되므로 부 조각까지 끌어내리지 않는다.
+// 맞음: 보기에 있었지만 고르지 않은 오개념의 주 조각에 약한 긍정 증거(0.1). 찍었을 수 있으니 3초 넘게 풀었을 때만.
+function pieceUpdate(st,q,m,ok,G,ms){ st.cp=st.cp||{}; st.cpn=st.cpn||{}; const up=(c,good,w)=>{ if(!CPC[c]||w<=0) return; st.cp[c]=bktW(pieceL(st,c),good,G,w); st.cpn[c]=(st.cpn[c]||0)+1; };
+  if(!ok){ const ps=m&&MISC[m]; if(ps){ const L0=pieceL(st,ps[0][0]); ps.forEach(([c,w],i)=>up(c,false,i?w*L0:w)); } }
+  else if(q.mis&&(ms==null||ms>=3000)){ const seen={}; Object.values(q.mis).forEach(code=>(MISC[code]||[]).slice(0,1).forEach(([c])=>{ if(!seen[c]){ seen[c]=1; up(c,true,.1); } })); } }
+// 약한 조각: 증거 2번 이상이고 숙달 0.35 미만. 선수 조각도 약하면 선수부터.
+function weakPieces(st){ st=st||state(); const cp=st.cp||{}, n=st.cpn||{}; const weak=Object.keys(cp).filter(c=>CPC[c]&&(n[c]||0)>=2&&cp[c]<.35);
+  return weak.map(c=>({c,name:CPC[c][0],when:CPC[c][1],L:cp[c],pre:CPC[c][2].filter(p=>weak.includes(p))})).sort((a,b)=>a.pre.length-b.pre.length||(a.when<b.when?-1:1)); }
 function rec(q, given, ok){
   if(!q||q._kt) return; q._kt=1;
   const ep=q._ep||(S&&S.ep)||''; if(!/^S\d-\d{1,3}$/.test(String(ep))) return;       // 3~6학년 영역 문항만
@@ -57,8 +71,11 @@ function rec(q, given, ok){
   if(!ok) r.qt=plain(q.q).slice(0,70);                                                 // 교사 화면용(기기 안에만 남음)
   const log=J(LK,[]); log.push(r); W(LK,log.slice(-3000));
   const st=state();
-  if(kc){ const nOpt=(q.opts&&q.opts.length)||0, G=nOpt?1/nOpt:.05; const L=st.kc[kc]==null?BKT.L0:st.kc[kc];
-    const post=ok?(L*(1-BKT.S))/(L*(1-BKT.S)+(1-L)*G):(L*BKT.S)/(L*BKT.S+(1-L)*(1-G)); st.kc[kc]=+(post+(1-post)*BKT.T).toFixed(4); st.kn[kc]=(st.kn[kc]||0)+1; }
+  const nOpt=(q.opts&&q.opts.length)||0, G=nOpt?1/nOpt:.05;
+  // 보기마다 무게가 다르다: 오개념 보기를 골랐으면 원인은 그 오개념이 가리키는 개념 조각에 있으므로 단원 숙달은 약하게, 조각은 세게 깎는다.
+  const wk=ok?1:(m&&MISC[m])?.4*pieceL(st,MISC[m][0][0])+.1:(q.fx&&(q.fx[String(given)]||q.fx[gk]))?.3:.7;   // 선수 조각이 이미 비어 있으면 이 단원 숙달은 덜 깎는다
+  if(kc){ st.kc[kc]=bktW(st.kc[kc]==null?BKT.L0:st.kc[kc],ok,G,wk); st.kn[kc]=(st.kn[kc]||0)+1; }
+  pieceUpdate(st,q,m,ok,G,ms);
   if(q.mis){ for(const c of new Set(Object.values(q.mis))){ const e=st.mis[c]||(st.mis[c]={h:[],n:0,ep:[]}); e.h.push([fk,c===m?1:0,ok?1:0]); e.h=e.h.slice(-8);
     if(c===m){ e.n++; if(!e.ep.includes(ep)) e.ep.push(ep); e.ep=e.ep.slice(-5); } } }
   W(SK,st);
@@ -66,11 +83,11 @@ function rec(q, given, ok){
   if(cfg().share&&KT_ENDPOINT){ const qu=J(QK,[]); qu.push([r.d,ep,ti,v,r.sd,r.g,r.ok,m,ms,r.dg]); W(QK,qu.slice(-3000)); }
 }
 // 최근 8번의 기회(그 오개념의 오답이 보기에 있던 문제) 안에서 판정한다. 기록 한 칸 = [문항, 그 오답을 골랐나, 맞혔나].
-// 확인: 서로 다른 문항 2종 이상에서 3번 이상 골랐고, (노출의 70% 이상) 또는 (틀릴 때마다 대부분 그 오답: 오답의 75% 이상이면서 정답률 40% 이상 = 찍는 아이가 아님).
+// 확인: 서로 다른 문항 2종 이상에서 3번 이상 골랐고, (노출의 70% 이상) 또는 (틀릴 때마다 대부분 그 오답: 오답 4번 이상 중 80% 이상이면서 정답률 40% 이상 = 찍는 아이가 아님).
 // 의심: 2종 이상에서 2번. 해소: 그 오답이 있던 문제를 3번 이어서 맞힘(다른 오답을 고른 것은 해소가 아님).
 function status(code,st){ const e=(st||state()).mis[code]; if(!e||!e.h||!e.h.length) return null; const h=e.h, n=h.length, picks=h.filter(x=>x[1]), k=picks.length, distinct=new Set(picks.map(x=>x[0])).size;
   const w=h.filter(x=>x[1]||x[2]===0).length, last3=h.slice(-3); if(last3.length===3&&last3.every(x=>x[2]===1)) return null;
-  if(k>=3&&distinct>=2&&(k/n>=.7||(k/w>=.75&&(n-w)/n>=.4))) return '확인'; if(k>=2&&distinct>=2) return '의심'; return null; }
+  if(k>=3&&distinct>=2&&(k/n>=.7||(w>=4&&k/w>=.8&&(n-w)/n>=.4))) return '확인'; if(k>=2&&distinct>=2) return '의심'; return null; }
 // 문제 3개 미만으로는 숙달·미숙달을 단정하지 않는다.
 function kcStatus(k,st){ const p=st.kc[k], n=(st.kn||{})[k]||0; if(p==null) return st.est[k]?'추정':'모름'; if(n<3) return p>=.4&&st.est[k]?'추정':'연습'; return p>=.85?'숙달':p>=.4?'연습':'미숙달'; }
 function report(){ const st=state(); const mis=Object.keys(st.mis).map(c=>({c,s:status(c,st),n:st.mis[c].n,ep:st.mis[c].ep||[]})).filter(x=>x.s&&MIS[x.c]).sort((a,b)=>(a.s==='확인'?0:1)-(b.s==='확인'?0:1)||b.n-a.n);
@@ -136,6 +153,8 @@ function teacherPage(){ if(typeof S!=='undefined'&&S) S.idle=true; hush(); app.c
       <p style="font-size:.95rem;color:var(--ink-soft)">이 기기에 쌓인 기록 ${log.length}건 · 수준 찾기 ${st.diagAt||'아직 안 함'}${cfg().share?' · 익명 기록 공유 켜짐':''}</p>
       <h2 class="sec">오개념</h2><ul class="recent kt-list">${misH}</ul>
       <p class="kt-ex">최근 8번의 기회에서 서로 다른 문항 2종 이상에 걸쳐 3번 이상 나오면 확인, 2번이면 의심입니다. 바르게 풀면 사라집니다.</p>
+      <h2 class="sec">비어 있는 개념</h2><ul class="recent kt-list">${(w=>w.length?w.map(x=>`<li><b>${esc(x.name)}</b> <span class="rd">${x.when.replace('-','학년 ')}학기에 처음 배움${x.pre.length?' · 먼저 '+x.pre.map(p=>CPC[p][0]).join(', '):''}</span></li>`).join(''):'<li>아직 비어 있다고 볼 개념이 없습니다.</li>')(weakPieces(st))}</ul>
+      <p class="kt-ex">오답 보기마다 "이 답을 고르면 어떤 개념을 모르는 것"인지와 그 무게를 정해 두었습니다. 같은 개념을 가리키는 오답이 두 번 이상 쌓이면 여기에 나옵니다. 위에 있을수록 먼저 채워야 하는 개념입니다.</p>
       <h2 class="sec">자주 틀리는 단순 지식 (1~2학년)</h2><ul class="recent kt-list">${factsHTML()}</ul>
       <p class="kt-ex">틀리면 같은 세트 뒤쪽에 한 번 더 나오고, 그 뒤 10분 → 다음 날 → 3일 간격으로 다시 나옵니다. 네 번 이어서 맞히면 익힘으로 바뀝니다.</p>
       <h2 class="sec">영역별 수준 (3~6학년)</h2>${lad}
@@ -230,7 +249,7 @@ function maybeSend(){ if(!KT_ENDPOINT||!navigator.sendBeacon) return; const c=cf
 addEventListener('pagehide',maybeSend);
 document.addEventListener('visibilitychange',()=>{ if(document.visibilityState==='hidden') maybeSend(); });
 
-window.KT={gradePage:g=>gradePage(g),startQuick,startDaily,pref,setPref,rec:(q,g,ok)=>(q&&q._e!=null?recEP:rec)(q,g,ok),factKey,dueFacts,startReview,report,status,epKC,MIS,LADDER,regen,formsOf,startDiag,startFocus,teacherPage,course};
+window.KT={CPC,MISC,weakPieces,state,gradePage:g=>gradePage(g),startQuick,startDaily,pref,setPref,rec:(q,g,ok)=>(q&&q._e!=null?recEP:rec)(q,g,ok),factKey,dueFacts,startReview,report,status,epKC,MIS,LADDER,regen,formsOf,startDiag,startFocus,teacherPage,course};
 (function boot(){ const h=location.hash; const c=cfg();
   if(h==='#kt-share-on'){ c.share=true; did(); setCfg(c); } else if(h==='#kt-share-off'){ c.share=false; W(QK,[]); setCfg(c); } else if(h==='#kt-reset'){ try{ localStorage.removeItem(DK); }catch(e){} did(); }
   if(h.startsWith('#kt-')) history.replaceState(null,'',location.pathname+location.search);

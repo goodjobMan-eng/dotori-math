@@ -133,3 +133,72 @@ B('S3-45', ['214 × 32를 계산하면?','6848',[['1070','N3-03'],['238','N4-19'
 B('S3-46', ['580 ÷ 40의 몫과 나머지는?','14 … 20',[['140 … 20','N4-06'],['14 … 2','N4-20']]], ['750 ÷ 60의 몫과 나머지는?','12 … 30',[['120 … 30','N4-06'],['12 … 3','N4-20']]], ['930 ÷ 70의 몫과 나머지는?','13 … 20',[['130 … 20','N4-06'],['13 … 2','N4-20']]]);
 B('S3-55', ['3과 8분의 1 − 1과 8분의 5를 계산하면?','1과 8분의 4',[['1과 8분의 6','N4-05'],['2와 8분의 4','N2-02']]], ['5와 7분의 2 − 2와 7분의 6을 계산하면?','2와 7분의 3',[['2와 7분의 6','N4-05'],['3과 7분의 4','N2-02']]], ['4와 9분의 1 − 1과 9분의 6을 계산하면?','2와 9분의 4',[['2와 9분의 5','N4-05'],['3과 9분의 5','N2-02']]]);
 B('S3-61', ['2.4 + 1.35를 계산하면?','3.75',[['1.59','N4-03'],['3.39','N3-08']]], ['3.2 + 1.46을 계산하면?','4.66',[['1.78','N4-03'],['4.48','N3-08']]], ['1.6 + 2.23을 계산하면?','3.83',[['2.39','N4-03'],['3.29','N3-08']]]);
+
+/* ---------- 3-11. 5~6학년 수와 연산 (Claude·Gemini 교차 검토 3차) ---------- */
+Object.assign(MIS, {
+'N5-09':['연산 순서·괄호를 잘못 적용','괄호 안을 먼저, 곱셈·나눗셈을 덧셈·뺄셈보다 먼저, 같은 급은 앞에서부터 계산해요.'],
+'N5-10':['1과 자기 자신을 약수에서 뺌','1과 그 수 자신도 약수예요.'],
+'N5-11':['공약수·공배수에서 한쪽 수만 확인','두 수 모두의 약수(배수)여야 공약수(공배수)예요.'],
+'N5-12':['기약·최소·최대 조건을 끝까지 채우지 않음','더 나눌 수 있는지, 더 작은(큰) 수가 있는지 끝까지 확인해요.'],
+'N5-13':['크기가 같은 분수를 만들 때 분자·분모 한쪽만 바꿈','분자와 분모에 같은 수를 곱하거나 같은 수로 나눠요.'],
+'N5-14':['반올림하는 자리를 혼동','"백의 자리까지"는 십의 자리에서 반올림해요.'],
+'N5-15':['(분수)×(자연수)에서 자연수를 분모에 곱함','자연수는 분자에만 곱해요.'],
+'N6-11':['분수의 나눗셈에서 역수로 바꾸지 않고 그대로 곱함','나누는 분수의 분자와 분모를 바꾸어 곱해요.'],
+'N6-12':['나눗셈 상황을 곱셈으로 식을 세움','1에 해당하는 양을 구할 때는 기준이 되는 양으로 나눠요.'],
+});
+const _gcd=(a,b)=>b?_gcd(b,a%b):a, _lcm=(a,b)=>a*b/_gcd(a,b), _jo=n=>'013678'.includes(String(n).slice(-1))?'은':'는';
+const tagNum=(q,f)=>tagOnly(q,o=>{ const x=parseFloat(String(o).replace(/[^\d.]/g,'')), A=parseFloat(String(q.ans).replace(/[^\d.]/g,'')); return isNaN(x)||isNaN(A)?null:f(x,A,o); });
+T3('S3-63#1',q=>{ const m=_pl(q.visual).match(/(\d+)\s*−\s*(\d+)\s*\+\s*(\d+)/); if(!m) return q; const [a,b,c]=m.slice(1).map(Number); if(a-b+c!==q.ans) return q; return setOpts(q,[[a-(b+c),'N5-09'],[q.ans+2,'F']],{q:`${a} − ${b} + ${c}의 값은?`}); });
+T3('S3-65#1',q=>{ const m=_pl(q.visual).match(/(\d+)\s*−\s*(\d+)\s*×\s*(\d+)/); if(!m) return q; const [a,b,c]=m.slice(1).map(Number); if(a-b*c!==q.ans) return q; return setOpts(q,[[(a-b)*c,'N5-01'],[b*c,'F']],{q:`${a} − ${b} × ${c}의 값은?`}); });
+T3('S3-66#1',q=>{ const m=_pl(q.visual).match(/(\d+)\s*÷\s*\((\d+)\s*×\s*(\d+)\)/); if(!m) return q; const [a,b,c]=m.slice(1).map(Number); return setOpts(q,[[a/b*c,'N5-09'],[b*c,'F']]); });
+T3('S3-67#1',q=>{ const m=_pl(q.visual).match(/\((\d+)\s*\+\s*(\d+)\)\s*×\s*(\d+)\s*−\s*(\d+)/); if(!m) return q; const [a,b,c,d]=m.slice(1).map(Number); return setOpts(q,[[a+b*c-d,'N5-09'],[(a+b)*(c-d),null]]); });
+T3('S3-68#1',q=>{ const n=+_nums(q)[0], A=+q.ans, sq=Number.isInteger(Math.sqrt(n)); return setOpts(q,[[A-2>0?A-2:null,'N5-10'],[sq?A+1:A-1,'F']]); });
+T3('S3-70#0',q=>{ const m=_pl(q.visual).match(/(\d+)\s*×\s*(\d+)\s*=\s*(\d+)/); if(!m) return q; const [a,b,c]=m.slice(1).map(Number), w=(q.opts||[]).map(String).find(o=>/약수$/.test(o)); if(!w||a===b) return q;
+  return setOpts(q,[[w,'N5-02'],[`${a}${_jo(a)} ${b}의 배수`,null]]); });
+T3('S3-71#1',q=>{ const [a,b]=_nums(q).map(Number), g=_gcd(a,b), l=_lcm(a,b); if(g<2) return q; let one=null; for(let d=2;d<=a;d++) if(a%d===0&&b%d!==0){ one=d; break; } if(one==null) for(let d=2;d<=b;d++) if(b%d===0&&a%d!==0){ one=d; break; }
+  q.q=_pl(q.q).replace('공약수가 아닌 것은?','공약수는?').trim(); q.ans=String(g); if(typeof q.ansText==='string') q.ansText=String(g); q.opts=[String(g),String(g+1),String(l)]; return setOpts(q,[[one,'N5-11'],[l,'N5-02']]); });
+T3('S3-72#1',q=>{ const [a,b]=_nums(q).map(Number), g=_gcd(a,b), l=_lcm(a,b); if(String(q.ans)!==`${l}일 뒤`) return q; return setOpts(q,[[g>1?`${g}일 뒤`:null,'N5-02'],[`${a+b}일 뒤`,'N2-05'],[a*b!==l?`${a*b}일 뒤`:null,'N5-12']]); });
+T3('S3-73#0',q=>{ const [a,b]=_nums(q).map(Number), g=_gcd(a,b), l=_lcm(a,b); if(String(q.ans)!==`${g}봉지`) return q; return setOpts(q,[[`${l}봉지`,'N5-02'],[`${a+b}봉지`,'N2-05'],[Math.min(a,b)!==g?`${Math.min(a,b)}봉지`:null,'N5-11']]); });
+T3('S3-73#1',q=>{ const [a,b]=_nums(q).map(Number), g=_gcd(a,b), l=_lcm(a,b); if(+q.ans!==l) return q; return setOpts(q,[[g>1?g:null,'N5-02'],[a*b!==l?a*b:null,'N5-12'],[a+b,'N2-05']]); });
+T3('S3-74#2',q=>{ const m=_pl(q.q).match(/(\d+)분의 (\d+)와/), n=String(q.ans).match(/^(\d+)분의 (\d+)$/); if(!m||!n) return q; const a=+m[1], b=+m[2], k=+n[1]/a; if(k<2||!Number.isInteger(k)) return q; return setOpts(q,[[`${a+k}분의 ${b+k}`,'N5-03'],[`${a}분의 ${b*k}`,'N5-13']]); });
+T3('S3-75#1',q=>{ const m=_pl(q.q).match(/(\d+)분의 (\d+)/); if(!m) return q; const D=+m[1], N=+m[2], g=_gcd(D,N); if(g<2) return q; let d=0; for(let k=2;k<g;k++) if(g%k===0){ d=k; break; }
+  return setOpts(q,[[d?`${D/d}분의 ${N/d}`:`${D}분의 ${N}`,'N5-12'],[`${D}분의 ${N/g}`,'N5-13']]); });
+T3('S3-76#1',q=>{ const [a,b]=_nums(q).map(Number), g=_gcd(a,b), A=+q.ans; if(A%a||A%b) return q; const one=[a,b].find(x=>x!==A&&(x%a||x%b)); return setOpts(q,[[a+b,'N2-05'],[g>1&&g!==A?g:null,'N5-02'],[one||null,'N5-11']]); });
+T3('S3-78#1',q=>{ const m=_pl(q.q).match(/0\.(\d\d)를/); if(!m) return q; const x=+m[1]; return setOpts(q,[[`100분의 ${x}`,'N5-12'],[`10분의 ${x}`,'N3-28'],[`200분의 ${x}`,null]]); });
+T3('S3-79#1',q=>{ const m=_pl(q.q).match(/(\d+)분의 (\d+) \+ (\d+)분의 (\d+)/), n=String(q.ans).match(/(\d+)분의 (\d+)$/); if(!m||!n) return q; const [a,b,c,d]=m.slice(1).map(Number); return setOpts(q,[[`${a+c}분의 ${b+d}`,'N5-04'],[`${n[1]}분의 ${b+d}`,'N5-13']],{q:`${a}분의 ${b} + ${c}분의 ${d}의 값은?`}); });
+T3('S3-81#1',q=>{ const m=_pl(q.q).match(/(\d+)분의 (\d+) − (\d+)분의 (\d+)/), n=String(q.ans).match(/(\d+)분의 (\d+)$/); if(!m||!n) return q; const [a,b,c,d]=m.slice(1).map(Number); return setOpts(q,[[a-c>=2&&b-d>=1?`${a-c}분의 ${b-d}`:null,'N5-04'],[b!==d?`${n[1]}분의 ${Math.abs(b-d)}`:null,'N5-13']]); });
+const rangeTag=q=>{ const t=_pl(q.q), m=t.match(/^([\d, ]+) 중 (\d+) (이상|이하|초과|미만)/); if(!m) return q; const xs=m[1].split(',').map(s=>+s.trim()), B=+m[2], has=xs.includes(B), A=+q.ans; if(!has) return q; const incl=/이상|이하/.test(m[3]);
+  return setOpts(q,[[incl?A-1:A+1,'N5-08'],[xs.length-A!==A&&xs.length-A!==(incl?A-1:A+1)?xs.length-A:null,null],[incl?A+1:A-1,null]]); };
+T3('S3-83#0',rangeTag); T3('S3-84#1',rangeTag);
+T3('S3-83#1',q=>tagOnly(q,o=>'N5-08'));
+T3('S3-84#2',q=>tagNum(q,(x,A)=>x===A+1?'N5-08':null));
+T3('S3-85#1',q=>tagNum(q,(x,A)=>x===A-1?'N6-10':null));
+T3('S3-86#1',q=>tagNum(q,(x,A)=>x===A+1?'N6-10':null));
+T3('S3-87#1',q=>{ const n=+_nums(q)[0], A=+q.ans; if(Math.round(n/100)*100!==A) return q; const up=Math.ceil(n/100)*100, k=Math.round(n/1000)*1000; return setOpts(q,[[up!==A?up:Math.floor(n/100)*100,'N6-10'],[k!==A?k:null,'N5-14']]); });
+['S3-88#0','S3-88#1','S3-88#2'].forEach(k=>T3(k,q=>tagOnly(q,o=>'N6-10')));
+const fracNat=q=>{ const t=_pl(q.q), m=t.match(/(\d+)분의 (\d+) × (\d+)/)||(t.match(/(\d+) × (\d+)분의 (\d+)/)||[]).slice(0).map((v,i,r)=>i===0?v:[r[2],r[3],r[1]][i-1]); if(!m||m.length<4) return q; const a=+m[1], b=+m[2], k=+m[3];
+  return setOpts(q,[[Math.random()<.5?`${a*k}분의 ${b*k}`:`${a*k}분의 ${b}`,'N5-15'],[`${a}분의 ${b+k}`,'N2-05']],{q:t.replace(/, 청이는.*$/,'의 값은?')}); };
+T3('S3-89#1',fracNat); T3('S3-90#1',fracNat);
+T3('S3-92#1',q=>tagOnly(q,o=>/[과와] \d+분의/.test(o)?'N5-06':null));
+T3('S3-94#1',q=>tagOnly(q,o=>/크다/.test(o)?'N5-05':null));
+T3('S3-106#1',q=>tagOnly(q,o=>/작다/.test(o)?'N6-01':null));
+T3('S3-96#0',q=>tagNum(q,(x,A)=>x>A?'N5-07':null));
+T3('S3-97#1',q=>{ const [a,b]=_nums(q); return tagOnly(q,o=>o===`${a}분의 ${b}`?'N3-01':null); });
+T3('S3-102#1',q=>tagNum(q,(x,A)=>Math.abs(x-A*10)<1e-9?'N6-07':'N3-01'));
+const dpTag=q=>tagNum(q,(x,A)=>x>A?'N3-08':x<A?'N6-07':null);
+T3('S3-103#0',dpTag); T3('S3-103#2',dpTag); T3('S3-109#1',q=>{ dpTag(q); const m=_pl(q.visual).match(/([\d.]+)\s*÷\s*([\d.]+)/); if(m) q.q=`${m[1]} ÷ ${m[2]}의 몫은?`; return q; });
+T3('S3-104#1',q=>{ const m=_pl(q.q).match(/(\d+)분의 (\d+) ÷ (\d+)분의 (\d+)/); if(!m||m[1]!==m[3]) return q; const a=+m[1], b=+m[2], c=+m[4]; if(String(q.ans)!==`${c}분의 ${b}`) return q; return setOpts(q,[[`${a*a}분의 ${b*c}`,'N6-11'],[`${b}분의 ${c}`,'N3-01']]); });
+T3('S3-107#1',q=>{ const m=_pl(q.q).match(/(\d+분의 \d+) ÷ (\d+분의 \d+)/); if(!m) return q; return tagOnly(q,o=>o===`${m[1]} × ${m[2]}`?'N6-11':'N6-02'); });
+T3('S3-111#1',q=>tagOnly(q,o=>(o.split('.')[1]||'').length<(String(q.ans).split('.')[1]||'').length?'N5-14':'N6-10'));
+T3('S3-112#1',q=>tagNum(q,(x,A)=>x>A?'N6-09':null));
+
+B('S3-67', ['30 − (4 + 2) × 3을 계산하면?','12',[['72','N5-01'],['32','N5-09']]], ['40 − (3 + 5) × 2를 계산하면?','24',[['64','N5-01'],['47','N5-09']]], ['50 − (6 + 4) × 3을 계산하면?','20',[['120','N5-01'],['56','N5-09']]]);
+B('S3-68', ['14 = 2 × 7을 보고 14의 약수를 모두 고르면?','1, 2, 7, 14',[['2, 7','N5-10'],['14, 28, 42','N5-02']]], ['15 = 3 × 5를 보고 15의 약수를 모두 고르면?','1, 3, 5, 15',[['3, 5','N5-10'],['15, 30, 45','N5-02']]], ['21 = 3 × 7을 보고 21의 약수를 모두 고르면?','1, 3, 7, 21',[['3, 7','N5-10'],['21, 42, 63','N5-02']]]);
+B('S3-82', ['3과 4분의 1 − 1과 3분의 2를 계산하면?','1과 12분의 7',[['1과 12분의 5','N4-05'],['2와 12분의 5','N2-02']]], ['4와 3분의 1 − 2와 4분의 3을 계산하면?','1과 12분의 7',[['1과 12분의 5','N4-05'],['2와 12분의 5','N2-02']]], ['5와 5분의 1 − 2와 3분의 2를 계산하면?','2와 15분의 8',[['2와 15분의 3','N4-05'],['3과 15분의 7','N2-02']]]);
+B('S3-94', ['6, 6 × 0.4, 6 × 1.2 중 가장 작은 것은?','6 × 0.4',[['6','N5-05'],['6 × 1.2',null]]], ['8, 8 × 0.5, 8 × 1.5 중 가장 작은 것은?','8 × 0.5',[['8','N5-05'],['8 × 1.5',null]]]);
+B('S3-96', ['82 × 2 = 164예요. 0.82 × 0.2는?','0.164',[['1.64','N5-07'],['164','N3-08']]], ['43 × 3 = 129예요. 0.43 × 0.3은?','0.129',[['1.29','N5-07'],['129','N3-08']]], ['56 × 4 = 224예요. 0.56 × 0.4는?','0.224',[['2.24','N5-07'],['224','N3-08']]]);
+B('S3-101', ['8.24 ÷ 4를 계산하면?','2.06',[['2.6','N6-08'],['20.6','N6-07']]], ['9.27 ÷ 3을 계산하면?','3.09',[['3.9','N6-08'],['30.9','N6-07']]], ['5.15 ÷ 5를 계산하면?','1.03',[['1.3','N6-08'],['10.3','N6-07']]]);
+B('S3-104', ['9분의 8 ÷ 9분의 2를 계산하면?','4',[['9분의 4','N6-03'],['81분의 16','N6-11']]], ['7분의 6 ÷ 7분의 2를 계산하면?','3',[['7분의 3','N6-03'],['49분의 12','N6-11']]], ['11분의 9 ÷ 11분의 3을 계산하면?','3',[['11분의 3','N6-03'],['121분의 27','N6-11']]]);
+B('S3-108', ['철사 5분의 3 m의 무게가 10분의 3 kg이에요. 철사 1 m의 무게는?','2분의 1 kg',[['2 kg','N6-06'],['50분의 9 kg','N6-12']]], ['호스 4분의 3 m의 무게가 8분의 3 kg이에요. 호스 1 m의 무게는?','2분의 1 kg',[['2 kg','N6-06'],['32분의 9 kg','N6-12']]]);
+B('S3-110', ['페인트 1.6 L로 벽 0.8 m²를 칠했어요. 페인트 1 L로 칠할 수 있는 넓이는?','0.5 m²',[['2 m²','N6-06'],['1.28 m²','N6-12']]], ['페인트 2.4 L로 벽 0.6 m²를 칠했어요. 페인트 1 L로 칠할 수 있는 넓이는?','0.25 m²',[['4 m²','N6-06'],['1.44 m²','N6-12']]]);
+B('S3-112', ['2.6 ÷ 0.4의 몫을 자연수까지 구하면 나머지는?','0.2',[['2','N6-09'],['0.5',null]]], ['3.5 ÷ 0.6의 몫을 자연수까지 구하면 나머지는?','0.5',[['5','N6-09'],['0.8',null]]]);
