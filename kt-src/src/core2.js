@@ -189,6 +189,7 @@ function diagNext(){ const D=S.diagRun; diagApply(); if(S.i>=DIAG_N){ S.acts.len
   for(let t=0;t<8&&!q;t++){ const kc=diagTarget(); if(!kc) break; const es=epsOf(kc).filter(e=>D.eps.includes(e)), un=es.filter(e=>!D.used[e]);
     q=bestQ(shuffle(un.length?un:es),q=>q.write||(q.opts&&q.opts.length>=3),st); if(!q) D.skip[kc]=1; }
   if(!q){ S.acts.length=S.i; return false; }
+  { const b=pref().band||3, cnt={}; Object.values(q.mis||{}).forEach(c=>{ const z=MISC[c]&&MISC[c][0][0]; if(z&&CPC[z]&&+CPC[z][1][0]<b) cnt[z]=(cnt[z]||0)+1; }); const z=Object.keys(cnt).sort((x,y)=>cnt[y]-cnt[x])[0]; if(z) q._probe=z; }   /* 수준을 찾는 문제가 아래 학년 조각도 함께 확인하게 한다 */
   D.used[q._ep]=1; q.diag=1; D.cur={i:S.i,ep:q._ep}; S.acts[S.i]={kind:'q',q}; S.ep=q._ep; S.ui=uix(q._ep); return true; }
 function startDiag(){ if(!pref().band||pref().band<3) setPref({band:3});
   S={mode:'ep36',retry:true,diagRun:{eps:diagEps(),used:{},pc:{},asked:{},res:{},skip:{},re:{},cur:null},ep:'S2-01',ui:0,ch:0,steps:[{kind:'acts'}],si:0,acts:Array.from({length:DIAG_N},()=>({kind:'q',q:null})),i:0,results:[],tries:0,counted:0,title:'내 수준 찾기',saveKey:'RETRY',chars:CAST};
@@ -237,6 +238,7 @@ function teacherPage(){ if(typeof S!=='undefined'&&S) S.idle=true; hush(); app.c
       <p style="font-size:.95rem;color:var(--ink-soft)">이 기기에 쌓인 기록 ${log.length}건 · 수준 찾기 ${st.diagAt||'아직 안 함'}${cfg().share?' · 익명 기록 공유 켜짐':''}</p>
       <h2 class="sec">오개념</h2><ul class="recent kt-list">${misH}</ul>
       <p class="kt-ex">최근 8번의 기회에서 서로 다른 문항 2종 이상에 걸쳐 3번 이상 나오면 확인, 2번이면 의심입니다. 바르게 풀면 사라집니다.</p>
+      ${(n=>((pref().band||0)>=3)?`<p class="kt-empty">아래 학년 개념 가운데 아직 직접 확인하지 못한 것: <b>${n}개</b>${n?' · 오늘의 문제에 두세 문제씩 섞어 확인합니다.':' · 모두 확인했습니다.'}</p>`:'')(probePool(state()).length)}
       <h2 class="sec">비어 있는 개념</h2><ul class="recent kt-list">${(w=>w.length?w.map(x=>`<li><b>${esc(x.name)}</b> <span class="rd">${x.when.replace('-','학년 ')}학기에 처음 배움${x.pre.length?' · 먼저 '+x.pre.map(p=>CPC[p][0]).join(', '):''}</span><div class="kt-ex">강의: ${(CPL[x.c]||[]).map(k=>`${k} ${esc(lecName(k))}${lecHas(k)?'':'(준비 중)'}`).join(', ')}</div></li>`).join(''):'<li>아직 비어 있다고 볼 개념이 없습니다.</li>')(weakPieces(st))}${weakPieces(st,true).filter(x=>x.s!=='weak').map(x=>`<li><b>${esc(x.name)}</b> <span class="rd">${x.s==='chk'?'확인 중: 처음 배우는 단원의 문제 2개로 다시 봅니다':'처음 배우는 단원에서는 맞힘. 윗학년 문제에서만 틀립니다'}</span></li>`).join('')}</ul>
       <p class="kt-ex">오답 보기마다 "이 답을 고르면 어떤 개념을 모르는 것"인지와 그 무게를 정해 두었습니다. 같은 개념을 가리키는 오답이 두 번 이상 쌓이면 여기에 나옵니다. 위에 있을수록 먼저 채워야 하는 개념입니다.</p>
 ${(L=>{ const ks=Object.keys(L).filter(c=>CPC[c]&&(L[c].mr||[]).length); return ks.length?`<h2 class="sec">강의와 문제의 순서</h2><ul class="recent kt-list">${ks.map(c=>`<li><b>${esc(CPC[c][0])}</b> <span class="rd">${L[c].arm==='A'?'강의 먼저':'문제 먼저'} · 바로 뒤 두 문제 ${L[c].mr.filter(x=>x).length}/${L[c].mr.length}${L[c].k?' · '+L[c].k:''}</span></li>`).join('')}</ul><p class="kt-ex">비어 있는 개념이 확정되면 절반은 강의부터, 절반은 문제부터 봅니다(모두 강의는 봄). 바로 뒤 두 문제의 결과를 견주면 강의가 실제로 도움이 되는지 알 수 있습니다.</p>`:''; })(st.lec||{})}
