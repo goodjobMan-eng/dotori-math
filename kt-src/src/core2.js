@@ -242,6 +242,7 @@ body{background-image:none}body:before{background:#FFF7EC var(--kt-grain)!import
 .kt-mode:nth-child(odd){transform:rotate(-1.2deg)}.kt-mode:nth-child(even){transform:rotate(1deg)}
 .kt-mode b{font-size:1.3rem;font-weight:400}.kt-mode span{font-family:"Gowun Dodum",sans-serif;font-size:.86rem;color:#7B5632}
 .kt-mode.kt-band{align-items:center;text-align:center;padding:22px 14px 18px calc(14px + 4%)}.kt-mode.kt-band b{font-size:clamp(1.6rem,6vw,2.1rem);text-shadow:0 1px 0 rgba(255,255,255,.75)}
+.kt-mode{align-items:center;text-align:center;padding-left:calc(14px + 4%)}.kt-modes:has(.who){margin-top:42px}.kt-mode b{text-shadow:0 1px 0 rgba(255,255,255,.75)}
 .kt-mode .who{position:absolute;right:4px;top:-34px;height:68px;pointer-events:none}
 .kt-mode .stamp{position:absolute;right:14px;bottom:12px;transform:rotate(-8deg);border:2px solid #3F7A34;border-radius:7px;padding:0 7px;font-style:normal;font-size:.8rem;color:#3F7A34}
 .kt-mode:active{transform:translateY(3px);filter:none}.kt-mode:focus-visible,.kt-tree:focus-visible,.kt-chip:focus-visible{outline:3px solid #3F7A34;outline-offset:3px}
