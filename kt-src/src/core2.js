@@ -95,7 +95,7 @@ const checkPieces=st=>weakPieces(st,true).filter(x=>x.s==='chk');
 // 공개 데이터에 더 싣는 칸: 보기에 있던 오개념 코드들(보기별 무게를 다시 추정하는 데 꼭 필요), 푸는 방식, 세트 안 순서, 다시 나온 문제인지.
 // 쓰기형 답은 아이가 이름·전화번호를 적을 수 있으므로, 숫자와 기호가 아니거나 12자를 넘으면 내보내지 않는다.
 const maskG=(q,g)=>(q.opts&&q.opts.length)||q.manip?g:(/^[0-9\-−.\/: ]{0,12}$/.test(String(g))?g:'STR');
-function recExtra(q){ let mode='u'; try{ mode=q._arm?q._arm:q._chk?'k':q.diag?'g':S.focus?'f':S.kt==='daily'?'d':S.kt==='quick'?'q':S.review?'r':'u'; }catch(e){}
+function recExtra(q){ let mode='u'; try{ mode=q._arm?q._arm:q._chk?'k':q.diag?'g':q._probe?'p':q._follow?'n':S.focus?'f':S.kt==='daily'?'d':S.kt==='quick'?'q':S.review?'r':'u'; }catch(e){}
   const ex=[...new Set(Object.values(q.mis||{}))].sort().slice(0,4).join('|'); let seq=0; try{ seq=Math.max(0,Math.min(99,S.i|0)); }catch(e){}
   return [ex,mode,seq,q._review?1:0,q.manip?'m':(q.opts&&q.opts.length)?'c':'w']; }
 function rec(q, given, ok){

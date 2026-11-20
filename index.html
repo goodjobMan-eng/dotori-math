@@ -5576,7 +5576,17 @@ function codeW4(q){ if(!q||q.opts&&q.opts.length||q.manip||q.onMount||q.mis) ret
       else if(da&&!db&&b<10&&ia>=10&&ia<100){ const T=Math.floor(ia/10), o=ia%10, c=Math.floor(o*b/10); if(c){ add((T*b*10+o*b%10)/10**da,'N3-14'); add(((T+c)*b*10+o*b%10)/10**da,'N3-21'); } } }
     else if(op==='÷'){ if(word){ add(a*b,'N6-12'); if(a>b) add(a-b,'N3-11'); } else { if(R<1) add(String(+(R*10).toFixed(6)).replace('.',''),'N6-07'); else if(db) add(R/10,'N6-07'); if(db) add(a*b,'N6-12'); } } }
   clash.forEach(k=>delete mis[k]); if(Object.keys(mis).length) q.mis=mis; return q; }
-const _tagQ0=tagQ; tagQ=function(ep,i,q){ q=_tagQ0(ep,i,q); try{ if(q&&typeof q==='object'&&!TAG3[ep+'#'+i]){ codeW(q); codeW2(q); codeW3(q); codeW4(q); } }catch(e){} return q; };
+/* 쓰기형 5: 분수와 자연수의 곱셈·나눗셈, 원주와 원의 넓이. */
+function codeW5(q){ if(!q||q.opts&&q.opts.length||q.manip||q.onMount||q.mis) return q; const A=String(q.ans), Q=_pl(q.q), V=_pl(q.visual), mis={}, clash=new Set();
+  const add=(k,c)=>{ k=String(k); if(k===A||!/^\d+$/.test(k)) return; if(k in mis){ if(mis[k]!==c) clash.add(k); return; } mis[k]=c; }, dig=v=>String(+(+v).toFixed(6)).replace('.',''); let m;
+  if(/생활 속 문제/.test(V)&&!/원주율/.test(Q)){ return q; }
+  if((m=Q.match(/^(\d+)[과와] (\d+)분의 (\d+) × (\d+)$/))){ const [w,d,n,k]=m.slice(1).map(Number), N=n*k; if(N<d&&A===`${w*k}${N}`) add(`${w*k}${n}`,'N5-06'); }
+  else if((m=Q.match(/^(\d+)분의 (\d+) × (\d+)$/))){ const [d,n,k]=m.slice(1).map(Number), N=n*k; if(N>d&&N%d&&A===`${Math.floor(N/d)}${N%d}`) add(String(N),'N4-26'); }
+  else if((m=Q.match(/^(\d+)분의 (\d+) ÷ (\d+)$/))){ const [d,n,k]=m.slice(1).map(Number); if(n%k===0&&A===String(n/k)&&/=\s*\d+\s*$/.test(V)) add(String(n*k),'N6-04'); }
+  else if((m=Q.match(/^지름이 (\d+) cm인 원의 원주는\?/))){ const d=+m[1]; if(A===dig(d*3.14)){ add(dig(d/2*3.14),'G3-04'); add(dig(d/2*d/2*3.14),'G6-12'); add(dig(d*2*3.14),'G3-04'); } }
+  else if((m=Q.match(/^반지름이 (\d+) (?:cm|m)인 .*넓이는/))){ const r=+m[1]; if(A===dig(r*r*3.14)){ add(dig(r*3.14),'G6-18'); add(dig(2*r*3.14),'G6-12'); add(dig(2*r*2*r*3.14),'G3-04'); } }
+  clash.forEach(k=>delete mis[k]); if(Object.keys(mis).length) q.mis=mis; return q; }
+const _tagQ0=tagQ; tagQ=function(ep,i,q){ q=_tagQ0(ep,i,q); try{ if(q&&typeof q==='object'&&!TAG3[ep+'#'+i]){ codeW(q); codeW2(q); codeW3(q); codeW4(q); codeW5(q); } }catch(e){} return q; };
 
 /* ---------- 3-14. 도형과 측정 (Claude·Gemini 교차 검토 4차) ---------- */
 Object.assign(MIS, {
@@ -5858,6 +5868,9 @@ function symQ(axis){ for(let t=0;t<60;t++){ const half=[]; for(let y=0;y<4;y++) 
     const vis=`<div class="tfrow">${symFig(H,{axis},20)}<span class="tarrow">→ ?</span></div><div class="tfrow" style="flex-wrap:wrap;gap:8px">${order.map((k,j)=>symFig([...H,...all[k]],{axis,label:labs[j]},16)).join('')}</div>`;
     const r=C36(WHO(),q,q,vis,labs[order.indexOf(0)],labs.slice()); r.mis={}; order.forEach((k,j)=>{ if(k) r.mis[labs[j]]=ws[k-1][1]; }); return r; } return null; }
 G36['S6-54'].push(()=>symQ(1)||G36['S6-54'][0]()); G36['S6-55'].push(()=>symQ(0)||G36['S6-55'][0]());
+
+/* ===== 3-24. 코드 없던 객관식 가운데 오답의 뜻이 뚜렷한 것 ===== */
+TX('S6-29#2',{'예각삼각형':'G4-09'},/두 각이/); TX('S3-42#0',o=>'N4-07',/억이 \d+개인 수/); TX('S3-42#1',o=>'N4-08',/읽으면/);
 
 /* ---------- 3-12. 개념 조각과 보기별 무게 (오개념 코드 → 모르는 개념 조각) ---------- */
 // 교수님 지적(2026-11-20): 오답에 코드만 붙일 게 아니라 "이 보기를 고른 아이는 어떤 개념을 모른다"는 가정과 무게가 있어야 한다.
@@ -6273,7 +6286,7 @@ const checkPieces=st=>weakPieces(st,true).filter(x=>x.s==='chk');
 // 공개 데이터에 더 싣는 칸: 보기에 있던 오개념 코드들(보기별 무게를 다시 추정하는 데 꼭 필요), 푸는 방식, 세트 안 순서, 다시 나온 문제인지.
 // 쓰기형 답은 아이가 이름·전화번호를 적을 수 있으므로, 숫자와 기호가 아니거나 12자를 넘으면 내보내지 않는다.
 const maskG=(q,g)=>(q.opts&&q.opts.length)||q.manip?g:(/^[0-9\-−.\/: ]{0,12}$/.test(String(g))?g:'STR');
-function recExtra(q){ let mode='u'; try{ mode=q._arm?q._arm:q._chk?'k':q.diag?'g':S.focus?'f':S.kt==='daily'?'d':S.kt==='quick'?'q':S.review?'r':'u'; }catch(e){}
+function recExtra(q){ let mode='u'; try{ mode=q._arm?q._arm:q._chk?'k':q.diag?'g':q._probe?'p':q._follow?'n':S.focus?'f':S.kt==='daily'?'d':S.kt==='quick'?'q':S.review?'r':'u'; }catch(e){}
   const ex=[...new Set(Object.values(q.mis||{}))].sort().slice(0,4).join('|'); let seq=0; try{ seq=Math.max(0,Math.min(99,S.i|0)); }catch(e){}
   return [ex,mode,seq,q._review?1:0,q.manip?'m':(q.opts&&q.opts.length)?'c':'w']; }
 function rec(q, given, ok){
