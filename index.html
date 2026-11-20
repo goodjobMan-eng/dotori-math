@@ -6055,10 +6055,18 @@ function report(){ const st=state(); const mis=Object.keys(st.mis).map(c=>({c,s:
 
 /* ---------- 8. 수준 찾기(첫 진단) ---------- */
 const CAST=['도토','대롱이','부엉 박사님','붕붕이'];
-function pickForKC(kc){ const eps=shuffle(epsOf(kc).slice());
-  for(const pass of [0,1]) for(const ep of eps){ for(const i of shuffle(G36[ep].map((_,k)=>k))){ for(let t=0;t<3;t++){ let q; try{ q=G36[ep][i](); }catch(e){ break; }
-    if(!q||q.manip||q.onMount) break; if(pass===0&&!q.write) break; if(!q.write&&(!q.opts||q.opts.length<3)) continue; q._ep=ep; q._ti=i; return q; } } }
-  return null; }
+/* 가장 큰 원칙(교수님, 2026-11-20): 문제 하나를 풀 때마다 가장 많은 개념 정보를 얻고, 적은 표본으로 결손을 찾아낸다.
+   그래서 문제를 아무거나 뽑지 않고 '지금 이 아이에 대해 가장 많이 알려 줄 문제'를 뽑는다.
+   정보량 = 단원 숙달의 불확실함 × (1 − 찍어서 맞힐 확률) + 보기에 든 오개념이 가리키는 조각마다의 불확실함.
+   불확실함은 숙달이 0.5에 가까울수록 크다(이미 아는 것, 이미 모른다고 확인된 것은 다시 물어도 얻는 것이 적다). */
+const H2=p=>{ p=Math.min(.98,Math.max(.02,p)); return -(p*Math.log2(p)+(1-p)*Math.log2(1-p)); };
+function qInfo(q,st){ st=st||state(); const kc=epKC(q._ep), n=(q.opts&&q.opts.length)||0, G=n?1/n:.05; let v=H2(kc&&st.kc[kc]!=null?st.kc[kc]:BKT.L0)*(1-G);
+  const ps=new Set(); Object.values(q.mis||{}).forEach(c=>{ if(MISC[c]) ps.add(MISC[c][0][0]); }); ps.forEach(c=>{ v+=H2(pieceL(st,c)); }); return v; }
+// 여러 편의 틀을 하나씩 만들어 보고 정보량이 큰 것 가운데서 고른다(늘 같은 문제가 나오지 않게, 가장 큰 것의 80% 이상인 것 중에서 뽑음).
+function bestQ(eps,ok,st){ st=st||state(); const cs=[]; for(const ep of eps){ const seen=new Set(); (G36[ep]||[]).forEach((g,i)=>{ if(seen.has(g)||cs.length>60) return; seen.add(g); for(let t=0;t<2;t++){ let q; try{ q=g(); }catch(e){ return; }
+      if(!q||q.manip||q.onMount) return; if(ok&&!ok(q)) continue; q._ep=ep; q._ti=i; cs.push([qInfo(q,st),q]); return; } }); }
+  if(!cs.length) return null; cs.sort((a,b)=>b[0]-a[0]); const top=cs.filter(x=>x[0]>=cs[0][0]*.8).slice(0,4); return top[Math.floor(Math.random()*top.length)][1]; }
+function pickForKC(kc){ return bestQ(shuffle(epsOf(kc).slice()),q=>q.write||(q.opts&&q.opts.length>=3)); }
 function diagApply(){ const D=S.diagRun; if(!D.cur||D.cur.done) return; D.cur.done=1; const t=D.strands[D.si]; if(S.results[D.cur.i]) t.lo=D.cur.mid+1; else t.hi=D.cur.mid; }
 function diagNext(){ const D=S.diagRun; diagApply();
   for(;;){ while(D.si<D.strands.length&&D.strands[D.si].lo>=D.strands[D.si].hi) D.si++;
@@ -6228,7 +6236,7 @@ function afterRec(q,given,ok,m){ if(ok) return; const tip=m&&MIS[m]?MIS[m][1]:''
   if(S&&S.acts){ (S._wrong=S._wrong||[]).push({q:plain(q.q).slice(0,70),g:clean(given),a:plain(q.ansText!=null&&q.ansText!==''?q.ansText:q.ans).slice(0,40),tip}); }
   if(tip&&pref().why){ q._tip=tip; q.hint1=tip; } }
 
-function qFromEp36(ep){ for(const i of shuffle(G36[ep].map((_,k)=>k))){ for(let t=0;t<3;t++){ let q; try{ q=G36[ep][i](); }catch(e){ break; } if(!q||q.manip||q.onMount) break; q._ep=ep; q._ti=i; return q; } } return null; }
+function qFromEp36(ep){ return bestQ([ep]); }                    // 그 편에서 지금 가장 많이 알려 줄 문제
 function qFromEp(e){ const fs=G[e]||[]; for(let t=0;t<8&&fs.length;t++){ let q; try{ q=fs[rnd(0,fs.length-1)](); }catch(x){ continue; } if(q&&!q.manip&&!q.onMount) return q; } return null; }
 function bag(){ const acts=[], seen=new Set(); return {acts, push(q,flag){ if(!q) return false; const k=keyOf(q); if(seen.has(k)) return false; seen.add(k); if(flag) q[flag]=1; acts.push({kind:'q',q}); return true; }}; }
 // 한 세트는 한 엔진(1~2학년 영상편 / 영역별)의 문제로만 만든다.
@@ -6479,7 +6487,7 @@ function slotPage(ask){ hush(); app.className='wrap'; const cur=curSlot();
 function exportAll(){ const o={}; try{ Object.keys(localStorage).filter(k=>k.startsWith('dotori-')).forEach(k=>o[k]=localStorage.getItem(k)); }catch(e){} return JSON.stringify(o); }
 function importAll(txt){ let o; try{ o=JSON.parse(txt); }catch(e){ return false; } if(!o||typeof o!=='object') return false; const ks=Object.keys(o).filter(k=>k.startsWith('dotori-')&&typeof o[k]==='string'); if(!ks.length) return false;
   try{ Object.keys(localStorage).filter(k=>k.startsWith('dotori-')).forEach(k=>localStorage.removeItem(k)); ks.forEach(k=>localStorage.setItem(k,o[k])); }catch(e){ return false; } return true; }
-window.KT={slotPage,switchSlot,curSlot,exportAll,importAll,checkPieces,pieceStage,CPL,CPC,MISC,weakPieces,state,gradePage:g=>gradePage(g),startQuick,startDaily,pref,setPref,rec:(q,g,ok)=>(q&&q._e!=null?recEP:rec)(q,g,ok),factKey,dueFacts,startReview,report,status,epKC,MIS,LADDER,regen,formsOf,startDiag,startFocus,teacherPage,course};
+window.KT={qInfo,bestQ,slotPage,switchSlot,curSlot,exportAll,importAll,checkPieces,pieceStage,CPL,CPC,MISC,weakPieces,state,gradePage:g=>gradePage(g),startQuick,startDaily,pref,setPref,rec:(q,g,ok)=>(q&&q._e!=null?recEP:rec)(q,g,ok),factKey,dueFacts,startReview,report,status,epKC,MIS,LADDER,regen,formsOf,startDiag,startFocus,teacherPage,course};
 (function boot(){ const h=location.hash; const c=cfg();
   if(h==='#kt-share-on'){ c.share=true; did(); setCfg(c); } else if(h==='#kt-share-off'){ c.share=false; W(QK,[]); setCfg(c); } else if(h==='#kt-reset'){ try{ localStorage.removeItem(DK); }catch(e){} did(); }
   if(h.startsWith('#kt-')) history.replaceState(null,'',location.pathname+location.search);

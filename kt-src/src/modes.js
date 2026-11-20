@@ -15,7 +15,7 @@ function afterRec(q,given,ok,m){ if(ok) return; const tip=m&&MIS[m]?MIS[m][1]:''
   if(S&&S.acts){ (S._wrong=S._wrong||[]).push({q:plain(q.q).slice(0,70),g:clean(given),a:plain(q.ansText!=null&&q.ansText!==''?q.ansText:q.ans).slice(0,40),tip}); }
   if(tip&&pref().why){ q._tip=tip; q.hint1=tip; } }
 
-function qFromEp36(ep){ for(const i of shuffle(G36[ep].map((_,k)=>k))){ for(let t=0;t<3;t++){ let q; try{ q=G36[ep][i](); }catch(e){ break; } if(!q||q.manip||q.onMount) break; q._ep=ep; q._ti=i; return q; } } return null; }
+function qFromEp36(ep){ return bestQ([ep]); }                    // 그 편에서 지금 가장 많이 알려 줄 문제
 function qFromEp(e){ const fs=G[e]||[]; for(let t=0;t<8&&fs.length;t++){ let q; try{ q=fs[rnd(0,fs.length-1)](); }catch(x){ continue; } if(q&&!q.manip&&!q.onMount) return q; } return null; }
 function bag(){ const acts=[], seen=new Set(); return {acts, push(q,flag){ if(!q) return false; const k=keyOf(q); if(seen.has(k)) return false; seen.add(k); if(flag) q[flag]=1; acts.push({kind:'q',q}); return true; }}; }
 // 한 세트는 한 엔진(1~2학년 영상편 / 영역별)의 문제로만 만든다.
