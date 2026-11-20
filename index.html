@@ -1204,7 +1204,7 @@ const T = {
   between:(lo,hi)=>()=>{ const n=rnd(lo,hi); return P('rami','가운데 수는?',`${sp(n-1,'과','와')} ${sino(n+1)} 사이의 수는 무엇일까요?`,seq([n-1,'?',n+1]),n,numOpts(n,0,hi+2)); },
   split:(N)=>()=>{ const a=rnd(1,N-1); return P('rami',`${N}${pt(N,'은','는')} ${a}${pt(a,'과','와')} 몇?`,`${sp(N,'을','를')} 두 주머니에 갈라요. ${sn(N)} ${sp(a,'과','와')} 몇일까요?`,pouches(a,null),N-a,numOpts(N-a,1,N),{hint:'가르기'}); },
   splitVis:(N)=>()=>{ const a=rnd(1,N-1); return P('cheong',`나 ${a}개 줘! 도토는 몇 개 남지?`,`도토리 ${GAE(N)} 중에 청이가 ${GAE(a)}를 달래요. 도토에게는 몇 개 남을까요?`,acorns(N,{gone:a}),N-a,numOpts(N-a,0,N),{hint:'가르기',tap:true,ansSpeech:GAE(N-a)}); },
-  splitBox:(N)=>()=>{ const a=rnd(1,N-1); const left=rnd(0,1); return P('halmi',left?`${N} = □ + ${N-a}`:`${N} = ${a} + □`,`${sn(N)} 무엇과 ${sino(left?N-a:a)}로 가를 수 있을까? 빈칸에 들어갈 수를 찾아보렴.`,eq(left?`${N} = □ + ${N-a}`:`${N} = ${a} + □`),a,numOpts(a,1,N),{hint:'가르기 식'}); },
+  splitBox:(N)=>()=>{ const a=rnd(1,N-1); const left=rnd(0,1); return P('halmi',left?`${N} = □ + ${N-a}`:`${N} = ${a} + □`,`${sn(N)} 무엇과 ${sino(left?N-a:a)}로 가를 수 있을까? 빈칸에 들어갈 수를 찾아보렴.`,eq(left?`${N} = □ + ${N-a}`:`${N} = ${a} + □`),left?a:N-a,numOpts(left?a:N-a,1,N),{hint:'가르기 식'}); },
   merge:(N)=>()=>{ const a=rnd(1,N-1); const b=N-a; return P('doto',`${a}${pt(a,'과','와')} ${b}${pt(b,'을','를')} 모으면?`,`${sp(a,'과','와')} ${sp(b,'을','를')} 모으면 얼마일까요?`,pouches(a,b),N,numOpts(N,1,N+2),{hint:'모으기'}); },
   mergeAny:(lo,hi)=>()=>{ const N=rnd(lo,hi); const a=rnd(1,N-1); const b=N-a; return P('doto',`${a}${pt(a,'과','와')} ${b}${pt(b,'을','를')} 모으면?`,`${sp(a,'과','와')} ${sp(b,'을','를')} 모으면 얼마일까요?`,pouches(a,b),N,numOpts(N,1,hi+2),{hint:'모으기'}); },
   splitAny:(lo,hi)=>()=>{ const N=rnd(lo,hi); const a=rnd(1,N-1); return P('rami',`${N}${pt(N,'은','는')} ${a}${pt(a,'과','와')} 몇?`,`${sn(N)} ${sp(a,'과','와')} 몇일까요?`,pouches(a,null),N-a,numOpts(N-a,1,hi),{hint:'가르기'}); },
@@ -6079,6 +6079,10 @@ function fixText(q){ if(q&&typeof q.q==='string'){ for(const [re,f] of FIXT){ if
     if(/\./.test(at)) q.q=q.q.replace(/^도토리 (\d+)개를 (\d+)명에게 똑같이 나누어 주면 한 명이 몇 개씩 받을까요\?$/,(m,a,b)=>`떡 ${a}개를 ${b}명이 똑같이 나누어 먹으면 한 명이 몇 개씩 먹을까요?`); }
   return q; }
 { const _t=tagQ; tagQ=function(ep,i,q){ return fixText(_t(ep,i,q)); }; }
+
+/* ===== 3-33. 1~2학년 수와 연산(EP 엔진) 글 검토: 화면 글만 고친다 ===== */
+function fixEP(q){ if(q&&typeof q.q==='string'){ q.q=q.q.replace(/(하나​?['’])은/,'$1는'); } return q; }
+if(typeof G!=='undefined') for(const e of Object.keys(G)) G[e]=G[e].map(g=>function(){ return fixEP(g.apply(this,arguments)); });
 
 /* ---------- 3-12. 개념 조각과 보기별 무게 (오개념 코드 → 모르는 개념 조각) ---------- */
 // 교수님 지적(2026-11-20): 오답에 코드만 붙일 게 아니라 "이 보기를 고른 아이는 어떤 개념을 모른다"는 가정과 무게가 있어야 한다.

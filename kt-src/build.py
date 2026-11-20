@@ -155,6 +155,11 @@ h = h.replace(_a, _a.replace("dropTools();\n", "dropTools(); if(DP){ DP.cur=DP.p
 _a = ".vgrp{display:inline-flex;gap:4px}"
 assert h.count(_a) == 1
 h = h.replace(_a, _a + ".vgrp.hasdp{gap:0;align-items:flex-end}.dotpick{width:26px;height:54px;padding:0;border:0;background:none;position:relative;cursor:pointer;flex:none}.dotpick::after{content:'';position:absolute;left:50%;bottom:13px;width:14px;height:14px;margin-left:-7px;border-radius:50%;border:2px dashed #B98A55;box-sizing:border-box;background:#fff}.dotpick.on::after{background:#2E2620;border:2px solid #2E2620}")
+
+# ---- 1~2학년 가르기 식 정답 오류: 'N = a + □'의 정답이 a로 되어 있었음(바른 답은 N-a). 'N = □ + b' 꼴은 맞았음 ----
+_a = "eq(left?`${N} = □ + ${N-a}`:`${N} = ${a} + □`),a,numOpts(a,1,N),{hint:'가르기 식'}"
+assert h.count(_a) == 1
+h = h.replace(_a, "eq(left?`${N} = □ + ${N-a}`:`${N} = ${a} + □`),left?a:N-a,numOpts(left?a:N-a,1,N),{hint:'가르기 식'}")
 for a, mc in MC:
     assert h.count(a) == 1, a
     h = h.replace(a, a + " mcode:()=>" + mc + ",")

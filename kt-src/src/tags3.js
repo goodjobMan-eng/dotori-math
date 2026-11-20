@@ -780,3 +780,7 @@ function fixText(q){ if(q&&typeof q.q==='string'){ for(const [re,f] of FIXT){ if
     if(/\./.test(at)) q.q=q.q.replace(/^도토리 (\d+)개를 (\d+)명에게 똑같이 나누어 주면 한 명이 몇 개씩 받을까요\?$/,(m,a,b)=>`떡 ${a}개를 ${b}명이 똑같이 나누어 먹으면 한 명이 몇 개씩 먹을까요?`); }
   return q; }
 { const _t=tagQ; tagQ=function(ep,i,q){ return fixText(_t(ep,i,q)); }; }
+
+/* ===== 3-33. 1~2학년 수와 연산(EP 엔진) 글 검토: 화면 글만 고친다 ===== */
+function fixEP(q){ if(q&&typeof q.q==='string'){ q.q=q.q.replace(/(하나​?['’])은/,'$1는'); } return q; }
+if(typeof G!=='undefined') for(const e of Object.keys(G)) G[e]=G[e].map(g=>function(){ return fixEP(g.apply(this,arguments)); });
