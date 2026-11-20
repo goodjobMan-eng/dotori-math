@@ -103,6 +103,8 @@ function rec(q, given, ok){
   const ep=q._ep||(S&&S.ep)||''; if(!/^S\d-\d{1,3}$/.test(String(ep))) return;       // 3~6학년 영역 문항만
   const gk=/^\d+$/.test(String(given))?String(+given):String(given);
   const m=ok?null:((q.mis&&(q.mis[String(given)]||q.mis[gk]))||q._mcode||null);
+  /* 이어 묻기: 쓰기·조작 문제를 틀렸는데 어떤 오개념인지 알 수 없으면, 바로 다음 문제를 같은 단원의 보기 촘촘한 객관식으로 바꿔 원인을 가른다(세트당 2번까지). */
+  if(!ok&&!m&&(q.manip||!(q.opts&&q.opts.length>1))&&S&&S.acts&&!S.diagRun&&!q._follow&&(S.fol||0)<2){ try{ const nx=S.acts[S.i+1]; if(nx&&nx.kind==='q'&&nx.q&&!nx.q._probe&&!nx.q._arm&&!nx.q._chk&&!nx.q._follow){ const k0=epKC(ep), okQ=x=>x.opts&&x.opts.length>=4&&x.mis&&Object.keys(x.mis).length>=2, f=bestQ([ep],okQ)||bestQ(shuffle(epsOf(k0).filter(e=>e!==ep)).slice(0,4),okQ); if(f){ f._follow=1; nx.q=f; S.fol=(S.fol||0)+1; } } }catch(e){} }
   const ti=q._ti==null?-1:q._ti, v=q._v||0, fk=`${ep}:${ti}:${v}`, kc=epKC(ep);
   const ms=q._t0?Math.min(600000,Date.now()-q._t0):0;
   const r={d:today(),ep,ti,v,sd:q._seed==null?0:q._seed,g:clean(given),ok:ok?1:0,m,ms,dg:q.diag?1:0};
