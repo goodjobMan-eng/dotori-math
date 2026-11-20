@@ -136,6 +136,25 @@ MC = [("state:()=>h+':'+m,", "(h%12===Math.round(tm/5)%12&&Math.abs(m-(th%12)*5)
  ("state:()=>h.map(v=>v*step).join(','),", "(step>1&&h.filter((v,i)=>target[i]>0&&v===target[i]).length>=Math.ceil(target.filter(x=>x>0).length*.6))?'D4-01':null")]
 MC.append(("state:()=>''+(+(+v).toFixed(3)),", "Math.abs(v-(target-step))<step/2&&target-step>lo?'G2-09':null"))
 MC.append(("state:()=>String(tKey(cur)),", "(()=>{ const K=tKey, R=k=>tApply(f,c=>tRot(c,k)), ck=K(cur), tk=K(target); if(ck===K(f)) return null; const rk=[1,2,3].find(k=>K(R(k))===tk), fl=[tLR,tUD].find(g=>K(tApply(f,g))===tk), cr=[1,2,3].find(k=>K(R(k))===ck), cf=[tLR,tUD].find(g=>K(tApply(f,g))===ck); if(rk&&!fl){ if(cr) return cr===4-rk?'G4-10':'G4-13'; if(cf) return 'G4-04'; } if(fl&&!rk){ if(cf) return 'G4-14'; if(cr) return 'G4-04'; } return null; })()"))
+
+# ---- 소수점 직접 찍기: 소수 답 칸의 소수점을 미리 찍지 않고 아이가 칸 사이를 눌러 찍는다 ----
+_a = "function mountWriteQ36(q){ const host=document.getElementById('wpad'); const ans=String(q.ans); const slots=[...document.querySelectorAll('#visual .vslot')]; const g=(UNITS36[S.ui]||{}).grade||3;"
+assert h.count(_a) == 1
+h = h.replace(_a, _a + """
+  const DP=(()=>{ const ds=[...document.querySelectorAll('#visual em.dot')]; if(ds.length!==1) return null; const grp=ds[0].parentElement, gs=[...grp.querySelectorAll('.vslot')]; if(gs.length<2||gs.length!==slots.length||!grp.classList.contains('vgrp')) return null; let p=0; for(const n of grp.children){ if(n===ds[0]) break; if(n.classList.contains('vslot')) p++; } if(p<1||p>=gs.length) return null; ds[0].remove();
+    const o={p,cur:null,lock:false,btns:[]}; o.paint=()=>o.btns.forEach((x,j)=>x.classList.toggle('on',o.cur===j)); [...gs,null].forEach((sl,i)=>{ const b=document.createElement('button'); b.type='button'; b.className='dotpick'; b.setAttribute('aria-label','여기에 소수점 찍기'); b.onclick=()=>{ if(o.lock) return; o.cur=o.cur===i?null:i; o.paint(); sfx('pop',.4); }; if(sl) grp.insertBefore(b,sl); else gs[gs.length-1].after(b); o.btns.push(b); }); grp.classList.add('hasdp'); return o; })();""")
+_a = "    if(r.ok){ dropTools(); if(pad) pad.lock(); answer({dataset:{v:ans},classList:{add(){}}},q); return; }\n    const em=equivMsg(q,r.guess);"
+assert h.count(_a) == 1
+h = h.replace(_a, """    if(DP&&DP.cur==null){ sfx('bad'); fb.innerHTML=`<div class="fb no"><div class="msg">소수점을 찍어 주세요. 칸 사이의 동그라미를 눌러요.</div></div>`; return; }
+    if(DP&&r.ok&&DP.cur!==DP.p){ r.ok=false; r.guess=ans.slice(0,DP.cur)+'.'+ans.slice(DP.cur); const t=String(q.q||'')+String(q.visual||'').replace(/<[^>]+>/g,' '); q._mcode=/×/.test(t)?'N5-07':/÷/.test(t)?'N6-07':'N4-23'; }
+    if(r.ok){ dropTools(); if(pad) pad.lock(); if(DP) DP.lock=true; answer({dataset:{v:ans},classList:{add(){}}},q); return; }
+    const em=DP&&q._mcode&&/\\./.test(r.guess)?null:equivMsg(q,r.guess);""")
+_a = "    S.results[S.i]=false; logAct(false,'q'); dropTools();\n    fb.innerHTML=`<div class=\"fb no\">${chip('rami','base')}<div class=\"msg\">괜찮아요, 같이 풀어 봐요!${solveHTML(q)}</div></div>`;"
+assert h.count(_a) == 1
+h = h.replace(_a, _a.replace("dropTools();\n", "dropTools(); if(DP){ DP.cur=DP.p; DP.lock=true; DP.paint(); }\n"))
+_a = ".vgrp{display:inline-flex;gap:4px}"
+assert h.count(_a) == 1
+h = h.replace(_a, _a + ".vgrp.hasdp{gap:0;align-items:flex-end}.dotpick{width:26px;height:54px;padding:0;border:0;background:none;position:relative;cursor:pointer;flex:none}.dotpick::after{content:'';position:absolute;left:50%;bottom:13px;width:14px;height:14px;margin-left:-7px;border-radius:50%;border:2px dashed #B98A55;box-sizing:border-box;background:#fff}.dotpick.on::after{background:#2E2620;border:2px solid #2E2620}")
 for a, mc in MC:
     assert h.count(a) == 1, a
     h = h.replace(a, a + " mcode:()=>" + mc + ",")

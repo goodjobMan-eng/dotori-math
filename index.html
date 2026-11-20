@@ -574,7 +574,7 @@ button{font-family:"Jua",sans-serif}
 .wbox.sm{width:64px;height:84px;border-radius:14px;box-shadow:0 3px 0 #E3C9A0}
 .wbox.sm canvas{border-radius:11px}
 .vslot{display:inline-flex;vertical-align:middle;min-width:64px;min-height:84px;align-items:center;justify-content:center}
-.vgrp{display:inline-flex;gap:4px}
+.vgrp{display:inline-flex;gap:4px}.vgrp.hasdp{gap:0;align-items:flex-end}.dotpick{width:26px;height:54px;padding:0;border:0;background:none;position:relative;cursor:pointer;flex:none}.dotpick::after{content:'';position:absolute;left:50%;bottom:13px;width:14px;height:14px;margin-left:-7px;border-radius:50%;border:2px dashed #B98A55;box-sizing:border-box;background:#fff}.dotpick.on::after{background:#2E2620;border:2px solid #2E2620}
 .eqrow{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;margin-top:8px;font-size:2.4rem;color:#4A2E14;flex-wrap:wrap}
 .eqrow b{font-weight:400;min-width:1.1em;text-align:center}.eqrow i{font-style:normal;color:#D45F16}
 .vert{display:inline-grid;grid-template-columns:40px 72px 72px;gap:4px 6px;font-size:2.4rem;color:#4A2E14;background:#fff;border:3px solid #F1CF6E;border-radius:18px;padding:10px 14px;margin-top:8px;justify-items:center;align-items:center}
@@ -4157,6 +4157,8 @@ answer=function(btn,q){ _answer0(btn,q); if(S.mode!=='ep36') return; const fb=do
 
 /* ---------- 11. 숫자판·손글씨 쓰기 (영역별) ---------- */
 function mountWriteQ36(q){ const host=document.getElementById('wpad'); const ans=String(q.ans); const slots=[...document.querySelectorAll('#visual .vslot')]; const g=(UNITS36[S.ui]||{}).grade||3;
+  const DP=(()=>{ const ds=[...document.querySelectorAll('#visual em.dot')]; if(ds.length!==1) return null; const grp=ds[0].parentElement, gs=[...grp.querySelectorAll('.vslot')]; if(gs.length<2||gs.length!==slots.length||!grp.classList.contains('vgrp')) return null; let p=0; for(const n of grp.children){ if(n===ds[0]) break; if(n.classList.contains('vslot')) p++; } if(p<1||p>=gs.length) return null; ds[0].remove();
+    const o={p,cur:null,lock:false,btns:[]}; o.paint=()=>o.btns.forEach((x,j)=>x.classList.toggle('on',o.cur===j)); [...gs,null].forEach((sl,i)=>{ const b=document.createElement('button'); b.type='button'; b.className='dotpick'; b.setAttribute('aria-label','여기에 소수점 찍기'); b.onclick=()=>{ if(o.lock) return; o.cur=o.cur===i?null:i; o.paint(); sfx('pop',.4); }; if(sl) grp.insertBefore(b,sl); else gs[gs.length-1].after(b); o.btns.push(b); }); grp.classList.add('hasdp'); return o; })();
   let mode; try{ mode=localStorage.getItem('dotori-input'); }catch(e){} if(!mode) mode=g>=3?'pad':'hand';
   let pad=null, vals=[], sel=0;
   const paint=()=>slots.forEach((s,i)=>{ const c=s.querySelector('.npc'); if(c){ c.textContent=vals[i]||''; c.classList.toggle('sel',i===sel); } });
@@ -4174,11 +4176,13 @@ function mountWriteQ36(q){ const host=document.getElementById('wpad'); const ans
   const addNext=fb=>{ if(document.getElementById('next')) return; fb.insertAdjacentHTML('beforeend',`<button class="next" id="next">${S.i>=S.acts.length-1?'결과 보기 ★':'다음 →'}</button>`); const nb=document.getElementById('next'); nb.onclick=()=>{ S.i++; S.i<S.acts.length?runAct():result(); }; nb.scrollIntoView({block:'nearest',behavior:'smooth'}); };
   function submit(){ const r=read(); const fb=document.getElementById('fb');
     if(r.empty){ sfx('bad'); host.classList.add('shakey'); setTimeout(()=>host.classList.remove('shakey'),450); fb.innerHTML=`<div class="fb no"><div class="msg">빈칸을 모두 채워 주세요</div></div>`; return; }
-    if(r.ok){ dropTools(); if(pad) pad.lock(); answer({dataset:{v:ans},classList:{add(){}}},q); return; }
-    const em=equivMsg(q,r.guess); if(em){ sfx('pop',.5); fb.innerHTML=`<div class="fb half">${chip('rami','happy')}<div class="msg">${em}</div></div>`; return; }
+    if(DP&&DP.cur==null){ sfx('bad'); fb.innerHTML=`<div class="fb no"><div class="msg">소수점을 찍어 주세요. 칸 사이의 동그라미를 눌러요.</div></div>`; return; }
+    if(DP&&r.ok&&DP.cur!==DP.p){ r.ok=false; r.guess=ans.slice(0,DP.cur)+'.'+ans.slice(DP.cur); const t=String(q.q||'')+String(q.visual||'').replace(/<[^>]+>/g,' '); q._mcode=/×/.test(t)?'N5-07':/÷/.test(t)?'N6-07':'N4-23'; }
+    if(r.ok){ dropTools(); if(pad) pad.lock(); if(DP) DP.lock=true; answer({dataset:{v:ans},classList:{add(){}}},q); return; }
+    const em=DP&&q._mcode&&/\./.test(r.guess)?null:equivMsg(q,r.guess); if(em){ sfx('pop',.5); fb.innerHTML=`<div class="fb half">${chip('rami','happy')}<div class="msg">${em}</div></div>`; return; }
     if(S.tries===0&&window.KT) KT.rec(q,r.guess,false); S.tries++; sfx('bad');
     if(S.tries<2){ fb.innerHTML=`<div class="fb no">${chip('doto','oops')}<div class="msg">아깝다! 다시 생각해 봐요.<div class="hint1">💡 ${hintFor(q)}</div></div></div>`; if(pad) pad.clear(); return; }
-    S.results[S.i]=false; logAct(false,'q'); dropTools();
+    S.results[S.i]=false; logAct(false,'q'); dropTools(); if(DP){ DP.cur=DP.p; DP.lock=true; DP.paint(); }
     fb.innerHTML=`<div class="fb no">${chip('rami','base')}<div class="msg">괜찮아요, 같이 풀어 봐요!${solveHTML(q)}</div></div>`;
     if(pad){ pad.toTrace(()=>addNext(fb)); addNext(fb); } else { slots.forEach((s,i)=>{ const c=s.querySelector('.npc'); if(c){ c.textContent=ans[i]; c.classList.add('show'); c.classList.remove('sel'); } }); addNext(fb); } }
   build(); }
