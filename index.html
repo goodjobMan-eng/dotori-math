@@ -6149,7 +6149,7 @@ function rec(q, given, ok){
   const shield=!ok&&ctxShield(st,m,fk);
   const wk=ok?1:shield?.7:(m&&MISC[m])?.4*pieceL(st,MISC[m][0][0])+.1:(q.fx&&(q.fx[String(given)]||q.fx[gk]))?.3:.7;   // 선수 조각이 이미 비어 있으면 이 단원 숙달은 덜 깎는다
   if(kc){ st.kc[kc]=bktW(st.kc[kc]==null?BKT.L0:st.kc[kc],ok,G,wk); st.kn[kc]=(st.kn[kc]||0)+1; }
-  if(!shield) pieceUpdate(st,q,m,ok,G,ms,fk); pieceCheck(st,q,ok,m,ms);
+  touchSlot(); if(!shield) pieceUpdate(st,q,m,ok,G,ms,fk); pieceCheck(st,q,ok,m,ms);
   if(q.mis){ for(const c of new Set(Object.values(q.mis))){ const e=st.mis[c]||(st.mis[c]={h:[],n:0,ep:[]}); e.h.push([fk,c===m?1:0,ok?1:0,nOpt||20]); e.h=e.h.slice(-8);
     if(c===m){ e.n++; if(!e.ep.includes(ep)) e.ep.push(ep); e.ep=e.ep.slice(-5); } } }
   W(SK,st);
@@ -6261,7 +6261,7 @@ ${(L=>{ const ks=Object.keys(L).filter(c=>CPC[c]&&(L[c].mr||[]).length); return 
       <h2 class="sec">영역별 수준 (3~6학년)</h2>${lad}
       <p class="kt-ex">숙달·미숙달은 문제를 3개 이상 푼 뒤에만 표시합니다. 추정은 수준 찾기에서 맞혔거나 더 어려운 내용을 맞혀 건너뛴 내용입니다.</p>
       <h2 class="sec">추천 코스</h2><ul class="recent kt-list">${cr||'<li>추천할 내용이 없습니다.</li>'}</ul>
-      <div class="btns" style="margin-top:14px"><button class="ghost" id="kt-rediag">수준 다시 찾기</button><button class="ghost" id="kt-reset">${curSlot()}번 자리의 학습 기록 지우기</button></div>
+      <div class="btns" style="margin-top:14px"><button class="ghost" id="kt-rediag">수준 다시 찾기</button><button class="ghost" id="kt-reset">${slotName(curSlot())||'이 기기'}의 학습 기록 지우기</button></div>
       <h2 class="sec">기록 옮기기</h2><p class="kt-ex">아이패드 사파리는 홈 화면에 추가하지 않으면 7일 안 쓸 때 기록을 지웁니다. 꺼낸 글자를 메모장에 보관했다가 다시 넣을 수 있습니다(이 기기의 모든 자리).</p>
       <textarea id="kt-io" rows="3" style="width:100%;font-size:.8rem;border:2px solid var(--line);border-radius:12px;padding:8px" aria-label="기록 글자"></textarea>
       <div class="btns" style="margin-top:8px"><button class="ghost" id="kt-exp">기록 꺼내기</button><button class="ghost" id="kt-imp">기록 넣기</button></div>
@@ -6443,7 +6443,7 @@ function modesHTML(){ const P=pref(), st=state(), done=st.daily&&st.daily.d===ds
   const sub=done?`${st.streak||1}일째 이어서 풀고 있어요`:P.band?`내 수준에 맞춘 ${P.pace}문제`:'내 수준에 맞춰 매일 조금씩';
   return `<div class="kt-modes"><button class="kt-mode" id="kt-quick"><img class="who" src="${JU['청이']['자세_만세']}" alt=""><b>가볍게 풀기</b><span>5문제만 풀고 끝</span></button>
     <button class="kt-mode" id="kt-daily"><img class="who" src="${JU['부엉 박사님']['자세_손가락하나']}" alt=""><b>오늘의 문제</b><span>${sub}</span>${done?'<i class="stamp">다 풀었어요</i>':''}</button></div>
-    <div class="kt-chips"><button class="kt-chip${P.why?' on':''}" id="kt-why">틀린 이유 보기 ${P.why?'켜짐':'꺼짐'}</button><button class="kt-chip" id="kt-pace">하루 ${P.pace}문제</button><button class="kt-chip" id="kt-slot">${curSlot()}번 자리</button><button class="kt-chip" id="kt-band">${bandName(P.band)}</button>${P.band>=3&&!st.lvl?'<button class="kt-chip" id="kt-diag">내 수준 정확히 찾기</button>':''}</div>
+    <div class="kt-chips"><button class="kt-chip${P.why?' on':''}" id="kt-why">틀린 이유 보기 ${P.why?'켜짐':'꺼짐'}</button><button class="kt-chip" id="kt-pace">하루 ${P.pace}문제</button><button class="kt-chip" id="kt-slot">${slotName(curSlot())?slotFace(curSlot(),'tiny')+slotName(curSlot()):'내 친구 고르기'}</button><button class="kt-chip" id="kt-band">${bandName(P.band)}</button>${P.band>=3&&!st.lvl?'<button class="kt-chip" id="kt-diag">내 수준 정확히 찾기</button>':''}</div>
     <h2 class="sec">골라서 풀기</h2>`; }
 function bindModes(){ const on=(id,f)=>{ const b=document.getElementById(id); if(b) b.onclick=f; };
   on('kt-quick',startQuick); on('kt-daily',startDaily); on('kt-diag',startDiag);
@@ -6533,11 +6533,11 @@ body{background-image:none}body:before{background:#FFF7EC var(--kt-grain)!import
 .kt-mode:nth-child(odd){transform:rotate(-1.2deg)}.kt-mode:nth-child(even){transform:rotate(1deg)}
 .kt-mode b{font-size:1.3rem;font-weight:400}.kt-mode span{font-family:"Gowun Dodum",sans-serif;font-size:.86rem;color:#7B5632}
 .kt-mode.kt-band{align-items:center;text-align:center;padding:22px 14px 18px calc(14px + 4%)}.kt-mode.kt-band b{font-size:clamp(1.6rem,6vw,2.1rem);text-shadow:0 1px 0 rgba(255,255,255,.75)}
-.kt-mode{align-items:center;text-align:center;padding-left:calc(14px + 4%)}.kt-modes:has(.who){margin-top:42px}.kt-mode b{text-shadow:0 1px 0 rgba(255,255,255,.75)}
 .kt-mode .who{position:absolute;right:4px;top:-34px;height:68px;pointer-events:none}
 .kt-mode .stamp{position:absolute;right:14px;bottom:12px;transform:rotate(-8deg);border:2px solid #3F7A34;border-radius:7px;padding:0 7px;font-style:normal;font-size:.8rem;color:#3F7A34}
 .kt-mode:active{transform:translateY(3px);filter:none}.kt-mode:focus-visible,.kt-tree:focus-visible,.kt-chip:focus-visible{outline:3px solid #3F7A34;outline-offset:3px}
-.kt-slots{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}.kt-slot{position:relative;aspect-ratio:1.25;border:0;background:var(--kt-sign) center/100% 100% no-repeat;font-family:"Jua",sans-serif;font-size:1.3rem;color:#5A3516;cursor:pointer}.kt-slot.used::after{content:"";position:absolute;right:16%;top:18%;width:8px;height:8px;border-radius:50%;background:#3F7A34}.kt-slot.on{outline:3px solid #3F7A34;outline-offset:1px;border-radius:14px}.kt-slot:focus-visible{outline:3px solid #3F7A34}
+.kt-faces{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:6px 0 14px}.kt-faces.small{grid-template-columns:repeat(4,1fr);gap:8px}.kt-pick{display:flex;flex-direction:column;align-items:center;gap:4px;padding:8px 2px;border:0;background:none;cursor:pointer;font-family:"Jua",sans-serif;color:var(--ink)}.kt-pick b{font-weight:400;font-size:.95rem}.kt-pick.on .kt-face{outline:3px solid #3F7A34;outline-offset:2px}.kt-pick:focus-visible{outline:3px solid #3F7A34;border-radius:14px}
+.kt-face{display:grid;place-items:end center;width:72px;height:72px;border-radius:46% 54% 50% 50%/52% 48% 52% 48%;background:var(--fc);border:3px solid #7A4A1E;overflow:hidden}.kt-face img{height:62px;margin-bottom:-4px}.kt-faces.small .kt-face{width:60px;height:60px}.kt-faces.small .kt-face img{height:52px}.kt-face.tiny{display:inline-grid;width:26px;height:26px;border-width:2px;vertical-align:-7px;margin-right:4px}.kt-face.tiny img{height:22px;margin-bottom:-2px}
 .kt-chips{display:flex;flex-wrap:wrap;gap:8px;margin:4px 2px 8px}
 .kt-chip{position:relative;padding:7px 13px 7px 25px;border:0;background:#E9D2A6;color:#5A3516;font-family:"Jua",sans-serif;font-size:.88rem;cursor:pointer;clip-path:polygon(11px 0,100% 0,100% 100%,11px 100%,0 50%)}
 .kt-chip::before{content:"";position:absolute;left:12px;top:50%;width:6px;height:6px;margin-top:-3px;border-radius:50%;background:var(--bg)}
@@ -6601,31 +6601,48 @@ function maybeSend(){ if(!KT_ENDPOINT||!navigator.sendBeacon) return; const c=cf
 addEventListener('pagehide',maybeSend);
 document.addEventListener('visibilitychange',()=>{ if(document.visibilityState==='hidden') maybeSend(); });
 
-/* ---------- 12. 자리 바꾸기: 한 기기를 여러 아이가 쓸 때 기록이 섞이지 않게 ---------- */
-// 이름 없이 번호만 고른다. 자리마다 기록 묶음을 따로 두고, 바꿀 때 지금 기록을 접어 넣고 그 자리 기록을 편다. 익명 기기 번호도 자리마다 다르다.
-const SLOT_CUR='dotori-slot-cur', SLOT_AT='dotori-slot-at', slotKey=n=>'dotori-slot-'+n;
-const curSlot=()=>{ try{ return +(localStorage.getItem(SLOT_CUR)||1); }catch(e){ return 1; } };
+/* ---------- 12. 내 친구 고르기: 한 기기를 여러 아이가 쓸 때 기록이 섞이지 않게 ---------- */
+// 기본은 기기 하나 = 한 아이(아무것도 고르지 않아도 됨). 여럿이 쓰는 기기에서는 이름 대신 "파란 쿼카", "노란 토끼"처럼 색깔과 동물로 된 나만의 친구를 고른다.
+// 친구마다 기록 묶음과 익명 번호가 따로다. 바꿀 때 지금 기록을 접어 넣고 그 친구의 기록을 편다.
+// 누가 쓰는지 짐작: 친구마다 쓴 시간대를 세어 두고, 다시 열면 "지금 이 시간에 자주 오던 친구"를 맨 앞에 보여 준다.
+const SLOT_CUR='dotori-slot-cur', SLOT_AT='dotori-slot-at', SLOT_USE='dotori-slot-use', slotKey=n=>'dotori-slot-'+n;
+const ANIMALS=[['다람쥐','도토'],['청설모','청이'],['판다','대롱이'],['쿼카','방긋이'],['토끼','째깍이'],['알파카','포근이'],['기린','길쭉이'],['코끼리','코코'],['생쥐','콩알이'],['하마','첨벙 선생님'],['꿀벌','붕붕이'],['부엉이','부엉 박사님'],['고슴도치','고슴도치 손님'],['두더지','두더지 손님'],['나비','나비 손님'],['개미','개미 반장']].filter(a=>JU[a[1]]);
+const COLORS=[['빨간','#E4604E'],['주황','#EE9A3A'],['노란','#F2C94C'],['초록','#6BAF5B'],['파란','#4F8FD9'],['보라','#9A77CF'],['분홍','#EE8FB5'],['하늘색','#7CC6E8']];
+const curSlot=()=>{ try{ const v=localStorage.getItem(SLOT_CUR)||'0'; return /^\d+-\d+$/.test(v)?v:'0'; }catch(e){ return '0'; } };       // '동물번호-색번호', 고르지 않았으면 '0'
+const slotName=id=>{ if(id==='0') return ''; const [a,c]=id.split('-').map(Number); return ANIMALS[a]&&COLORS[c]?`${COLORS[c][0]} ${ANIMALS[a][0]}`:''; };
+const slotFace=(id,cls)=>{ if(id==='0') return ''; const [a,c]=id.split('-').map(Number); if(!ANIMALS[a]||!COLORS[c]) return ''; return `<span class="kt-face ${cls||''}" style="--fc:${COLORS[c][1]}"><img src="${JU[ANIMALS[a][1]]['기본']}" alt=""></span>`; };
 const learnerKeys=()=>Object.keys(localStorage).filter(k=>k.startsWith('dotori-')&&!k.startsWith('dotori-slot-')&&k!==CK&&k!=='dotori-input');
-function switchSlot(n){ const cur=curSlot(); if(n===cur) return home(); try{ const pack={}; learnerKeys().forEach(k=>{ pack[k]=localStorage.getItem(k); localStorage.removeItem(k); }); localStorage.setItem(slotKey(cur),JSON.stringify(pack));
-    const nx=J(slotKey(n),{}); Object.entries(nx).forEach(([k,v])=>localStorage.setItem(k,v)); localStorage.removeItem(slotKey(n)); localStorage.setItem(SLOT_CUR,String(n)); localStorage.setItem(SLOT_AT,String(Date.now())); }catch(e){} location.reload(); }
+const slotUse=()=>J(SLOT_USE,{});
+function touchSlot(){ try{ const id=curSlot(), u=slotUse(), e=u[id]||(u[id]={h:Array(24).fill(0),at:0}), now=new Date(); if(Date.now()-e.at>20*60e3) e.h[now.getHours()]++; e.at=Date.now(); W(SLOT_USE,u); localStorage.setItem(SLOT_AT,String(Date.now())); }catch(e){} }
+function switchSlot(n){ const cur=curSlot(); if(n===cur){ touchSlot(); return home(); }
+  if(cur==='0'&&!knownSlots().length){ try{ localStorage.setItem(SLOT_CUR,n); touchSlot(); }catch(e){} return home(); }      // 처음 친구를 고르는 것이면 지금까지의 기록이 그 친구의 것
+  try{ const pack={}; learnerKeys().forEach(k=>{ pack[k]=localStorage.getItem(k); localStorage.removeItem(k); }); if(Object.keys(pack).length) localStorage.setItem(slotKey(cur),JSON.stringify(pack));
+    const nx=J(slotKey(n),{}); Object.entries(nx).forEach(([k,v])=>localStorage.setItem(k,v)); localStorage.removeItem(slotKey(n)); localStorage.setItem(SLOT_CUR,n); touchSlot(); }catch(e){} location.reload(); }
 const slotUsed=n=>n===curSlot()?learnerKeys().length>0:!!localStorage.getItem(slotKey(n));
-function slotPage(ask){ hush(); app.className='wrap'; const cur=curSlot();
-  app.innerHTML=`<div class="top"><button class="back" id="back">← 처음</button><div class="crumb">자리 고르기</div><span style="width:70px"></span></div>
-    <div class="stage"><div style="font-family:Jua;font-size:1.25rem;margin-bottom:6px">${ask?`방금 쓰던 ${cur}번 자리가 맞나요?`:'내 번호를 골라요'}</div>
-    <p class="kt-ex" style="margin-bottom:12px">여럿이 함께 쓰는 기기에서는 자리마다 기록이 따로 쌓여요. 이름은 적지 않아요.</p>
-    <div class="kt-slots">${Array.from({length:30},(_,i)=>i+1).map(n=>`<button class="kt-slot${n===cur?' on':''}${slotUsed(n)?' used':''}" data-slot="${n}">${n}</button>`).join('')}</div></div>`;
-  document.getElementById('back').onclick=()=>{ try{ localStorage.setItem(SLOT_AT,String(Date.now())); }catch(e){} home(); };
-  app.querySelectorAll('[data-slot]').forEach(b=>b.onclick=()=>{ try{ localStorage.setItem(SLOT_AT,String(Date.now())); }catch(e){} switchSlot(+b.dataset.slot); }); }
+// 이 기기에서 쓴 적 있는 친구들을, 지금 시각(앞뒤 한 시간)에 자주 온 순서 → 최근에 온 순서로.
+function knownSlots(){ const u=slotUse(), hr=new Date().getHours(), near=e=>e.h[hr]+.5*(e.h[(hr+23)%24]+e.h[(hr+1)%24]);
+  return Object.keys(u).filter(id=>id!=='0'&&slotName(id)).sort((a,b)=>near(u[b])-near(u[a])||u[b].at-u[a].at); }
+function slotPage(ask,pickA){ hush(); app.className='wrap'; const cur=curSlot(), known=knownSlots(), stamp=()=>{ try{ localStorage.setItem(SLOT_AT,String(Date.now())); }catch(e){} };
+  const top=known.length?`<div class="kt-sec">${ask?'혹시 이 친구인가요?':'이 기기의 친구들'}</div><div class="kt-faces">${known.slice(0,6).map(id=>`<button class="kt-pick${id===cur?' on':''}" data-slot="${id}">${slotFace(id)}<b>${slotName(id)}</b></button>`).join('')}</div>`:'';
+  const body=pickA==null
+    ?`<div class="kt-sec">${known.length?'다른 친구 찾기':'어떤 동물로 할까요?'}</div><div class="kt-faces small">${ANIMALS.map((a,i)=>`<button class="kt-pick" data-animal="${i}"><span class="kt-face" style="--fc:#E9D2A6"><img src="${JU[a[1]]['기본']}" alt=""></span><b>${a[0]}</b></button>`).join('')}</div>`
+    :`<div class="kt-sec">${ANIMALS[pickA][0]}, 무슨 색으로 할까요?</div><div class="kt-faces small">${COLORS.map((c,i)=>`<button class="kt-pick" data-slot="${pickA}-${i}">${slotFace(pickA+'-'+i)}<b>${c[0]}</b></button>`).join('')}</div><div class="btns" style="margin-top:12px"><button class="ghost" id="kt-animals">다른 동물 고르기</button></div>`;
+  app.innerHTML=`<div class="top"><button class="back" id="back">← 처음</button><div class="crumb">내 친구 고르기</div><span style="width:70px"></span></div>
+    <div class="stage" style="text-align:left"><p class="kt-ex" style="margin-bottom:8px">여럿이 함께 쓰는 기기에서는 색깔과 동물로 된 나만의 친구를 골라요. 이름은 적지 않아요. 내 친구가 무엇인지는 나만 기억해요.</p>${pickA==null?top:''}${body}</div>`;
+  document.getElementById('back').onclick=()=>{ stamp(); home(); };
+  app.querySelectorAll('[data-slot]').forEach(b=>b.onclick=()=>{ stamp(); switchSlot(b.dataset.slot); });
+  app.querySelectorAll('[data-animal]').forEach(b=>b.onclick=()=>slotPage(ask,+b.dataset.animal));
+  const ab=document.getElementById('kt-animals'); if(ab) ab.onclick=()=>slotPage(ask); }
 // 기록 옮기기: 이 기기의 모든 자리 기록을 글자로 꺼내거나 다시 넣는다(브라우저가 저장소를 지웠을 때, 기기를 바꿀 때).
 function exportAll(){ const o={}; try{ Object.keys(localStorage).filter(k=>k.startsWith('dotori-')).forEach(k=>o[k]=localStorage.getItem(k)); }catch(e){} return JSON.stringify(o); }
 function importAll(txt){ let o; try{ o=JSON.parse(txt); }catch(e){ return false; } if(!o||typeof o!=='object') return false; const ks=Object.keys(o).filter(k=>k.startsWith('dotori-')&&typeof o[k]==='string'); if(!ks.length) return false;
   try{ Object.keys(localStorage).filter(k=>k.startsWith('dotori-')).forEach(k=>localStorage.removeItem(k)); ks.forEach(k=>localStorage.setItem(k,o[k])); }catch(e){ return false; } return true; }
-window.KT={qInfo,bestQ,slotPage,switchSlot,curSlot,exportAll,importAll,checkPieces,pieceStage,CPL,CPC,MISC,weakPieces,state,gradePage:g=>gradePage(g),startQuick,startDaily,pref,setPref,rec:(q,g,ok)=>(q&&q._e!=null?recEP:rec)(q,g,ok),factKey,dueFacts,startReview,report,status,epKC,MIS,LADDER,regen,formsOf,startDiag,startFocus,teacherPage,course};
+window.KT={qInfo,bestQ,slotPage,switchSlot,curSlot,slotName,knownSlots,exportAll,importAll,checkPieces,pieceStage,CPL,CPC,MISC,weakPieces,state,gradePage:g=>gradePage(g),startQuick,startDaily,pref,setPref,rec:(q,g,ok)=>(q&&q._e!=null?recEP:rec)(q,g,ok),factKey,dueFacts,startReview,report,status,epKC,MIS,LADDER,regen,formsOf,startDiag,startFocus,teacherPage,course};
 (function boot(){ const h=location.hash; const c=cfg();
   if(h==='#kt-share-on'){ c.share=true; did(); setCfg(c); } else if(h==='#kt-share-off'){ c.share=false; W(QK,[]); setCfg(c); } else if(h==='#kt-reset'){ try{ localStorage.removeItem(DK); }catch(e){} did(); }
   if(h.startsWith('#kt-')) history.replaceState(null,'',location.pathname+location.search);
   try{ if(navigator.storage&&navigator.storage.persist) navigator.storage.persist(); }catch(e){}
-  let ask=false; try{ const at=+(localStorage.getItem(SLOT_AT)||0); ask=at>0&&Date.now()-at>2*3600e3&&Array.from({length:30},(_,i)=>i+1).filter(slotUsed).length>1; }catch(e){}
+  let ask=false; try{ const at=+(localStorage.getItem(SLOT_AT)||0); ask=at>0&&Date.now()-at>2*3600e3&&knownSlots().length>1; }catch(e){}
   if(h==='#teacher') teacherPage(); else if(ask) slotPage(true); else home(); })();
 })();
 
