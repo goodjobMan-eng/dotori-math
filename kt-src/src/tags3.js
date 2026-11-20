@@ -478,3 +478,32 @@ G36['S6-23'][0]=tGen(()=>{ const f=tRand(), lr=rnd(0,1); return tQ5(`이 도형�
 G36['S6-23'][1]=tGen(()=>{ const f=tRand(); return tQ5('오른쪽으로 두 번 뒤집으면?',f,f,[[tA(f,tLR),'G4-17'],[tA(f,tUD),'G4-14'],[tA(f,tRk(2)),'G4-04'],[tA(f,tRk(1)),'G4-04']]); });
 G36['S6-24'][0]=tGen(()=>{ const f=tRand(), k=rnd(1,3); const ws=k===2?[[tA(f,tRk(1)),'G4-13'],[tA(f,tRk(3)),'G4-13']]:[[tA(f,tRk(4-k)),'G4-10'],[tA(f,tRk(2)),'G4-13']]; return tQ5(`이 도형을 시계 방향으로 ${k*90}° 돌리면?`,f,tA(f,tRk(k)),[...ws,[tA(f,tLR),'G4-04'],[tA(f,tUD),'G4-04']]); });
 G36['S6-24'][1]=tGen(()=>{ const f=tRand(); return tQ5('시계 반대 방향으로 90° 돌리면?',f,tA(f,tRk(3)),[[tA(f,tRk(1)),'G4-10'],[tA(f,tRk(2)),'G4-13'],[tA(f,tLR),'G4-04'],[tA(f,tUD),'G4-04']]); });
+
+/* ===== 3-23. 그림 고르기(합동·선대칭·점대칭): 오답 그림마다 오개념 코드 ===== */
+Object.assign(MIS,{
+'G5-14':['모양이 같으면 크기가 달라도 합동이라고 봄','합동은 모양과 크기가 모두 같아 완전히 겹쳐요.'],
+'G5-15':['대칭인 쪽을 뒤집거나 돌리지 않고 그대로 옮겨 그림','선대칭은 접은 것처럼 반대로, 점대칭은 반 바퀴 돌린 것처럼 그려요.']});
+/* 합동인 도형 고르기: 크게·작게 닮은 도형(G5-14), 넓이만 같은 도형(G5-07) */
+(()=>{ const i=G36['S6-52'].findIndex(g=>{ try{ return /합동인 도형은 어느 것/.test(g().q||''); }catch(e){ return false; } }); if(i<0) return;
+  G36['S6-52'][i]=()=>{ const T=mkTri(); const xs=T.P.map(p=>p[0]), ys=T.P.map(p=>p[1]), ext=Math.max(...xs)-Math.min(...xs), eyt=Math.max(...ys)-Math.min(...ys), s=60/Math.max(ext,eyt);
+    const make=k=>{ let P=T.P.map(([x,y])=>k===1?[x*1.35,y*1.35]:k===2?[x*.68,y*.68]:[x,y]); if(k===3) P=P.map(([x,y],j)=>j===0?[x+(x>ext/2?-1:1)*ext*.45,y]:[x,y]); const t=Math.PI/2*rnd(0,3), f=rnd(0,1)?-1:1; return P.map(([x,y])=>[f*x*Math.cos(t)-y*Math.sin(t),f*x*Math.sin(t)+y*Math.cos(t)]); };
+    const place=(P,cx,cy)=>{ const X=P.map(p=>p[0]*s), Y=P.map(p=>p[1]*s), ox=cx-(Math.max(...X)+Math.min(...X))/2, oy=cy-(Math.max(...Y)+Math.min(...Y))/2; return P.map(([x,y])=>[x*s+ox,y*s+oy]); };
+    const pg=(Q,fill,st)=>`<polygon points="${Q.map(p=>p.map(v=>v.toFixed(1)).join(',')).join(' ')}" fill="${fill}" stroke="${st}" stroke-width="2.5" stroke-linejoin="round"/>`;
+    const order=shuffle([0,1,2,3]), labs=['가','나','다','라'], code=[null,'G5-14','G5-14','G5-07'];
+    let g=pg(place(T.P,180,50),'#FFE3B0','#6B3E1C')+`<line x1="10" y1="104" x2="350" y2="104" stroke="#EADBC8" stroke-dasharray="4 4"/>`;
+    order.forEach((k,j)=>{ const cx=48+j*88; g+=pg(place(make(k),cx,170),'#DCEEFF','#2F6E9E')+`<text x="${cx}" y="252" font-size="17" font-weight="700" text-anchor="middle" fill="#2E2620">${labs[j]}</text>`; });
+    const r=C36(WHO(),'위 삼각형과 합동인 도형은 어느 것일까요?','위 삼각형과 합동인 도형은 어느 것일까요?',svgWrap(g,262),labs[order.indexOf(0)],labs.slice()); r.mis={}; order.forEach((k,j)=>{ if(k) r.mis[labs[j]]=code[k]; }); return r; }; })();
+/* 대칭이 되도록 완성한 그림 고르기: 8×4 칸, 왼쪽 절반이 주어짐 */
+const symFig=(cells,o,u)=>{ const W=8*u, H=4*u; let g=''; for(let k=0;k<=8;k++) g+=`<line x1="${k*u}" y1="0" x2="${k*u}" y2="${H}" stroke="#E5D3B5"/>`; for(let k=0;k<=4;k++) g+=`<line x1="0" y1="${k*u}" x2="${W}" y2="${k*u}" stroke="#E5D3B5"/>`;
+  cells.forEach(([x,y,n])=>{ g+=`<rect x="${x*u}" y="${y*u}" width="${u}" height="${u}" fill="${n?'#8CC0E8':'#F2A65A'}" stroke="#7A4A1E" stroke-width="1.5"/>`; });
+  g+=o.axis?`<line x1="${W/2}" y1="-3" x2="${W/2}" y2="${H+3}" stroke="#D43D2A" stroke-width="2.5" stroke-dasharray="5 4"/>`:`<circle cx="${W/2}" cy="${H/2}" r="${u*.28}" fill="#D43D2A"/>`;
+  return `<div class="tf"><svg viewBox="-3 -4 ${W+6} ${H+8}" width="${W+6}" height="${H+8}">${g}</svg>${o.label?`<b>${o.label}</b>`:''}</div>`; };
+function symQ(axis){ for(let t=0;t<60;t++){ const half=[]; for(let y=0;y<4;y++) for(let x=1;x<4;x++) if(Math.random()<.42) half.push([x,y]); if(half.length<4||half.length>7||!half.some(c=>c[0]===3)) continue;
+    const mir=half.map(([x,y])=>[7-x,y,1]), rot=half.map(([x,y])=>[7-x,3-y,1]), mov=half.map(([x,y])=>[x+3,y,1]), far=(axis?mir:rot).map(([x,y])=>[x+1,y,1]);
+    const cor=axis?mir:rot, ws=[[axis?rot:mir,'G5-05'],[mov,'G5-15'],[far,'G5-10']], key=c=>c.map(v=>v[0]+','+v[1]).sort().join('|'), ks=[cor,...ws.map(w=>w[0])].map(key);
+    if(new Set(ks).size<4||far.some(c=>c[0]>7)) continue;
+    const all=[cor,...ws.map(w=>w[0])], order=shuffle([0,1,2,3]), labs=['가','나','다','라'], H=half.map(c=>[c[0],c[1]]);
+    const q=axis?'점선을 대칭축으로 하는 선대칭도형이 되게 완성한 것은?':'빨간 점을 대칭의 중심으로 하는 점대칭도형이 되게 완성한 것은?';
+    const vis=`<div class="tfrow">${symFig(H,{axis},20)}<span class="tarrow">→ ?</span></div><div class="tfrow" style="flex-wrap:wrap;gap:8px">${order.map((k,j)=>symFig([...H,...all[k]],{axis,label:labs[j]},16)).join('')}</div>`;
+    const r=C36(WHO(),q,q,vis,labs[order.indexOf(0)],labs.slice()); r.mis={}; order.forEach((k,j)=>{ if(k) r.mis[labs[j]]=ws[k-1][1]; }); return r; } return null; }
+G36['S6-54'].push(()=>symQ(1)||G36['S6-54'][0]()); G36['S6-55'].push(()=>symQ(0)||G36['S6-55'][0]());

@@ -169,7 +169,9 @@ function diagGap(sd){ const D=S.diagRun, Ld=LADDER[sd], av=[]; Ld.forEach((kc,k)
 function diagTarget(){ const D=S.diagRun, gs=Object.keys(LADDER).map(diagGap).filter(Boolean), open=gs.filter(g=>g.mid.length);
   if(open.length){ open.sort((a,b)=>b.mid.length-a.mid.length||Math.random()-.5); const g=open[0], c=(g.lo+g.hi)/2; return g.Ld[g.mid.slice().sort((a,b)=>Math.abs(a-c)-Math.abs(b-c))[0]]; }
   const re=gs.map(g=>g.Ld[g.hi]).filter(kc=>kc&&D.res[kc]&&D.res[kc][1]===1&&D.res[kc][0]===0&&!D.re[kc]);   /* 틈이 다 닫혔으면: 한 번 틀린 경계 단원을 한 번 더(실수였는지) */
-  if(re.length){ D.re[re[0]]=1; return re[0]; } return null; }
+  if(re.length){ D.re[re[0]]=1; return re[0]; }
+  const st=state(), hs=[]; gs.forEach(g=>g.Ld.forEach((kc,k)=>{ if(k<g.lo&&!D.res[kc]&&!D.skip[kc]&&epsOf(kc).some(e=>D.eps.includes(e))) hs.push([st.kc[kc]==null?BKT.L0:st.kc[kc],Math.random(),kc]); }));   /* 남는 문제로는 수준 아래에서 한 번도 안 물은 단원(구멍 후보)을 숙달이 낮은 것부터 */
+  if(hs.length){ hs.sort((a,b)=>a[0]-b[0]||a[1]-b[1]); return hs[0][2]; } return null; }
 function diagNext(){ const D=S.diagRun; diagApply(); if(S.i>=DIAG_N){ S.acts.length=S.i; return false; } const st=state(); let q=null;
   for(let t=0;t<8&&!q;t++){ const kc=diagTarget(); if(!kc) break; const es=epsOf(kc).filter(e=>D.eps.includes(e)), un=es.filter(e=>!D.used[e]);
     q=bestQ(shuffle(un.length?un:es),q=>q.write||(q.opts&&q.opts.length>=3),st); if(!q) D.skip[kc]=1; }
@@ -178,7 +180,7 @@ function diagNext(){ const D=S.diagRun; diagApply(); if(S.i>=DIAG_N){ S.acts.len
 function startDiag(){ if(!pref().band||pref().band<3) setPref({band:3});
   S={mode:'ep36',retry:true,diagRun:{eps:diagEps(),used:{},pc:{},asked:{},res:{},skip:{},re:{},cur:null},ep:'S2-01',ui:0,ch:0,steps:[{kind:'acts'}],si:0,acts:Array.from({length:DIAG_N},()=>({kind:'q',q:null})),i:0,results:[],tries:0,counted:0,title:'내 수준 찾기',saveKey:'RETRY',chars:CAST};
   if(diagNext()) step(); else home(); }
-function diagDone(){ diagApply(); const st=state(); st.lvl={}; Object.keys(LADDER).forEach(sd=>{ const Ld=LADDER[sd]; const g=diagGap(sd), k=g?g.lo+1:0;   /* 수준 = 맞힌 가장 높은 단원까지 */ st.lvl[sd]=k; Ld.slice(0,k).forEach(x=>{ st.est[x]=1; if((st.kc[x]==null?BKT.L0:st.kc[x])<.55) st.kc[x]=.55; }); }); st.diagAt=today(); W(SK,st);
+function diagDone(){ diagApply(); const st=state(); st.lvl={}; Object.keys(LADDER).forEach(sd=>{ const Ld=LADDER[sd]; const g=diagGap(sd), k=g?g.lo+1:0;   /* 수준 = 맞힌 가장 높은 단원까지 */ st.lvl[sd]=k; Ld.slice(0,k).forEach(x=>{ const R=S.diagRun.res[x]; if(R&&R[1]>R[0]) return; st.est[x]=1; if((st.kc[x]==null?BKT.L0:st.kc[x])<.55) st.kc[x]=.55; }); }); st.diagAt=today(); W(SK,st);
   const cp=st.cp||{}, good=Object.keys(cp).filter(c=>CPC[c]&&cp[c]>=.6).length, chk=checkPieces(st).length, weak=weakPieces(st).length, low=Object.keys(cp).filter(c=>CPC[c]&&cp[c]<.35).length;
   S={idle:true}; hush(); app.className='wrap';
   app.innerHTML=`<div class="stage"><div style="font-family:Jua;font-size:1.3rem;margin-bottom:8px">수준 찾기 끝! 이제 내 수준에 맞는 문제가 나와요.</div><p class="kt-ex" style="margin-bottom:14px">잘 아는 개념 ${good}개 · 더 살펴볼 개념 ${Math.max(low,chk+weak)}개</p><div class="btns"><button class="next" id="kt-go">오늘의 문제 풀기</button><button class="ghost" id="kt-home">처음으로</button></div></div>`;
