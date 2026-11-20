@@ -1,0 +1,17 @@
+name = "dotori-kt"
+main = "worker.js"
+compatibility_date = "2026-06-01"
+
+# 비공개 저장소. 공개 설정(Public access)은 켜지 않는다.
+[[r2_buckets]]
+binding = "BUCKET"
+bucket_name = "dotori-kt-raw"
+
+# IP당 1분에 20번까지. (Workers Rate Limiting 바인딩)
+[[unsafe.bindings]]
+name = "LIMITER"
+type = "ratelimit"
+namespace_id = "1001"
+simple = { limit = 20, period = 60 }
+
+# 로그에 요청 내용이 남지 않게 관측 기능은 기본값(꺼짐) 유지
