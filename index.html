@@ -6179,6 +6179,9 @@ const pieceL=(st,c)=>(st.cp&&st.cp[c]!=null)?st.cp[c]:.5;
 function pieceUpdate(st,q,m,ok,G,ms,fk){ st.cp=st.cp||{}; st.cpn=st.cpn||{}; st.cph=st.cph||{}; const up=(c,good,w)=>{ if(!CPC[c]||w<=0) return; st.cp[c]=bktW(pieceL(st,c),good,G,w); st.cpn[c]=(st.cpn[c]||0)+1; };
   if(q._arm&&q._lec&&st.lec&&st.lec[q._lec]){ const L=st.lec[q._lec]; L.mr=[...(L.mr||[]),ok?1:0].slice(0,2); }
   if(!ok){ const ps=m&&MISC[m]; if(ps){ const L0=pieceL(st,ps[0][0]); ps.forEach(([c,w],i)=>up(c,false,i?w*L0:w)); const c0=ps[0][0], hs=st.cph[c0]||(st.cph[c0]=[]); if(fk&&!hs.includes(fk)){ hs.push(fk); st.cph[c0]=hs.slice(-4); } } }
+  if(q._probe&&CPC[q._probe]){ const c=q._probe; st.cpo=st.cpo||{}; const fast=ms!=null&&ms<3000;
+    if(ok&&!fast){ up(c,true,.5); st.cpo[c]=(st.cpo[c]||0)+1; const d1=CPC[c][2], d2=[...new Set(d1.flatMap(x=>CPC[x]?CPC[x][2]:[]))].filter(x=>x!==c&&!d1.includes(x)); d1.forEach(x=>{ up(x,true,.35); st.cpo[x]=(st.cpo[x]||0)+.5; }); d2.forEach(x=>{ up(x,true,.25); st.cpo[x]=(st.cpo[x]||0)+.5; }); }
+    else if(!ok){ st.cpf=st.cpf||{}; st.cpf[c]=1; const ps=m&&MISC[m]; if(!ps||ps[0][0]!==c){ up(c,false,.5); const hs=st.cph[c]||(st.cph[c]=[]); if(fk&&!hs.includes(fk)) hs.push(fk); } } }
   else if(q.mis&&(ms==null||ms>=3000)){ const seen={}; Object.values(q.mis).forEach(code=>(MISC[code]||[]).slice(0,1).forEach(([c])=>{ if(!seen[c]){ seen[c]=1; up(c,true,.1); } })); } }
 // 약한 조각: 증거 2번 이상이고 숙달 0.35 미만. 다만 곧바로 "비어 있다"고 하지 않는다.
 // 고학년 문제의 오답만으로 저학년 조각이 깎였을 수 있으므로(예: 분수 나눗셈에서만 나누는 수를 바꿈), 먼저 그 조각을 처음 배우는 단원의 문제 2개로 확인한다.
@@ -6186,6 +6189,16 @@ function pieceUpdate(st,q,m,ok,G,ms,fk){ st.cp=st.cp||{}; st.cpn=st.cpn||{}; st.
 //   ctx가 된 뒤 다시 약해지면 확인 없이 확정.
 // '약함'의 조건: 그 조각을 가리키는 오답을 서로 다른 문항 2종 이상에서 골랐고 숙달이 0.35 미만.
 const fkGrade=fk=>{ const ep=String(fk).split(':')[0]; if(/^EP/.test(ep)) return 1; const u=UNITS36[uix(ep)]; return u?gradeOfUnit(u):9; };
+/* 찌르기(탐색): 제 학년 아래 조각 가운데 직접 확인된 적 없는 것을 그물의 꼭대기부터 묻는다. 맞히면 그 아래 두 단계까지 함께 확인된 것으로 치고, 틀리면 꼭대기가 빠져 그 아래 조각이 다음 꼭대기가 된다. */
+function probePool(st){ const b=pref().band||3, po=st.cpo||{}, hs=st.cph||{}, cv=st.cpv||{};
+  const base=Object.keys(CPC).filter(c=>+CPC[c][1][0]<b&&(po[c]||0)<1&&pieceL(st,c)<.8&&(hs[c]||[]).length<2&&!cv[c]&&codesOfPiece(c).some(code=>formsOf(code).length)); const inB=new Set(base), pf=st.cpf||{};
+  return base.filter(c=>!(pf[c]&&CPC[c][2].some(x=>inB.has(x)))); }   /* 찔러서 틀린 조각은 그 아래 조각을 다 살핀 뒤에 다시 묻는다 */
+function probeTops(st){ const pool=probePool(st), inP=new Set(pool); const under=c=>{ const d1=CPC[c][2], d2=d1.flatMap(x=>CPC[x]?CPC[x][2]:[]); return new Set([...d1,...d2].filter(x=>inP.has(x))).size; };
+  const pf=Object.keys(st.cpf||{}).filter(c=>CPC[c]&&!((st.cpo||{})[c]>=1)), hot=new Set(pf.flatMap(c=>{ const d1=CPC[c][2]; return [...d1,...d1.flatMap(x=>CPC[x]?CPC[x][2]:[])]; }));   /* 찔러서 틀린 갈래를 먼저 파 내려간다 */
+  return pool.filter(c=>!pool.some(d=>CPC[d][2].includes(c))).map(c=>[under(c)+(hot.has(c)?10:0)+Math.random()*.5,c]).sort((a,b)=>b[0]-a[0]).map(x=>x[1]); }
+function probeQ(st,c){ let best=null, bv=-1; for(const {f,code} of shuffle(codesOfPiece(c).flatMap(code=>formsOf(code).map(f=>({f,code})))).slice(0,8)){ for(let t=0;t<4;t++){ let q; try{ q=G36[f.ep][f.i](); }catch(e){ break; }
+      if(q&&!q.manip&&!q.onMount&&q.mis&&Object.values(q.mis).includes(code)){ q._ep=f.ep; q._ti=f.i; const v=qInfo(q,st); if(v>bv){ bv=v; best=q; } break; } } }
+  if(best) best._probe=c; return best; }
 function pieceStage(st,c){ st.cpv=st.cpv||{}; const cp=st.cp||{}, hs=(st.cph||{})[c]||[]; const low=CPC[c]&&hs.length>=2&&cp[c]<.35; const v=st.cpv[c];
   if(!low) return v&&v.s==='ctx'?'ctx':null; if(v&&v.s==='ctx'){ if(v.left>0) return 'ctx'; st.cpv[c]={s:'weak'}; return 'weak'; }
   if(!v){ const g0=+CPC[c][1][0], upper=hs.some(fk=>fkGrade(fk)>g0), has=codesOfPiece(c).some(code=>MISC[code].length===1&&formsOf(code).length);
@@ -6506,7 +6519,9 @@ function startDaily(){ const P=pref(); if(!P.band) return bandPage(startDaily); 
     while(B.acts.length<want&&g++<80) B.push(qFromEp(cur),'_new');
     while(B.acts.length<N&&g++<240) B.push(qFromEp(i>0?EPO[rnd(0,i-1)]:cur));
     if(!P.seen[cur]){ video={kind:'video',key:epLabel(cur),label:`${epLabel(cur)} ${EPS[cur][0]}`}; const seen=P.seen; seen[cur]=1; setPref({seen}); } }
-  else { const st=state(); const ck=checkPieces(st)[0]; if(ck) checkActs(B,ck.c); W(SK,st); const wp=weakPieces(st)[0]; if(wp){ const L=lecPlan(st,wp.c), n0=B.acts.length; video=pieceVideo(wp.c,L); pieceActs(B,Math.max(n0+2,Math.ceil(N*.4)),wp.c); if(L.mr.length<2&&!L.m){ B.acts.slice(n0,n0+2).forEach(a=>{ a.q._arm=L.arm; a.q._lec=wp.c; }); L.m=1; } W(SK,st); } misActs(B,Math.max(B.acts.length,Math.ceil(N*.4))); const fr=frontier(st);
+  else { const st=state(); const ck=checkPieces(st)[0]; if(ck) checkActs(B,ck.c); W(SK,st); const wp=weakPieces(st)[0]; if(wp){ const L=lecPlan(st,wp.c), n0=B.acts.length; video=pieceVideo(wp.c,L); pieceActs(B,Math.max(n0+2,Math.ceil(N*.4)),wp.c); if(L.mr.length<2&&!L.m){ B.acts.slice(n0,n0+2).forEach(a=>{ a.q._arm=L.arm; a.q._lec=wp.c; }); L.m=1; } W(SK,st); } misActs(B,Math.max(B.acts.length,Math.ceil(N*.4)));
+    { const room=Math.min((st.probeN||0)<3?3:2,Math.floor(N/2)-B.acts.length); let k=0; for(const c of probeTops(st)){ if(k>=room) break; const q=probeQ(st,c); if(q){ B.push(q); k++; } } if(k){ st.probeN=(st.probeN||0)+1; W(SK,st); } }
+    const fr=frontier(st);
     while(B.acts.length<N&&g++<N*10){ const eps=epsOf(fr[g%fr.length]); if(eps.length) B.push(qFromEp36(eps[rnd(0,eps.length-1)]),'_new'); } }
   runSet(P.band===1?B.acts:shuffle(B.acts),'오늘의 문제',{kt:'daily'},video); }
 function finishDaily(S0){ const st=state(), t=dstr(Date.now());
@@ -6731,7 +6746,7 @@ function slotPage(ask,pickA){ hush(); app.className='wrap'; const cur=curSlot(),
 function exportAll(){ const o={}; try{ Object.keys(localStorage).filter(k=>k.startsWith('dotori-')).forEach(k=>o[k]=localStorage.getItem(k)); }catch(e){} return JSON.stringify(o); }
 function importAll(txt){ let o; try{ o=JSON.parse(txt); }catch(e){ return false; } if(!o||typeof o!=='object') return false; const ks=Object.keys(o).filter(k=>k.startsWith('dotori-')&&typeof o[k]==='string'); if(!ks.length) return false;
   try{ Object.keys(localStorage).filter(k=>k.startsWith('dotori-')).forEach(k=>localStorage.removeItem(k)); ks.forEach(k=>localStorage.setItem(k,o[k])); }catch(e){ return false; } return true; }
-window.KT={qInfo,bestQ,slotPage,switchSlot,curSlot,slotName,knownSlots,exportAll,importAll,checkPieces,pieceStage,CPL,CPC,MISC,weakPieces,state,gradePage:g=>gradePage(g),startQuick,startDaily,pref,setPref,rec:(q,g,ok)=>(q&&q._e!=null?recEP:rec)(q,g,ok),factKey,dueFacts,startReview,report,status,epKC,MIS,LADDER,regen,formsOf,startDiag,startFocus,teacherPage,course};
+window.KT={probePool,probeTops,qInfo,bestQ,slotPage,switchSlot,curSlot,slotName,knownSlots,exportAll,importAll,checkPieces,pieceStage,CPL,CPC,MISC,weakPieces,state,gradePage:g=>gradePage(g),startQuick,startDaily,pref,setPref,rec:(q,g,ok)=>(q&&q._e!=null?recEP:rec)(q,g,ok),factKey,dueFacts,startReview,report,status,epKC,MIS,LADDER,regen,formsOf,startDiag,startFocus,teacherPage,course};
 (function boot(){ const h=location.hash; const c=cfg();
   if(h==='#kt-share-on'){ c.share=true; did(); setCfg(c); } else if(h==='#kt-share-off'){ c.share=false; W(QK,[]); setCfg(c); } else if(h==='#kt-reset'){ try{ localStorage.removeItem(DK); }catch(e){} did(); }
   if(h.startsWith('#kt-')) history.replaceState(null,'',location.pathname+location.search);

@@ -60,7 +60,9 @@ function startDaily(){ const P=pref(); if(!P.band) return bandPage(startDaily); 
     while(B.acts.length<want&&g++<80) B.push(qFromEp(cur),'_new');
     while(B.acts.length<N&&g++<240) B.push(qFromEp(i>0?EPO[rnd(0,i-1)]:cur));
     if(!P.seen[cur]){ video={kind:'video',key:epLabel(cur),label:`${epLabel(cur)} ${EPS[cur][0]}`}; const seen=P.seen; seen[cur]=1; setPref({seen}); } }
-  else { const st=state(); const ck=checkPieces(st)[0]; if(ck) checkActs(B,ck.c); W(SK,st); const wp=weakPieces(st)[0]; if(wp){ const L=lecPlan(st,wp.c), n0=B.acts.length; video=pieceVideo(wp.c,L); pieceActs(B,Math.max(n0+2,Math.ceil(N*.4)),wp.c); if(L.mr.length<2&&!L.m){ B.acts.slice(n0,n0+2).forEach(a=>{ a.q._arm=L.arm; a.q._lec=wp.c; }); L.m=1; } W(SK,st); } misActs(B,Math.max(B.acts.length,Math.ceil(N*.4))); const fr=frontier(st);
+  else { const st=state(); const ck=checkPieces(st)[0]; if(ck) checkActs(B,ck.c); W(SK,st); const wp=weakPieces(st)[0]; if(wp){ const L=lecPlan(st,wp.c), n0=B.acts.length; video=pieceVideo(wp.c,L); pieceActs(B,Math.max(n0+2,Math.ceil(N*.4)),wp.c); if(L.mr.length<2&&!L.m){ B.acts.slice(n0,n0+2).forEach(a=>{ a.q._arm=L.arm; a.q._lec=wp.c; }); L.m=1; } W(SK,st); } misActs(B,Math.max(B.acts.length,Math.ceil(N*.4)));
+    { const room=Math.min((st.probeN||0)<3?3:2,Math.floor(N/2)-B.acts.length); let k=0; for(const c of probeTops(st)){ if(k>=room) break; const q=probeQ(st,c); if(q){ B.push(q); k++; } } if(k){ st.probeN=(st.probeN||0)+1; W(SK,st); } }
+    const fr=frontier(st);
     while(B.acts.length<N&&g++<N*10){ const eps=epsOf(fr[g%fr.length]); if(eps.length) B.push(qFromEp36(eps[rnd(0,eps.length-1)]),'_new'); } }
   runSet(P.band===1?B.acts:shuffle(B.acts),'오늘의 문제',{kt:'daily'},video); }
 function finishDaily(S0){ const st=state(), t=dstr(Date.now());
