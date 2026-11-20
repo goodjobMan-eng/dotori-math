@@ -159,19 +159,26 @@ function pickForKC(kc){ return bestQ(shuffle(epsOf(kc).slice()),q=>q.write||(q.o
 const DIAG_N=12;
 function diagEps(){ const b=pref().band||3, lo=Math.max(3,b-1), hi=Math.min(6,b+1); return UNITS36.filter(u=>{ const g=gradeOfUnit(u); return g>=lo&&g<=hi; }).flatMap(u=>u.eps); }
 function diagApply(){ const D=S.diagRun; if(!D.cur||D.cur.done) return; D.cur.done=1; const ok=!!S.results[D.cur.i], kc=epKC(D.cur.ep); if(!kc) return; const st=state(), Ld=LADDER[kc[1]]||[], idx=Ld.indexOf(kc); if(idx<0) return;
-  D.asked[kc]=1; for(let k=0;k<Ld.length;k++){ if(k===idx||D.asked[Ld[k]]) continue; const d=Math.abs(k-idx)-1, cur=st.kc[Ld[k]]==null?BKT.L0:st.kc[Ld[k]];
+  D.asked[kc]=1; const R=D.res[kc]=D.res[kc]||[0,0]; R[ok?0:1]++; for(let k=0;k<Ld.length;k++){ if(k===idx||D.asked[Ld[k]]) continue; const d=Math.abs(k-idx)-1, cur=st.kc[Ld[k]]==null?BKT.L0:st.kc[Ld[k]];
     if(ok&&k<idx) st.kc[Ld[k]]=bktW(cur,true,1/3,.6*Math.pow(.8,d)); else if(!ok&&k>idx) st.kc[Ld[k]]=bktW(cur,false,1/3,.5*Math.pow(.8,d)); }
   W(SK,st); }
-function diagNext(){ const D=S.diagRun; diagApply(); if(S.i>=DIAG_N){ S.acts.length=S.i; return false; } const st=state();
-  const fresh=q=>{ const ps=[...new Set(Object.values(q.mis||{}).map(c=>MISC[c]&&MISC[c][0][0]).filter(Boolean))]; return !ps.length||ps.some(c=>(D.pc[c]||0)<3); };
-  const pool=shuffle(D.eps.filter(e=>!D.used[e])).slice(0,30), q=bestQ(pool,q=>(q.write||(q.opts&&q.opts.length>=3))&&fresh(q),st);
-  if(!q||(S.i>=6&&qInfo(q,st)<.8)){ S.acts.length=S.i; return false; }
-  D.used[q._ep]=1; new Set(Object.values(q.mis||{}).map(c=>MISC[c]&&MISC[c][0][0]).filter(Boolean)).forEach(c=>{ D.pc[c]=(D.pc[c]||0)+1; }); q.diag=1;
-  D.cur={i:S.i,ep:q._ep}; S.acts[S.i]={kind:'q',q}; S.ep=q._ep; S.ui=uix(q._ep); return true; }
+/* 영역마다 '맞힌 가장 높은 단원(lo)'과 '틀린 가장 낮은 단원(hi)' 사이를 반씩 좁힌다. 어느 단원을 물을지는 이 틈이, 그 단원의 어떤 문제를 낼지는 정보량이 정한다. */
+function diagGap(sd){ const D=S.diagRun, Ld=LADDER[sd], av=[]; Ld.forEach((kc,k)=>{ if(!D.skip[kc]&&epsOf(kc).some(e=>D.eps.includes(e))) av.push(k); }); if(!av.length) return null;
+  let lo=av[0]-1, hi=av[av.length-1]+1; Ld.forEach((kc,k)=>{ const R=D.res[kc]; if(R&&R[0]>0&&R[0]>=R[1]&&k>lo) lo=k; }); Ld.forEach((kc,k)=>{ const R=D.res[kc]; if(R&&R[1]>R[0]&&k>lo&&k<hi) hi=k; });
+  const mid=av.filter(k=>k>lo&&k<hi); return {sd,lo,hi,mid,Ld}; }
+function diagTarget(){ const D=S.diagRun, gs=Object.keys(LADDER).map(diagGap).filter(Boolean), open=gs.filter(g=>g.mid.length);
+  if(open.length){ open.sort((a,b)=>b.mid.length-a.mid.length||Math.random()-.5); const g=open[0], c=(g.lo+g.hi)/2; return g.Ld[g.mid.slice().sort((a,b)=>Math.abs(a-c)-Math.abs(b-c))[0]]; }
+  const re=gs.map(g=>g.Ld[g.hi]).filter(kc=>kc&&D.res[kc]&&D.res[kc][1]===1&&D.res[kc][0]===0&&!D.re[kc]);   /* 틈이 다 닫혔으면: 한 번 틀린 경계 단원을 한 번 더(실수였는지) */
+  if(re.length){ D.re[re[0]]=1; return re[0]; } return null; }
+function diagNext(){ const D=S.diagRun; diagApply(); if(S.i>=DIAG_N){ S.acts.length=S.i; return false; } const st=state(); let q=null;
+  for(let t=0;t<8&&!q;t++){ const kc=diagTarget(); if(!kc) break; const es=epsOf(kc).filter(e=>D.eps.includes(e)), un=es.filter(e=>!D.used[e]);
+    q=bestQ(shuffle(un.length?un:es),q=>q.write||(q.opts&&q.opts.length>=3),st); if(!q) D.skip[kc]=1; }
+  if(!q){ S.acts.length=S.i; return false; }
+  D.used[q._ep]=1; q.diag=1; D.cur={i:S.i,ep:q._ep}; S.acts[S.i]={kind:'q',q}; S.ep=q._ep; S.ui=uix(q._ep); return true; }
 function startDiag(){ if(!pref().band||pref().band<3) setPref({band:3});
-  S={mode:'ep36',retry:true,diagRun:{eps:diagEps(),used:{},pc:{},asked:{},cur:null},ep:'S2-01',ui:0,ch:0,steps:[{kind:'acts'}],si:0,acts:Array.from({length:DIAG_N},()=>({kind:'q',q:null})),i:0,results:[],tries:0,counted:0,title:'내 수준 찾기',saveKey:'RETRY',chars:CAST};
+  S={mode:'ep36',retry:true,diagRun:{eps:diagEps(),used:{},pc:{},asked:{},res:{},skip:{},re:{},cur:null},ep:'S2-01',ui:0,ch:0,steps:[{kind:'acts'}],si:0,acts:Array.from({length:DIAG_N},()=>({kind:'q',q:null})),i:0,results:[],tries:0,counted:0,title:'내 수준 찾기',saveKey:'RETRY',chars:CAST};
   if(diagNext()) step(); else home(); }
-function diagDone(){ diagApply(); const st=state(); st.lvl={}; Object.keys(LADDER).forEach(sd=>{ const Ld=LADDER[sd]; const Lv=x=>st.kc[x]==null?BKT.L0:st.kc[x], asked=S.diagRun.asked||{}; let good=-1; Ld.forEach((x,i)=>{ if(Lv(x)>=.55) good=i; }); const fail=Ld.findIndex(x=>asked[x]&&Lv(x)<.3); let k=fail>=0?Math.min(fail,good+1):good+1;   /* 수준 = 직접 물어 틀린 첫 단원 앞까지, 또는 맞힌 가장 높은 단원까지 */ st.lvl[sd]=k; Ld.slice(0,k).forEach(x=>{ st.est[x]=1; }); }); st.diagAt=today(); W(SK,st);
+function diagDone(){ diagApply(); const st=state(); st.lvl={}; Object.keys(LADDER).forEach(sd=>{ const Ld=LADDER[sd]; const g=diagGap(sd), k=g?g.lo+1:0;   /* 수준 = 맞힌 가장 높은 단원까지 */ st.lvl[sd]=k; Ld.slice(0,k).forEach(x=>{ st.est[x]=1; if((st.kc[x]==null?BKT.L0:st.kc[x])<.55) st.kc[x]=.55; }); }); st.diagAt=today(); W(SK,st);
   const cp=st.cp||{}, good=Object.keys(cp).filter(c=>CPC[c]&&cp[c]>=.6).length, chk=checkPieces(st).length, weak=weakPieces(st).length, low=Object.keys(cp).filter(c=>CPC[c]&&cp[c]<.35).length;
   S={idle:true}; hush(); app.className='wrap';
   app.innerHTML=`<div class="stage"><div style="font-family:Jua;font-size:1.3rem;margin-bottom:8px">수준 찾기 끝! 이제 내 수준에 맞는 문제가 나와요.</div><p class="kt-ex" style="margin-bottom:14px">잘 아는 개념 ${good}개 · 더 살펴볼 개념 ${Math.max(low,chk+weak)}개</p><div class="btns"><button class="next" id="kt-go">오늘의 문제 풀기</button><button class="ghost" id="kt-home">처음으로</button></div></div>`;

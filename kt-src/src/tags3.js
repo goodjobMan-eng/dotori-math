@@ -462,3 +462,19 @@ B('S4-11', ['낮 기온이 1일 10도, 2일 16도, 3일 19도, 4일 17도, 5일 
 B('S4-16', ['4일 동안 읽은 책이 8권, 0권, 14권, 14권이에요. 하루 평균 몇 권을 읽었을까요?','9권',[['12권','D5-08'],['7권','D5-02'],['14권','D5-01'],['36권','D5-04']]]);
 B('S4-18', ['파란 구슬만 5개 든 통에서 1개를 꺼낼 때, 파란 구슬이 나올 가능성을 수로 나타내면?','1',[['2분의 1','D5-05'],['0','D5-06'],['5','D5-07'],['5분의 1','D5-09']]]);
 B('S4-21', ['200명을 조사한 띠그래프에서 운동이 눈금 35에서 60까지 차지해요. 운동을 고른 학생은 몇 명일까요?','50명',[['25명','D6-01'],['120명','D6-03'],['5명','R6-04'],['70명',null]]], ['200명을 조사한 원그래프에서 독서가 60명이에요. 독서의 중심각은 몇 도일까요?','108°',[['30°','D6-04'],['60°','D6-01'],['10.8°','R6-04'],['54°','D6-06']]]);
+
+/* ===== 3-22. 그림 고르기(밀기·뒤집기·돌리기): 오답 그림마다 오개념 코드, 5지선다까지 ===== */
+Object.assign(MIS,{
+'G4-15':['밀면 도형의 방향이 바뀐다고 봄','밀기는 위치만 바뀌고 모양과 방향은 그대로예요.'],
+'G4-16':['뒤집어도 모양이 그대로라고 봄','뒤집으면 거울에 비친 것처럼 방향이 반대가 돼요.'],
+'G4-17':['같은 방향으로 두 번 뒤집으면 처음과 같아짐을 모름','한 번 뒤집고 또 뒤집으면 처음 모양으로 돌아와요.']});
+function tQ5(q,f,correct,wrongs){ const ck=tKey(correct), seen=new Set([ck]), ws=[]; for(const [g,c] of shuffle(wrongs.slice())){ const k=tKey(g); if(seen.has(k)) continue; seen.add(k); ws.push([g,c]); if(ws.length>=4) break; }
+  if(ws.length<2) return null; const all=[correct,...ws.map(w=>w[0])], order=shuffle(all.map((_,i)=>i)), labs=['가','나','다','라','마'].slice(0,all.length), ans=labs[order.indexOf(0)];
+  const vis=`<div class="tfrow">${tFig(f,'',true)}<span class="tarrow">→ ?</span></div><div class="tfrow" style="flex-wrap:wrap;gap:8px">${order.map((k,j)=>tFig(all[k],labs[j])).join('')}</div>`;
+  const r=C36(WHO(),q,q,vis,ans,labs.slice()); r.mis={}; order.forEach((k,j)=>{ if(k>0) r.mis[labs[j]]=ws[k-1][1]; }); return r; }
+const tA=(f,fn)=>tApply(f,fn), tRk=k=>c=>tRot(c,k);
+G36['S6-22'][0]=tGen(()=>{ const f=tRand(), d=rndPick('오른쪽','왼쪽','위쪽','아래쪽'); return tQ5(`이 도형을 ${d}으로 밀면 어떤 모양이 될까요?`,f,f,[[tA(f,tLR),'G4-15'],[tA(f,tUD),'G4-15'],[tA(f,tRk(1)),'G4-15'],[tA(f,tRk(2)),'G4-15']]); });
+G36['S6-23'][0]=tGen(()=>{ const f=tRand(), lr=rnd(0,1); return tQ5(`이 도형을 ${lr?'오른쪽(또는 왼쪽)':'아래쪽(또는 위쪽)'}으로 뒤집으면?`,f,tA(f,lr?tLR:tUD),[[tA(f,lr?tUD:tLR),'G4-14'],[tA(f,tRk(1)),'G4-04'],[tA(f,tRk(2)),'G4-04'],[f,'G4-16']]); });
+G36['S6-23'][1]=tGen(()=>{ const f=tRand(); return tQ5('오른쪽으로 두 번 뒤집으면?',f,f,[[tA(f,tLR),'G4-17'],[tA(f,tUD),'G4-14'],[tA(f,tRk(2)),'G4-04'],[tA(f,tRk(1)),'G4-04']]); });
+G36['S6-24'][0]=tGen(()=>{ const f=tRand(), k=rnd(1,3); const ws=k===2?[[tA(f,tRk(1)),'G4-13'],[tA(f,tRk(3)),'G4-13']]:[[tA(f,tRk(4-k)),'G4-10'],[tA(f,tRk(2)),'G4-13']]; return tQ5(`이 도형을 시계 방향으로 ${k*90}° 돌리면?`,f,tA(f,tRk(k)),[...ws,[tA(f,tLR),'G4-04'],[tA(f,tUD),'G4-04']]); });
+G36['S6-24'][1]=tGen(()=>{ const f=tRand(); return tQ5('시계 반대 방향으로 90° 돌리면?',f,tA(f,tRk(3)),[[tA(f,tRk(1)),'G4-10'],[tA(f,tRk(2)),'G4-13'],[tA(f,tLR),'G4-04'],[tA(f,tUD),'G4-04']]); });
