@@ -134,10 +134,14 @@ h = h.replace("check:()=>on.size===n, state:()=>on.size+'/'+d,", "check:()=>on.s
 MC = [("state:()=>h+':'+m,", "(h%12===Math.round(tm/5)%12&&Math.abs(m-(th%12)*5)<=2&&h%12!==th%12)?'G2-10':(tm>=35&&h%12===(th%12+1)%12&&Math.abs(m-tm)<=1)?'G2-06':(tm>0&&tm%5===0&&h%12===th%12&&m===tm/5)?'G2-07':null"),
  ("state:()=>''+d,", "(target!==90&&Math.abs(d-(180-target))<=3)?'G4-01':null"), ("state:()=>''+len,", "len===target+1?'G2-09':null"), ("state:()=>''+rad,", "(rad===2*r||rad*2===r)?'G3-04':null"),
  ("state:()=>h.map(v=>v*step).join(','),", "(step>1&&h.filter((v,i)=>target[i]>0&&v===target[i]).length>=Math.ceil(target.filter(x=>x>0).length*.6))?'D4-01':null")]
+MC.append(("state:()=>String(tKey(cur)),", "(()=>{ const K=tKey, R=k=>tApply(f,c=>tRot(c,k)), ck=K(cur), tk=K(target); if(ck===K(f)) return null; const rk=[1,2,3].find(k=>K(R(k))===tk), fl=[tLR,tUD].find(g=>K(tApply(f,g))===tk), cr=[1,2,3].find(k=>K(R(k))===ck), cf=[tLR,tUD].find(g=>K(tApply(f,g))===ck); if(rk&&!fl){ if(cr) return cr===4-rk?'G4-10':'G4-13'; if(cf) return 'G4-04'; } if(fl&&!rk){ if(cf) return 'G4-14'; if(cr) return 'G4-04'; } return null; })()"))
 for a, mc in MC:
     assert h.count(a) == 1, a
     h = h.replace(a, a + " mcode:()=>" + mc + ",")
 a = "const ok=q.manip.check(); answer("; assert h.count(a) == 1
+_a = "g.reveal=()=>g.set(half.map(([x,y])=>[5-x,y])); return MQ('대칭축(점선)을 기준으로 선대칭도형을 완성해 보세요.'"
+assert h.count(_a) == 1
+h = h.replace(_a, "g.reveal=()=>g.set(half.map(([x,y])=>[5-x,y])); g.state=()=>g.cells().map(v=>v.join('')).sort().join('.'); g.mcode=()=>{ const c=g.cells().map(v=>v.join(',')).sort().join('|'), K=f=>half.map(f).map(v=>v.join(',')).sort().join('|'); return c===K(([x,y])=>[x+3,y])?'G5-15':c===K(([x,y])=>[5-x,4-y])?'G5-05':null; }; return MQ('대칭축(점선)을 기준으로 선대칭도형을 완성해 보세요.'")
 h = h.replace(a, "const ok=q.manip.check(); try{ if(S.tries===0&&q.manip.state){ q._mstate=String(q.manip.state()).slice(0,24); if(!ok&&q.manip.mcode) q._mcode=q.manip.mcode(); } }catch(e){} answer(")
 k = h.rindex('</body>'); h = h[:k] + '<script>\n' + out + '\n</script>\n' + h[k:]
 open('out/index.html', 'w', encoding='utf-8').write(h)

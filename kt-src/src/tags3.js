@@ -511,11 +511,12 @@ function tQ5(q,f,correct,wrongs){ const ck=tKey(correct), seen=new Set([ck]), ws
   const vis=`<div class="tfrow">${tFig(f,'',true)}<span class="tarrow">→ ?</span></div><div class="tfrow" style="flex-wrap:wrap;gap:8px">${order.map((k,j)=>tFig(all[k],labs[j])).join('')}</div>`;
   const r=C36(WHO(),q,q,vis,ans,labs.slice()); r.mis={}; order.forEach((k,j)=>{ if(k>0) r.mis[labs[j]]=ws[k-1][1]; }); return r; }
 const tA=(f,fn)=>tApply(f,fn), tRk=k=>c=>tRot(c,k);
-G36['S6-22'][0]=tGen(()=>{ const f=tRand(), d=rndPick('오른쪽','왼쪽','위쪽','아래쪽'); return tQ5(`이 도형을 ${d}으로 밀면 어떤 모양이 될까요?`,f,f,[[tA(f,tLR),'G4-15'],[tA(f,tUD),'G4-15'],[tA(f,tRk(1)),'G4-15'],[tA(f,tRk(2)),'G4-15']]); });
-G36['S6-23'][0]=tGen(()=>{ const f=tRand(), lr=rnd(0,1); return tQ5(`이 도형을 ${lr?'오른쪽(또는 왼쪽)':'아래쪽(또는 위쪽)'}으로 뒤집으면?`,f,tA(f,lr?tLR:tUD),[[tA(f,lr?tUD:tLR),'G4-14'],[tA(f,tRk(1)),'G4-04'],[tA(f,tRk(2)),'G4-04'],[f,'G4-16']]); });
-G36['S6-23'][1]=tGen(()=>{ const f=tRand(); return tQ5('오른쪽으로 두 번 뒤집으면?',f,f,[[tA(f,tLR),'G4-17'],[tA(f,tUD),'G4-14'],[tA(f,tRk(2)),'G4-04'],[tA(f,tRk(1)),'G4-04']]); });
-G36['S6-24'][0]=tGen(()=>{ const f=tRand(), k=rnd(1,3); const ws=k===2?[[tA(f,tRk(1)),'G4-13'],[tA(f,tRk(3)),'G4-13']]:[[tA(f,tRk(4-k)),'G4-10'],[tA(f,tRk(2)),'G4-13']]; return tQ5(`이 도형을 시계 방향으로 ${k*90}° 돌리면?`,f,tA(f,tRk(k)),[...ws,[tA(f,tLR),'G4-04'],[tA(f,tUD),'G4-04']]); });
-G36['S6-24'][1]=tGen(()=>{ const f=tRand(); return tQ5('시계 반대 방향으로 90° 돌리면?',f,tA(f,tRk(3)),[[tA(f,tRk(1)),'G4-10'],[tA(f,tRk(2)),'G4-13'],[tA(f,tLR),'G4-04'],[tA(f,tUD),'G4-04']]); });
+const _rep=(ep,re,f)=>{ const i=G36[ep].findIndex(g=>{ try{ const q=g(); return q&&!q.manip&&re.test(q.q||''); }catch(e){ return false; } }); if(i>=0) G36[ep][i]=f; };   /* 조작 문제는 그대로 두고, 그림 고르기 틀만 찾아 바꾼다 */
+_rep('S6-22',/밀면 어떤 모양/,tGen(()=>{ const f=tRand(), d=rndPick('오른쪽','왼쪽','위쪽','아래쪽'); return tQ5(`이 도형을 ${d}으로 밀면 어떤 모양이 될까요?`,f,f,[[tA(f,tLR),'G4-15'],[tA(f,tUD),'G4-15'],[tA(f,tRk(1)),'G4-15'],[tA(f,tRk(2)),'G4-15']]); }));
+_rep('S6-23',/으로 뒤집으면\?/,tGen(()=>{ const f=tRand(), lr=rnd(0,1); return tQ5(`이 도형을 ${lr?'오른쪽(또는 왼쪽)':'아래쪽(또는 위쪽)'}으로 뒤집으면?`,f,tA(f,lr?tLR:tUD),[[tA(f,lr?tUD:tLR),'G4-14'],[tA(f,tRk(1)),'G4-04'],[tA(f,tRk(2)),'G4-04'],[f,'G4-16']]); }));
+_rep('S6-23',/두 번 뒤집으면/,tGen(()=>{ const f=tRand(); return tQ5('오른쪽으로 두 번 뒤집으면?',f,f,[[tA(f,tLR),'G4-17'],[tA(f,tUD),'G4-14'],[tA(f,tRk(2)),'G4-04'],[tA(f,tRk(1)),'G4-04']]); }));
+_rep('S6-24',/^이 도형을 시계 방향으로/,tGen(()=>{ const f=tRand(), k=rnd(1,3); const ws=k===2?[[tA(f,tRk(1)),'G4-13'],[tA(f,tRk(3)),'G4-13']]:[[tA(f,tRk(4-k)),'G4-10'],[tA(f,tRk(2)),'G4-13']]; return tQ5(`이 도형을 시계 방향으로 ${k*90}° 돌리면?`,f,tA(f,tRk(k)),[...ws,[tA(f,tLR),'G4-04'],[tA(f,tUD),'G4-04']]); }));
+_rep('S6-24',/^시계 반대 방향으로 90° 돌리면/,tGen(()=>{ const f=tRand(); return tQ5('시계 반대 방향으로 90° 돌리면?',f,tA(f,tRk(3)),[[tA(f,tRk(1)),'G4-10'],[tA(f,tRk(2)),'G4-13'],[tA(f,tLR),'G4-04'],[tA(f,tUD),'G4-04']]); }));
 
 /* ===== 3-23. 그림 고르기(합동·선대칭·점대칭): 오답 그림마다 오개념 코드 ===== */
 Object.assign(MIS,{
