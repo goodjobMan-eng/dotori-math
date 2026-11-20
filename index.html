@@ -5294,7 +5294,7 @@ const MIS = {
 
 /* ---------- 3-9. 기본(예제) 문제에 오개념 보기 달기 — 3학년 수와 연산 (2026-11-20, Claude·Gemini 교차 검토 1차) ---------- */
 // 기본 문제는 수가 매번 바뀌므로, 만들어진 문제에서 수를 읽어 '오개념이면 내는 답'을 계산해 보기에 넣는다.
-// 한 문항의 두 오답은 서로 다른 코드. 오답 풀이 3개 이상이면 그중 2개를 뽑는다(시드로 재현).
+// 한 문항의 오답들은 서로 다른 코드. 오개념 유형 수만큼 보기를 둔다(오답 최대 4개, 5지선다까지).
 // 구구 인접 단처럼 오개념이 아닌 '사실 인출 실패'는 코드 대신 q.fx에 표시해 둔다(나중에 되풀이 큐로).
 Object.assign(MIS, {
 'N2-07':['올림수를 윗자리로 넘기지 않고 그 자리에 그대로 씀','10이 넘으면 1을 윗자리로 올리고, 남은 수만 그 자리에 써요.'],
@@ -5337,7 +5337,7 @@ function setOpts(q,pool,keep){ const A=String(q.ans), seen=new Set([A]), ok=[];
   for(const [v,c] of pool){ const s=String(v); if(v==null||seen.has(s)||/NaN|undefined|-/.test(s)) continue; seen.add(s); ok.push([v,c]); }
   const codes=new Set(); const uniq=ok.filter(([v,c])=>{ if(c&&c!=='F'&&codes.has(c)) return false; if(c) codes.add(c); return true; });
   if(uniq.length<2) return q;                                     // 조건이 안 맞는 수가 나오면 원래 보기 그대로
-  while(uniq.length>2) uniq.splice(Math.floor(Math.random()*uniq.length),1);
+  while(uniq.length>4) uniq.splice(Math.floor(Math.random()*uniq.length),1);      // 오개념 유형이 많으면 보기도 늘린다(정답 + 오답 최대 4개 = 5지선다). 교수님 지적(2026-11-20)
   const num=typeof q.ans==='number', opts=[q.ans,...uniq.map(x=>num?+x[0]:String(x[0]))];
   for(let i=opts.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [opts[i],opts[j]]=[opts[j],opts[i]]; }
   q.opts=opts; q.mis={}; q.fx={}; uniq.forEach(([v,c])=>{ if(c==='F') q.fx[String(v)]=1; else if(c) q.mis[String(v)]=c; }); if(keep) Object.assign(q,keep); return q; }
