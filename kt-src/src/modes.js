@@ -26,6 +26,10 @@ function runSet(acts,title,flag,video){ if(!acts.length) return home(); const q0
 
 function misActs(B,limit){ for(const x of report().mis.filter(x=>formsOf(x.c).length)){ for(const f of shuffle(formsOf(x.c).slice())){ if(B.acts.length>=limit) return;
     for(let t=0;t<6;t++){ let q; try{ q=G36[f.ep][f.i](); }catch(e){ break; } if(q&&q.mis&&Object.values(q.mis).includes(x.c)){ q._ep=f.ep; q._ti=f.i; B.push(q); break; } } } } }
+// 비어 있는 개념 조각을 가르는 문제(그 조각을 가리키는 오개념 보기가 든 문제)를 먼저 넣는다.
+function pieceActs(B,limit,c){ const fs=shuffle(codesOfPiece(c).flatMap(code=>formsOf(code).map(f=>({f,code})))); for(const {f,code} of fs){ if(B.acts.length>=limit) return;
+    for(let t=0;t<6;t++){ let q; try{ q=G36[f.ep][f.i](); }catch(e){ break; } if(q&&q.mis&&Object.values(q.mis).includes(code)){ q._ep=f.ep; q._ti=f.i; B.push(q); break; } } } }
+function pieceVideo(c){ const P=pref(), seen=P.seenP||{}, t=dstr(Date.now()); if(seen[c]===t) return null; const k=(CPL[c]||[]).find(lecHas); if(!k) return null; seen[c]=t; setPref({seenP:seen}); return {kind:'video',key:k,label:`${k} ${lecName(k)}`}; }
 function frontier(st){ const fr=Object.keys(LADDER).map(s=>LADDER[s].find(k=>!['숙달','추정'].includes(kcStatus(k,st)))||LADDER[s][LADDER[s].length-1]); return fr; }
 
 // 가볍게 풀기: 이미 아는 내용에서 5문제. 복습할 것이 있으면 먼저 넣는다.
@@ -42,7 +46,7 @@ function startDaily(){ const P=pref(); if(!P.band) return bandPage(startDaily); 
     while(B.acts.length<want&&g++<80) B.push(qFromEp(cur),'_new');
     while(B.acts.length<N&&g++<240) B.push(qFromEp(i>0?EPO[rnd(0,i-1)]:cur));
     if(!P.seen[cur]){ video={kind:'video',key:epLabel(cur),label:`${epLabel(cur)} ${EPS[cur][0]}`}; const seen=P.seen; seen[cur]=1; setPref({seen}); } }
-  else { const st=state(); misActs(B,Math.ceil(N*.3)); const fr=frontier(st);
+  else { const st=state(), wp=weakPieces(st)[0]; if(wp){ pieceActs(B,Math.ceil(N*.4),wp.c); if(B.acts.length) video=pieceVideo(wp.c); } misActs(B,B.acts.length+Math.ceil(N*.3)); const fr=frontier(st);
     while(B.acts.length<N&&g++<N*10){ const eps=epsOf(fr[g%fr.length]); if(eps.length) B.push(qFromEp36(eps[rnd(0,eps.length-1)]),'_new'); } }
   runSet(P.band===1?B.acts:shuffle(B.acts),'오늘의 문제',{kt:'daily'},video); }
 function finishDaily(S0){ const st=state(), t=dstr(Date.now());

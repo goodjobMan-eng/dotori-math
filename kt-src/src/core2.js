@@ -117,7 +117,7 @@ function diagDone(){ diagApply(); const st=state(); st.lvl={}; S.diagRun.strands
 
 /* ---------- 9. 다시 다지기(오개념 맞춤 연습)와 오늘의 코스 ---------- */
 let FORM_IDX=null;
-function formsOf(code){ if(!FORM_IDX){ FORM_IDX={}; for(const ep of Object.keys(G36)) G36[ep].forEach((g,i)=>{ for(let k=0;k<8;k++){ let q; try{ q=g(); }catch(e){ break; } if(!q||!q.diag) break;
+function formsOf(code){ if(!FORM_IDX){ FORM_IDX={}; for(const ep of Object.keys(G36)) G36[ep].forEach((g,i)=>{ for(let k=0;k<8;k++){ let q; try{ q=g(); }catch(e){ break; } if(!q||typeof q!=='object') break; if(!q.mis) continue;
     for(const c of Object.values(q.mis||{})){ const a=(FORM_IDX[c]=FORM_IDX[c]||[]); if(!a.some(x=>x.ep===ep&&x.i===i)) a.push({ep,i}); } } }); }
   return FORM_IDX[code]||[]; }
 function startFocus(code){ const fs=shuffle(formsOf(code).slice()); if(!fs.length) return home(); const acts=[], seen=new Set();
@@ -153,7 +153,7 @@ function teacherPage(){ if(typeof S!=='undefined'&&S) S.idle=true; hush(); app.c
       <p style="font-size:.95rem;color:var(--ink-soft)">이 기기에 쌓인 기록 ${log.length}건 · 수준 찾기 ${st.diagAt||'아직 안 함'}${cfg().share?' · 익명 기록 공유 켜짐':''}</p>
       <h2 class="sec">오개념</h2><ul class="recent kt-list">${misH}</ul>
       <p class="kt-ex">최근 8번의 기회에서 서로 다른 문항 2종 이상에 걸쳐 3번 이상 나오면 확인, 2번이면 의심입니다. 바르게 풀면 사라집니다.</p>
-      <h2 class="sec">비어 있는 개념</h2><ul class="recent kt-list">${(w=>w.length?w.map(x=>`<li><b>${esc(x.name)}</b> <span class="rd">${x.when.replace('-','학년 ')}학기에 처음 배움${x.pre.length?' · 먼저 '+x.pre.map(p=>CPC[p][0]).join(', '):''}</span></li>`).join(''):'<li>아직 비어 있다고 볼 개념이 없습니다.</li>')(weakPieces(st))}</ul>
+      <h2 class="sec">비어 있는 개념</h2><ul class="recent kt-list">${(w=>w.length?w.map(x=>`<li><b>${esc(x.name)}</b> <span class="rd">${x.when.replace('-','학년 ')}학기에 처음 배움${x.pre.length?' · 먼저 '+x.pre.map(p=>CPC[p][0]).join(', '):''}</span><div class="kt-ex">강의: ${(CPL[x.c]||[]).map(k=>`${k} ${esc(lecName(k))}${lecHas(k)?'':'(준비 중)'}`).join(', ')}</div></li>`).join(''):'<li>아직 비어 있다고 볼 개념이 없습니다.</li>')(weakPieces(st))}</ul>
       <p class="kt-ex">오답 보기마다 "이 답을 고르면 어떤 개념을 모르는 것"인지와 그 무게를 정해 두었습니다. 같은 개념을 가리키는 오답이 두 번 이상 쌓이면 여기에 나옵니다. 위에 있을수록 먼저 채워야 하는 개념입니다.</p>
       <h2 class="sec">자주 틀리는 단순 지식 (1~2학년)</h2><ul class="recent kt-list">${factsHTML()}</ul>
       <p class="kt-ex">틀리면 같은 세트 뒤쪽에 한 번 더 나오고, 그 뒤 10분 → 다음 날 → 3일 간격으로 다시 나옵니다. 네 번 이어서 맞히면 익힘으로 바뀝니다.</p>
@@ -249,7 +249,7 @@ function maybeSend(){ if(!KT_ENDPOINT||!navigator.sendBeacon) return; const c=cf
 addEventListener('pagehide',maybeSend);
 document.addEventListener('visibilitychange',()=>{ if(document.visibilityState==='hidden') maybeSend(); });
 
-window.KT={CPC,MISC,weakPieces,state,gradePage:g=>gradePage(g),startQuick,startDaily,pref,setPref,rec:(q,g,ok)=>(q&&q._e!=null?recEP:rec)(q,g,ok),factKey,dueFacts,startReview,report,status,epKC,MIS,LADDER,regen,formsOf,startDiag,startFocus,teacherPage,course};
+window.KT={CPL,CPC,MISC,weakPieces,state,gradePage:g=>gradePage(g),startQuick,startDaily,pref,setPref,rec:(q,g,ok)=>(q&&q._e!=null?recEP:rec)(q,g,ok),factKey,dueFacts,startReview,report,status,epKC,MIS,LADDER,regen,formsOf,startDiag,startFocus,teacherPage,course};
 (function boot(){ const h=location.hash; const c=cfg();
   if(h==='#kt-share-on'){ c.share=true; did(); setCfg(c); } else if(h==='#kt-share-off'){ c.share=false; W(QK,[]); setCfg(c); } else if(h==='#kt-reset'){ try{ localStorage.removeItem(DK); }catch(e){} did(); }
   if(h.startsWith('#kt-')) history.replaceState(null,'',location.pathname+location.search);
