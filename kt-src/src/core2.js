@@ -151,20 +151,30 @@ function bestQ(eps,ok,st){ st=st||state(); const cs=[]; for(const ep of eps){ co
       if(!q||q.manip||q.onMount) return; if(ok&&!ok(q)) continue; q._ep=ep; q._ti=i; cs.push([qInfo(q,st),q]); return; } }); }
   if(!cs.length) return null; cs.sort((a,b)=>b[0]-a[0]); const top=cs.filter(x=>x[0]>=cs[0][0]*.8).slice(0,4); return top[Math.floor(Math.random()*top.length)][1]; }
 function pickForKC(kc){ return bestQ(shuffle(epsOf(kc).slice()),q=>q.write||(q.opts&&q.opts.length>=3)); }
-function diagApply(){ const D=S.diagRun; if(!D.cur||D.cur.done) return; D.cur.done=1; const t=D.strands[D.si]; if(S.results[D.cur.i]) t.lo=D.cur.mid+1; else t.hi=D.cur.mid; }
-function diagNext(){ const D=S.diagRun; diagApply();
-  for(;;){ while(D.si<D.strands.length&&D.strands[D.si].lo>=D.strands[D.si].hi) D.si++;
-    if(D.si>=D.strands.length){ S.acts.length=S.i; return false; }
-    const t=D.strands[D.si], mid=(t.lo+t.hi)>>1, q=pickForKC(LADDER[t.s][mid]);
-    if(!q){ t.lo=mid+1; continue; }
-    D.cur={mid,i:S.i}; S.acts[S.i]={kind:'q',q}; S.ep=q._ep; S.ui=uix(q._ep); return true; } }
-function startDiag(){ const strands=Object.keys(LADDER).map(s=>({s,lo:0,hi:LADDER[s].length}));
-  const total=strands.reduce((a,t)=>a+Math.ceil(Math.log2(t.hi+1)),0);
-  S={mode:'ep36',retry:true,diagRun:{strands,si:0,cur:null},ep:'S2-01',ui:0,ch:0,steps:[{kind:'acts'}],si:0,acts:Array.from({length:total},()=>({kind:'q',q:null})),i:0,results:[],tries:0,counted:0,title:'내 수준 찾기',saveKey:'RETRY',chars:CAST};
+/* 내 수준 찾기(다시 짬): 단원 사다리를 반씩 좁히던 것을 버리고, 매 문제 "지금 가장 많이 알려 줄 문제"를 고른다.
+   - 후보: 고른 학년대와 그 앞뒤 한 학년의 모든 편. 한 편은 한 번만, 같은 조각은 세 번까지만.
+   - 답할 때마다 단원·조각·오개념이 갱신되고(rec), 거기에 더해 같은 영역의 앞뒤 단원으로 약하게 번진다:
+     맞히면 그보다 앞 단원이 올라가고, 틀리면 그보다 뒤 단원이 내려간다(멀수록 약하게, 직접 물어본 단원은 건드리지 않음).
+   - 12문제, 또는 6문제 뒤 남은 문제의 정보량이 작아지면 끝. */
+const DIAG_N=12;
+function diagEps(){ const b=pref().band||3, lo=Math.max(3,b-1), hi=Math.min(6,b+1); return UNITS36.filter(u=>{ const g=gradeOfUnit(u); return g>=lo&&g<=hi; }).flatMap(u=>u.eps); }
+function diagApply(){ const D=S.diagRun; if(!D.cur||D.cur.done) return; D.cur.done=1; const ok=!!S.results[D.cur.i], kc=epKC(D.cur.ep); if(!kc) return; const st=state(), Ld=LADDER[kc[1]]||[], idx=Ld.indexOf(kc); if(idx<0) return;
+  D.asked[kc]=1; for(let k=0;k<Ld.length;k++){ if(k===idx||D.asked[Ld[k]]) continue; const d=Math.abs(k-idx)-1, cur=st.kc[Ld[k]]==null?BKT.L0:st.kc[Ld[k]];
+    if(ok&&k<idx) st.kc[Ld[k]]=bktW(cur,true,1/3,.6*Math.pow(.8,d)); else if(!ok&&k>idx) st.kc[Ld[k]]=bktW(cur,false,1/3,.5*Math.pow(.8,d)); }
+  W(SK,st); }
+function diagNext(){ const D=S.diagRun; diagApply(); if(S.i>=DIAG_N){ S.acts.length=S.i; return false; } const st=state();
+  const fresh=q=>{ const ps=[...new Set(Object.values(q.mis||{}).map(c=>MISC[c]&&MISC[c][0][0]).filter(Boolean))]; return !ps.length||ps.some(c=>(D.pc[c]||0)<3); };
+  const pool=shuffle(D.eps.filter(e=>!D.used[e])).slice(0,30), q=bestQ(pool,q=>(q.write||(q.opts&&q.opts.length>=3))&&fresh(q),st);
+  if(!q||(S.i>=6&&qInfo(q,st)<.8)){ S.acts.length=S.i; return false; }
+  D.used[q._ep]=1; new Set(Object.values(q.mis||{}).map(c=>MISC[c]&&MISC[c][0][0]).filter(Boolean)).forEach(c=>{ D.pc[c]=(D.pc[c]||0)+1; }); q.diag=1;
+  D.cur={i:S.i,ep:q._ep}; S.acts[S.i]={kind:'q',q}; S.ep=q._ep; S.ui=uix(q._ep); return true; }
+function startDiag(){ if(!pref().band||pref().band<3) setPref({band:3});
+  S={mode:'ep36',retry:true,diagRun:{eps:diagEps(),used:{},pc:{},asked:{},cur:null},ep:'S2-01',ui:0,ch:0,steps:[{kind:'acts'}],si:0,acts:Array.from({length:DIAG_N},()=>({kind:'q',q:null})),i:0,results:[],tries:0,counted:0,title:'내 수준 찾기',saveKey:'RETRY',chars:CAST};
   if(diagNext()) step(); else home(); }
-function diagDone(){ diagApply(); const st=state(); st.lvl={}; S.diagRun.strands.forEach(t=>{ st.lvl[t.s]=t.lo; LADDER[t.s].slice(0,t.lo).forEach(k=>{ st.est[k]=1; }); }); st.diagAt=today(); W(SK,st);
+function diagDone(){ diagApply(); const st=state(); st.lvl={}; Object.keys(LADDER).forEach(sd=>{ const Ld=LADDER[sd]; const Lv=x=>st.kc[x]==null?BKT.L0:st.kc[x], asked=S.diagRun.asked||{}; let good=-1; Ld.forEach((x,i)=>{ if(Lv(x)>=.55) good=i; }); const fail=Ld.findIndex(x=>asked[x]&&Lv(x)<.3); let k=fail>=0?Math.min(fail,good+1):good+1;   /* 수준 = 직접 물어 틀린 첫 단원 앞까지, 또는 맞힌 가장 높은 단원까지 */ st.lvl[sd]=k; Ld.slice(0,k).forEach(x=>{ st.est[x]=1; }); }); st.diagAt=today(); W(SK,st);
+  const cp=st.cp||{}, good=Object.keys(cp).filter(c=>CPC[c]&&cp[c]>=.6).length, chk=checkPieces(st).length, weak=weakPieces(st).length, low=Object.keys(cp).filter(c=>CPC[c]&&cp[c]<.35).length;
   S={idle:true}; hush(); app.className='wrap';
-  app.innerHTML=`<div class="stage"><div style="font-family:Jua;font-size:1.3rem;margin-bottom:14px">수준 찾기 끝! 이제 내 수준에 맞는 문제가 나와요.</div><div class="btns"><button class="next" id="kt-go">오늘의 문제 풀기</button><button class="ghost" id="kt-home">처음으로</button></div></div>`;
+  app.innerHTML=`<div class="stage"><div style="font-family:Jua;font-size:1.3rem;margin-bottom:8px">수준 찾기 끝! 이제 내 수준에 맞는 문제가 나와요.</div><p class="kt-ex" style="margin-bottom:14px">잘 아는 개념 ${good}개 · 더 살펴볼 개념 ${Math.max(low,chk+weak)}개</p><div class="btns"><button class="next" id="kt-go">오늘의 문제 풀기</button><button class="ghost" id="kt-home">처음으로</button></div></div>`;
   document.getElementById('kt-go').onclick=startDaily; document.getElementById('kt-home').onclick=home; if(!pref().band) setPref({band:3}); }
 
 /* ---------- 9. 다시 다지기(오개념 맞춤 연습)와 오늘의 코스 ---------- */
