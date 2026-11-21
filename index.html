@@ -3233,7 +3233,7 @@ function ruler(len){ const u=24, W=u*(len+2)+20; let s=`<rect x="10" y="40" widt
 function gridShape(cells){ const u=22; const xs=cells.map(c=>c[0]), ys=cells.map(c=>c[1]); const W=(Math.max(...xs)+3)*u, H=(Math.max(...ys)+3)*u; let s=''; for(let x=0;x<=W;x+=u) s+=`<line x1="${x}" y1="0" x2="${x}" y2="${H}" stroke="#E5D3B5"/>`; for(let y=0;y<=H;y+=u) s+=`<line x1="0" y1="${y}" x2="${W}" y2="${y}" stroke="#E5D3B5"/>`;
   cells.forEach(([x,y])=>s+=`<rect x="${(x+1)*u}" y="${(y+1)*u}" width="${u}" height="${u}" fill="#F2A65A" stroke="#7A4A1E"/>`); return SV(W,H,s,260); }
 const polyomino=n=>{ const set=new Set(['0,0']); const cs=[[0,0]]; while(cs.length<n){ const [x,y]=rndPick(...cs); const [dx,dy]=rndPick([1,0],[0,1],[-1,0],[0,-1]); const nx=x+dx, ny=y+dy; if(nx<0||ny<0||nx>5||ny>4) continue; const k=nx+','+ny; if(set.has(k)) continue; set.add(k); cs.push([nx,ny]); } return cs; };
-const lab=(x,y,t)=>`<text x="${x}" y="${y}" font-size="14" text-anchor="middle" font-weight="700" fill="#4A2E14">${t}</text>`;
+const lab=(x,y,t)=>/^\s*(cm)?\s*$/.test(String(t))?'':`<text x="${x}" y="${y}" font-size="14" text-anchor="middle" font-weight="700" fill="#4A2E14">${t}</text>`;
 function figSvg(kind,a,b,c){ const F='fill="#FFE3B0" '+STK, D='stroke="#D45F16" stroke-width="2" stroke-dasharray="5 4"'; let s;
   if(kind==='rect'){ const k=Math.min(160/a,90/b), w=Math.max(34,a*k), hh=Math.max(26,b*k), x=120-w/2, y=62-hh/2; s=`<rect x="${x}" y="${y}" width="${w}" height="${hh}" ${F}/>`+lab(120,y+hh+20,a+' cm')+lab(Math.max(22,x-22),67,b+' cm'); }
   else if(kind==='sq') s=`<rect x="70" y="15" width="100" height="100" ${F}/>`+lab(120,134,a+' cm');
@@ -3243,7 +3243,7 @@ function figSvg(kind,a,b,c){ const F='fill="#FFE3B0" '+STK, D='stroke="#D45F16" 
   else if(kind==='trap') s=`<polygon points="80,20 170,20 215,110 30,110" ${F}/><line x1="80" y1="20" x2="80" y2="110" ${D}/>`+lab(125,14,a+' cm')+lab(122,130,b+' cm')+lab(98,72,c);
   else if(kind==='circ') s=`<circle cx="120" cy="65" r="55" ${F}/><line x1="120" y1="65" x2="175" y2="65" ${D}/><circle cx="120" cy="65" r="3" fill="#4A2E14"/>`+lab(148,58,a);
   return SV(240,140,s,300); }
-const boxSvg=(a,b,c)=>SV(220,150,`<polygon points="20,50 150,50 150,140 20,140" fill="#FFE3B0" ${STK}/><polygon points="20,50 70,15 200,15 150,50" fill="#FFF0D0" ${STK}/><polygon points="150,50 200,15 200,105 150,140" fill="#F5D39A" ${STK}/><line x1="20" y1="140" x2="70" y2="105" stroke="#6B3E1C" stroke-width="2" stroke-dasharray="5 4"/><line x1="70" y1="105" x2="200" y2="105" stroke="#6B3E1C" stroke-width="2" stroke-dasharray="5 4"/><line x1="70" y1="15" x2="70" y2="105" stroke="#6B3E1C" stroke-width="2" stroke-dasharray="5 4"/>`+(a?lab(85,148,a+' cm')+lab(190,140,b+' cm')+lab(44,98,c+' cm'):''),260);
+const boxSvg=(a,b,c)=>SV(220,162,`<polygon points="20,50 150,50 150,140 20,140" fill="#FFE3B0" ${STK}/><polygon points="20,50 70,15 200,15 150,50" fill="#FFF0D0" ${STK}/><polygon points="150,50 200,15 200,105 150,140" fill="#F5D39A" ${STK}/><line x1="20" y1="140" x2="70" y2="105" stroke="#6B3E1C" stroke-width="2" stroke-dasharray="5 4"/><line x1="70" y1="105" x2="200" y2="105" stroke="#6B3E1C" stroke-width="2" stroke-dasharray="5 4"/><line x1="70" y1="15" x2="70" y2="105" stroke="#6B3E1C" stroke-width="2" stroke-dasharray="5 4"/>`+(a?lab(85,158,a+' cm')+lab(190,140,b+' cm')+lab(44,98,c+' cm'):''),260);
 const ROT={'↑':'→','→':'↓','↓':'←','←':'↑'}, FLR={'↑':'↑','↓':'↓','←':'→','→':'←'}, FUD={'↑':'↓','↓':'↑','←':'←','→':'→'};
 const ARR=['↑','→','↓','←'];
 const big=t=>`<div class="bigsym">${t}</div>`;
@@ -5985,6 +5985,7 @@ B('S6-16', ['3 m 50 cm와 40 cm를 더하면 얼마일까요?','3 m 90 cm',[['43
 /* ===== 3-31e. 4지선다 넓히기: 1~2학년 규칙 찾기, 분류하기, 표와 그래프, 모양과 비교하기 (한 문장, 직접 검산) ===== */
 Object.assign(MIS,{
 'R1-04':['수가 몇씩 변하는지 잘못 봄','앞뒤 수의 차를 두 군데 넘게 확인해요.'],
+'N1-06':['0을 더하거나 빼면 0이 된다고 봄','0은 아무것도 없다는 뜻이라, 더하거나 빼도 수가 그대로예요.'],
 'G2-14':['놓인 방향이 바뀌면 다른 모양이라고 봄','돌려 놓아도 뾰족한 곳과 곧은 선의 수는 그대로예요.'],
 'G2-15':['비교한 결과를 반대로 읽음','저울은 내려간 쪽이 무겁고, 옮겨 부어 넘치면 처음 그릇이 더 많이 담겨요.'],
 'G2-16':['높이나 크기 한 가지만 보고 양이 같다고 봄','높이나 크기가 같아도 담기는 양과 무게는 다를 수 있어요.']});
@@ -6132,9 +6133,21 @@ function fixJosa(t){ if(typeof t!=='string'||t.indexOf('​')<0) return t;
   const P={'은':['은','는'],'는':['은','는'],'이':['이','가'],'가':['이','가'],'을':['을','를'],'를':['을','를'],'과':['과','와'],'와':['과','와'],'이에요':['이에요','예요'],'예요':['이에요','예요'],'이야':['이야','야'],'야':['이야','야'],'이란다':['이란다','란다'],'란다':['이란다','란다']};
   return t.replace(/([가-힣])​(으로|로|이에요|예요|이란다|란다|이야|야|은|는|이|가|을|를|과|와)(?=[\s,.?!~…]|$)/g,(m,ch,j)=>{ const jong=(ch.charCodeAt(0)-0xAC00)%28; const nj=(j==='으로'||j==='로')?((jong>0&&jong!==8)?'으로':'로'):P[j][jong>0?0:1]; return ch+'​'+nj; }); }
 if(typeof say==='function'){ const _say=say; say=function(text,who,cb){ return _say(fixJosa(text),who,cb); }; }
+/* 1~2학년 보기 넓히기: 그 단원의 대표 오개념 답이 보기에 꼭 들어가게 한다(코드 없는 오답 하나를 바꿈). 난수를 쓰지 않아 씨앗 재생성과 맞는다. */
+function epWrong(q){ if(!q||!Array.isArray(q.opts)||q.opts.length<3||q.opts.some(o=>typeof o!=='number')||typeof q.ans!=='number') return q;
+  const s=String(q.q).replace(/<[^>]+>/g,' ').replace(/​/g,'').replace(/\s+/g,' ').trim(); let m, add=[];
+  if((m=s.match(/^(\d) [+−-] 0 = \?$/))&&+m[1]>0) add.push([0,'N1-06']);
+  else if((m=s.match(/^(1\d) [−-] (\d) = \?$/))&&(+m[1]%10)<+m[2]) add.push([10+(+m[2]-(+m[1]%10)),'N2-02']);
+  else if((m=s.match(/^(\d\d) [−-] (\d\d) = \?$/))&&(+m[1]%10)<(+m[2]%10)) add.push([+m[1]-+m[2]+10,'N2-08']);
+  else if((m=s.match(/^□ \+ (\d+) = (\d+)$/))||(m=s.match(/^(\d+) \+ □ = (\d+)$/))) add.push([+m[1]+ +m[2],'N1-03']);
+  else if((m=s.match(/^(\d)의 (\d)배는\?$/))&&(+m[1])*(+m[2])!==+m[1]+ +m[2]) add.push([+m[1]+ +m[2],'N2-05']);
+  for(const [v,c] of add){ if(v===q.ans||v<0) continue; q.mis=q.mis||{};
+    if(!q.opts.includes(v)){ let k=-1; for(let i=q.opts.length-1;i>=0;i--){ if(q.opts[i]!==q.ans&&!q.mis[q.opts[i]]){ k=i; break; } } if(k<0) continue; q.opts[k]=v; }
+    if(!q.mis[v]) q.mis[v]=c; }
+  return q; }
 function fixEP(q){ if(q){ for(const k of ['speech','ansSpeech','hint']) if(typeof q[k]==='string') q[k]=fixJosa(q[k]); } if(q&&typeof q.q==='string'){ q.q=q.q.replace(/(하나​?['’])은/,'$1는'); q.q=q.q.replace(/^(['‘].*?([가-힣])​?['’])[은는] 숫자로\?$/,(m,a,ch)=>a+(((ch.charCodeAt(0)-0xAC00)%28)?'은':'는')+' 숫자로?');
   { const m=q.q.match(/^(\d+)에서 숫자 (\d)([은는]) 얼마\?$/); const an=+q.ans; if(m&&an>0){ const pl=an>=1000?'천':an>=100?'백':an>=10?'십':'일'; q.q=`${m[1]}에서 ${pl}의 자리 숫자 ${m[2]}${m[3]} 얼마?`; } } } return q; }
-if(typeof G!=='undefined') for(const e of Object.keys(G)) G[e]=G[e].map(g=>function(){ return fixEP(g.apply(this,arguments)); });
+if(typeof G!=='undefined') for(const e of Object.keys(G)) G[e]=G[e].map(g=>function(){ return epWrong(fixEP(g.apply(this,arguments))); });
 
 /* ---------- 3-12. 개념 조각과 보기별 무게 (오개념 코드 → 모르는 개념 조각) ---------- */
 // 교수님 지적(2026-11-20): 오답에 코드만 붙일 게 아니라 "이 보기를 고른 아이는 어떤 개념을 모른다"는 가정과 무게가 있어야 한다.
@@ -6446,7 +6459,7 @@ Object.assign(MISC,{'G4-18':[['GC08',.9]],'G4-19':[['GC10',.9]],'G5-16':[['GC11'
 Object.assign(MISC,{'G3-09':[['GC05',.9]],'G3-10':[['GC05',.9]],'G5-17':[['GC14',.9]]});
 Object.assign(MISC,{'G4-20':[['GC09',.9]],'G6-19':[['GC19',.9]]});
 Object.assign(MISC,{'G2-11':[['GC02',.9]],'G2-12':[['GC02',.9]],'G2-13':[['GC03',.9]]});
-Object.assign(MISC,{'R1-04':[['RC01',.9]],'G2-14':[['GC01',.9]],'G2-15':[['GC03',.9]],'G2-16':[['GC03',.9]]});
+Object.assign(MISC,{'N1-06':[['C02',.9]],'R1-04':[['RC01',.9]],'G2-14':[['GC01',.9]],'G2-15':[['GC03',.9]],'G2-16':[['GC03',.9]]});
 Object.assign(MISC,{'G6-20':[['GC17',.9]]});
 
 /* ---------- 4-1. PC 에셋 폴더에서 가져온 그림: 캐릭터 8명(자세 7장씩)과 배경 3장 ---------- */

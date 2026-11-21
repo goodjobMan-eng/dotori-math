@@ -686,6 +686,7 @@ B('S6-16', ['3 m 50 cm와 40 cm를 더하면 얼마일까요?','3 m 90 cm',[['43
 /* ===== 3-31e. 4지선다 넓히기: 1~2학년 규칙 찾기, 분류하기, 표와 그래프, 모양과 비교하기 (한 문장, 직접 검산) ===== */
 Object.assign(MIS,{
 'R1-04':['수가 몇씩 변하는지 잘못 봄','앞뒤 수의 차를 두 군데 넘게 확인해요.'],
+'N1-06':['0을 더하거나 빼면 0이 된다고 봄','0은 아무것도 없다는 뜻이라, 더하거나 빼도 수가 그대로예요.'],
 'G2-14':['놓인 방향이 바뀌면 다른 모양이라고 봄','돌려 놓아도 뾰족한 곳과 곧은 선의 수는 그대로예요.'],
 'G2-15':['비교한 결과를 반대로 읽음','저울은 내려간 쪽이 무겁고, 옮겨 부어 넘치면 처음 그릇이 더 많이 담겨요.'],
 'G2-16':['높이나 크기 한 가지만 보고 양이 같다고 봄','높이나 크기가 같아도 담기는 양과 무게는 다를 수 있어요.']});
@@ -833,6 +834,18 @@ function fixJosa(t){ if(typeof t!=='string'||t.indexOf('​')<0) return t;
   const P={'은':['은','는'],'는':['은','는'],'이':['이','가'],'가':['이','가'],'을':['을','를'],'를':['을','를'],'과':['과','와'],'와':['과','와'],'이에요':['이에요','예요'],'예요':['이에요','예요'],'이야':['이야','야'],'야':['이야','야'],'이란다':['이란다','란다'],'란다':['이란다','란다']};
   return t.replace(/([가-힣])​(으로|로|이에요|예요|이란다|란다|이야|야|은|는|이|가|을|를|과|와)(?=[\s,.?!~…]|$)/g,(m,ch,j)=>{ const jong=(ch.charCodeAt(0)-0xAC00)%28; const nj=(j==='으로'||j==='로')?((jong>0&&jong!==8)?'으로':'로'):P[j][jong>0?0:1]; return ch+'​'+nj; }); }
 if(typeof say==='function'){ const _say=say; say=function(text,who,cb){ return _say(fixJosa(text),who,cb); }; }
+/* 1~2학년 보기 넓히기: 그 단원의 대표 오개념 답이 보기에 꼭 들어가게 한다(코드 없는 오답 하나를 바꿈). 난수를 쓰지 않아 씨앗 재생성과 맞는다. */
+function epWrong(q){ if(!q||!Array.isArray(q.opts)||q.opts.length<3||q.opts.some(o=>typeof o!=='number')||typeof q.ans!=='number') return q;
+  const s=String(q.q).replace(/<[^>]+>/g,' ').replace(/​/g,'').replace(/\s+/g,' ').trim(); let m, add=[];
+  if((m=s.match(/^(\d) [+−-] 0 = \?$/))&&+m[1]>0) add.push([0,'N1-06']);
+  else if((m=s.match(/^(1\d) [−-] (\d) = \?$/))&&(+m[1]%10)<+m[2]) add.push([10+(+m[2]-(+m[1]%10)),'N2-02']);
+  else if((m=s.match(/^(\d\d) [−-] (\d\d) = \?$/))&&(+m[1]%10)<(+m[2]%10)) add.push([+m[1]-+m[2]+10,'N2-08']);
+  else if((m=s.match(/^□ \+ (\d+) = (\d+)$/))||(m=s.match(/^(\d+) \+ □ = (\d+)$/))) add.push([+m[1]+ +m[2],'N1-03']);
+  else if((m=s.match(/^(\d)의 (\d)배는\?$/))&&(+m[1])*(+m[2])!==+m[1]+ +m[2]) add.push([+m[1]+ +m[2],'N2-05']);
+  for(const [v,c] of add){ if(v===q.ans||v<0) continue; q.mis=q.mis||{};
+    if(!q.opts.includes(v)){ let k=-1; for(let i=q.opts.length-1;i>=0;i--){ if(q.opts[i]!==q.ans&&!q.mis[q.opts[i]]){ k=i; break; } } if(k<0) continue; q.opts[k]=v; }
+    if(!q.mis[v]) q.mis[v]=c; }
+  return q; }
 function fixEP(q){ if(q){ for(const k of ['speech','ansSpeech','hint']) if(typeof q[k]==='string') q[k]=fixJosa(q[k]); } if(q&&typeof q.q==='string'){ q.q=q.q.replace(/(하나​?['’])은/,'$1는'); q.q=q.q.replace(/^(['‘].*?([가-힣])​?['’])[은는] 숫자로\?$/,(m,a,ch)=>a+(((ch.charCodeAt(0)-0xAC00)%28)?'은':'는')+' 숫자로?');
   { const m=q.q.match(/^(\d+)에서 숫자 (\d)([은는]) 얼마\?$/); const an=+q.ans; if(m&&an>0){ const pl=an>=1000?'천':an>=100?'백':an>=10?'십':'일'; q.q=`${m[1]}에서 ${pl}의 자리 숫자 ${m[2]}${m[3]} 얼마?`; } } } return q; }
-if(typeof G!=='undefined') for(const e of Object.keys(G)) G[e]=G[e].map(g=>function(){ return fixEP(g.apply(this,arguments)); });
+if(typeof G!=='undefined') for(const e of Object.keys(G)) G[e]=G[e].map(g=>function(){ return epWrong(fixEP(g.apply(this,arguments))); });

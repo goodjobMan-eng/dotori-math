@@ -201,5 +201,12 @@ _g="else if(kind==='rhom') s=`<polygon points=\"120,10 200,65 120,120 40,65\" ${
 h = h.replace(_g, "else if(kind==='rhom'){ const bv=parseFloat(b)||a, k=Math.min(160/a,110/bv), hx=Math.max(24,a*k/2), hy=Math.max(20,bv*k/2); s=`<polygon points=\"120,${65-hy} ${120+hx},65 120,${65+hy} ${120-hx},65\" ${F}/><line x1=\"${120-hx}\" y1=\"65\" x2=\"${120+hx}\" y2=\"65\" ${D}/><line x1=\"120\" y1=\"${65-hy}\" x2=\"120\" y2=\"${65+hy}\" ${D}/>`+lab(120+hx*0.55,58,a+' cm')+lab(142,65+Math.max(18,hy*0.6),b); }")
 _g="+(a?lab(85,148,a+' cm')+lab(190,140,b+' cm')+lab(8,98,c+' cm'):''),260);"; assert h.count(_g)==1
 h = h.replace(_g, "+(a?lab(85,148,a+' cm')+lab(190,140,b+' cm')+lab(44,98,c+' cm'):''),260);")
+# --- 그림 점검 2회차: 수 없는 치수 글자(' cm')는 그리지 않음, 직육면체 가로 글자가 모서리 선에 겹침 ---
+_g="const lab=(x,y,t)=>`<text x="; assert h.count(_g)==1
+h = h.replace(_g, "const lab=(x,y,t)=>/^\\s*(cm)?\\s*$/.test(String(t))?'':`<text x=")
+_g="const boxSvg=(a,b,c)=>SV(220,150,"; assert h.count(_g)==1
+h = h.replace(_g, "const boxSvg=(a,b,c)=>SV(220,162,")
+_g="(a?lab(85,148,a+' cm')"; assert h.count(_g)==1
+h = h.replace(_g, "(a?lab(85,158,a+' cm')")
 open('out/index.html', 'w', encoding='utf-8').write(h)
 print('built', len(out))
