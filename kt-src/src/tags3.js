@@ -1097,7 +1097,12 @@ function g36Wrong(ep,i,q){ if(!q||q.manip||q.onMount||!Array.isArray(q.opts)||q.
   const coded=opts.filter(o=>String(o)!==A&&q.mis[String(o)]).length; let keepF=coded>=2?0:(coded===1?1:9); const out=[];
   for(const o of opts){ const s=String(o); if(s!==A&&!q.mis[s]){ if(keepF>0){ keepF--; out.push(o); } else delete q.fx[s]; } else out.push(o); }
   q.opts=out; return q; }
-{ const _t=tagQ; tagQ=function(ep,i,q){ q=_t(ep,i,q); try{ q=g36Wrong(ep,i,q); }catch(e){} return q; }; }
+/* ---------- 3-36. 보기 자리 섞기 ----------
+   보기의 자리(1번·2번…)는 오개념 종류나 정답과 아무 관계가 없어야 한다. 규칙이 보기를 끼워 넣는 순서가 자리에 남지 않게, 모든 처리가 끝난 뒤 한 번 섞는다.
+   Math.random을 쓰지만 씨앗 재생성(withSeed) 안에서 불리므로 같은 씨앗이면 같은 순서다. 부등호(>, =, <)처럼 순서가 약속인 보기는 그대로 둔다. 점검: node x37.js */
+function mixOpts(q){ try{ if(!q||typeof q!=='object'||q.manip||q.onMount||!Array.isArray(q.opts)||q.opts.length<2) return q; if(q.opts.every(o=>/^[<>=＞＜]$/.test(String(o).trim()))) return q;
+  const a=q.opts; for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } }catch(e){} return q; }
+{ const _t=tagQ; tagQ=function(ep,i,q){ q=_t(ep,i,q); try{ q=g36Wrong(ep,i,q); }catch(e){} return mixOpts(q); }; }
 try{ window.__R36=R36; window.__G36G=G36G; window.__MIS=MIS; }catch(e){}
 
 
@@ -1192,4 +1197,4 @@ function epWrite(q){ try{ if(!q||typeof q!=='object'||(q.opts&&q.opts.length)||q
   const cands=[_pl(q.q), String(q.ansText||'').replace(/= \d+\s*$/,'= ?')]; for(const t of cands){ const u=String(t).replace(/\s+/g,' ').trim(); for(const [re,f] of EPR){ const m=u.match(re); if(!m) continue; if(!/[+×−-]/.test(u)) continue;
       const n=(u.match(/\d+/g)||[]).map(Number), ops=u.match(/[+×−-]/g)||[]; let v=n[0]; ops.forEach((o,i)=>{ const y=n[i+1]; v=o==='+'?v+y:o==='×'?v*y:v-y; }); if(String(v)!==A) continue;   /* 식을 계산한 값이 정답과 같을 때만 */
       const mis={}, clash=new Set(); for(const [w,c] of (f(m,q)||[])){ const k=String(w); if(k===A||!/^\d+$/.test(k)||typeof c!=='string'||c==='F') continue; if(k in mis){ if(mis[k]!==c) clash.add(k); continue; } mis[k]=c; } clash.forEach(k=>delete mis[k]); if(Object.keys(mis).length){ q.mis=mis; return q; } } } }catch(e){} return q; }
-if(typeof G!=='undefined') for(const e of Object.keys(G)) G[e]=G[e].map(g=>function(){ return epWrite(epWrong(fixEP(g.apply(this,arguments)))); });
+if(typeof G!=='undefined') for(const e of Object.keys(G)) G[e]=G[e].map(g=>function(){ return mixOpts(epWrite(epWrong(fixEP(g.apply(this,arguments))))); });

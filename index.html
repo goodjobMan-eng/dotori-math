@@ -2647,7 +2647,7 @@ unit(3,'3-1 분수와 소수',[
  ]],
  ['S3-19','누가 더 먹었을까','분모 같은 분수 크기 비교',[
   ()=>{ const d=rnd(4,9), a=rnd(1,d-1); let b=rnd(1,d-1); if(b===a) b=a===1?2:a-1; return C36('cheong',`${d}분의 ${a}와 ${d}분의 ${b}, 더 큰 것은?`,`분모가 같으면 분자가 클수록 커요. 어느 쪽이 더 클까요?`,`<div class="pies">${pie(d,a)}${pie(d,b)}</div>`,`${d}분의 ${Math.max(a,b)}`,[`${d}분의 ${a}`,`${d}분의 ${b}`]); },
-  ()=>{ const d=rnd(4,9), a=rnd(1,d-2), b=rnd(a+1,d-1); return C36('rami',`□ 안에 알맞은 것은?`,`${sino(d)}분의 ${sino(a)}와 ${sino(d)}분의 ${sino(b)}. 부등호를 넣어 보세요.`,row(fr(a,d),'□',fr(b,d)),'<',['<','>','=']); },
+  ()=>{ const d=rnd(4,9); let a=rnd(1,d-2), b=rnd(a+1,d-1); if(Math.random()<0.5) [a,b]=[b,a]; return C36('rami',`□ 안에 알맞은 것은?`,`${sino(d)}분의 ${sino(a)}와 ${sino(d)}분의 ${sino(b)}. 부등호를 넣어 보세요.`,row(fr(a,d),'□',fr(b,d)),a<b?'<':'>',['>','=','<']); },
  ]],
  ['S3-20','8분의 1이 더 크지?','단위분수 크기 비교',[
   ()=>{ const a=rnd(2,5), b=rnd(a+1,9); return C36('cheong',`${a}분의 1과 ${b}분의 1, 더 큰 것은?`,`청이는 ${sino(b)}이 크니까 ${sino(b)}분의 일이 크대요. 정말 그럴까요?`,`<div class="fbars">${bar(a,1)}${bar(b,1)}</div>`,`${a}분의 1`,[`${a}분의 1`,`${b}분의 1`]); },
@@ -6396,7 +6396,12 @@ function g36Wrong(ep,i,q){ if(!q||q.manip||q.onMount||!Array.isArray(q.opts)||q.
   const coded=opts.filter(o=>String(o)!==A&&q.mis[String(o)]).length; let keepF=coded>=2?0:(coded===1?1:9); const out=[];
   for(const o of opts){ const s=String(o); if(s!==A&&!q.mis[s]){ if(keepF>0){ keepF--; out.push(o); } else delete q.fx[s]; } else out.push(o); }
   q.opts=out; return q; }
-{ const _t=tagQ; tagQ=function(ep,i,q){ q=_t(ep,i,q); try{ q=g36Wrong(ep,i,q); }catch(e){} return q; }; }
+/* ---------- 3-36. 보기 자리 섞기 ----------
+   보기의 자리(1번·2번…)는 오개념 종류나 정답과 아무 관계가 없어야 한다. 규칙이 보기를 끼워 넣는 순서가 자리에 남지 않게, 모든 처리가 끝난 뒤 한 번 섞는다.
+   Math.random을 쓰지만 씨앗 재생성(withSeed) 안에서 불리므로 같은 씨앗이면 같은 순서다. 부등호(>, =, <)처럼 순서가 약속인 보기는 그대로 둔다. 점검: node x37.js */
+function mixOpts(q){ try{ if(!q||typeof q!=='object'||q.manip||q.onMount||!Array.isArray(q.opts)||q.opts.length<2) return q; if(q.opts.every(o=>/^[<>=＞＜]$/.test(String(o).trim()))) return q;
+  const a=q.opts; for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } }catch(e){} return q; }
+{ const _t=tagQ; tagQ=function(ep,i,q){ q=_t(ep,i,q); try{ q=g36Wrong(ep,i,q); }catch(e){} return mixOpts(q); }; }
 try{ window.__R36=R36; window.__G36G=G36G; window.__MIS=MIS; }catch(e){}
 
 
@@ -6491,7 +6496,7 @@ function epWrite(q){ try{ if(!q||typeof q!=='object'||(q.opts&&q.opts.length)||q
   const cands=[_pl(q.q), String(q.ansText||'').replace(/= \d+\s*$/,'= ?')]; for(const t of cands){ const u=String(t).replace(/\s+/g,' ').trim(); for(const [re,f] of EPR){ const m=u.match(re); if(!m) continue; if(!/[+×−-]/.test(u)) continue;
       const n=(u.match(/\d+/g)||[]).map(Number), ops=u.match(/[+×−-]/g)||[]; let v=n[0]; ops.forEach((o,i)=>{ const y=n[i+1]; v=o==='+'?v+y:o==='×'?v*y:v-y; }); if(String(v)!==A) continue;   /* 식을 계산한 값이 정답과 같을 때만 */
       const mis={}, clash=new Set(); for(const [w,c] of (f(m,q)||[])){ const k=String(w); if(k===A||!/^\d+$/.test(k)||typeof c!=='string'||c==='F') continue; if(k in mis){ if(mis[k]!==c) clash.add(k); continue; } mis[k]=c; } clash.forEach(k=>delete mis[k]); if(Object.keys(mis).length){ q.mis=mis; return q; } } } }catch(e){} return q; }
-if(typeof G!=='undefined') for(const e of Object.keys(G)) G[e]=G[e].map(g=>function(){ return epWrite(epWrong(fixEP(g.apply(this,arguments)))); });
+if(typeof G!=='undefined') for(const e of Object.keys(G)) G[e]=G[e].map(g=>function(){ return mixOpts(epWrite(epWrong(fixEP(g.apply(this,arguments))))); });
 
 /* ---------- 3-12. 개념 조각과 보기별 무게 (오개념 코드 → 모르는 개념 조각) ---------- */
 // 교수님 지적(2026-11-20): 오답에 코드만 붙일 게 아니라 "이 보기를 고른 아이는 어떤 개념을 모른다"는 가정과 무게가 있어야 한다.
