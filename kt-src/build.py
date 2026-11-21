@@ -112,7 +112,7 @@ sub("[`${a}%`,'D6-03']]); });", "[`${a}%`,'D6-03']], [`${100-b}%`]); });", 1)
 sub("[[`${2*(a+b)} cm²`,'G5-01'],[`${a+b} cm²`,'G5-01']]); },", "[[`${2*(a+b)} cm²`,'G5-01'],[`${a+b} cm²`,'G5-01']], [`${a*b+a} cm²`]); },", 1)
 
 
-out = '\n'.join(lines) + open('src/bank2.js', encoding='utf-8').read() + open('src/mis.js', encoding='utf-8').read() + open('src/tags3.js', encoding='utf-8').read() + open('src/cpiece.js', encoding='utf-8').read() + open('src/assets2.js', encoding='utf-8').read() + open('src/core2.js', encoding='utf-8').read().replace('/*__FACTS__*/', open('src/facts.js', encoding='utf-8').read()).replace('/*__MODES__*/', open('src/modes.js', encoding='utf-8').read())
+out = '\n'.join(lines) + open('src/bank2.js', encoding='utf-8').read() + open('src/mis.js', encoding='utf-8').read() + open('src/tags3.js', encoding='utf-8').read() + open('src/cpiece.js', encoding='utf-8').read() + open('src/assets2.js', encoding='utf-8').read() + open('src/core2.js', encoding='utf-8').read().replace('/*__FACTS__*/', open('src/facts.js', encoding='utf-8').read()).replace('/*__MODES__*/', open('src/modes.js', encoding='utf-8').read()) + open('src/cards.js', encoding='utf-8').read()
 open('kt.js', 'w', encoding='utf-8').write(out)
 
 h = open('/tmp/dotori-math/index.html', encoding='utf-8').read()
@@ -142,12 +142,14 @@ _a = "function mountWriteQ36(q){ const host=document.getElementById('wpad'); con
 assert h.count(_a) == 1
 h = h.replace(_a, _a + """
   /* 소수 답: 칸마다 쓰는 대신 답을 통째로 쓴다(12.4처럼 소수점도 직접). 칸 사이 점 찍기는 헷갈려서 없앴다(교수님 11/21). */
+  let _m0; try{ _m0=localStorage.getItem('dotori-input'); }catch(e){} if(!_m0) _m0=g>=3?'pad':'hand';
   const DP=null; const FREE=(()=>{ const ds=[...document.querySelectorAll('#visual em.dot')];
-    if(ds.length===0&&slots.length){ /* 소수 계산인데 답이 자연수로 떨어진 경우(0.5 × 6 = 3)도 같은 답 상자를 쓴다: 칸 모양으로 '소수가 아니다'를 알려 주지 않게 */ const grp=slots[0].parentElement, txt=String(q.q||'')+' '+document.getElementById('visual').textContent; if(!grp||!grp.classList.contains('vgrp')||slots.some(x=>x.parentElement!==grp)||!/\\d\\.\\d/.test(txt)||!/^\\d+$/.test(ans)) return null; slots.forEach(x=>x.remove()); const box=document.createElement('div'); box.className='freeans empty'; box.id='freeans'; grp.appendChild(box); grp.classList.add('hasfree'); return {p:ans.length,box}; }
+    if(ds.length===0&&slots.length){ /* 소수 계산인데 답이 자연수로 떨어진 경우(0.5 × 6 = 3)도 같은 답 상자를 쓴다: 칸 모양으로 '소수가 아니다'를 알려 주지 않게 */ const grp=slots[0].parentElement, txt=String(q.q||'')+' '+document.getElementById('visual').textContent; if(!grp||!grp.classList.contains('vgrp')||slots.some(x=>x.parentElement!==grp)||!/^\\d+$/.test(ans)) return null; const isDec=/\\d\\.\\d/.test(txt); if(!isDec&&(_m0==='hand'||q.ub||q._step||/^0\\d/.test(ans)||document.querySelectorAll('#visual .vgrp').length!==1)) return null;   /* 정수 답도 숫자판 모드에서는 상자 하나(자릿수 힌트 없음). 손글씨 모드는 숫자를 직접 쓰게 칸 그대로 */ slots.forEach(x=>x.remove()); const box=document.createElement('div'); box.className='freeans empty'; box.id='freeans'; grp.appendChild(box); grp.classList.add('hasfree'); return {p:ans.length,box,int:!isDec}; }
     if(ds.length!==1) return null; const grp=ds[0].parentElement, gs=[...grp.querySelectorAll('.vslot')]; if(gs.length<2||gs.length!==slots.length||!grp.classList.contains('vgrp')) return null; let p=0; for(const n of grp.children){ if(n===ds[0]) break; if(n.classList.contains('vslot')) p++; } if(p<1||p>=gs.length) return null;
     ds[0].remove(); gs.forEach(x=>x.remove()); const box=document.createElement('div'); box.className='freeans empty'; box.id='freeans'; grp.appendChild(box); grp.classList.add('hasfree'); return {p,box}; })();
   if(FREE) return mountFree(q,host,ans,FREE);
-  if(q.ub){ const gs=[...document.querySelectorAll('#visual .vgrp')]; if(gs.length===2&&slots.every(x=>gs.includes(x.parentElement))){ slots.forEach(x=>x.remove()); const boxes=gs.map((g,i)=>{ const d=document.createElement('div'); d.className='ubox empty'; d.dataset.i=i; g.appendChild(d); g.classList.add('hasfree'); return d; }); return mountUnit(q,host,ans,boxes); } }""")
+  /* 손글씨 모드(1~2학년 기본)는 숫자를 직접 써 보는 것이 중요해서 칸을 그대로 둔다. 숫자판 모드에서만 단위 상자. */
+  if(q.ub&&_m0!=='hand'){ const gs=[...document.querySelectorAll('#visual .vgrp')]; if(gs.length===2&&slots.every(x=>gs.includes(x.parentElement))){ slots.forEach(x=>x.remove()); const boxes=gs.map((g,i)=>{ const d=document.createElement('div'); d.className='ubox empty'; d.dataset.i=i; g.appendChild(d); g.classList.add('hasfree'); return d; }); return mountUnit(q,host,ans,boxes); } }""")
 _a = "function mountWriteQ36(q){"
 assert h.count(_a) == 1
 h = h.replace(_a, """/* 시간·복합 단위 답: 단위마다 답 상자 하나(자릿수 힌트 없음). 빈 상자는 제출을 막는다. 값이 같지만 넘친 채로 둔 답(3시간 75분)은 G2-17 */
@@ -155,8 +157,9 @@ function mountUnit(q,host,ans,boxes){ const U=q.ub, A=U.a, tot=A[0]*U.base+A[1];
   const paint=()=>boxes.forEach((b,i)=>{ b.textContent=vals[i]; b.classList.toggle('empty',!vals[i]); b.classList.toggle('sel',!lock&&i===sel); });
   const key=k=>{ if(lock) return; if(k==='⌫'){ if(!vals[sel]&&sel>0) sel--; else vals[sel]=vals[sel].slice(0,-1); } else if(k==='→') sel=(sel+1)%2; else if(vals[sel].length<4) vals[sel]+=k; paint(); };
   boxes.forEach((b,i)=>b.onclick=()=>{ if(lock) return; sel=i; paint(); });
-  host.innerHTML=`<div class="numpad">${['1','2','3','4','5','6','7','8','9','→','0','⌫'].map(k=>`<button class="nk${/\\d/.test(k)?'':' fn'}" data-k="${k}"${k==='→'?' aria-label="다음 칸"':''}>${k==='→'?'다음 칸':k}</button>`).join('')}</div><div class="wtools"><button class="next wok">다 썼어!</button></div>`;
+  host.innerHTML=`<div class="numpad">${['1','2','3','4','5','6','7','8','9','→','0','⌫'].map(k=>`<button class="nk${/\\d/.test(k)?'':' fn'}" data-k="${k}"${k==='→'?' aria-label="다음 칸"':''}>${k==='→'?'다음 칸':k}</button>`).join('')}</div><div class="wtools"><button class="next wok">다 썼어!</button><button class="wmode">✍️ 손글씨</button></div>`;
   host.querySelectorAll('.nk').forEach(b=>b.onclick=()=>key(b.dataset.k)); host.querySelector('.wok').onclick=()=>submit();
+  host.querySelector('.wmode').onclick=()=>{ try{ localStorage.setItem('dotori-input','hand'); }catch(e){} document.removeEventListener('keydown',onKey); document.getElementById('visual').innerHTML=q.visual; mountWriteQ36(q); };
   const onKey=e=>{ if(!document.body.contains(boxes[0])||lock){ document.removeEventListener('keydown',onKey); return; } if(/^[0-9]$/.test(e.key)) key(e.key); else if(e.key==='Backspace') key('⌫'); else if(e.key==='Tab'||e.key===' '||e.key==='ArrowRight'||e.key==='ArrowLeft') key('→'); else if(e.key==='Enter'){ if(sel===0&&vals[0]&&!vals[1]) key('→'); else submit(); } else return; e.preventDefault(); }; document.addEventListener('keydown',onKey);
   const done=()=>{ lock=true; host.querySelector('.wtools')?.remove(); host.querySelector('.numpad')?.remove(); document.removeEventListener('keydown',onKey); paint(); };
   const addNext=fb=>{ if(document.getElementById('next')) return; fb.insertAdjacentHTML('beforeend',`<button class="next" id="next">${S.i>=S.acts.length-1?'결과 보기 ★':'다음 →'}</button>`); const nb=document.getElementById('next'); nb.onclick=()=>{ S.i++; S.i<S.acts.length?runAct():result(); }; nb.scrollIntoView({block:'nearest',behavior:'smooth'}); };
@@ -171,8 +174,9 @@ function mountUnit(q,host,ans,boxes){ const U=q.ub, A=U.a, tot=A[0]*U.base+A[1];
 function mountFree(q,host,ans,F){ const truth=F.p>=ans.length?ans:ans.slice(0,F.p)+'.'+ans.slice(F.p), dec=ans.length-F.p, tv=parseFloat(truth); let txt='', lock=false;
   const paint=()=>{ F.box.textContent=txt; F.box.classList.toggle('empty',!txt); };
   const key=k=>{ if(lock) return; if(k==='⌫') txt=txt.slice(0,-1); else if(k==='.'){ if(txt&&!txt.includes('.')) txt+='.'; } else if(txt.replace('.','').length<9) txt+=k; paint(); };
-  host.innerHTML=`<div class="numpad">${['1','2','3','4','5','6','7','8','9','.','0','⌫'].map(k=>`<button class="nk${/\\d/.test(k)?'':' fn'}" data-k="${k}">${k}</button>`).join('')}</div><div class="wtools"><button class="next wok">다 썼어!</button></div>`;
+  host.innerHTML=`<div class="numpad">${['1','2','3','4','5','6','7','8','9','.','0','⌫'].map(k=>`<button class="nk${/\\d/.test(k)?'':' fn'}" data-k="${k}">${k}</button>`).join('')}</div><div class="wtools"><button class="next wok">다 썼어!</button>${F.int?'<button class="wmode">✍️ 손글씨</button>':''}</div>`;
   host.querySelectorAll('.nk').forEach(b=>b.onclick=()=>key(b.dataset.k)); host.querySelector('.wok').onclick=()=>submit();
+  if(F.int) host.querySelector('.wmode').onclick=()=>{ try{ localStorage.setItem('dotori-input','hand'); }catch(e){} document.removeEventListener('keydown',onKey); document.getElementById('visual').innerHTML=q.visual; mountWriteQ36(q); };
   const onKey=e=>{ if(!document.body.contains(F.box)||lock){ document.removeEventListener('keydown',onKey); return; } if(/^[0-9]$/.test(e.key)) key(e.key); else if(e.key==='.'||e.key===',') key('.'); else if(e.key==='Backspace') key('⌫'); else if(e.key==='Enter') submit(); else return; e.preventDefault(); }; document.addEventListener('keydown',onKey);
   const done=()=>{ lock=true; host.querySelector('.wtools')?.remove(); host.querySelector('.numpad')?.remove(); document.removeEventListener('keydown',onKey); };
   const addNext=fb=>{ if(document.getElementById('next')) return; fb.insertAdjacentHTML('beforeend',`<button class="next" id="next">${S.i>=S.acts.length-1?'결과 보기 ★':'다음 →'}</button>`); const nb=document.getElementById('next'); nb.onclick=()=>{ S.i++; S.i<S.acts.length?runAct():result(); }; nb.scrollIntoView({block:'nearest',behavior:'smooth'}); };
@@ -189,7 +193,7 @@ function mountFree(q,host,ans,F){ const truth=F.p>=ans.length?ans:ans.slice(0,F.
 function mountWriteQ36(q){""")
 _a = ".vgrp{display:inline-flex;gap:4px}"
 assert h.count(_a) == 1
-h = h.replace(_a, _a + ".vgrp.hasfree{display:inline-flex}.ubox{min-width:76px;height:58px;padding:0 10px;border:3px solid #E3C9A0;border-radius:14px;background:#fff;color:#2E2620;font-size:32px;font-weight:700;display:flex;align-items:center;justify-content:center;box-sizing:border-box;cursor:pointer}.ubox.sel{border-color:#E8963C;box-shadow:0 0 0 3px #FBE3C6}.ubox.show{border-color:#6BBF7A;background:#F2FBF3}.numpad .nk[data-k='→']{font-size:15px}.eqrow.stepq{font-size:1.5rem;gap:3px}.eqrow.stepq .vslot.mini{min-width:40px;min-height:48px}.eqrow.stepq .frac{margin:0 1px}.freeans{min-width:150px;height:60px;padding:0 16px;border:3px solid #E8963C;border-radius:16px;background:#fff;color:#2E2620;font-size:34px;font-weight:700;display:flex;align-items:center;justify-content:center;letter-spacing:1px;box-sizing:border-box}.freeans.empty::after{content:'답';color:#C9B79E;font-weight:400;font-size:22px}.freeans.show{border-color:#6BBF7A;background:#F2FBF3}")
+h = h.replace(_a, _a + ".vgrp.hasfree{display:inline-flex}.uchunk{display:inline-flex;align-items:center;gap:4px;flex-wrap:nowrap;white-space:nowrap}.uchunk .vgrp{gap:2px}.eqrow:has(.uchunk + .uchunk){gap:6px 6px;font-size:1.8rem}.eqrow:has(.uchunk + .uchunk) .uchunk{gap:2px}.eqrow:has(.uchunk + .uchunk) .wbox.sm{width:46px;height:64px}.eqrow:has(.uchunk + .uchunk) .vslot{min-width:46px;min-height:64px}.eqrow:has(.uchunk + .uchunk) b{min-width:0}.ubox{min-width:76px;height:58px;padding:0 10px;border:3px solid #E3C9A0;border-radius:14px;background:#fff;color:#2E2620;font-size:32px;font-weight:700;display:flex;align-items:center;justify-content:center;box-sizing:border-box;cursor:pointer}.ubox.sel{border-color:#E8963C;box-shadow:0 0 0 3px #FBE3C6}.ubox.show{border-color:#6BBF7A;background:#F2FBF3}.numpad .nk[data-k='→']{font-size:15px}.eqrow.stepq{font-size:1.5rem;gap:3px}.eqrow.stepq .vslot.mini{min-width:40px;min-height:48px}.eqrow.stepq .frac{margin:0 1px}.freeans{min-width:150px;height:60px;padding:0 16px;border:3px solid #E8963C;border-radius:16px;background:#fff;color:#2E2620;font-size:34px;font-weight:700;display:flex;align-items:center;justify-content:center;letter-spacing:1px;box-sizing:border-box}.freeans.empty::after{content:'답';color:#C9B79E;font-weight:400;font-size:22px}.freeans.show{border-color:#6BBF7A;background:#F2FBF3}")
 _a = "    if(r.ok){ dropTools(); if(pad) pad.lock(); answer({dataset:{v:ans},classList:{add(){}}},q); return; }\n    const em=equivMsg(q,r.guess);"
 assert h.count(_a) == 1
 h = h.replace(_a, """    if(DP&&DP.cur==null){ sfx('bad'); fb.innerHTML=`<div class="fb no"><div class="msg">소수점을 찍어 주세요. 칸 사이의 동그라미를 눌러요.</div></div>`; return; }
@@ -285,5 +289,12 @@ h = h.replace(_g, "`${a} : ${b}의 비율을 소수로?`,' ',row(decS(s)),s,{ans
 # --- 부동소수 찌꺼기: 소수 크기 비교(S3-22#1)에서 b=a+0.1이 1.7000000000000002로 문제 글에 그대로 나왔음 ---
 _g="()=>{ const a=rnd(1,30)/10; let b=rnd(1,30)/10; if(b===a) b=a+0.1; return C36('doto',`${a}와 ${b}, 더 큰 수는?`"; assert h.count(_g)==1
 h = h.replace(_g, "()=>{ const a=rnd(1,30)/10; let b=rnd(1,30)/10; if(b===a) b=+(a+0.1).toFixed(1); return C36('doto',`${a}와 ${b}, 더 큰 수는?`")
+# --- 손글씨 → 숫자판으로 바꿀 때 단위 답 문제는 단위 상자로 다시 그린다 ---
+_g="tools.querySelector('.wmode').onclick=()=>{ mode=mode==='hand'?'pad':'hand'; try{ localStorage.setItem('dotori-input',mode); }catch(e){} build(); };"; assert h.count(_g)==1
+h = h.replace(_g, "tools.querySelector('.wmode').onclick=()=>{ mode=mode==='hand'?'pad':'hand'; try{ localStorage.setItem('dotori-input',mode); }catch(e){} if(mode==='pad'&&typeof q.visual==='string'&&!q.onMount){ document.getElementById('visual').innerHTML=q.visual; return mountWriteQ36(q); } build(); };")
+# --- km·m 덧셈(S6-39): m가 늘 세 자리이고 받아올림이 없어 오개념이 안 드러났음 → 두 자리 m와 받아올림이 섞여 나오게 ---
+_g="()=>{ const a=rnd(1,4), b=rnd(100,499), c=rnd(1,4), d=rnd(100,499); return WN2(`${a} km ${b} m + ${c} km ${d} m`,'',a+c,'km',b+d,'m'); }"; assert h.count(_g)==1
+h = h.replace(_g, "()=>{ const a=rnd(1,4), b=rnd(0,1)?rnd(20,95):rnd(300,950), c=rnd(1,4), d=rnd(0,1)?rnd(20,95):rnd(300,950), t=b+d; return WN2(`${a} km ${b} m + ${c} km ${d} m`,'',a+c+(t>=1000?1:0),'km',t%1000,'m'); }")
 open('out/index.html', 'w', encoding='utf-8').write(h)
 print('built', len(out))
+

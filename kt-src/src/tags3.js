@@ -1159,7 +1159,7 @@ function codeW10(q){ if(!q||q.opts&&q.opts.length||q.manip||q.onMount||q.mis) re
   else if((m=Q.match(/(\d+)시 (\d+)분에서 (\d+)분 뒤/))||(m=Q.match(/(\d+)시 (\d+)분에 [^.]*?(\d+)분 동안/))) tadd(+m[1],+m[2],0,+m[3]);
   else if((m=Q.match(/(\d+) (km|kg|L|m|cm) (\d+) (m|g|mL|cm|mm) ([+−]) (?:(\d+) (?:km|kg|L|m|cm) )?(\d+) (?:m|g|mL|cm|mm)\b/))||(m=Q.match(/(\d+) (km|kg|L|m|cm) (\d+) (m|g|mL|cm|mm)[^+−\d]*?()()(\d+) (?:m|g|mL|cm|mm)[을를] (더|꺼|따|썼|마)/))){
     const base=m[2]==='m'?100:m[2]==='cm'?10:1000, X=+m[1], y=+m[3], Z=+(m[6]||0), w=+m[7], plus=m[5]==='+'||m[8]==='더'; const tot=plus?X*base+y+Z*base+w:X*base+y-Z*base-w; if(tot<0||`${Math.floor(tot/base)}${tot%base}`!==A) return q;
-    if(plus&&y+w>=base) add(`${X+Z},${y+w-base}`,'N2-01'); if(!plus&&y<w){ add(`${X-Z},${w-y}`,'N2-02'); add(`${X-Z},${y+base-w}`,'N2-08'); } }
+    if(plus&&y+w>=base) add(`${X+Z},${y+w-base}`,'N2-01'); if(!plus&&y<w){ add(`${X-Z},${w-y}`,'N2-02'); add(`${X-Z},${y+base-w}`,'N2-08'); } if(base===1000){ if(plus&&y+w>=100&&y+w<1000) add(`${X+Z+1},${y+w-100}`,'G3-05'); if(!plus&&y<w&&X-Z-1>=0) add(`${X-Z-1},${y+100-w}`,'G3-05'); } }   /* 1000 관계인데 100에서 받아올림·받아내림 */
   if(Object.keys(UT).length) q._ut=UT; clash.forEach(k=>delete mis[k]); if(Object.keys(mis).length) q.mis=mis; return q; }
 function dropEqualOpts(q){ try{ if(!q||!Array.isArray(q.opts)||q.opts.length<2) return q; const A=String(q.ans), Q=_pl(q.q), num=s=>/^\d+(\.\d+)?$/.test(s)?parseFloat(s):null, fr=s=>{ const m=String(s).match(/^(?:(\d+)[과와] )?(\d+)분의 (\d+)$/); return m?+(m[1]||0)+ +m[3]/+m[2]:null; };
   const av=num(A), af=fr(A), formAsked=/기약|약분|통분|가분수|대분수|나타내|같은|소수로|분수로/.test(Q); const same=o=>{ const s=String(o); if(s===A) return false; if(av!=null&&num(s)!=null) return Math.abs(num(s)-av)<1e-9; if(af!=null&&fr(s)!=null&&!formAsked) return Math.abs(fr(s)-af)<1e-9; return false; };
@@ -1344,3 +1344,16 @@ function codeU(q){ if(!q||!q.write||!q.slots||typeof q.visual!=='string') return
   if((c=Q.match(/(\d+) ?(mm|cm|m|mL|g|분|초)[는은]? ?몇/))&&+c[1]===tot){ add(0,tot,'G2-17'); if(base===60) add(Math.floor(tot/100),tot%100,'G2-03'); if(base===1000) add(Math.floor(tot/100),tot%100,'G3-05'); }   // 단위 바꾸기
   q.ub={u,base,a}; if(Object.keys(T).length) q.mis=Object.assign({},q.mis||{},T); return q; }
 { const _t=tagQ; tagQ=function(ep,i,q){ q=_t(ep,i,q); try{ q=codeU(q); }catch(e){} return q; }; }
+
+
+// ===== 3-40. km·m 뺄셈: 자릿수 함정이 있는 수 조합 =====
+// 카본 지적(11/21): 'km ### m'끼리는 십진 계산과 답이 같아 오개념이 안 드러난다. m가 두 자리이고 받아내림이 있어야 100으로 받아내리는 오답(G3-05)이 갈린다.
+ADD('S6-39', ()=>{ const c=rnd(1,2), a=c+rnd(2,3), b=rnd(10,90), d=rnd(b+10,Math.min(950,b+400)), tot=a*1000+b-c*1000-d; return WN2(`${a} km ${b} m − ${c} km ${d} m`,'',Math.floor(tot/1000),'km',tot%1000,'m'); });
+
+
+// ===== 3-41. 줄은 의미 단위로 =====
+// 교수님 지시(11/21): '□□시 □□분'이 '□□시 □□ / 분'으로 꺾이면 안 된다. 칸 묶음과 그 단위 글자를 한 덩어리(.uchunk)로 묶어
+// 덩어리 안에서는 줄이 바뀌지 않게 한다. 한 줄에 다 안 들어가면 덩어리 사이에서만 바뀐다(□□시 / □□분).
+function unitChunk(q){ if(!q||typeof q.visual!=='string'||q.visual.indexOf('uchunk')>=0) return q;
+  q.visual=q.visual.replace(/<span class="vgrp">((?:<span class="vslot[^"]*"><\/span>|<em class="dot"><\/em>)+)<\/span><b>([^<]{1,6})<\/b>/g,'<span class="uchunk"><span class="vgrp">$1</span><b>$2</b></span>'); return q; }
+{ const _t=tagQ; tagQ=function(ep,i,q){ q=_t(ep,i,q); try{ q=unitChunk(q); }catch(e){} return q; }; }

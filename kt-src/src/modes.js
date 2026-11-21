@@ -39,9 +39,11 @@ function checkActs(B,c){ const g0=+CPC[c][1][0], gradeOf=ep=>{ const u=UNITS36[u
 // 두 쪽 모두 '확정 직후 그 조각의 문제 2개'를 푼다(A는 강의를 본 뒤, B는 보기 전). B도 그 두 문제에서 하나라도 틀리면 다음 세트에서 강의를 본다.
 const armOf=c=>{ let h=0; for(const ch of did()+c) h=(h*31+ch.charCodeAt(0))>>>0; return h%2?'B':'A'; };
 function lecPlan(st,c){ st.lec=st.lec||{}; let L=st.lec[c]; if(!L) L=st.lec[c]={arm:armOf(c),mr:[],k:(CPL[c]||[]).find(lecHas)||''}; return L; }
-function pieceVideo(c,L){ if(!L.k||L.v) return null; const t=dstr(Date.now());
+function pieceVideo(c,L){ const card=!L.k&&typeof KCARDS!=='undefined'&&!!KCARDS[c];   /* 강의 영상이 없는 조각은 개념 카드가 영상 자리를 대신한다 */
+  if((!L.k&&!card)||L.v) return null; const t=dstr(Date.now());
   if(L.arm==='B'){ if(L.mr.length<2) return null; if(L.mr.every(x=>x)){ L.v='skip'; return null; } }       // 문제 먼저: 두 문제를 다 맞혔으면 강의는 건너뜀
-  L.v=t; if(cfg().share&&KT_ENDPOINT){ const qu=J(QK,[]); qu.push([t,L.k,-1,0,0,'V '+c,1,null,0,0,'',L.arm,0,0,'c']); W(QK,qu.slice(-3000)); }
+  L.v=t; if(cfg().share&&KT_ENDPOINT){ const qu=J(QK,[]); qu.push([t,L.k||('card:'+c),-1,0,0,(card?'K ':'V ')+c,1,null,0,0,'',L.arm,0,0,'c']); W(QK,qu.slice(-3000)); }
+  if(card) return {kind:'card',c,key:'card:'+c,label:'개념 카드'};
   return {kind:'video',key:L.k,label:`${L.k} ${lecName(L.k)}`}; }
 function frontier(st){ const fr=Object.keys(LADDER).map(s=>LADDER[s].find(k=>!['숙달','추정'].includes(kcStatus(k,st)))||LADDER[s][LADDER[s].length-1]); return fr; }
 
