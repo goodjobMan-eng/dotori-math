@@ -213,5 +213,8 @@ _g="C36('halmi',`${nm}이 ${k}개인 수는?`,`${nm}이 ${sino(k)} 개이면 얼
 h = h.replace(_g, "C36('halmi',`${nm}${nm==='조'?'가':'이'} ${k}개인 수는?`,`${nm}${nm==='조'?'가':'이'} ${sino(k)} 개이면 얼마일까?")
 _g="CF(`${o}는 어떤 모양일까요?`"; assert h.count(_g)==1
 h = h.replace(_g, "CF(`${o}${((o.charCodeAt(o.length-1)-0xAC00)%28)?'은':'는'} 어떤 모양일까요?`")
+# --- 정답 오류: a + bq ÷ b × c − bq 틀(S3-67#0, S3-113#0)의 정답이 ÷b를 빼먹고 계산돼 있었음 ---
+_g="c=rnd(2,9), a=rnd(5,30); const r=a+b*q*c- (b*q);"; assert h.count(_g)==1
+h = h.replace(_g, "c=rnd(2,9), a=b*q+rnd(1,20); const r=a+q*c-(b*q);")
 open('out/index.html', 'w', encoding='utf-8').write(h)
 print('built', len(out))

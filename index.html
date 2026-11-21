@@ -2875,7 +2875,7 @@ unit(5,'5-1 자연수의 혼합 계산',[
   ()=>{ const b=rnd(2,6), c=rnd(2,9), s=b*c, a=rnd(2,9); return C36('doto',`${a*s} ÷ (${b} × ${c})`,`괄호 안을 먼저 계산하면?`,row(a*s,'÷',`(${b} × ${c})`),a,optsFrom(a,[a*c*c,a*b])); },
  ]],
  ['S3-67','계산 순서 총정리','사칙연산과 괄호',[
-  ()=>{ const b=rnd(2,5), q=rnd(2,6), c=rnd(2,9), a=rnd(5,30); const r=a+b*q*c- (b*q); return W36('halmi',`${a} + ${b*q} ÷ ${b} × ${c} − ${b*q}`,`괄호 없으면 곱셈과 나눗셈을 먼저, 앞에서부터. 그다음 덧셈과 뺄셈.`,row(a,'+',b*q,'÷',b,'×',c,'−',b*q,'=',`<span class="vgrp">${SL(r)}</span>`),r,{ansText:`= ${r}`}); },
+  ()=>{ const b=rnd(2,5), q=rnd(2,6), c=rnd(2,9), a=b*q+rnd(1,20); const r=a+q*c-(b*q); return W36('halmi',`${a} + ${b*q} ÷ ${b} × ${c} − ${b*q}`,`괄호 없으면 곱셈과 나눗셈을 먼저, 앞에서부터. 그다음 덧셈과 뺄셈.`,row(a,'+',b*q,'÷',b,'×',c,'−',b*q,'=',`<span class="vgrp">${SL(r)}</span>`),r,{ansText:`= ${r}`}); },
   ()=>{ const a=rnd(2,6), b=rnd(2,6), c=rnd(2,5), d=rnd(1,9); const r=(a+b)*c-d; return C36('rami',`(${a} + ${b}) × ${c} − ${d}`,`괄호 먼저, 곱셈, 그다음 뺄셈.`,row(`(${a} + ${b})`,'×',c,'−',d),r,optsFrom(r,[a+b*c-d,(a+b)*(c-d),(a+b)*c+d,a+b*(c-d)])); },
  ]],
 ]);
@@ -5504,8 +5504,14 @@ B('S3-110', ['페인트 1.6 L로 벽 0.8 m²를 칠했어요. 페인트 1 L로 �
 B('S3-112', ['2.6 ÷ 0.4의 몫을 자연수까지 구하면 나머지는?','0.2',[['2','N6-09'],['0.5',null]]], ['3.5 ÷ 0.6의 몫을 자연수까지 구하면 나머지는?','0.5',[['5','N6-09'],['0.8',null]]]);
 
 /* ---------- 3-13. 쓰기형(손글씨) 계산 문제: 식에서 '오개념이면 쓰는 답'을 계산해 예상 오답으로 달아 둔다 ---------- */
+/* 나머지가 있는 나눗셈(답 = 몫과 나머지를 이어 쓴 숫자열): 풀이 글 'a ÷ b = Q … R'에서 읽는다 */
+function codeWR(q){ const x=String(q.ansText||'').replace(/,/g,'').match(/^(\d+) ÷ (\d+) = (\d+) … (\d+)$/); if(!x) return q; const a=+x[1], b=+x[2], Q=+x[3], R=+x[4], A=String(q.ans); if(A!==`${Q}${R}`||Q*b+R!==a) return q;
+  const mis={}, add=(k,c)=>{ k=String(k); if(k!==A&&!(k in mis)) mis[k]=c; }; if(Q>=1) add(`${Q-1}${R+b}`,'N3-02'); if(a>b) add(`${a-b}`,'N3-11'); if(Object.keys(mis).length) q.mis=mis; return q; }
 function codeW(q){ if(!q||q.opts&&q.opts.length||q.manip||q.onMount||q.mis) return q; const A=String(q.ans); if(!/^\d+(\.\d+)?$/.test(A)) return q;
-  const t=(_pl(q.visual)+' | '+_pl(q.q)).replace(/,/g,''); const m=t.match(/(\d+(?:\.\d+)?)\s*([+−×÷])\s*(\d+(?:\.\d+)?)(?!\s*[+−×÷\d(])/); if(!m||/[()]/.test(t.split('|')[0])||/분의/.test(t)||/[+−×÷]/.test(t.slice(Math.max(0,t.lastIndexOf('|',m.index)),m.index))) return q;   /* 분수식이거나 앞에 다른 연산이 있으면 읽지 않는다 */
+  const t0=(_pl(q.visual)+' | '+_pl(q.q)).replace(/,/g,''); if(/[()]/.test(t0.split('|')[0])||/분의/.test(t0)) return q;   /* 분수식·괄호식은 읽지 않는다 */
+  let m=null; { const RE=/(\d+(?:\.\d+)?)\s*([+−×÷])\s*(\d+(?:\.\d+)?)(?!\s*[+−×÷\d(])/, fit=x=>{ const a=+x[1], b=+x[3], v=x[2]==='+'?a+b:x[2]==='−'?a-b:x[2]==='×'?a*b:a/b; return Math.abs(v-+A)<1e-9; };
+    for(const src of [_pl(q.q), String(q.ansText||'').split('=')[0], _pl(q.visual)]){ const u=String(src).replace(/,/g,''), x=u.match(RE); if(x&&!/[+−×÷]/.test(u.slice(0,x.index))&&fit(x)){ m=x; break; } } }
+  if(!m) return codeWR(q);   /* 맞는 식이 없으면 나머지가 있는 나눗셈인지 본다 */
   const as=m[1], op=m[2], bs=m[3], a=+as, b=+bs, mis={}, clash=new Set(), add=(v,c)=>{ if(v==null) return; const s=String(v); if(s===A||/NaN|-|e/.test(s)) return; if(s in mis){ if(mis[s]!==c) clash.add(s); return; } mis[s]=c; }, dec=as.includes('.')||bs.includes('.');
   const eq=(x,y)=>Math.abs(x-y)<1e-9;
   if(!dec){
@@ -5514,6 +5520,7 @@ function codeW(q){ if(!q||q.opts&&q.opts.length||q.manip||q.onMount||q.mis) retu
         if(x.length===3&&x[1]===0&&x[2]<y[2]) add(+`${x[0]-1-y[0]}${10-y[1]}${x[2]+10-y[2]}`,'N2-04'); } }
     else if(op==='×'&&a*b===+A){ add(a+b,'N2-05');
       if(b<10&&a>=10&&a<100){ const T=Math.floor(a/10), o=a%10, c=Math.floor(o*b/10); if(c){ add(T*b*10+o*b%10,'N3-14'); add((T+c)*b*10+o*b%10,'N3-21'); } }
+      else if(b<10&&a>=100&&a<1000){ const ds=dg(as), ps=ds.map(d=>d*b); if(ps.slice(1).some(v=>v>9)){ let v=0; ps.forEach((p,i)=>{ v=v*10+(i===0?p:p%10); }); add(v,'N3-14'); } }   /* 세 자리 × 한 자리: 올림한 수를 더하지 않음 */
       else if(a%10===0&&b%10===0&&a<100&&b<100) add(a*b/10,'N3-33');
       else if(a%10===0&&b<10&&a<100) add(a/10*b,'N3-12');
       else if(b>=10&&b<100&&a>=10) add(a*(b%10)+a*Math.floor(b/10),'N3-03'); }
@@ -5571,14 +5578,16 @@ function codeW4(q){ if(!q||q.opts&&q.opts.length||q.manip||q.onMount||q.mis) ret
     if(/÷/.test(Q)){ const n=x.n*y.d, d=x.d*y.n; if(n<d&&A===red(n,d)) add(red(x.n*y.n,x.d*y.d),'N6-11'); }
     else { const n=x.n*y.n, d=x.d*y.d; if(A===red(n,d)&&x.n*y.d<x.d*y.n) add(red(x.n*y.d,x.d*y.n),'N5-18'); } }
   else if(/\d\.\d/.test(Q+V)&&q.ansText){ const at=String(q.ansText).match(/^\s*(\d+(?:\.\d+)?)/); if(!at||at[1].replace('.','')!==A) return q; const R=+at[1];
-    const word=/생활 속 문제/.test(V), src=word?Q:(V.split('=')[0]||''), m=(src.replace(/,/g,'').match(/\d+(?:\.\d+)?/g)||[]); if(m.length!==2) return q; const as=m[0], bs=m[1], a=+as, b=+bs;
+    const word=/생활 속 문제/.test(V); let src=word?Q:(V.split('=')[0]||''), m=(src.replace(/,/g,'').match(/\d+(?:\.\d+)?/g)||[]); if(m.length!==2&&!word){ src=Q; m=(src.replace(/,/g,'').match(/\d+(?:\.\d+)?/g)||[]); }   /* 세로셈 그림은 숫자가 칸마다 떨어져 있으므로 문제 글의 식을 읽는다 */
+    if(word&&m.length===3&&m[0]==='1'&&/^1 (m|L|kg|개|분|시간)/.test(Q)) m=m.slice(1);   /* '1 m의 무게가 …'의 1은 식의 수가 아니다 */
+    if(m.length!==2) return q; const as=m[0], bs=m[1], a=+as, b=+bs;
     const fits={'+':eq(a+b,R),'−':eq(a-b,R),'×':eq(a*b,R),'÷':!!b&&eq(a/b,R)}, sg=(src.match(/[+−×÷]/g)||[]), cand=Object.keys(fits).filter(k=>fits[k]); const op=word?(cand.length===1?cand[0]:null):(sg.length===1&&fits[sg[0]]?sg[0]:null); if(!op) return q;
     const da=(as.split('.')[1]||'').length, db=(bs.split('.')[1]||'').length, ia=+as.replace('.',''), ib=+bs.replace('.',''), D=Math.max(da,db);
     if(op==='+'){ if(da!==db) add((ia+ib)/10**D,'N4-03'); else if(da===1){ const fa=ia%10, fb=ib%10; if(fa+fb>=10){ add(`${Math.floor(a)+Math.floor(b)}${fa+fb}`,'N3-08'); add(`${Math.floor(a)+Math.floor(b)}${(fa+fb)%10}`,'N2-01'); } } }
     else if(op==='−'){ if(da!==db&&ia!==ib) add(Math.abs(ia-ib)/10**D,'N4-03'); }
     else if(op==='×'){ if(word){ add(a+b,'N2-05'); if(b&&b<1) add(a/b,'N6-06'); }
       else if(da&&!db&&b<10&&ia>=10&&ia<100){ const T=Math.floor(ia/10), o=ia%10, c=Math.floor(o*b/10); if(c){ add((T*b*10+o*b%10)/10**da,'N3-14'); add(((T+c)*b*10+o*b%10)/10**da,'N3-21'); } } }
-    else if(op==='÷'){ if(word){ add(a*b,'N6-12'); if(a>b) add(a-b,'N3-11'); } else { if(R<1) add(String(+(R*10).toFixed(6)).replace('.',''),'N6-07'); else if(db) add(R/10,'N6-07'); if(db) add(a*b,'N6-12'); } } }
+    else if(op==='÷'){ if(word){ add(a*b,'N6-12'); if(a>b) add(a-b,'N3-11'); } else { if(R<1) add(String(+(R*10).toFixed(6)).replace('.',''),'N6-07'); else if(db) add(R/10,'N6-07'); if(db) add(a*b,'N6-12'); if(!db&&/^\d+\.0\d+$/.test(at[1])) add(at[1].replace('.0','.').replace('.',''),'N6-08'); } } }
   clash.forEach(k=>delete mis[k]); if(Object.keys(mis).length) q.mis=mis; return q; }
 /* 쓰기형 5: 분수와 자연수의 곱셈·나눗셈, 원주와 원의 넓이. */
 function codeW5(q){ if(!q||q.opts&&q.opts.length||q.manip||q.onMount||q.mis) return q; const A=String(q.ans), Q=_pl(q.q), V=_pl(q.visual), mis={}, clash=new Set();
@@ -5590,7 +5599,16 @@ function codeW5(q){ if(!q||q.opts&&q.opts.length||q.manip||q.onMount||q.mis) ret
   else if((m=Q.match(/^지름이 (\d+) cm인 원의 원주는\?/))){ const d=+m[1]; if(A===dig(d*3.14)){ add(dig(d/2*3.14),'G3-04'); add(dig(d/2*d/2*3.14),'G6-12'); add(dig(d*2*3.14),'G3-04'); } }
   else if((m=Q.match(/^반지름이 (\d+) (?:cm|m)인 .*넓이는/))){ const r=+m[1]; if(A===dig(r*r*3.14)){ add(dig(r*3.14),'G6-18'); add(dig(2*r*3.14),'G6-12'); add(dig(2*r*2*r*3.14),'G3-04'); } }
   clash.forEach(k=>delete mis[k]); if(Object.keys(mis).length) q.mis=mis; return q; }
-const _tagQ0=tagQ; tagQ=function(ep,i,q){ q=_tagQ0(ep,i,q); try{ if(q&&typeof q==='object'&&!TAG3[ep+'#'+i]){ codeW(q); codeW2(q); codeW3(q); codeW4(q); codeW5(q); } }catch(e){} return q; };
+/* 쓰기형 6: 혼합 계산(연산이 둘 이상인 자연수 식). 앞에서부터만 계산한 값(N5-01), 괄호를 무시한 값(N5-09)을 단다. */
+function codeW6(q){ if(!q||q.opts&&q.opts.length||q.manip||q.onMount||q.mis) return q; const A=String(q.ans); if(!/^\d+$/.test(A)) return q; const Q=_pl(q.q).replace(/,/g,'').trim();
+  if(!/^[\d\s+−×÷()]+$/.test(Q)||(Q.match(/[+−×÷]/g)||[]).length<2) return q; const tk=Q.match(/\d+|[+−×÷()]/g), ap=(x,o,y)=>o==='+'?x+y:o==='−'?x-y:o==='×'?x*y:x/y;
+  const ev=(t)=>{ let i=0; const prim=()=>{ if(t[i]==='('){ i++; const v=sum(); i++; return v; } return +t[i++]; }, term=()=>{ let v=prim(); while(t[i]==='×'||t[i]==='÷') { const o=t[i++]; v=ap(v,o,prim()); } return v; }, sum=()=>{ let v=term(); while(t[i]==='+'||t[i]==='−'){ const o=t[i++]; v=ap(v,o,term()); } return v; }; return sum(); };
+  const ltr=(t)=>{ const f=t.filter(x=>x!=='('&&x!==')'); let v=+f[0]; for(let i=1;i<f.length;i+=2) v=ap(v,f[i],+f[i+1]); return v; };
+  if(String(ev(tk))!==A) return q; const mis={}, ok=v=>Number.isInteger(v)&&v>=0&&String(v)!==A; const np=tk.filter(x=>x!=='('&&x!==')'), hasP=tk.includes('(');
+  if(hasP){ const v=ev(np); if(ok(v)) mis[String(v)]='N5-09'; const w=ltr(tk); if(ok(w)&&!(String(w) in mis)) mis[String(w)]='N5-01'; } else { const w=ltr(tk); if(ok(w)) mis[String(w)]='N5-01'; }
+  if(!hasP&&np.length===5&&((np[1]==='−'&&np[3]==='+')||(np[1]==='÷'&&np[3]==='×'))){ const v=ap(+np[0],np[1],ap(+np[2],np[3],+np[4])); if(ok(v)&&!(String(v) in mis)) mis[String(v)]='N5-09'; }   /* 같은 단계인데 뒤부터 계산 */
+  if(Object.keys(mis).length) q.mis=mis; return q; }
+const _tagQ0=tagQ; tagQ=function(ep,i,q){ q=_tagQ0(ep,i,q); try{ if(q&&typeof q==='object'&&!TAG3[ep+'#'+i]){ codeW(q); codeW2(q); codeW3(q); codeW4(q); codeW5(q); codeW6(q); } }catch(e){} return q; };
 
 /* ---------- 3-14. 도형과 측정 (Claude·Gemini 교차 검토 4차) ---------- */
 Object.assign(MIS, {
@@ -6468,7 +6486,12 @@ function epWrong(q){ if(!q||!Array.isArray(q.opts)||q.opts.length<3) return q;
   q.opts=all.slice(k).concat(all.slice(0,k)); q.mis={}; for(const [v,c] of wrong) if(c) q.mis[v]=c; return q; }
 function fixEP(q){ if(q){ for(const k of ['speech','ansSpeech','hint']) if(typeof q[k]==='string') q[k]=fixJosa(q[k]); } if(q&&typeof q.q==='string'){ q.q=q.q.replace(/(하나​?['’])은/,'$1는'); q.q=q.q.replace(/^(['‘].*?([가-힣])​?['’])[은는] 숫자로\?$/,(m,a,ch)=>a+(((ch.charCodeAt(0)-0xAC00)%28)?'은':'는')+' 숫자로?');
   { const m=q.q.match(/^(\d+)에서 숫자 (\d)([은는]) 얼마\?$/); const an=+q.ans; if(m&&an>0){ const pl=an>=1000?'천':an>=100?'백':an>=10?'십':'일'; q.q=`${m[1]}에서 ${pl}의 자리 숫자 ${m[2]}${m[3]} 얼마?`; } } } return q; }
-if(typeof G!=='undefined') for(const e of Object.keys(G)) G[e]=G[e].map(g=>function(){ return epWrong(fixEP(g.apply(this,arguments))); });
+/* 1~2학년 쓰기형(보기 없는) 틀: 객관식과 같은 규칙(EPR)으로 '오개념이면 쓰는 답'을 계산해 예상 오답으로 단다 */
+function epWrite(q){ try{ if(!q||typeof q!=='object'||(q.opts&&q.opts.length)||q.manip||q.onMount||(q.mis&&Object.keys(q.mis).length)) return q; const A=String(q.ans); if(!/^\d+$/.test(A)) return q;
+  const cands=[_pl(q.q), String(q.ansText||'').replace(/= \d+\s*$/,'= ?')]; for(const t of cands){ const u=String(t).replace(/\s+/g,' ').trim(); for(const [re,f] of EPR){ const m=u.match(re); if(!m) continue; if(!/[+×−-]/.test(u)) continue;
+      const n=(u.match(/\d+/g)||[]).map(Number), ops=u.match(/[+×−-]/g)||[]; let v=n[0]; ops.forEach((o,i)=>{ const y=n[i+1]; v=o==='+'?v+y:o==='×'?v*y:v-y; }); if(String(v)!==A) continue;   /* 식을 계산한 값이 정답과 같을 때만 */
+      const mis={}, clash=new Set(); for(const [w,c] of (f(m,q)||[])){ const k=String(w); if(k===A||!/^\d+$/.test(k)||typeof c!=='string'||c==='F') continue; if(k in mis){ if(mis[k]!==c) clash.add(k); continue; } mis[k]=c; } clash.forEach(k=>delete mis[k]); if(Object.keys(mis).length){ q.mis=mis; return q; } } } }catch(e){} return q; }
+if(typeof G!=='undefined') for(const e of Object.keys(G)) G[e]=G[e].map(g=>function(){ return epWrite(epWrong(fixEP(g.apply(this,arguments)))); });
 
 /* ---------- 3-12. 개념 조각과 보기별 무게 (오개념 코드 → 모르는 개념 조각) ---------- */
 // 교수님 지적(2026-11-20): 오답에 코드만 붙일 게 아니라 "이 보기를 고른 아이는 어떤 개념을 모른다"는 가정과 무게가 있어야 한다.
