@@ -141,8 +141,36 @@ MC.append(("state:()=>String(tKey(cur)),", "(()=>{ const K=tKey, R=k=>tApply(f,c
 _a = "function mountWriteQ36(q){ const host=document.getElementById('wpad'); const ans=String(q.ans); const slots=[...document.querySelectorAll('#visual .vslot')]; const g=(UNITS36[S.ui]||{}).grade||3;"
 assert h.count(_a) == 1
 h = h.replace(_a, _a + """
-  const DP=(()=>{ const ds=[...document.querySelectorAll('#visual em.dot')]; if(ds.length!==1) return null; const grp=ds[0].parentElement, gs=[...grp.querySelectorAll('.vslot')]; if(gs.length<2||gs.length!==slots.length||!grp.classList.contains('vgrp')) return null; let p=0; for(const n of grp.children){ if(n===ds[0]) break; if(n.classList.contains('vslot')) p++; } if(p<1||p>=gs.length) return null; ds[0].remove();
-    const o={p,cur:null,lock:false,btns:[]}; o.paint=()=>o.btns.forEach((x,j)=>x.classList.toggle('on',o.cur===j)); [...gs,null].forEach((sl,i)=>{ const b=document.createElement('button'); b.type='button'; b.className='dotpick'; b.setAttribute('aria-label','여기에 소수점 찍기'); b.onclick=()=>{ if(o.lock) return; o.cur=o.cur===i?null:i; o.paint(); sfx('pop',.4); }; if(sl) grp.insertBefore(b,sl); else gs[gs.length-1].after(b); o.btns.push(b); }); grp.classList.add('hasdp'); return o; })();""")
+  /* 소수 답: 칸마다 쓰는 대신 답을 통째로 쓴다(12.4처럼 소수점도 직접). 칸 사이 점 찍기는 헷갈려서 없앴다(교수님 11/21). */
+  const DP=null; const FREE=(()=>{ const ds=[...document.querySelectorAll('#visual em.dot')];
+    if(ds.length===0&&slots.length){ /* 소수 계산인데 답이 자연수로 떨어진 경우(0.5 × 6 = 3)도 같은 답 상자를 쓴다: 칸 모양으로 '소수가 아니다'를 알려 주지 않게 */ const grp=slots[0].parentElement, txt=String(q.q||'')+' '+document.getElementById('visual').textContent; if(!grp||!grp.classList.contains('vgrp')||slots.some(x=>x.parentElement!==grp)||!/\\d\\.\\d/.test(txt)||!/^\\d+$/.test(ans)) return null; slots.forEach(x=>x.remove()); const box=document.createElement('div'); box.className='freeans empty'; box.id='freeans'; grp.appendChild(box); grp.classList.add('hasfree'); return {p:ans.length,box}; }
+    if(ds.length!==1) return null; const grp=ds[0].parentElement, gs=[...grp.querySelectorAll('.vslot')]; if(gs.length<2||gs.length!==slots.length||!grp.classList.contains('vgrp')) return null; let p=0; for(const n of grp.children){ if(n===ds[0]) break; if(n.classList.contains('vslot')) p++; } if(p<1||p>=gs.length) return null;
+    ds[0].remove(); gs.forEach(x=>x.remove()); const box=document.createElement('div'); box.className='freeans empty'; box.id='freeans'; grp.appendChild(box); grp.classList.add('hasfree'); return {p,box}; })();
+  if(FREE) return mountFree(q,host,ans,FREE);""")
+_a = "function mountWriteQ36(q){"
+assert h.count(_a) == 1
+h = h.replace(_a, """function mountFree(q,host,ans,F){ const truth=F.p>=ans.length?ans:ans.slice(0,F.p)+'.'+ans.slice(F.p), dec=ans.length-F.p, tv=parseFloat(truth); let txt='', lock=false;
+  const paint=()=>{ F.box.textContent=txt; F.box.classList.toggle('empty',!txt); };
+  const key=k=>{ if(lock) return; if(k==='⌫') txt=txt.slice(0,-1); else if(k==='.'){ if(txt&&!txt.includes('.')) txt+='.'; } else if(txt.replace('.','').length<9) txt+=k; paint(); };
+  host.innerHTML=`<div class="numpad">${['1','2','3','4','5','6','7','8','9','.','0','⌫'].map(k=>`<button class="nk${/\\d/.test(k)?'':' fn'}" data-k="${k}">${k}</button>`).join('')}</div><div class="wtools"><button class="next wok">다 썼어!</button></div>`;
+  host.querySelectorAll('.nk').forEach(b=>b.onclick=()=>key(b.dataset.k)); host.querySelector('.wok').onclick=()=>submit();
+  const onKey=e=>{ if(!document.body.contains(F.box)||lock){ document.removeEventListener('keydown',onKey); return; } if(/^[0-9]$/.test(e.key)) key(e.key); else if(e.key==='.'||e.key===',') key('.'); else if(e.key==='Backspace') key('⌫'); else if(e.key==='Enter') submit(); else return; e.preventDefault(); }; document.addEventListener('keydown',onKey);
+  const done=()=>{ lock=true; host.querySelector('.wtools')?.remove(); host.querySelector('.numpad')?.remove(); document.removeEventListener('keydown',onKey); };
+  const addNext=fb=>{ if(document.getElementById('next')) return; fb.insertAdjacentHTML('beforeend',`<button class="next" id="next">${S.i>=S.acts.length-1?'결과 보기 ★':'다음 →'}</button>`); const nb=document.getElementById('next'); nb.onclick=()=>{ S.i++; S.i<S.acts.length?runAct():result(); }; nb.scrollIntoView({block:'nearest',behavior:'smooth'}); };
+  function submit(){ if(lock) return; const fb=document.getElementById('fb');
+    if(!txt||txt.endsWith('.')){ sfx('bad'); host.classList.add('shakey'); setTimeout(()=>host.classList.remove('shakey'),450); fb.innerHTML=`<div class="fb no"><div class="msg">답을 써 주세요</div></div>`; return; }
+    const v=parseFloat(txt); if(Math.abs(v-tv)<1e-9){ done(); F.box.classList.add('show'); answer({dataset:{v:ans},classList:{add(){}}},q); return; }
+    const strip=s=>s.replace('.','').replace(/^0+/,'').replace(/0+$/,''); let guess; delete q._mcode;
+    if(strip(txt)&&strip(txt)===strip(truth)){ guess=txt; const t=String(q.q||'')+String(q.visual||'').replace(/<[^>]+>/g,' ')+String(q.ansText||''); q._mcode=/×|넓이|원주/.test(t)?'N5-07':/÷/.test(t)?'N6-07':'N4-23'; }   /* 숫자는 맞고 소수점 자리만 틀림 */
+    else { const sc=v*Math.pow(10,dec), r=Math.round(sc), k1=Math.abs(sc-r)<1e-6?String(r).padStart(ans.length,'0'):null, k2=txt.replace('.',''), M=q.mis||{}; guess=k1&&M[k1]?k1:M[k2]?k2:(k1||txt); }   /* 예상 오답 열쇠(소수점을 뺀 숫자열)로 맞춘다 */
+    if(S.tries===0&&window.KT) KT.rec(q,guess,false); S.tries++; sfx('bad');
+    if(S.tries<2){ fb.innerHTML=`<div class="fb no">${chip('doto','oops')}<div class="msg">아깝다! 다시 생각해 봐요.<div class="hint1">💡 ${hintFor(q)}</div></div></div>`; txt=''; paint(); return; }
+    S.results[S.i]=false; logAct(false,'q'); done(); fb.innerHTML=`<div class="fb no">${chip('rami','base')}<div class="msg">괜찮아요, 같이 풀어 봐요!${solveHTML(q)}</div></div>`; txt=String(tv); paint(); F.box.classList.add('show'); addNext(fb); }
+  paint(); }
+function mountWriteQ36(q){""")
+_a = ".vgrp{display:inline-flex;gap:4px}"
+assert h.count(_a) == 1
+h = h.replace(_a, _a + ".vgrp.hasfree{display:inline-flex}.freeans{min-width:150px;height:60px;padding:0 16px;border:3px solid #E8963C;border-radius:16px;background:#fff;color:#2E2620;font-size:34px;font-weight:700;display:flex;align-items:center;justify-content:center;letter-spacing:1px;box-sizing:border-box}.freeans.empty::after{content:'답';color:#C9B79E;font-weight:400;font-size:22px}.freeans.show{border-color:#6BBF7A;background:#F2FBF3}")
 _a = "    if(r.ok){ dropTools(); if(pad) pad.lock(); answer({dataset:{v:ans},classList:{add(){}}},q); return; }\n    const em=equivMsg(q,r.guess);"
 assert h.count(_a) == 1
 h = h.replace(_a, """    if(DP&&DP.cur==null){ sfx('bad'); fb.innerHTML=`<div class="fb no"><div class="msg">소수점을 찍어 주세요. 칸 사이의 동그라미를 눌러요.</div></div>`; return; }
@@ -227,5 +255,16 @@ _g="()=>{ const n=rnd(3,5), avg=rnd(10,40); let v=Array(n).fill(avg); for(let i=
 h = h.replace(_g, "()=>{ const n=rnd(3,5), avg=rnd(25,45); let v=Array(n).fill(avg); for(let i=0;i<n-1;i++){ const d=rnd(-5,5); v[i]+=d; v[n-1]-=d; }")
 _g="'S4-15':()=>{ const n=rnd(3,5), avg=rnd(20,40); let v=Array(n).fill(avg); for(let i=0;i<n-1;i++){ const d=rnd(-6,6);"; assert h.count(_g)==1
 h = h.replace(_g, "'S4-15':()=>{ const n=rnd(3,5), avg=rnd(26,45); let v=Array(n).fill(avg); for(let i=0;i<n-1;i++){ const d=rnd(-6,6);")
+# --- 식을 미리 주면 단순 계산 문제가 됨(교수님 11/21): 원주·원의 넓이 쓰기 틀에서 '16 × 3.14 =' 식을 뺌 ---
+_g="figSvg('circ',`${d/2} cm`)+row(d,'×',3.14,'=',decS(s),'cm'),s,{ansText:`${s} cm`}"; assert h.count(_g)==1
+h = h.replace(_g, "figSvg('circ',`${d/2} cm`)+row(decS(s),'cm'),s,{ansText:`${d} × 3.14 = ${s} cm`}")
+_g="figSvg('circ',`${r} cm`)+row(r,'×',r,'×',3.14,'=',decS(s)),s,{ansText:`${s} cm²`}"; assert h.count(_g)==1
+h = h.replace(_g, "figSvg('circ',`${r} cm`)+row(decS(s),'cm²'),s,{ansText:`${r} × ${r} × 3.14 = ${s} cm²`}")
+# --- 비율을 소수로(S5-14#0): '3 ÷ 5 =' 식을 주면 어느 수를 나누는지(비의 순서)를 알려 주게 됨 → 식을 뺌 ---
+_g="`${a} : ${b}의 비율을 소수로?`,' ',row(a,'÷',b,'=',decS(s)),s,{ansText:s}"; assert h.count(_g)==1
+h = h.replace(_g, "`${a} : ${b}의 비율을 소수로?`,' ',row(decS(s)),s,{ansText:`${a} ÷ ${b} = ${s}`}")
+# --- 부동소수 찌꺼기: 소수 크기 비교(S3-22#1)에서 b=a+0.1이 1.7000000000000002로 문제 글에 그대로 나왔음 ---
+_g="()=>{ const a=rnd(1,30)/10; let b=rnd(1,30)/10; if(b===a) b=a+0.1; return C36('doto',`${a}와 ${b}, 더 큰 수는?`"; assert h.count(_g)==1
+h = h.replace(_g, "()=>{ const a=rnd(1,30)/10; let b=rnd(1,30)/10; if(b===a) b=+(a+0.1).toFixed(1); return C36('doto',`${a}와 ${b}, 더 큰 수는?`")
 open('out/index.html', 'w', encoding='utf-8').write(h)
 print('built', len(out))

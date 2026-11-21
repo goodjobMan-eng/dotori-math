@@ -1,0 +1,10 @@
+const { chromium } = require('playwright');
+// 깨진 값 검사(틀마다 200번): 정답·보기·풀이에 NaN/undefined/Infinity/빈 값, 보기 중복, 긴 소수(부동소수 찌꺼기 0.30000000000000004), 쓰기형 정답이 숫자열이 아닌데 칸 입력인 경우.
+(async()=>{ const b=await chromium.launch(); const p=await b.newPage(); p.on('pageerror',e=>console.log('페이지 오류',e.message)); await p.goto('file://'+process.cwd()+'/out/index.html'); await p.waitForTimeout(1500);
+ const r=await p.evaluate(()=>{ const bad={}; let n=0; const pl=h=>String(h==null?'':h).replace(/<svg[\s\S]*?<\/svg>/g,' ').replace(/<[^>]+>/g,' ').replace(/[​]/g,'').replace(/\s+/g,' ').trim(); const junk=s=>/NaN|undefined|Infinity|\[object|null/.test(s)||/\d\.\d{6,}/.test(s);
+  const scan=(e,i,g)=>{ for(let k=0;k<200;k++){ let q; try{ q=g(); }catch(x){ bad[e+'#'+i]='생성 중 오류 '+x.message; return; } if(!q||typeof q!=='object') return; n++; const id=e+'#'+i; if(bad[id]) return; const flag=(w,s)=>{ bad[id]=w+' ∥ '+pl(q.q).slice(0,50)+' ∥ '+String(s).slice(0,60); };
+    const A=pl(q.ans); if(!q.manip&&!q.onMount&&(A===''||junk(A))) return flag('정답',A); if(q.opts&&q.opts.length){ const os=q.opts.map(o=>pl(typeof o==='object'?(o.v??o.label):o)); if(os.some(o=>o===''||junk(o))) return flag('보기',os.join(' | ')); if(new Set(os).size!==os.length) return flag('보기 중복',os.join(' | ')); }
+    for(const f of ['q','ansText','speech','hint','visual']){ const s=pl(q[f]); if(junk(s)) return flag(f,(s.match(/.{0,20}(NaN|undefined|Infinity|\[object|null|\d\.\d{6,}).{0,10}/)||[s])[0]); }
+    for(const m of Object.keys(q.mis||{})) if(junk(m)||m==='') return flag('예상 오답',m); } };
+  for(const e of Object.keys(G36)) G36[e].forEach((g,i)=>scan(e,i,g)); for(const e of Object.keys(G)) G[e].forEach((g,i)=>scan(e,i,g)); return {n,bad}; });
+ const ks=Object.keys(r.bad); console.log('뽑은 문제',r.n,'| 깨진 값이 나온 틀',ks.length); ks.forEach(k=>console.log(k+' | '+r.bad[k])); await b.close(); })();

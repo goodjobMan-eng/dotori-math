@@ -333,7 +333,28 @@ function codeW7(q){ if(!q||q.opts&&q.opts.length||q.manip||q.onMount||q.mis) ret
   else if(fr.length===1&&!fr[0].w&&(op==='×'||op==='÷')){ const x=fr[0], ks=(Q.replace(/(\d+)분의 (\d+)/,' ').match(/\d+/g)||[]).map(Number).filter(v=>v>1); if(ks.length!==1) return q; const k=ks[0];
     if(op==='×'){ if(!same(x.n*k,x.d)) return q; add(x.n,x.d*k,'N5-15'); add(x.n*k,x.d*k,'N5-15'); } else { if(!same(x.n,x.d*k)) return q; add(x.n*k,x.d,'N6-04'); if(x.n%k===0&&x.d%k===0) add(x.n/k,x.d/k,'N6-14'); } }
   clash.forEach(k=>delete mis[k]); if(Object.keys(mis).length) q.mis=mis; return q; }
-const _tagQ0=tagQ; tagQ=function(ep,i,q){ q=_tagQ0(ep,i,q); try{ if(q&&typeof q==='object'&&!TAG3[ep+'#'+i]){ codeW(q); codeW2(q); codeW3(q); codeW4(q); codeW5(q); codeW6(q); codeW7(q); } }catch(e){} return q; };
+/* 쓰기형 8: 비율을 소수로(a : b → a ÷ b). 기준량과 비교하는 양을 바꿔 b ÷ a를 쓴 답(R6-01). 열쇠는 정답과 같은 소수 자릿수로 맞춘 숫자열. */
+function codeW8(q){ if(!q||q.opts&&q.opts.length||q.manip||q.onMount||q.mis) return q; const m=_pl(q.q).match(/^\s*(\d+) : (\d+)의 비율을 소수로\?/); if(!m) return q; const a=+m[1], b=+m[2], A=String(q.ans), t=(String(q.ansText||'').match(/([\d.]+)\s*$/)||[])[1]; if(!t||Math.abs(a/b-+t)>1e-9) return q;
+  const dec=(t.split('.')[1]||'').length, w=b/a*Math.pow(10,dec); if(Number.isInteger(w)){ const k=String(w).padStart(A.length,'0'); if(k!==A) q.mis={[k]:'R6-01'}; } return q; }
+/* 쓰기형 9: 변화와 관계·자료와 가능성의 자연수 답(비례배분·비례식·단위량·백분율·할인·평균·등식의 □). 문제 글의 수로 정답을 다시 계산해 맞을 때만 단다. */
+function codeW9(q){ if(!q||q.opts&&q.opts.length||q.manip||q.onMount||q.mis) return q; const A=String(q.ans); if(!/^\d+$/.test(A)) return q; const Av=+A, Q=_pl(q.q).replace(/,/g,'').replace(/\s+/g,' ').trim(), mis={}, clash=new Set(); let m;
+  const add=(v,c)=>{ if(v==null||!Number.isFinite(v)||v<0||!Number.isInteger(v)) return; const k=String(v); if(k===A) return; if(k in mis){ if(mis[k]!==c) clash.add(k); return; } mis[k]=c; };
+  if((m=Q.match(/(\d+)(?:개|원)?[을를] (\d+) : (\d+)(?:으로|로) 나[누눈]/))){ const N=+m[1], a=+m[2], b=+m[3], pa=N*a/(a+b), pb=N*b/(a+b); if(Av===pa||Av===pb){ const mine=Av===pa?a:b, oth=Av===pa?pb:pa; add(oth,'R6-01'); if(N/mine!==oth) add(N/mine,'R6-13'); if(N/(a+b)!==oth&&N/(a+b)!==N/mine) add(N/(a+b),'R6-16'); } }
+  else if((m=Q.match(/^(\d+) : (\d+) = (\d+) : □/))){ const [a,b,c]=m.slice(1).map(Number); if(b*c/a===Av){ add(b*c,'R6-15'); add(c+(b-a),'R6-10'); add(a*c/b,'R6-12'); } }
+  else if((m=Q.match(/^(\d+) : (\d+) = □ : (\d+)/))){ const [a,b,d]=m.slice(1).map(Number); if(a*d/b===Av){ add(a*d,'R6-15'); add(d-(b-a),'R6-10'); add(b*d/a,'R6-12'); } }
+  else if((m=Q.match(/(\d+) ?(?:m|분|개|L|kg|시간)[가이에] (\d+) ?(?:원|L|km|개|g|kg)(?:이면|가 나오는[^.]*에서|를 [^.]*면)? (\d+) ?(?:m|분|개|L|kg|시간)/))&&+m[1]>1&&+m[2]*+m[3]/+m[1]===Av){ const [a,P,y]=m.slice(1).map(Number); add(P+(y-a),'R6-10'); add(P*y,'R6-15'); }
+  else if((m=Q.match(/(\d+) ?(시간|km²)에 (\d+) ?(km|명)[을를이가] .*1 ?(시간|km²)에 몇/))&&+m[3]/+m[1]===Av){ add(+m[3]*+m[1],'N6-12'); add(+m[3]-+m[1],'R6-02'); }
+  else if((m=Q.match(/(\d+)명 중 (\d+)명은 몇 %/))&&+m[2]/+m[1]*100===Av){ add(+m[2],'D6-01'); add(+m[1]-+m[2],'R6-02'); }
+  else if((m=Q.match(/전체 (\d+)명 중 (\d+)%는 몇 명/))&&+m[1]*+m[2]/100===Av){ add(+m[1]*+m[2],'R6-04'); add(+m[2],'D6-01'); }
+  else if((m=Q.match(/(\d+)원짜리[^%]*?(\d+)% 할인/))&&+m[1]*(100-+m[2])/100===Av){ add(+m[1]*+m[2]/100,'R6-07'); add(+m[1]-+m[2],'R6-07'); }
+  else if((m=Q.match(/(\d+)명의 평균이 (\d+)점이면 점수의 합/))&&+m[1]*+m[2]===Av){ add(+m[1]+ +m[2],'N2-05'); }
+  else if((m=Q.match(/(\d+|세|네|다섯) 번 본 시험의 평균이 (\d+)점.*?점수가 (.+?)이면 나머지/))){ const n={세:3,네:4,다섯:5}[m[1]]||+m[1], avg=+m[2], v=(m[3].match(/\d+/g)||[]).map(Number), sum=v.reduce((a,b)=>a+b,0); if(v.length===n-1&&n*avg-sum===Av){ add(n*avg,'D5-04'); add(Math.round(sum/v.length)===sum/v.length?sum/v.length:null,'D5-02'); } }
+  else if((m=Q.match(/(\d+)회 평균이 (\d+)점이에요\. ([\d ]+)점 다음 마지막/))){ const n=+m[1], avg=+m[2], v=(m[3].match(/\d+/g)||[]).map(Number), sum=v.reduce((a,b)=>a+b,0); if(v.length===n-1&&n*avg-sum===Av){ add(n*avg,'D5-04'); add(avg,'D5-02'); } }
+  else if(/고르게 하면/.test(Q)){ const all=(Q.split('고르게')[0].match(/\d+/g)||[]).map(Number); for(const v of [all,all.slice(1)]){ if(v.length>=3&&v.reduce((a,b)=>a+b,0)/v.length===Av){ add(v.reduce((a,b)=>a+b,0),'D5-04'); add((Math.max(...v)+Math.min(...v))/2,'D5-02'); break; } } }
+  else if((m=Q.match(/^(\d+) ([+−×]) (\d+) = □ ([+−×]) (\d+)/))||(m=Q.match(/^(\d+) ([+−×]) (\d+) = (\d+) ([+−×]) □/))){ const ap=(x,o,y)=>o==='+'?x+y:o==='−'?x-y:x*y, L=ap(+m[1],m[2],+m[3]), front=/= □/.test(Q), c=front?+m[5]:+m[4], o=front?m[4]:m[5]; const ok=front?ap(Av,o,c)===L:ap(c,o,Av)===L; if(ok){ add(L,'R4-02'); add(ap(L,o,c),'R4-02'); } }
+  clash.forEach(k=>delete mis[k]); if(Object.keys(mis).length) q.mis=mis; return q; }
+const _tagQ0=tagQ; tagQ=function(ep,i,q){ q=_tagQ0(ep,i,q); if(q&&typeof q==='object'&&!TAG3[ep+'#'+i]){ if(q.mis&&!Object.keys(q.mis).length) delete q.mis;   /* 빈 mis({})가 있으면 규칙이 모두 건너뛰던 것을 막는다 */
+  for(const f of [codeW,codeW2,codeW3,codeW4,codeW5,codeW6,codeW7,codeW8,codeW9]){ try{ f(q); }catch(e){ (window.__cwErr=window.__cwErr||{})[f.name+' '+ep+'#'+i]=String(e&&e.message); } } } return q; };
 
 /* ---------- 3-14. 도형과 측정 (Claude·Gemini 교차 검토 4차) ---------- */
 Object.assign(MIS, {
@@ -1064,7 +1085,7 @@ R36['S3-25#1']=(q)=>[[1,'N3-12'],[q.ans===3?2:3,'N3-33']];
 R36['S3-27#1']=(q,s)=>{ const [a]=_N(s); return [[a+10,'N2-05'],[a*_N(s)[1],'F']]; };
 R36['S3-68#0']=(q,s)=>{ const n=_N(s)[0]; return [[n,'N5-10']].concat(q.opts.filter(o=>o!==q.ans).map(o=>[o,(o===n||o===1)?'N5-10':(o*o>n?'N5-19':'F')])); };
 { const _dn=R36['S3-98#4']; R36['S3-98#4']=(q,s)=>{ const [[d,n]]=_FR(s), k=_N(s.replace(/\d+분의 \d+/,''))[0]; const r=_dn(q,s); if((k*d)%n===0) r.splice(1,0,[String(k*d/n),'N6-02']); return r; }; R36['S3-98#5']=R36['S3-98#4']; }
-R36['S3-112#1']=(q,s)=>{ const [a,b]=_N(s); return [[_r6(+q.ans*10),'N6-09'],[_r6(a/b-Math.floor(a/b)),'N6-05'],[_r6(+q.ans/10),'F']]; };
+R36['S3-112#1']=(q,s)=>{ const [a,b]=_N(s); return [[_r6(+q.ans*10),'N6-09'],[Math.round((a/b-Math.floor(a/b))*100)/100,'N6-05'],[_r6(+q.ans/10),'F']]; };
 R36['S5-12#3']=(q,s)=>{ const v=_N(s); if(v.length<5) return []; return [[v[3]+(v[3]-v[1]),'R4-01'],[v[4]+(v[1]-v[0]),'R5-02']]; };
 // --- 도형과 측정(S6) ---
 R36['S6-01#0']=_tg(()=>'+G1-01'); R36['S6-01#1']=R36['S6-01#0']; R36['S6-01#2']=R36['S6-01#0'];
@@ -1126,7 +1147,10 @@ function g36Wrong(ep,i,q){ if(!q||q.manip||q.onMount||!Array.isArray(q.opts)||q.
    Math.random을 쓰지만 씨앗 재생성(withSeed) 안에서 불리므로 같은 씨앗이면 같은 순서다. 부등호(>, =, <)처럼 순서가 약속인 보기는 그대로 둔다. 점검: node x37.js */
 function mixOpts(q){ try{ if(!q||typeof q!=='object'||q.manip||q.onMount||!Array.isArray(q.opts)||q.opts.length<2) return q; if(q.opts.every(o=>/^[<>=＞＜]$/.test(String(o).trim()))) return q;
   const a=q.opts; for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } }catch(e){} return q; }
-{ const _t=tagQ; tagQ=function(ep,i,q){ q=_t(ep,i,q); try{ q=g36Wrong(ep,i,q); }catch(e){} return mixOpts(q); }; }
+{ const _t=tagQ; tagQ=function(ep,i,q){ q=_t(ep,i,q); try{ q=g36Wrong(ep,i,q); }catch(e){}
+  /* 문제 글을 다듬은(fixText) 뒤의 글로 한 번 더: 쓰기형인데 아직 예상 오답이 없으면 글을 읽는 규칙을 다시 돌린다 */
+  try{ if(q&&typeof q==='object'&&!(q.opts&&q.opts.length)&&!q.manip&&!q.onMount&&!TAG3[ep+'#'+i]&&!(q.mis&&Object.keys(q.mis).length)){ delete q.mis; for(const f of [codeW2,codeW3,codeW7,codeW8,codeW9]){ try{ f(q); }catch(e){} if(q.mis) break; } } }catch(e){}
+  return mixOpts(q); }; }
 try{ window.__R36=R36; window.__G36G=G36G; window.__MIS=MIS; }catch(e){}
 
 
