@@ -1235,7 +1235,7 @@ const T = {
   carry2:()=>{ const t1=rnd(1,4), o1=rnd(5,9), t2=rnd(1,4), o2=rnd(10-o1,9); const a=t1*10+o1, b=t2*10+o2; return P('halmi',`${a} + ${b} = ?`,`${sino(a)} 더하기 ${sino(b)}. 낱개가 열 개가 되면 바구니 하나로 묶는단다.`,opRows(a,'+',b)+eq(`${a} + ${b} = □`,true),a+b,numOpts(a+b,20,99),{hint:'낱개 10개 → 바구니 1개'}); },
   borrow2:()=>{ const t1=rnd(3,9), o1=rnd(0,5), t2=rnd(1,t1-1), o2=rnd(o1+1,9); const a=t1*10+o1, b=t2*10+o2; return P('halmi',`${a} − ${b} = ?`,`${sino(a)} 빼기 ${sino(b)}. 낱개가 모자라면 바구니 하나를 풀어요.`,opRows(a,'−',b)+eq(`${a} − ${b} = □`,true),a-b,numOpts(a-b,1,99),{hint:'바구니 1개 → 낱개 10개'}); },
   three:()=>{ const kind=rnd(0,2); let a=rnd(3,9), b=rnd(1,6), c=rnd(1,5); if(kind===0){ const s=a+b+c; return P('halmi',`${a} + ${b} + ${c} = ?`,`할머니가 ${GAE(b)}, 람이가 ${GAE(c)}를 더 주었단다. ${sino(a)} 더하기 ${sino(b)} 더하기 ${sn(c)}?`,pouches(a,b,c),s,numOpts(s,5,25),{hint:'앞에서부터 차례로'}); } if(kind===1){ c=Math.min(c,a+b); const s=a+b-c; return P('cheong',`${a} + ${b} − ${c} = ?`,`${sino(a)} 더하기 ${sino(b)}, 그런데 청이가 ${GAE(c)}를 가져갔어. 얼마일까?`,eq(`${a} + ${b} − ${c} = □`),s,numOpts(s,0,20),{hint:'앞에서부터 차례로'}); } a=rnd(6,9); b=rnd(1,a-2); c=rnd(1,a-b-1); const s=a-b-c; return P('doto',`${a} − ${b} − ${c} = ?`,`${sino(a)} 빼기 ${sino(b)} 빼기 ${sn(c)} 얼마일까요?`,eq(`${a} − ${b} − ${c} = □`),s,numOpts(s,0,10),{hint:'앞에서부터 차례로'}); },
-  box:()=>{ const kind=rnd(0,3); const t=rnd(5,12), a=rnd(1,t-1); const x=t-a; const cloth=`<img src="${A['보자기']}" style="width:80px;height:auto" alt="">`; if(kind===0) return P('cheong',`${a} + □ = ${t}`,`도토리 탐정! ${sino(a)}에 몇을 더하면 ${sn(t)} 될까? 보자기 밑에 몇 개가 숨었을까?`,noTap(acorns(a))+'<div class="plus">+</div>'+cloth+eq(`${a} + □ = ${t}`,true),x,numOpts(x,1,12),{hint:'□를 찾아라'}); if(kind===1) return P('doto',`□ + ${a} = ${t}`,`몇에 ${sp(a,'을','를')} 더하면 ${sn(t)} 될까요?`,cloth+'<div class="plus">+</div>'+noTap(acorns(a))+eq(`□ + ${a} = ${t}`,true),x,numOpts(x,1,12),{hint:'□를 찾아라'}); if(kind===2) return P('rami',`${t} − □ = ${a}`,`${sino(t)}에서 몇을 빼면 ${sn(a)} 될까요? 몇 개가 사라졌을까?`,acorns(t,{gone:x,notap:true})+eq(`${t} − □ = ${a}`,true),x,numOpts(x,1,12),{hint:'사라진 도토리'}); return P('halmi',`□ − ${a} = ${x}`,`어떤 수에서 ${sp(a,'을','를')} 빼면 ${sn(x)} 된단다. 어떤 수일까?`,cloth+'<div class="plus">−</div>'+noTap(acorns(a))+eq(`□ − ${a} = ${x}`,true),t,numOpts(t,1,15),{hint:'처음 도토리 수'}); },
+  box:()=>{ const kind=rnd(0,3); const t=rnd(5,12), a=rnd(1,t-1); const x=t-a; const cloth=`<img src="${A['보자기']}" style="width:80px;height:auto" alt="">`; if(kind===0) return P('cheong',`${a} + □ = ${t}`,`도토리 탐정! ${sino(a)}에 몇을 더하면 ${sp(t,'이','가')} 될까? 보자기 밑에 몇 개가 숨었을까?`,noTap(acorns(a))+'<div class="plus">+</div>'+cloth+eq(`${a} + □ = ${t}`,true),x,numOpts(x,1,12),{hint:'□를 찾아라'}); if(kind===1) return P('doto',`□ + ${a} = ${t}`,`몇에 ${sp(a,'을','를')} 더하면 ${sp(t,'이','가')} 될까요?`,cloth+'<div class="plus">+</div>'+noTap(acorns(a))+eq(`□ + ${a} = ${t}`,true),x,numOpts(x,1,12),{hint:'□를 찾아라'}); if(kind===2) return P('rami',`${t} − □ = ${a}`,`${sino(t)}에서 몇을 빼면 ${sp(a,'이','가')} 될까요? 몇 개가 사라졌을까?`,acorns(t,{gone:x,notap:true})+eq(`${t} − □ = ${a}`,true),x,numOpts(x,1,12),{hint:'사라진 도토리'}); return P('halmi',`□ − ${a} = ${x}`,`어떤 수에서 ${sp(a,'을','를')} 빼면 ${sp(x,'이','가')} 된단다. 어떤 수일까?`,cloth+'<div class="plus">−</div>'+noTap(acorns(a))+eq(`□ − ${a} = ${x}`,true),t,numOpts(t,1,15),{hint:'처음 도토리 수'}); },
   hundredsBreak:()=>{ const c=rnd(2,9); return P('rami',`도토리 ${c*100}개는 창고 몇 칸?`,`도토리 ${sino(c*100)} 개는 창고 몇 칸일까요? 창고 한 칸은 백 개예요.`,units(c,0,0),c,numOpts(c,1,9),{hint:'100이 몇 개'}); },
   hundreds:()=>{ const c=rnd(1,9); return P('halmi',`창고 ${c}칸은 도토리 몇 개?`,`창고 한 칸에는 도토리가 백 개 들어간단다. 창고 ${nativeCount(c)} 칸이면 몇 개일까?`,units(c,0,0),c*100,numOpts(c*100,100,900,100),{hint:'100씩 세기'}); },
   tenBasketsHundred:()=>{ return P('rami','바구니 10개는 도토리 몇 개?',`바구니 열 개면 도토리 몇 개일까요? 열, 스물, 서른… 하고 세어 봐요.`,units(0,10,0),100,shuffle([100,90,10]),{hint:'10이 10개면 100'}); },
@@ -1252,11 +1252,11 @@ const T = {
   read4:()=>{ const n=rnd(1,9)*1000+rnd(0,9)*100+rnd(0,9)*10+rnd(0,9); return P('doto',`'${sino(n)}'은 숫자로?`,`${sn(n)} 숫자로 어떻게 쓸까요?`,eq(sino(n),true),n,numOpts(n,1000,9999,pick([1,10,100,1000])),{hint:'네 자리 수 쓰기'}); },
   groups:(m)=>()=>{ const k=rnd(2,6); return P('rami',`${m}씩 ${k}묶음, 모두 몇 개?`,`접시 하나에 도토리 ${GAE(m)}씩. ${sino(m)}씩 ${nativeCount(k)} 묶음이면 모두 몇 개일까요?`,plates(k,m),m*k,numOpts(m*k,2,40,m),{hint:`${m}씩 세기`,ansSpeech:GAE(m*k)}); },
   groupsHow:(m)=>()=>{ const k=rnd(2,6); return P('doto',`${m}씩 묶으면 몇 묶음?`,`도토리 ${GAE(m*k)}를 ${sino(m)}씩 묶으면 몇 묶음일까요?`,plates(k,m),k,numOpts(k,1,8),{hint:'묶음 수 세기'}); },
-  times:()=>{ const b=rnd(2,5), t=rnd(2,4); return P('cheong',`${b}의 ${t}배는?`,`청이 도토리는 ${GAE(b)}. 도토는 청이의 ${nativeCount(t)} 배를 가졌대. ${sino(b)}의 ${sino(t)}배는 얼마일까?`,plates(t,b),b*t,numOpts(b*t,2,20),{hint:'몇의 몇 배'}); },
+  times:()=>{ const b=rnd(2,5), t=rnd(2,4); return P('cheong',`${b}의 ${t}배는?`,`청이 도토리는 ${GAE(b)}. 도토는 청이의 ${nativeCount(t)} 배를 가졌대. ${sino(b)}의 ${nativeCount(t)} 배는 얼마일까?`,plates(t,b),b*t,numOpts(b*t,2,20),{hint:'몇의 몇 배'}); },
   timesHow:()=>{ const b=rnd(2,4), t=rnd(2,4); return P('halmi',`${b*t}${pt(b*t,'은','는')} ${b}의 몇 배?`,`${sn(b*t)} ${sino(b)}의 몇 배일까?`,plates(t,b),t,numOpts(t,1,6),{hint:'묶음이 몇 개'}); },
   mulWrite:()=>{ const a=rnd(2,5), b=rnd(2,5); const kind=rnd(0,1); if(kind===0) return P('doto',`${a}씩 ${b}묶음을 곱셈식으로!`,`${sino(a)}씩 ${nativeCount(b)} 묶음. 곱셈식으로 쓰면 무엇일까요?`,plates(b,a),`${a}×${b}`,shuffle([`${a}×${b}`,`${a}+${b}`,`${a}×${b+1}`]),{hint:'몇 × 묶음 수',text:true,ansSpeech:`${sino(a)} 곱하기 ${sino(b)}`}); return P('rami',`${a} × ${b} = ?`,`${sino(a)} 곱하기 ${sn(b)} 얼마일까요? 접시를 세어 봐요.`,plates(b,a),a*b,numOpts(a*b,2,30),{hint:'곱셈식'}); },
   gugu:(k)=>()=>{ const m=rnd(1,9); const vis = platesImg(m,k)+eq(`${k} × ${m} = □`,true); return P(pick(['doto','rami']),`${k} × ${m} = ?`,`구구단! ${sino(k)} 곱하기 ${sp(m,'은','는')}?`,vis,k*m,numOpts(k*m,k,81,k),{hint:`${k}단`}); },
-  guguBox:(k)=>()=>{ const m=rnd(1,9); return P('cheong',`${k} × □ = ${k*m}`,`${sino(k)}에 몇을 곱하면 ${sn(k*m)} 될까? 접시가 몇 개인지 세어 봐.`,platesImg(m,k)+eq(`${k} × □ = ${k*m}`,true),m,numOpts(m,1,9),{hint:'접시 수 세기'}); },
+  guguBox:(k)=>()=>{ const m=rnd(1,9); return P('cheong',`${k} × □ = ${k*m}`,`${sino(k)}에 몇을 곱하면 ${sp(k*m,'이','가')} 될까? 접시가 몇 개인지 세어 봐.`,platesImg(m,k)+eq(`${k} × □ = ${k*m}`,true),m,numOpts(m,1,9),{hint:'접시 수 세기'}); },
   guguSkip:(k)=>()=>{ const m=rnd(1,6); const list=[k*m,k*(m+1),k*(m+2)]; return P('halmi',`${k}씩 뛰어 세기, 다음은?`,`${sino(k)}씩 뛰어 세어 보자. ${list.map(sino).join(', ')}, 다음은?`,seq([...list,'?']),k*(m+3),numOpts(k*(m+3),k,90,k),{hint:`${k}씩 커져요`}); },
   guguWord:(k)=>()=>{ const m=rnd(1,9); const h=guguHead(k,m); return P('rami',`${k}단: ${h} ?`,`${h}, 얼마일까요?`,eq(`${k} × ${m} = □`),k*m,numOpts(k*m,k,81,k),{hint:'구구단 외우기'}); },
   one:()=>{ const a=rnd(1,9); const kind=rnd(0,1); if(kind===0) return P('halmi',`${a} × 1 = ?`,`접시 하나에 도토리를 하나씩만 담았단다. ${sino(a)} 곱하기 일은 얼마일까?`,plates(a,1),a,numOpts(a,0,12)); return P('doto',`1 × ${a} = ?`,`일 곱하기 ${sn(a)} 얼마일까요?`,eq(`1 × ${a} = □`),a,numOpts(a,0,12)); },
@@ -1283,7 +1283,7 @@ function vertVis(a, op, b, o={}){
 const PW=(who,q,speech,visual,ans,x={})=>P(who,q,speech,visual,ans,[],Object.assign({write:true,slots:true},x));
 T.again=f=>()=>f();
 Object.assign(T,{
-  boxW:()=>{ const a=rnd(1,6), b=rnd(1,9-a); const k=rnd(0,1); return PW('cheong','빈칸을 찾아요',k?`${sino(a)} 더하기 몇이 ${sn(a+b)} 될까? 빈칸에 들어갈 수를 찾아보렴.`:`어떤 수에서 ${sp(b,'을','를')} 빼면 ${sn(a)} 될까? 빈칸에 들어갈 수를 찾아보렴.`,k?eqRow([a,'+','?','=',a+b]):eqRow(['?','−',b,'=',a]),k?b:a+b,{hint:'도토리 탐정'}); },
+  boxW:()=>{ const a=rnd(1,6), b=rnd(1,9-a); const k=rnd(0,1); return PW('cheong','빈칸을 찾아요',k?`${sino(a)} 더하기 몇이 ${sp(a+b,'이','가')} 될까? 빈칸에 들어갈 수를 찾아보렴.`:`어떤 수에서 ${sp(b,'을','를')} 빼면 ${sp(a,'이','가')} 될까? 빈칸에 들어갈 수를 찾아보렴.`,k?eqRow([a,'+','?','=',a+b]):eqRow(['?','−',b,'=',a]),k?b:a+b,{hint:'도토리 탐정'}); },
   groupsW:(k)=>()=>{ const m=rnd(2,5); return PW('doto',`${k}씩 몇 묶음?`,`도토리를 ${GAE(k)}씩 묶으면 몇 묶음일까요?`,plates(m,k)+eqRow([k,'×','?','=',k*m]),m,{}); },
   // 덧셈·뺄셈 뜻: 그림 보고 식 전체 쓰기
   eqAll:(op,who,lo,hi)=>()=>{ let a=rnd(lo,hi), b=rnd(1,op==='+'?hi-a:a); if(op==='+'&&a+b>9) b=9-a||1; const r=op==='+'?a+b:a-b; const vis=op==='+'?acRows(noTap(acorns(a)),'+',noTap(acorns(b))):acorns(a,{gone:b,notap:true});
@@ -1318,7 +1318,7 @@ Object.assign(T,{
   skipW:(step)=>()=>{ const n=step===10?rnd(12,89)*10:step===100?rnd(1,6)*100+rnd(0,9)*10:rnd(1,9)*1000; const list=[n,n+step,n+2*step]; const ans=n+3*step; return PW(pick(['rami','doto']),`${step}씩 뛰어 세기, 다음은?`,`${sino(step)}씩 뛰어 세어요. ${list.map(sino).join(', ')}, 다음은 무엇일까요?`,seq(list)+slotCols(ans),ans,{ansSpeech:sino(ans)}); },
   // 곱셈
   mulEq:()=>{ const a=rnd(2,5), b=rnd(2,5); const p=a*b; return PW('doto',`${a}씩 ${b}묶음, 곱셈식을 써요`,`${sino(a)}씩 ${nativeCount(b)} 묶음. 곱셈식으로 쓰면 무엇일까요?`,plates(b,a)+eqRow(['?','×','?','=',Q(p)]),`${a}${b}${p}`,{ansText:`${a} × ${b} = ${p}`,ansSpeech:`${sino(a)} 곱하기 ${sn(b)} ${sino(p)}`}); },
-  timesW:()=>{ const b=rnd(2,5), t=rnd(2,4); const p=b*t; return PW('cheong',`${b}의 ${t}배는?`,`청이 도토리는 ${GAE(b)}. 도토는 청이의 ${nativeCount(t)} 배를 가졌대. ${sino(b)}의 ${sino(t)}배는 얼마일까?`,plates(t,b)+eqRow([b,'×',t,'=',Q(p)]),p,{}); },
+  timesW:()=>{ const b=rnd(2,5), t=rnd(2,4); const p=b*t; return PW('cheong',`${b}의 ${t}배는?`,`청이 도토리는 ${GAE(b)}. 도토는 청이의 ${nativeCount(t)} 배를 가졌대. ${sino(b)}의 ${nativeCount(t)} 배는 얼마일까?`,plates(t,b)+eqRow([b,'×',t,'=',Q(p)]),p,{}); },
   guguW:(k)=>()=>{ const m=rnd(1,9); const p=k*m; return PW(pick(['doto','rami']),`${k} × ${m} = ?`,`구구단! ${sino(k)} 곱하기 ${sp(m,'은','는')}?`,platesImg(m,k)+eqRow([k,'×',m,'=',Q(p)]),p,{ansSpeech:`${guguHead(k,m)} ${sino(p)}`}); },
   oneZeroW:()=>{ const a=rnd(1,9); const z=rnd(0,1); return PW(z?'cheong':'halmi',z?`${a} × 0 = ?`:`${a} × 1 = ?`,z?`${sino(a)} 곱하기 영은 얼마일까?`:`${sino(a)} 곱하기 일은 얼마일까?`,eqRow([a,'×',z?0:1,'=','?']),z?0:a,{}); },
 });
@@ -1457,7 +1457,7 @@ const SYNTH={
 };
 function sfx(kind, vol=0.9){ try{ let k=SFX_ALIAS[kind]||kind; if(Array.isArray(k)) k=k[Math.floor(Math.random()*k.length)]; const src=SFX[k]; if(src){ const a=new Audio(src); a.volume=vol; a.play().catch(()=>{}); return; } const ac=AC(); if(!ac) return; const fn=SYNTH[k]||SYNTH[kind]; if(fn) fn(ac,ac.currentTime); }catch(e){} }
 const gameP=(who,title,speech,mount,hint='')=>({who,title,speech,mount,hint});
-const bubbleSay=(root,who,text)=>{ const b=root.querySelector('.gsay'); if(b){ b.innerHTML=`${IMG(CH_KO[who]+'_기본','gface')}<span>${text}</span>`; } say(text,who); };
+const bubbleSay=(root,who,text)=>{ text=fixJosa(text); const b=root.querySelector('.gsay'); if(b){ b.innerHTML=`${IMG(CH_KO[who]+'_기본','gface')}<span>${text}</span>`; } say(text,who); };
 
 /* ---------- 1. 나무 흔들기 (정확히 N개) ---------- */
 function gShake(N, who='doto', extra={}){
@@ -1779,7 +1779,7 @@ function gTimes(){
   const b=rnd(2,4), t=rnd(2,4); const who='cheong';
   return gameP(who, `청이 도토리의 ${t}배 만들기`, `청이 도토리는 ${GAE(b)}야. 도토는 청이의 ${nativeCount(t)} 배를 가졌대. ${GAE(b)}씩 ${nativeCount(t)} 묶음이 되게 도토 접시에 담아 보자!`,
   (root, done)=>{
-    const g=gPlates(b,t,{who,eq:`${b}의 ${t}배 = □`,after:`${sino(b)}의 ${sino(t)}배는 ${sino(b*t)}! ${sino(b)}씩 ${nativeCount(t)} 묶음이야.`});
+    const g=gPlates(b,t,{who,eq:`${b}의 ${t}배 = □`,after:`${sino(b)}의 ${nativeCount(t)} 배는 ${sino(b*t)}! ${sino(b)}씩 ${nativeCount(t)} 묶음이야.`});
     g.mount(root, done); const first=root.querySelector('.plates'); const hdr=document.createElement('div'); hdr.className='cname'; hdr.style.marginBottom='6px'; hdr.innerHTML=`<img src="${A['청이_기본']}" alt=""> 청이 ${b}개 → 도토는 ${t}배`; first.before(hdr);
   }, '접시에 끌어다 담아요');
 }
@@ -2796,7 +2796,7 @@ function readBig(n){ if(n===0) return '영'; const u=['','만','억','조']; let
 /* ---------- 4-2 ---------- */
 const red=(n,d)=>{ const g=gcd(n,d)||1; return [n/g,d/g]; };
 const frTxt=(n,d)=>`${d}분의 ${n}`;
-const mixTxt=(w,n,d)=>n?`${w}와 ${d}분의 ${n}`:`${w}`;
+const mixTxt=(w,n,d)=>n?`${w}${/[013678]$/.test(String(w))?'과':'와'} ${d}분의 ${n}`:`${w}`;
 const toMix=(N,d)=>[Math.floor(N/d),N%d];
 const frSp=(n,d)=>`${sino(d)}분의 ${sino(n)}`;
 const mixSp=(w,n,d)=>`${sino(w)}과 ${frSp(n,d)}`;
@@ -2977,7 +2977,7 @@ unit(5,'5-2 수의 범위와 어림하기',[
 ]);
 unit(5,'5-2 분수의 곱셈',[
  ['S3-89','몇 배의 케이크','(분수)×(자연수)',[
-  ()=>{ const d=rnd(3,8), n=rnd(1,d-1), k=rnd(2,5); const [rn,rd]=red(n*k,d); const [w,m]=toMix(rn,rd); return W36('rami',`${frTxt(n,d)} × ${k}`,`${frSp(n,d)}의 ${sino(k)}배. 분자에 ${sino(k)}를 곱해요. 약분하고 대분수로.`,bars(k,d,n*k)+row(fr(n,d),'×',k,'=',w?(m?mixQ(w,m,rd,'wn'):`<span class="vgrp">${SL(w)}</span>`):frQ(rn,rd,'nd')),w?(m?`${w}${m}`:`${w}`):`${rn}${rd}`,{ansText:w?mixTxt(w,m,rd):frTxt(rn,rd)}); },
+  ()=>{ const d=rnd(3,8), n=rnd(1,d-1), k=rnd(2,5); const [rn,rd]=red(n*k,d); const [w,m]=toMix(rn,rd); return W36('rami',`${frTxt(n,d)} × ${k}`,`${frSp(n,d)}의 ${nativeCount(k)} 배. 분자에 ${sino(k)}를 곱해요. 약분하고 대분수로.`,bars(k,d,n*k)+row(fr(n,d),'×',k,'=',w?(m?mixQ(w,m,rd,'wn'):`<span class="vgrp">${SL(w)}</span>`):frQ(rn,rd,'nd')),w?(m?`${w}${m}`:`${w}`):`${rn}${rd}`,{ansText:w?mixTxt(w,m,rd):frTxt(rn,rd)}); },
   ()=>{ const d=rnd(3,8), n=rnd(1,d-1), k=rnd(2,5); return C36('cheong',`${frTxt(n,d)} × ${k}, 청이는 ${frTxt(n*k,d*k)}이래`,`청이는 분모에도 곱했어요. 분자에만 곱하면?`,row(fr(n,d),'×',k),frTxt(n*k,d),[frTxt(n*k,d),frTxt(n*k,d*k),frTxt(n,d*k)]); },
  ]],
  ['S3-90','자연수의 몇 분의 몇','(자연수)×(분수)',[
@@ -6032,6 +6032,17 @@ B('S3-67', ['500원짜리 공책 2권과 400원짜리 연필 1자루를 사고 3
 B('S4-09', ['모두 33명을 조사한 표에 개 12명, 토끼 6명이 적혀 있고 고양이는 지워졌어요. 눈금 한 칸이 3명인 막대그래프에서 고양이는 몇 칸으로 그릴까요?','5칸',[['15칸','D4-01'],['11칸','F'],['45칸','N4-14']]]);
 B('S4-10', ['눈금 한 칸이 5권인 막대그래프에서 동화책은 9칸, 위인전은 4칸, 과학책은 6칸이에요. 가장 많은 책은 가장 적은 책보다 몇 권 더 많을까요?','25권',[['5권','D4-01'],['65권','N1-03'],['15권','F']]]);
 
+/* ===== 3-31j. 4~5지선다 넓히기: 3-1 길이와 시간, 3-2 들이와 무게, 4-1 규칙 찾기 (직접 검산) ===== */
+B('S6-37', ['508 mm는 몇 cm 몇 mm일까요?','50 cm 8 mm',[['5 cm 8 mm','G3-05'],['58 cm','N4-01'],['500 cm 8 mm','F']]]);
+B('S6-38', ['3 km 70 m는 모두 몇 m일까요?','3070 m',[['370 m','G3-05'],['3700 m','N4-01'],['30070 m','G3-07'],['73 m','F']]]);
+B('S6-35', ['1분 55초 + 2분 50초는 몇 분 몇 초일까요?','4분 45초',[['4분 5초','G2-03'],['3분 45초','N2-01'],['3분 105초','F']]]);
+B('S6-42', ['2 L 800 mL + 1 L 500 mL는 몇 L 몇 mL일까요?','4 L 300 mL',[['3 L 300 mL','N2-01'],['1 L 300 mL','N1-03'],['3 L 1300 mL','F']]]);
+B('S6-46', ['4 kg 200 g − 1 kg 500 g은 몇 kg 몇 g일까요?','2 kg 700 g',[['3 kg 300 g','N2-02'],['3 kg 700 g','N2-08'],['5 kg 700 g','N1-03'],['2 kg 500 g','F']]]);
+B('S6-45', ['5040 kg은 몇 t 몇 kg일까요?','5 t 40 kg',[['50 t 40 kg','G3-05'],['5 t 400 kg','N4-01'],['5 t 4 kg','F']]]);
+B('S5-06', ['100, 98, 94, 88, 80 다음에 올 수는?','70',[['72','R4-01'],['78','R5-03'],['90','N1-03'],['64','F']]],
+  ['성냥개비로 정사각형을 한 줄로 이어 붙여요. 정사각형 1개는 4개, 2개는 7개, 3개는 10개가 필요해요. 정사각형 6개를 이어 붙이려면 성냥개비는 몇 개 필요할까요?','19개',[['20개','R6-14'],['13개','R4-01'],['22개','F']]]);
+B('S5-08', ['480 ÷ 2 = 240, 480 ÷ 4 = 120, 480 ÷ 8 = 60. 이 규칙에서 넷째 식의 몫은?','30',[['0','R4-01'],['40','R1-04'],['120','N4-14'],['16','F']]]);
+
 /* ===== 3-32. 글 검토에서 고친 문장(화면 글만 바꾼다. 음성 글과 태그는 그대로) ===== */
 const FIXT=[
  [/^(\d+) \+ (\d+), 청이가 (\d+)이래\. 맞을까\?$/, (m,a,b,c)=>`${a} + ${b} = ? 청이의 답은 ${c}. 바르게 계산하면?`],
@@ -6079,7 +6090,11 @@ const FIXT=[
  [/^(\d+ m의 .+만큼은 몇 m일까요\?) 반반이가 리본을 잘라요\.$/, (m,a)=>`반반이가 리본을 잘라요. ${a}`],
 ];
 const _bat=n=>/[013678]$/.test(String(n));   /* 수를 읽었을 때 받침이 있는지(끝자리 0·1·3·6·7·8) */
-function fixText(q){ if(q&&typeof q.q==='string'){ for(const [re,f] of FIXT){ if(re.test(q.q)){ q.q=q.q.replace(re,f); break; } }
+/* 숫자 바로 뒤 조사를 읽는 소리의 받침에 맞춤(화면 글): 0.3와→0.3과, 4을→4를, 3로→3으로 */
+function fixNumJosa(s){ if(typeof s!=='string') return s; return s.replace(/(\d)(으로|로|은|는|을|를|과|와)(?=[\s,.?!)]|$)/g,(m,d,j)=>{ const bat=/[013678]/.test(d), ri=/[178]/.test(d); const nj=(j==='으로'||j==='로')?((bat&&!ri)?'으로':'로'):({'은':'은는','는':'은는','을':'을를','를':'을를','과':'과와','와':'과와'})[j][bat?0:1]; return d+nj; }); }
+function fixText(q){ if(q&&typeof q.hint==='string'&&!/</.test(q.hint)) q.hint=fixNumJosa(q.hint); if(q&&typeof q.q==='string'&&!/</.test(q.q)) q.q=fixNumJosa(q.q);
+ if(q&&typeof q.q==='string'){ for(const [re,f] of FIXT){ if(re.test(q.q)){ q.q=q.q.replace(re,f); break; } }
+  q.q=q.q.replace(/(\d+ kg) 0 g(?=[은이에 ])/,'$1').replace(/(\d+ L) 0 mL(?=[은이에 ])/,'$1');
     q.q=q.q.replace(/(\d)(이에요|예요)([.,!]|$)/g,(m,d,e,t)=>d+(_bat(d)?'이에요':'예요')+t);
     if(q.opts){ const j=q.opts.indexOf('~아닐 것 같다'); if(j>=0&&q.ans!=='~아닐 것 같다'){ q.opts[j]='아닐 것 같다'; if(q.mis&&q.mis['~아닐 것 같다']){ q.mis['아닐 것 같다']=q.mis['~아닐 것 같다']; delete q.mis['~아닐 것 같다']; } } }
     const at=String(q.ansText==null?'':q.ansText);
@@ -6089,8 +6104,35 @@ function fixText(q){ if(q&&typeof q.q==='string'){ for(const [re,f] of FIXT){ if
   return q; }
 { const _t=tagQ; tagQ=function(ep,i,q){ return fixText(_t(ep,i,q)); }; }
 
+/* ===== 3-34. 소수 표기 바로잡기: 끝자리 0(3.0, 0.80, 4.50)을 뺀다 =====
+   toFixed로 만든 수라 '18.0 ÷ 5', '1.55 + 2.75 = 4.30'처럼 나오던 것. 교과서 표기는 18 ÷ 5, 4.3.
+   쓰기형은 태그 붙이기 전에(칸 수·정답 숫자까지), 객관식은 태그 붙인 뒤에(보기·코드 키까지) 고친다.
+   끝자리 0이 내용인 편(자릿값·크기 비교·읽기·소수점 위치·반올림)은 건드리지 않는다. */
+const DEC_KEEP=new Set(['S3-21','S3-22','S3-56','S3-58','S3-78','S3-96','S3-111']);
+const _tz=/(\d+\.\d*?)0+(?![\d.])/g, _tzs=s=>String(s).replace(_tz,(m,a)=>a.replace(/\.$/,''));
+function decKeep(ep,q){ return DEC_KEEP.has(ep)||!q||q.manip||typeof q.q!=='string'||/청이의 답|읽으면/.test(q.q); }
+function normDecPre(ep,q){ if(decKeep(ep,q)||!(q.write&&q.slots)||typeof q.ansText!=='string'||typeof q.visual!=='string') return q;
+  const has=s=>{ _tz.lastIndex=0; return _tz.test(String(s)); };
+  if(has(q.q)){ q.q=fixNumJosa(_tzs(q.q)); q.visual=q.visual.replace(/<b>([^<]*)<\/b>/g,(m,a)=>'<b>'+_tzs(a)+'</b>'); if(typeof q.speech==='string') q.speech=q.speech.replace(/( 점 [일이삼사오육칠팔구영]*[일이삼사오육칠팔구])영+(?![가-힣])/g,'$1').replace(/ 점 영+(?![가-힣])/g,''); }
+  if(!has(q.ansText)) return q;
+  const nums=q.ansText.match(/\d+(?:\.\d+)?/g)||[]; const grp=q.visual.match(/<span class="vgrp">.*?<\/span><\/span>/g)||[];
+  if(nums.length!==grp.length||nums.join('').replace(/\./g,'')!==String(q.ans)) return q;
+  let vis=q.visual; const out=[];
+  nums.forEach((n,j)=>{ const s=_tzs(n); out.push(s); if(s===n) return; const k=n.length-s.length-(s.indexOf('.')<0?1:0); let g=grp[j]; for(let x=0;x<k;x++) g=g.replace(/<span class="vslot"><\/span>(?=<\/span>$)/,''); if(s.indexOf('.')<0) g=g.replace('<em class="dot">.</em>',''); vis=vis.replace(grp[j],g); });
+  q.visual=vis; q.ans=out.join('').replace(/\./g,''); let j=0; q.ansText=q.ansText.replace(/\d+(?:\.\d+)?/g,()=>out[j++]); return q; }
+function normDecPost(ep,q){ if(decKeep(ep,q)||!Array.isArray(q.opts)||!q.opts.length||q.opts.some(o=>typeof o!=='string')) return q;
+  const no=q.opts.map(_tzs); if(new Set(no).size!==no.length) return q;
+  if(no.some((o,i)=>o!==q.opts[i])){ if(q.mis){ const m={}; for(const k of Object.keys(q.mis)) m[_tzs(k)]=q.mis[k]; q.mis=m; } q.ans=_tzs(q.ans); q.opts=no; }
+  q.q=fixNumJosa(_tzs(q.q)); return q; }
+{ const _t=tagQ; tagQ=function(ep,i,q){ try{ q=normDecPre(ep,q); }catch(e){} q=_t(ep,i,q); try{ q=normDecPost(ep,q); }catch(e){} return q; }; }
+
 /* ===== 3-33. 1~2학년 수와 연산(EP 엔진) 글 검토: 화면 글만 고친다 ===== */
-function fixEP(q){ if(q&&typeof q.q==='string'){ q.q=q.q.replace(/(하나​?['’])은/,'$1는'); q.q=q.q.replace(/^(['‘].*?([가-힣])​?['’])[은는] 숫자로\?$/,(m,a,ch)=>a+(((ch.charCodeAt(0)-0xAC00)%28)?'은':'는')+' 숫자로?');
+/* 수 낱말(보이지 않는 표시로 감싼 것) 바로 뒤 조사를 받침에 맞춤: 사을→사를, 삼로→삼으로, 일으로→일로 */
+function fixJosa(t){ if(typeof t!=='string'||t.indexOf('​')<0) return t;
+  const P={'은':['은','는'],'는':['은','는'],'이':['이','가'],'가':['이','가'],'을':['을','를'],'를':['을','를'],'과':['과','와'],'와':['과','와'],'이에요':['이에요','예요'],'예요':['이에요','예요'],'이야':['이야','야'],'야':['이야','야'],'이란다':['이란다','란다'],'란다':['이란다','란다']};
+  return t.replace(/([가-힣])​(으로|로|이에요|예요|이란다|란다|이야|야|은|는|이|가|을|를|과|와)(?=[\s,.?!~…]|$)/g,(m,ch,j)=>{ const jong=(ch.charCodeAt(0)-0xAC00)%28; const nj=(j==='으로'||j==='로')?((jong>0&&jong!==8)?'으로':'로'):P[j][jong>0?0:1]; return ch+'​'+nj; }); }
+if(typeof say==='function'){ const _say=say; say=function(text,who,cb){ return _say(fixJosa(text),who,cb); }; }
+function fixEP(q){ if(q){ for(const k of ['speech','ansSpeech','hint']) if(typeof q[k]==='string') q[k]=fixJosa(q[k]); } if(q&&typeof q.q==='string'){ q.q=q.q.replace(/(하나​?['’])은/,'$1는'); q.q=q.q.replace(/^(['‘].*?([가-힣])​?['’])[은는] 숫자로\?$/,(m,a,ch)=>a+(((ch.charCodeAt(0)-0xAC00)%28)?'은':'는')+' 숫자로?');
   { const m=q.q.match(/^(\d+)에서 숫자 (\d)([은는]) 얼마\?$/); const an=+q.ans; if(m&&an>0){ const pl=an>=1000?'천':an>=100?'백':an>=10?'십':'일'; q.q=`${m[1]}에서 ${pl}의 자리 숫자 ${m[2]}${m[3]} 얼마?`; } } } return q; }
 if(typeof G!=='undefined') for(const e of Object.keys(G)) G[e]=G[e].map(g=>function(){ return fixEP(g.apply(this,arguments)); });
 

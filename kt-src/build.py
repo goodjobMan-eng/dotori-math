@@ -169,5 +169,17 @@ assert h.count(_a) == 1
 h = h.replace(_a, "g.reveal=()=>g.set(half.map(([x,y])=>[5-x,y])); g.state=()=>g.cells().map(v=>v.join('')).sort().join('.'); g.mcode=()=>{ const c=g.cells().map(v=>v.join(',')).sort().join('|'), K=f=>half.map(f).map(v=>v.join(',')).sort().join('|'); return c===K(([x,y])=>[x+3,y])?'G5-15':c===K(([x,y])=>[5-x,4-y])?'G5-05':null; }; return MQ('대칭축(점선)을 기준으로 선대칭도형을 완성해 보세요.'")
 h = h.replace(a, "const ok=q.manip.check(); try{ if(S.tries===0&&q.manip.state){ q._mstate=String(q.manip.state()).slice(0,24); if(!ok&&q.manip.mcode) q._mcode=q.manip.mcode(); } }catch(e){} answer(")
 k = h.rindex('</body>'); h = h[:k] + '<script>\n' + out + '\n</script>\n' + h[k:]
+# --- 음성 글: 수 뒤 조사·읽기 고침 (2026-11-21) ---
+import re as _re
+_n=len(_re.findall(r"\$\{sn\(([^}]*)\)\} (될까|된단다)", h)); assert _n==7, _n
+h = _re.sub(r"\$\{sn\(([^}]*)\)\} (될까|된단다)", lambda m: "${sp(%s,'이','가')} %s"%(m.group(1),m.group(2)), h)
+_b="${sino(b)}의 ${sino(t)}배"; assert h.count(_b)==3
+h = h.replace(_b, "${sino(b)}의 ${nativeCount(t)} 배")
+_c="${frSp(n,d)}의 ${sino(k)}배."; assert h.count(_c)==1
+h = h.replace(_c, "${frSp(n,d)}의 ${nativeCount(k)} 배.")
+_d="const bubbleSay=(root,who,text)=>{"; assert h.count(_d)==1
+h = h.replace(_d, _d+" text=fixJosa(text);")
+_e="const mixTxt=(w,n,d)=>n?`${w}와 ${d}분의 ${n}`:`${w}`;"; assert h.count(_e)==1
+h = h.replace(_e, "const mixTxt=(w,n,d)=>n?`${w}${/[013678]$/.test(String(w))?'과':'와'} ${d}분의 ${n}`:`${w}`;")
 open('out/index.html', 'w', encoding='utf-8').write(h)
 print('built', len(out))

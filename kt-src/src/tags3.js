@@ -733,6 +733,17 @@ B('S3-67', ['500원짜리 공책 2권과 400원짜리 연필 1자루를 사고 3
 B('S4-09', ['모두 33명을 조사한 표에 개 12명, 토끼 6명이 적혀 있고 고양이는 지워졌어요. 눈금 한 칸이 3명인 막대그래프에서 고양이는 몇 칸으로 그릴까요?','5칸',[['15칸','D4-01'],['11칸','F'],['45칸','N4-14']]]);
 B('S4-10', ['눈금 한 칸이 5권인 막대그래프에서 동화책은 9칸, 위인전은 4칸, 과학책은 6칸이에요. 가장 많은 책은 가장 적은 책보다 몇 권 더 많을까요?','25권',[['5권','D4-01'],['65권','N1-03'],['15권','F']]]);
 
+/* ===== 3-31j. 4~5지선다 넓히기: 3-1 길이와 시간, 3-2 들이와 무게, 4-1 규칙 찾기 (직접 검산) ===== */
+B('S6-37', ['508 mm는 몇 cm 몇 mm일까요?','50 cm 8 mm',[['5 cm 8 mm','G3-05'],['58 cm','N4-01'],['500 cm 8 mm','F']]]);
+B('S6-38', ['3 km 70 m는 모두 몇 m일까요?','3070 m',[['370 m','G3-05'],['3700 m','N4-01'],['30070 m','G3-07'],['73 m','F']]]);
+B('S6-35', ['1분 55초 + 2분 50초는 몇 분 몇 초일까요?','4분 45초',[['4분 5초','G2-03'],['3분 45초','N2-01'],['3분 105초','F']]]);
+B('S6-42', ['2 L 800 mL + 1 L 500 mL는 몇 L 몇 mL일까요?','4 L 300 mL',[['3 L 300 mL','N2-01'],['1 L 300 mL','N1-03'],['3 L 1300 mL','F']]]);
+B('S6-46', ['4 kg 200 g − 1 kg 500 g은 몇 kg 몇 g일까요?','2 kg 700 g',[['3 kg 300 g','N2-02'],['3 kg 700 g','N2-08'],['5 kg 700 g','N1-03'],['2 kg 500 g','F']]]);
+B('S6-45', ['5040 kg은 몇 t 몇 kg일까요?','5 t 40 kg',[['50 t 40 kg','G3-05'],['5 t 400 kg','N4-01'],['5 t 4 kg','F']]]);
+B('S5-06', ['100, 98, 94, 88, 80 다음에 올 수는?','70',[['72','R4-01'],['78','R5-03'],['90','N1-03'],['64','F']]],
+  ['성냥개비로 정사각형을 한 줄로 이어 붙여요. 정사각형 1개는 4개, 2개는 7개, 3개는 10개가 필요해요. 정사각형 6개를 이어 붙이려면 성냥개비는 몇 개 필요할까요?','19개',[['20개','R6-14'],['13개','R4-01'],['22개','F']]]);
+B('S5-08', ['480 ÷ 2 = 240, 480 ÷ 4 = 120, 480 ÷ 8 = 60. 이 규칙에서 넷째 식의 몫은?','30',[['0','R4-01'],['40','R1-04'],['120','N4-14'],['16','F']]]);
+
 /* ===== 3-32. 글 검토에서 고친 문장(화면 글만 바꾼다. 음성 글과 태그는 그대로) ===== */
 const FIXT=[
  [/^(\d+) \+ (\d+), 청이가 (\d+)이래\. 맞을까\?$/, (m,a,b,c)=>`${a} + ${b} = ? 청이의 답은 ${c}. 바르게 계산하면?`],
@@ -780,7 +791,11 @@ const FIXT=[
  [/^(\d+ m의 .+만큼은 몇 m일까요\?) 반반이가 리본을 잘라요\.$/, (m,a)=>`반반이가 리본을 잘라요. ${a}`],
 ];
 const _bat=n=>/[013678]$/.test(String(n));   /* 수를 읽었을 때 받침이 있는지(끝자리 0·1·3·6·7·8) */
-function fixText(q){ if(q&&typeof q.q==='string'){ for(const [re,f] of FIXT){ if(re.test(q.q)){ q.q=q.q.replace(re,f); break; } }
+/* 숫자 바로 뒤 조사를 읽는 소리의 받침에 맞춤(화면 글): 0.3와→0.3과, 4을→4를, 3로→3으로 */
+function fixNumJosa(s){ if(typeof s!=='string') return s; return s.replace(/(\d)(으로|로|은|는|을|를|과|와)(?=[\s,.?!)]|$)/g,(m,d,j)=>{ const bat=/[013678]/.test(d), ri=/[178]/.test(d); const nj=(j==='으로'||j==='로')?((bat&&!ri)?'으로':'로'):({'은':'은는','는':'은는','을':'을를','를':'을를','과':'과와','와':'과와'})[j][bat?0:1]; return d+nj; }); }
+function fixText(q){ if(q&&typeof q.hint==='string'&&!/</.test(q.hint)) q.hint=fixNumJosa(q.hint); if(q&&typeof q.q==='string'&&!/</.test(q.q)) q.q=fixNumJosa(q.q);
+ if(q&&typeof q.q==='string'){ for(const [re,f] of FIXT){ if(re.test(q.q)){ q.q=q.q.replace(re,f); break; } }
+  q.q=q.q.replace(/(\d+ kg) 0 g(?=[은이에 ])/,'$1').replace(/(\d+ L) 0 mL(?=[은이에 ])/,'$1');
     q.q=q.q.replace(/(\d)(이에요|예요)([.,!]|$)/g,(m,d,e,t)=>d+(_bat(d)?'이에요':'예요')+t);
     if(q.opts){ const j=q.opts.indexOf('~아닐 것 같다'); if(j>=0&&q.ans!=='~아닐 것 같다'){ q.opts[j]='아닐 것 같다'; if(q.mis&&q.mis['~아닐 것 같다']){ q.mis['아닐 것 같다']=q.mis['~아닐 것 같다']; delete q.mis['~아닐 것 같다']; } } }
     const at=String(q.ansText==null?'':q.ansText);
@@ -790,7 +805,34 @@ function fixText(q){ if(q&&typeof q.q==='string'){ for(const [re,f] of FIXT){ if
   return q; }
 { const _t=tagQ; tagQ=function(ep,i,q){ return fixText(_t(ep,i,q)); }; }
 
+/* ===== 3-34. 소수 표기 바로잡기: 끝자리 0(3.0, 0.80, 4.50)을 뺀다 =====
+   toFixed로 만든 수라 '18.0 ÷ 5', '1.55 + 2.75 = 4.30'처럼 나오던 것. 교과서 표기는 18 ÷ 5, 4.3.
+   쓰기형은 태그 붙이기 전에(칸 수·정답 숫자까지), 객관식은 태그 붙인 뒤에(보기·코드 키까지) 고친다.
+   끝자리 0이 내용인 편(자릿값·크기 비교·읽기·소수점 위치·반올림)은 건드리지 않는다. */
+const DEC_KEEP=new Set(['S3-21','S3-22','S3-56','S3-58','S3-78','S3-96','S3-111']);
+const _tz=/(\d+\.\d*?)0+(?![\d.])/g, _tzs=s=>String(s).replace(_tz,(m,a)=>a.replace(/\.$/,''));
+function decKeep(ep,q){ return DEC_KEEP.has(ep)||!q||q.manip||typeof q.q!=='string'||/청이의 답|읽으면/.test(q.q); }
+function normDecPre(ep,q){ if(decKeep(ep,q)||!(q.write&&q.slots)||typeof q.ansText!=='string'||typeof q.visual!=='string') return q;
+  const has=s=>{ _tz.lastIndex=0; return _tz.test(String(s)); };
+  if(has(q.q)){ q.q=fixNumJosa(_tzs(q.q)); q.visual=q.visual.replace(/<b>([^<]*)<\/b>/g,(m,a)=>'<b>'+_tzs(a)+'</b>'); if(typeof q.speech==='string') q.speech=q.speech.replace(/( 점 [일이삼사오육칠팔구영]*[일이삼사오육칠팔구])영+(?![가-힣])/g,'$1').replace(/ 점 영+(?![가-힣])/g,''); }
+  if(!has(q.ansText)) return q;
+  const nums=q.ansText.match(/\d+(?:\.\d+)?/g)||[]; const grp=q.visual.match(/<span class="vgrp">.*?<\/span><\/span>/g)||[];
+  if(nums.length!==grp.length||nums.join('').replace(/\./g,'')!==String(q.ans)) return q;
+  let vis=q.visual; const out=[];
+  nums.forEach((n,j)=>{ const s=_tzs(n); out.push(s); if(s===n) return; const k=n.length-s.length-(s.indexOf('.')<0?1:0); let g=grp[j]; for(let x=0;x<k;x++) g=g.replace(/<span class="vslot"><\/span>(?=<\/span>$)/,''); if(s.indexOf('.')<0) g=g.replace('<em class="dot">.</em>',''); vis=vis.replace(grp[j],g); });
+  q.visual=vis; q.ans=out.join('').replace(/\./g,''); let j=0; q.ansText=q.ansText.replace(/\d+(?:\.\d+)?/g,()=>out[j++]); return q; }
+function normDecPost(ep,q){ if(decKeep(ep,q)||!Array.isArray(q.opts)||!q.opts.length||q.opts.some(o=>typeof o!=='string')) return q;
+  const no=q.opts.map(_tzs); if(new Set(no).size!==no.length) return q;
+  if(no.some((o,i)=>o!==q.opts[i])){ if(q.mis){ const m={}; for(const k of Object.keys(q.mis)) m[_tzs(k)]=q.mis[k]; q.mis=m; } q.ans=_tzs(q.ans); q.opts=no; }
+  q.q=fixNumJosa(_tzs(q.q)); return q; }
+{ const _t=tagQ; tagQ=function(ep,i,q){ try{ q=normDecPre(ep,q); }catch(e){} q=_t(ep,i,q); try{ q=normDecPost(ep,q); }catch(e){} return q; }; }
+
 /* ===== 3-33. 1~2학년 수와 연산(EP 엔진) 글 검토: 화면 글만 고친다 ===== */
-function fixEP(q){ if(q&&typeof q.q==='string'){ q.q=q.q.replace(/(하나​?['’])은/,'$1는'); q.q=q.q.replace(/^(['‘].*?([가-힣])​?['’])[은는] 숫자로\?$/,(m,a,ch)=>a+(((ch.charCodeAt(0)-0xAC00)%28)?'은':'는')+' 숫자로?');
+/* 수 낱말(보이지 않는 표시로 감싼 것) 바로 뒤 조사를 받침에 맞춤: 사을→사를, 삼로→삼으로, 일으로→일로 */
+function fixJosa(t){ if(typeof t!=='string'||t.indexOf('​')<0) return t;
+  const P={'은':['은','는'],'는':['은','는'],'이':['이','가'],'가':['이','가'],'을':['을','를'],'를':['을','를'],'과':['과','와'],'와':['과','와'],'이에요':['이에요','예요'],'예요':['이에요','예요'],'이야':['이야','야'],'야':['이야','야'],'이란다':['이란다','란다'],'란다':['이란다','란다']};
+  return t.replace(/([가-힣])​(으로|로|이에요|예요|이란다|란다|이야|야|은|는|이|가|을|를|과|와)(?=[\s,.?!~…]|$)/g,(m,ch,j)=>{ const jong=(ch.charCodeAt(0)-0xAC00)%28; const nj=(j==='으로'||j==='로')?((jong>0&&jong!==8)?'으로':'로'):P[j][jong>0?0:1]; return ch+'​'+nj; }); }
+if(typeof say==='function'){ const _say=say; say=function(text,who,cb){ return _say(fixJosa(text),who,cb); }; }
+function fixEP(q){ if(q){ for(const k of ['speech','ansSpeech','hint']) if(typeof q[k]==='string') q[k]=fixJosa(q[k]); } if(q&&typeof q.q==='string'){ q.q=q.q.replace(/(하나​?['’])은/,'$1는'); q.q=q.q.replace(/^(['‘].*?([가-힣])​?['’])[은는] 숫자로\?$/,(m,a,ch)=>a+(((ch.charCodeAt(0)-0xAC00)%28)?'은':'는')+' 숫자로?');
   { const m=q.q.match(/^(\d+)에서 숫자 (\d)([은는]) 얼마\?$/); const an=+q.ans; if(m&&an>0){ const pl=an>=1000?'천':an>=100?'백':an>=10?'십':'일'; q.q=`${m[1]}에서 ${pl}의 자리 숫자 ${m[2]}${m[3]} 얼마?`; } } } return q; }
 if(typeof G!=='undefined') for(const e of Object.keys(G)) G[e]=G[e].map(g=>function(){ return fixEP(g.apply(this,arguments)); });
