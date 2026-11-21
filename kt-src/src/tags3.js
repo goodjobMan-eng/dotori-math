@@ -1149,9 +1149,9 @@ function g36Wrong(ep,i,q){ if(!q||q.manip||q.onMount||!Array.isArray(q.opts)||q.
 /* 쓰기형 10: 시간·복합 단위의 덧셈과 뺄셈(답 = 큰 단위 숫자 + 작은 단위 숫자를 이어 쓴 열쇠). 칸 수가 정답과 같은 오답만 쓸 수 있으므로 길이가 같을 때만 단다.
    60에서 받아올림·받아내림을 100으로 한 답(G2-03), 받아올림한 1을 더하지 않은 답(N2-01), 작은 단위를 큰 쪽에서 작은 쪽으로 뺀 답(N2-02). */
 function codeW10(q){ if(!q||q.opts&&q.opts.length||q.manip||q.onMount||q.mis) return q; const A=String(q.ans); if(!/^\d+$/.test(A)) return q; const Q=_pl(q.q).replace(/,/g,'').replace(/\s+/g,' ').trim(), mis={}, clash=new Set(); let m;
-  const add=(k,c)=>{ k=String(k); if(k===A||k.length!==A.length||/-/.test(k)) return; if(k in mis){ if(mis[k]!==c) clash.add(k); return; } mis[k]=c; };
-  const tsub=(H,M,h,d)=>{ let tm=H*60+M-h*60-d; if(tm<0) return; if(`${Math.floor(tm/60)}${tm%60}`!==A) return; if(M<d){ add(`${H-h-1}${M+100-d}`,'G2-03'); add(`${H-h}${d-M}`,'N2-02'); } };
-  const tadd=(H,M,h,d)=>{ const tm=H*60+M+h*60+d; if(`${Math.floor(tm/60)}${tm%60}`!==A) return; if(M+d>=60){ add(`${H+h}${M+d-60}`,'N2-01'); if(M+d>=100) add(`${H+h+1}${M+d-100}`,'G2-03'); } };
+  const UT={}; const add=(k,c)=>{ k=String(k); if(/-/.test(k)) return; if(/,/.test(k)){ if(!(k in UT)) UT[k]=c; k=k.replace(',',''); } if(k===A||k.length!==A.length) return; if(k in mis){ if(mis[k]!==c) clash.add(k); return; } mis[k]=c; };
+  const tsub=(H,M,h,d)=>{ let tm=H*60+M-h*60-d; if(tm<0) return; if(`${Math.floor(tm/60)}${tm%60}`!==A) return; if(M<d){ add(`${H-h-1},${M+100-d}`,'G2-03'); add(`${H-h},${d-M}`,'N2-02'); } };
+  const tadd=(H,M,h,d)=>{ const tm=H*60+M+h*60+d; if(`${Math.floor(tm/60)}${tm%60}`!==A) return; if(M+d>=60){ add(`${H+h},${M+d-60}`,'N2-01'); if(M+d>=100) add(`${H+h+1},${M+d-100}`,'G2-03'); } };
   if((m=Q.match(/(\d+)시간? (\d+)분 − (?:(\d+)시간 )?(\d+)분/))) tsub(+m[1],+m[2],+(m[3]||0),+m[4]);
   else if((m=Q.match(/(\d+)시 (\d+)분에서 (\d+)분 전/))) tsub(+m[1],+m[2],0,+m[3]);
   else if((m=Q.match(/(\d+)시 (\d+)분에 끝났어요.*?(\d+)분 동안/))) tsub(+m[1],+m[2],0,+m[3]);
@@ -1159,8 +1159,8 @@ function codeW10(q){ if(!q||q.opts&&q.opts.length||q.manip||q.onMount||q.mis) re
   else if((m=Q.match(/(\d+)시 (\d+)분에서 (\d+)분 뒤/))||(m=Q.match(/(\d+)시 (\d+)분에 [^.]*?(\d+)분 동안/))) tadd(+m[1],+m[2],0,+m[3]);
   else if((m=Q.match(/(\d+) (km|kg|L|m|cm) (\d+) (m|g|mL|cm|mm) ([+−]) (?:(\d+) (?:km|kg|L|m|cm) )?(\d+) (?:m|g|mL|cm|mm)\b/))||(m=Q.match(/(\d+) (km|kg|L|m|cm) (\d+) (m|g|mL|cm|mm)[^+−\d]*?()()(\d+) (?:m|g|mL|cm|mm)[을를] (더|꺼|따|썼|마)/))){
     const base=m[2]==='m'?100:m[2]==='cm'?10:1000, X=+m[1], y=+m[3], Z=+(m[6]||0), w=+m[7], plus=m[5]==='+'||m[8]==='더'; const tot=plus?X*base+y+Z*base+w:X*base+y-Z*base-w; if(tot<0||`${Math.floor(tot/base)}${tot%base}`!==A) return q;
-    if(plus&&y+w>=base) add(`${X+Z}${y+w-base}`,'N2-01'); if(!plus&&y<w){ add(`${X-Z}${w-y}`,'N2-02'); add(`${X-Z}${y+base-w}`,'N2-08'); } }
-  clash.forEach(k=>delete mis[k]); if(Object.keys(mis).length) q.mis=mis; return q; }
+    if(plus&&y+w>=base) add(`${X+Z},${y+w-base}`,'N2-01'); if(!plus&&y<w){ add(`${X-Z},${w-y}`,'N2-02'); add(`${X-Z},${y+base-w}`,'N2-08'); } }
+  if(Object.keys(UT).length) q._ut=UT; clash.forEach(k=>delete mis[k]); if(Object.keys(mis).length) q.mis=mis; return q; }
 function dropEqualOpts(q){ try{ if(!q||!Array.isArray(q.opts)||q.opts.length<2) return q; const A=String(q.ans), Q=_pl(q.q), num=s=>/^\d+(\.\d+)?$/.test(s)?parseFloat(s):null, fr=s=>{ const m=String(s).match(/^(?:(\d+)[과와] )?(\d+)분의 (\d+)$/); return m?+(m[1]||0)+ +m[3]/+m[2]:null; };
   const av=num(A), af=fr(A), formAsked=/기약|약분|통분|가분수|대분수|나타내|같은|소수로|분수로/.test(Q); const same=o=>{ const s=String(o); if(s===A) return false; if(av!=null&&num(s)!=null) return Math.abs(num(s)-av)<1e-9; if(af!=null&&fr(s)!=null&&!formAsked) return Math.abs(fr(s)-af)<1e-9; return false; };
   const keep=q.opts.filter(o=>!same(o)); if(keep.length<q.opts.length&&keep.length<2){ const m=A.match(/^(\d+)분의 (\d+)$/), alt=m?`${m[1]}분의 ${+m[2]+1}`:av!=null?String(+(av+1).toFixed(6)):null; if(alt&&!keep.includes(alt)){ keep.push(alt); (q.fx=q.fx||{})[alt]=1; } }   /* 보기가 둘뿐이면 실수형 보기 하나로 바꿔 넣는다 */
@@ -1267,3 +1267,80 @@ function epWrite(q){ try{ if(!q||typeof q!=='object'||(q.opts&&q.opts.length)||q
       if(/^\d+ [+×−-] \d+ = \?$/.test(u)){ const n=(u.match(/\d+/g)||[]).map(Number), o=(u.match(/[+×−-]/)||[])[0], v=o==='+'?n[0]+n[1]:o==='×'?n[0]*n[1]:n[0]-n[1]; if(String(v)!==A) continue; }   /* 순수한 식이면 계산한 값이 정답과 같을 때만. □·말로 된 꼴은 객관식과 같은 규칙을 그대로 쓴다 */
       const mis={}, clash=new Set(); for(const [w,c] of (f(m,q)||[])){ const k=String(w); if(k===A||!/^\d+$/.test(k)||typeof c!=='string'||c==='F') continue; if(k in mis){ if(mis[k]!==c) clash.add(k); continue; } mis[k]=c; } clash.forEach(k=>delete mis[k]); if(Object.keys(mis).length){ q.mis=mis; return q; } } } }catch(e){} return q; }
 if(typeof G!=='undefined') for(const e of Object.keys(G)) G[e]=G[e].map(g=>function(){ return mixOpts(epWrite(epWrong(fixEP(g.apply(this,arguments))))); });
+
+/* ========== 3-37. 그림을 보고 구하는 도형 문제 — 반드시 파일 맨 끝(틀 번호가 뒤에 붙도록) ========== */
+/* ---------- 그림을 보고 구하는 도형 문제 (교수님 11/21: 초등은 구체적 조작기 — 글로만 주는 문제와 함께, 실제 도형을 보여 주고 넓이·둘레·각도를 구하게 하는 문제가 있어야 한다) ----------
+   각도는 주어진 값대로 그린다(눈으로 봐도 맞게). 문제 글에는 수를 넣지 않고 그림의 표시에서 읽게 한다. */
+const _T=(x,y,t,sz=14,c='#4A2E14')=>`<text x="${x.toFixed(1)}" y="${y.toFixed(1)}" font-size="${sz}" text-anchor="middle" font-weight="700" fill="${c}">${t}</text>`;
+const _fit=(pts,W,H,pad)=>{ const xs=pts.map(p=>p[0]), ys=pts.map(p=>p[1]), x0=Math.min(...xs), x1=Math.max(...xs), y0=Math.min(...ys), y1=Math.max(...ys), k=Math.min((W-2*pad)/(x1-x0||1),(H-2*pad)/(y1-y0||1)), ox=(W-(x1-x0)*k)/2, oy=(H-(y1-y0)*k)/2; return pts.map(p=>[ox+(p[0]-x0)*k, oy+(y1-p[1])*k]); };   /* 수학 좌표(위가 +) → 화면 좌표 */
+const _inLab=(P,i,t,d=26)=>{ const n=P.length, c=[P.reduce((a,p)=>a+p[0],0)/n, P.reduce((a,p)=>a+p[1],0)/n], v=[c[0]-P[i][0], c[1]-P[i][1]], L=Math.hypot(v[0],v[1])||1; return _T(P[i][0]+v[0]/L*d, P[i][1]+v[1]/L*d+5, t, 13, /\?/.test(t)?'#D45F16':'#4A2E14'); };   /* 꼭짓점 안쪽에 각 표시 */
+const polyAngSvg=(pts,labs)=>{ const W=260,H=150, P=_fit(pts,W,H,20); return SV(W,H,`<polygon points="${P.map(p=>p[0].toFixed(1)+','+p[1].toFixed(1)).join(' ')}" fill="#FFE3B0" ${STK}/>`+labs.map((t,i)=>t?_inLab(P,i,t):'').join(''),300); };
+const _rad=d=>d*Math.PI/180;
+const triPts=(A,B)=>{ const L=10, C=180-A-B, b=L*Math.sin(_rad(B))/Math.sin(_rad(C)); return [[0,0],[L,0],[b*Math.cos(_rad(A)), b*Math.sin(_rad(A))]]; };   /* 왼쪽 각 A, 오른쪽 각 B */
+const quadPts=(a,b,c)=>{ const L1=10, L2=6, P0=[0,0], P1=[L1,0], d1=_rad(180-b), P2=[P1[0]+L2*Math.cos(d1), P1[1]+L2*Math.sin(d1)], d2=d1+_rad(180-c), u=[Math.cos(d2),Math.sin(d2)], w=[Math.cos(_rad(a)),Math.sin(_rad(a))], den=u[0]*w[1]-u[1]*w[0]; if(Math.abs(den)<1e-6) return null; const t=(-(P2[0])*w[1]+P2[1]*w[0])/den, s=(u[0]*(-P2[1])-u[1]*(-P2[0]))/(-den); if(!(t>1)||!(s>1)) return null; return [P0,P1,P2,[P2[0]+t*u[0],P2[1]+t*u[1]]]; };   /* 각 a(왼쪽 아래), b(오른쪽 아래), c(오른쪽 위) */
+const _tick=(p,q)=>{ const m=[(p[0]+q[0])/2,(p[1]+q[1])/2], v=[q[0]-p[0],q[1]-p[1]], L=Math.hypot(v[0],v[1])||1, n=[-v[1]/L*6, v[0]/L*6]; return `<line x1="${(m[0]-n[0]).toFixed(1)}" y1="${(m[1]-n[1]).toFixed(1)}" x2="${(m[0]+n[0]).toFixed(1)}" y2="${(m[1]+n[1]).toFixed(1)}" stroke="#D45F16" stroke-width="2.5"/>`; };
+const isoSvg=(apex,labs)=>{ const base=(180-apex)/2, W=260,H=150, P=_fit(triPts(base,base),W,H,20); return SV(W,H,`<polygon points="${P.map(p=>p[0].toFixed(1)+','+p[1].toFixed(1)).join(' ')}" fill="#FFE3B0" ${STK}/>`+_tick(P[0],P[2])+_tick(P[1],P[2])+labs.map((t,i)=>t?_inLab(P,i,t):'').join(''),300); };
+const rectQSvg=(inside,bottom,left)=>SV(240,140,`<rect x="50" y="18" width="150" height="88" fill="#FFE3B0" ${STK}/>`+_T(125,68,inside,14)+_T(125,128,bottom,14)+_T(26,67,left,14,/\?/.test(left)?'#D45F16':'#4A2E14'),300);
+const cubeSvg=a=>SV(220,162,`<polygon points="40,55 135,55 135,150 40,150" fill="#FFE3B0" ${STK}/><polygon points="40,55 80,18 175,18 135,55" fill="#FFF0D0" ${STK}/><polygon points="135,55 175,18 175,113 135,150" fill="#F5D39A" ${STK}/><line x1="40" y1="150" x2="80" y2="113" ${DASH}/><line x1="80" y1="113" x2="175" y2="113" ${DASH}/><line x1="80" y1="18" x2="80" y2="113" ${DASH}/>`+_T(88,146,a+' cm',14),240);
+const diaSvg=t=>SV(240,140,`<circle cx="120" cy="68" r="56" fill="#FFE3B0" ${STK}/><line x1="64" y1="68" x2="176" y2="68" ${DASH}/><circle cx="120" cy="68" r="3" fill="#4A2E14"/>`+_T(120,60,t,14),300);
+const rowCircSvg=(n,t,mark)=>{ const r=Math.min(40,110/n), W=Math.max(2*r*n+30,120), cy=r+22; let s=''; for(let i=0;i<n;i++){ const cx=15+r+2*r*i; s+=`<circle cx="${cx}" cy="${cy}" r="${r}" fill="#FFE3B0" ${STK}/><circle cx="${cx}" cy="${cy}" r="2.5" fill="#4A2E14"/>`; } s+=`<line x1="${15+r}" y1="${cy}" x2="${15+2*r}" y2="${cy}" ${DASH}/>`+_T(15+r,cy-r-5,'반지름 '+t,12); if(mark==='len') s+=`<line x1="15" y1="${cy+r+12}" x2="${15+2*r*n}" y2="${cy+r+12}" stroke="#D45F16" stroke-width="2"/>`+_T(15+r*n,cy+r+28,'?',14,'#D45F16'); else s+=`<line x1="${15+r}" y1="${cy+r+12}" x2="${15+r+2*r*(n-1)}" y2="${cy+r+12}" stroke="#D45F16" stroke-width="2"/>`+_T(15+r*n,cy+r+28,'?',14,'#D45F16'); return SV(W,cy+r+34,s,320); };
+ADD('S6-50', ()=>{ let a,b; do{ a=rnd(25,95); b=rnd(25,95); }while(a+b>150||a+b<70); const c=180-a-b; return WM('그림을 보고 ?로 표시한 각의 크기를 구해 보세요.', polyAngSvg(triPts(a,b),[a+'°',b+'°','?']), c, [[360-a-b,'G4-12'],[a+b,'G4-12']], '', '도'); });
+ADD('S6-51', ()=>{ for(let k=0;k<40;k++){ const a=rnd(60,110), b=rnd(60,115), c=rnd(60,120), d=360-a-b-c; if(d<50||d>130) continue; const P=quadPts(a,b,c); if(!P) continue; return WM('사각형에서 ?로 표시한 각의 크기를 구해 보세요.', polyAngSvg(P,[a+'°',b+'°',c+'°','?']), d, [[180-a-b-c>0?180-a-b-c:null,'G4-12'],[a+b+c,'G4-12']], '', '도'); } return G36['S6-51'][0](); });
+ADD('S6-28', ()=>{ const t=rnd(10,60)*2, base=(180-t)/2; return WM('두 변의 길이가 같은 삼각형이에요. ?로 표시한 각의 크기는?', isoSvg(t,['?','',t+'°']), base, [[180-t,'G4-18'],[t,'G4-18']], '', '도'); });
+ADD('S6-28', ()=>{ const base=rnd(25,80), t=180-2*base; return WM('두 변의 길이가 같은 삼각형이에요. ?로 표시한 각의 크기는?', isoSvg(t,[base+'°','','?']), t, [[180-base,'G4-18'],[base,'G4-18']], '', '도'); });
+ADD('S6-68', ()=>{ const a=rnd(3,12), b=rnd(2,9), S=a*b; return WM('직사각형의 넓이가 그림과 같아요. ?에 알맞은 길이는?', rectQSvg(`넓이 ${S} cm²`, a+' cm', '?'), b, [[S-a>0?S-a:null,'G5-01'],[(S-2*a)>0&&(S-2*a)%2===0?(S-2*a)/2:null,'G5-01']], '', 'cm'); });
+ADD('S6-66', ()=>{ const a=rnd(3,12), b=rnd(2,9), R=2*(a+b); return WM('직사각형의 둘레가 그림과 같아요. ?에 알맞은 길이는?', rectQSvg(`둘레 ${R} cm`, a+' cm', '?'), b, [[R-a,'G5-01'],[R%a===0?R/a:null,'G5-01'],[R-2*a,'G5-13']], '', 'cm'); });
+ADD('S6-71', ()=>{ const a=rnd(2,8)*2, h=rnd(2,5)*2, S=a*h/2; return WM(`넓이가 ${S} cm²인 삼각형이에요. ?로 표시한 높이는?`, figSvg('tri',a,'?'), h, [[S/a,'G5-03']], '', 'cm'); });
+ADD('S6-70', ()=>{ const a=rnd(4,12), h=rnd(3,9), S=a*h; return WM(`넓이가 ${S} cm²인 평행사변형이에요. ?로 표시한 높이는?`, figSvg('para',a,'?'), h, [[2*h,'G5-16']], '', 'cm'); });
+ADD('S6-56', ()=>{ const a=rnd(3,9), b=rnd(2,8), c=rnd(2,8); return WM('직육면체의 모든 모서리 길이의 합은?', boxSvg(a,b,c), 4*(a+b+c), [[a+b+c,'G5-13'],[2*(a+b+c),'G5-13']], '', 'cm'); });
+ADD('S6-76', ()=>{ const a=rnd(2,9); return WM('정육면체의 겉넓이는?', cubeSvg(a), 6*a*a, [[a*a*a,'G6-05'],[a*a,'G6-06'],[4*a*a,'G6-06']], '', 'cm²'); });
+ADD('S6-78', ()=>{ const a=rnd(2,9); return WM('정육면체의 부피는?', cubeSvg(a), a*a*a, [[6*a*a,'G6-05'],[a*a,'G6-06']], '', 'cm³'); });
+ADD('S6-26', ()=>{ const r=rnd(2,15), d=2*r; return WM('원의 반지름은 몇 cm일까요?', diaSvg(d+' cm'), r, [[2*d,'G3-04'],[d,'G3-04']], '', 'cm'); });
+ADD('S6-27', ()=>{ const n=rnd(2,4), r=rnd(2,9); return WM('크기가 같은 원을 맞닿게 그렸어요. ?로 표시한 전체 길이는?', rowCircSvg(n,r+' cm','len'), 2*r*n, [[r*n,'G3-04'],[2*r*(n-1),'G3-10']], '', 'cm'); });
+ADD('S6-27', ()=>{ const n=rnd(3,4), r=rnd(2,9); return WM('크기가 같은 원을 맞닿게 그렸어요. 양 끝 두 원의 중심 사이의 거리(?)는?', rowCircSvg(n,r+' cm','ctr'), 2*r*(n-1), [[2*r*n,'G3-10'],[r*(n-1),'G3-04']], '', 'cm'); });
+
+
+// ===== 3-38. 풀이 단계는 '식의 빈칸 채우기'로 =====
+// 분수 나눗셈 첫 문제는 중간 식(= 3분의 2 × 3분의 1 =)을 다 보여 줘서 마지막 곱셈만 하면 됐다.
+// 중간 식에서 핵심이 되는 수를 빈칸으로 바꾼다. 식 전체를 쓰게 하지 않고 칸만 채우게 한다.
+// 답 열쇠 = (단계 칸에 쓴 숫자) + (마지막 답). 단계 칸을 틀리면 그 자리에서 오개념을 알 수 있다.
+const _sb=n=>'<b class="fs">'+'<span class="vslot"></span>'.repeat(String(n).length)+'</b>';
+const _fr2=/<span class="frac"><b>(\d+)<\/b><i><\/i><b>(\d+)<\/b><\/span>/g;
+const STEPB={
+ // 곱셈으로 바꾸는 단계: 뒤의 분수(역수)를 빈칸으로. 뒤집지 않고 그대로 쓰면 N6-02
+ inv:(st)=>{ const m=[...st.matchAll(_fr2)]; if(m.length!==2) return null; const [all,t,b]=m[1]; return {html:st.slice(0,m[1].index)+`<span class="frac">${_sb(t)}<i></i>${_sb(b)}</span>`+st.slice(m[1].index+all.length), key:t+b, wrong:t!==b?[[b+t,'N6-02']]:[]}; },
+ // 통분하는 단계: 두 분자를 빈칸으로. 분자를 그대로 두면 N5-13
+ com:(st,pr)=>{ const m=[...st.matchAll(_fr2)], o=[...pr.matchAll(_fr2)]; if(m.length!==2||o.length!==2) return null; let h=st; for(const x of [m[1],m[0]]) h=h.slice(0,x.index)+`<span class="frac">${_sb(x[1])}<i></i><b>${x[2]}</b></span>`+h.slice(x.index+x[0].length);
+   const key=m[0][1]+m[1][1], w=o[0][1]+o[1][1]; return {html:h, key, wrong:w!==key&&w.length===key.length?[[w,'N5-13']]:[]}; },
+ // (자연수 ÷ 분자) × 분모 단계: 분자·분모 자리를 빈칸으로. 서로 바꿔 쓰면 N6-02
+ nat:(st)=>{ const m=st.match(/^<b>\((\d+) ÷ (\d+)\) × (\d+)<\/b>$/); if(!m) return null; return {html:`<b>(${m[1]} ÷</b>${_sb(m[2])}<b>) ×</b>${_sb(m[3])}`, key:m[2]+m[3], wrong:m[2]!==m[3]?[[m[3]+m[2],'N6-02']]:[]}; }
+};
+const STEPT={'S3-98#1':'inv','S3-107#0':'inv','S3-113#3':'inv','S3-105#0':'com','S3-106#0':'nat'};
+function stepBlank(ep,i,q){ const k=STEPT[ep+'#'+i]; if(!k||!q||!q.write||!q.slots||typeof q.visual!=='string') return q;
+  const P=q.visual.split('<i>=</i>'); if(P.length!==3) return q; const r=STEPB[k](P[1],P[0]); if(!r) return q;
+  const v=[P[0],r.html,P[2]].join('<i>=</i>'), A=String(q.ans); if((v.match(/class="vslot"/g)||[]).length!==r.key.length+A.length) return q;
+  const mis={}; for(const [m,c] of Object.entries(q.mis||{})) if(m.length===A.length) mis[r.key+m]=c;
+  for(const [w,c] of r.wrong){ mis[w+A]=c; for(const m of Object.keys(q.mis||{})) if(m.length===A.length) mis[w+m]=c; }
+  q.visual=v.replace('class="eqrow long"','class="eqrow long stepq"').replace(/class="vslot"/g,'class="vslot mini"'); q.ans=r.key+A; q.mis=mis; q._step=r.key.length; return q; }
+{ const _t=tagQ; tagQ=function(ep,i,q){ q=_t(ep,i,q); try{ q=stepBlank(ep,i,q); }catch(e){} return q; }; }
+
+
+// ===== 3-39. 시간·복합 단위 답은 '단위마다 답 상자 하나' =====
+// 칸(숫자 한 자리마다 하나)은 칸 수가 답의 자릿수를 알려 줘서 '3시간 75분', '0시간 115분' 같은 답을 쓸 수 없었다.
+// Claude·카본 상의(11/21): 단위마다 길이 제한이 느슨한 상자 하나([ ]시간 [ ]분). 단위 틀은 남기고 자릿수 힌트만 없앤다.
+// 예상 오답 열쇠는 '큰 단위 값,작은 단위 값'(예: "3,75"). 화면은 build.py의 mountUnit.
+Object.assign(MIS,{'G2-17':['작은 단위가 넘쳤는데 큰 단위로 바꾸지 않음','60분은 1시간, 100 cm는 1 m처럼 넘친 만큼 큰 단위로 바꿔 써요.']});
+const UBASE={'시+분':60,'시간+분':60,'분+초':60,'m+cm':100,'cm+mm':10,'km+m':1000,'L+mL':1000,'kg+g':1000};
+function codeU(q){ if(!q||!q.write||!q.slots||typeof q.visual!=='string') return q;
+  const m=q.visual.match(/<span class="vgrp">((?:<span class="vslot[^"]*"><\/span>)+)<\/span><b>([^<]+)<\/b><span class="vgrp">((?:<span class="vslot[^"]*"><\/span>)+)<\/span><b>([^<]+)<\/b><\/div>$/); if(!m) return q;
+  const u=[m[2].trim(),m[4].trim()], base=UBASE[u.join('+')]; if(!base) return q;
+  const n1=(m[1].match(/vslot/g)||[]).length, n2=(m[3].match(/vslot/g)||[]).length, A=String(q.ans); if(!/^\d+$/.test(A)||n1+n2!==A.length||(q.visual.match(/class="vslot/g)||[]).length!==A.length) return q;
+  const a=[+A.slice(0,n1),+A.slice(n1)], tot=a[0]*base+a[1], T={};
+  const add=(x,y,c)=>{ if(!(x>=0)||!(y>=0)||x!==Math.floor(x)||y!==Math.floor(y)||(x===a[0]&&y===a[1])) return; const k=x+','+y; if(!(k in T)) T[k]=c; };
+  for(const [k,c] of Object.entries(q._ut||{})){ const [x,y]=k.split(',').map(Number); add(x,y,c); if(c==='N2-01') add(x,y+base,'G2-17'); }   // 받아올림을 안 한 답과, 넘친 채로 둔 답
+  for(const [k,c] of Object.entries(q.mis||{})) if(/^\d+$/.test(k)&&k.length===A.length) add(+k.slice(0,n1),+k.slice(n1),c);
+  const Q=_pl(q.q).replace(/,/g,'').replace(/\s+/g,' ').trim(); let c;
+  if(u[0]==='시'&&/<svg/.test(q.visual)&&/시계/.test(Q)){ if(a[1]>0&&a[1]%5===0) add(a[0],a[1]/5,'G2-07'); if(a[1]>=30) add(a[0]%12+1,a[1],'G2-06'); }   // 시계 읽기
+  if((c=Q.match(/(\d+) ?(mm|cm|m|mL|g|분|초)[는은]? ?몇/))&&+c[1]===tot){ add(0,tot,'G2-17'); if(base===60) add(Math.floor(tot/100),tot%100,'G2-03'); if(base===1000) add(Math.floor(tot/100),tot%100,'G3-05'); }   // 단위 바꾸기
+  q.ub={u,base,a}; if(Object.keys(T).length) q.mis=Object.assign({},q.mis||{},T); return q; }
+{ const _t=tagQ; tagQ=function(ep,i,q){ q=_t(ep,i,q); try{ q=codeU(q); }catch(e){} return q; }; }

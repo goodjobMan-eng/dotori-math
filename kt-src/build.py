@@ -146,10 +146,29 @@ h = h.replace(_a, _a + """
     if(ds.length===0&&slots.length){ /* 소수 계산인데 답이 자연수로 떨어진 경우(0.5 × 6 = 3)도 같은 답 상자를 쓴다: 칸 모양으로 '소수가 아니다'를 알려 주지 않게 */ const grp=slots[0].parentElement, txt=String(q.q||'')+' '+document.getElementById('visual').textContent; if(!grp||!grp.classList.contains('vgrp')||slots.some(x=>x.parentElement!==grp)||!/\\d\\.\\d/.test(txt)||!/^\\d+$/.test(ans)) return null; slots.forEach(x=>x.remove()); const box=document.createElement('div'); box.className='freeans empty'; box.id='freeans'; grp.appendChild(box); grp.classList.add('hasfree'); return {p:ans.length,box}; }
     if(ds.length!==1) return null; const grp=ds[0].parentElement, gs=[...grp.querySelectorAll('.vslot')]; if(gs.length<2||gs.length!==slots.length||!grp.classList.contains('vgrp')) return null; let p=0; for(const n of grp.children){ if(n===ds[0]) break; if(n.classList.contains('vslot')) p++; } if(p<1||p>=gs.length) return null;
     ds[0].remove(); gs.forEach(x=>x.remove()); const box=document.createElement('div'); box.className='freeans empty'; box.id='freeans'; grp.appendChild(box); grp.classList.add('hasfree'); return {p,box}; })();
-  if(FREE) return mountFree(q,host,ans,FREE);""")
+  if(FREE) return mountFree(q,host,ans,FREE);
+  if(q.ub){ const gs=[...document.querySelectorAll('#visual .vgrp')]; if(gs.length===2&&slots.every(x=>gs.includes(x.parentElement))){ slots.forEach(x=>x.remove()); const boxes=gs.map((g,i)=>{ const d=document.createElement('div'); d.className='ubox empty'; d.dataset.i=i; g.appendChild(d); g.classList.add('hasfree'); return d; }); return mountUnit(q,host,ans,boxes); } }""")
 _a = "function mountWriteQ36(q){"
 assert h.count(_a) == 1
-h = h.replace(_a, """function mountFree(q,host,ans,F){ const truth=F.p>=ans.length?ans:ans.slice(0,F.p)+'.'+ans.slice(F.p), dec=ans.length-F.p, tv=parseFloat(truth); let txt='', lock=false;
+h = h.replace(_a, """/* 시간·복합 단위 답: 단위마다 답 상자 하나(자릿수 힌트 없음). 빈 상자는 제출을 막는다. 값이 같지만 넘친 채로 둔 답(3시간 75분)은 G2-17 */
+function mountUnit(q,host,ans,boxes){ const U=q.ub, A=U.a, tot=A[0]*U.base+A[1]; let vals=['',''], sel=0, lock=false;
+  const paint=()=>boxes.forEach((b,i)=>{ b.textContent=vals[i]; b.classList.toggle('empty',!vals[i]); b.classList.toggle('sel',!lock&&i===sel); });
+  const key=k=>{ if(lock) return; if(k==='⌫'){ if(!vals[sel]&&sel>0) sel--; else vals[sel]=vals[sel].slice(0,-1); } else if(k==='→') sel=(sel+1)%2; else if(vals[sel].length<4) vals[sel]+=k; paint(); };
+  boxes.forEach((b,i)=>b.onclick=()=>{ if(lock) return; sel=i; paint(); });
+  host.innerHTML=`<div class="numpad">${['1','2','3','4','5','6','7','8','9','→','0','⌫'].map(k=>`<button class="nk${/\\d/.test(k)?'':' fn'}" data-k="${k}"${k==='→'?' aria-label="다음 칸"':''}>${k==='→'?'다음 칸':k}</button>`).join('')}</div><div class="wtools"><button class="next wok">다 썼어!</button></div>`;
+  host.querySelectorAll('.nk').forEach(b=>b.onclick=()=>key(b.dataset.k)); host.querySelector('.wok').onclick=()=>submit();
+  const onKey=e=>{ if(!document.body.contains(boxes[0])||lock){ document.removeEventListener('keydown',onKey); return; } if(/^[0-9]$/.test(e.key)) key(e.key); else if(e.key==='Backspace') key('⌫'); else if(e.key==='Tab'||e.key===' '||e.key==='ArrowRight'||e.key==='ArrowLeft') key('→'); else if(e.key==='Enter'){ if(sel===0&&vals[0]&&!vals[1]) key('→'); else submit(); } else return; e.preventDefault(); }; document.addEventListener('keydown',onKey);
+  const done=()=>{ lock=true; host.querySelector('.wtools')?.remove(); host.querySelector('.numpad')?.remove(); document.removeEventListener('keydown',onKey); paint(); };
+  const addNext=fb=>{ if(document.getElementById('next')) return; fb.insertAdjacentHTML('beforeend',`<button class="next" id="next">${S.i>=S.acts.length-1?'결과 보기 ★':'다음 →'}</button>`); const nb=document.getElementById('next'); nb.onclick=()=>{ S.i++; S.i<S.acts.length?runAct():result(); }; nb.scrollIntoView({block:'nearest',behavior:'smooth'}); };
+  function submit(){ if(lock) return; const fb=document.getElementById('fb'); const e=vals.findIndex(v=>!v);
+    if(e>=0){ sfx('bad'); host.classList.add('shakey'); setTimeout(()=>host.classList.remove('shakey'),450); sel=e; paint(); fb.innerHTML=`<div class="fb no"><div class="msg">${U.u[e]} 칸이 비어 있어요. 없으면 0을 써요.</div></div>`; return; }
+    const x=parseInt(vals[0],10), y=parseInt(vals[1],10); if(x===A[0]&&y===A[1]){ done(); boxes.forEach(b=>b.classList.add('show')); answer({dataset:{v:ans},classList:{add(){}}},q); return; }
+    const same=x*U.base+y===tot; delete q._mcode; if(same) q._mcode='G2-17';   /* 값은 같지만 큰 단위로 바꾸지 않음 */
+    if(S.tries===0&&window.KT) KT.rec(q,x+','+y,false); S.tries++; sfx('bad');
+    if(S.tries<2){ fb.innerHTML=`<div class="fb no">${chip('doto','oops')}<div class="msg">${same?`값은 맞아요! ${U.base} ${U.u[1]}${/^(분|g)$/.test(U.u[1])?'이':'가'} 넘으면 ${U.u[0]}${/^(시|시간|분|kg)$/.test(U.u[0])?'으로':'로'} 바꿔 써요.`:`아깝다! 다시 생각해 봐요.<div class="hint1">💡 ${hintFor(q)}</div>`}</div></div>`; vals=['','']; sel=0; paint(); return; }
+    S.results[S.i]=false; logAct(false,'q'); done(); fb.innerHTML=`<div class="fb no">${chip('rami','base')}<div class="msg">괜찮아요, 같이 풀어 봐요!${solveHTML(q)}</div></div>`; vals=[String(A[0]),String(A[1])]; paint(); boxes.forEach(b=>b.classList.add('show')); addNext(fb); }
+  paint(); }
+function mountFree(q,host,ans,F){ const truth=F.p>=ans.length?ans:ans.slice(0,F.p)+'.'+ans.slice(F.p), dec=ans.length-F.p, tv=parseFloat(truth); let txt='', lock=false;
   const paint=()=>{ F.box.textContent=txt; F.box.classList.toggle('empty',!txt); };
   const key=k=>{ if(lock) return; if(k==='⌫') txt=txt.slice(0,-1); else if(k==='.'){ if(txt&&!txt.includes('.')) txt+='.'; } else if(txt.replace('.','').length<9) txt+=k; paint(); };
   host.innerHTML=`<div class="numpad">${['1','2','3','4','5','6','7','8','9','.','0','⌫'].map(k=>`<button class="nk${/\\d/.test(k)?'':' fn'}" data-k="${k}">${k}</button>`).join('')}</div><div class="wtools"><button class="next wok">다 썼어!</button></div>`;
@@ -170,7 +189,7 @@ h = h.replace(_a, """function mountFree(q,host,ans,F){ const truth=F.p>=ans.leng
 function mountWriteQ36(q){""")
 _a = ".vgrp{display:inline-flex;gap:4px}"
 assert h.count(_a) == 1
-h = h.replace(_a, _a + ".vgrp.hasfree{display:inline-flex}.freeans{min-width:150px;height:60px;padding:0 16px;border:3px solid #E8963C;border-radius:16px;background:#fff;color:#2E2620;font-size:34px;font-weight:700;display:flex;align-items:center;justify-content:center;letter-spacing:1px;box-sizing:border-box}.freeans.empty::after{content:'답';color:#C9B79E;font-weight:400;font-size:22px}.freeans.show{border-color:#6BBF7A;background:#F2FBF3}")
+h = h.replace(_a, _a + ".vgrp.hasfree{display:inline-flex}.ubox{min-width:76px;height:58px;padding:0 10px;border:3px solid #E3C9A0;border-radius:14px;background:#fff;color:#2E2620;font-size:32px;font-weight:700;display:flex;align-items:center;justify-content:center;box-sizing:border-box;cursor:pointer}.ubox.sel{border-color:#E8963C;box-shadow:0 0 0 3px #FBE3C6}.ubox.show{border-color:#6BBF7A;background:#F2FBF3}.numpad .nk[data-k='→']{font-size:15px}.eqrow.stepq{font-size:1.5rem;gap:3px}.eqrow.stepq .vslot.mini{min-width:40px;min-height:48px}.eqrow.stepq .frac{margin:0 1px}.freeans{min-width:150px;height:60px;padding:0 16px;border:3px solid #E8963C;border-radius:16px;background:#fff;color:#2E2620;font-size:34px;font-weight:700;display:flex;align-items:center;justify-content:center;letter-spacing:1px;box-sizing:border-box}.freeans.empty::after{content:'답';color:#C9B79E;font-weight:400;font-size:22px}.freeans.show{border-color:#6BBF7A;background:#F2FBF3}")
 _a = "    if(r.ok){ dropTools(); if(pad) pad.lock(); answer({dataset:{v:ans},classList:{add(){}}},q); return; }\n    const em=equivMsg(q,r.guess);"
 assert h.count(_a) == 1
 h = h.replace(_a, """    if(DP&&DP.cur==null){ sfx('bad'); fb.innerHTML=`<div class="fb no"><div class="msg">소수점을 찍어 주세요. 칸 사이의 동그라미를 눌러요.</div></div>`; return; }
