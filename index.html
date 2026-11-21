@@ -2876,7 +2876,7 @@ unit(5,'5-1 자연수의 혼합 계산',[
  ]],
  ['S3-67','계산 순서 총정리','사칙연산과 괄호',[
   ()=>{ const b=rnd(2,5), q=rnd(2,6), c=rnd(2,9), a=b*q+rnd(1,20); const r=a+q*c-(b*q); return W36('halmi',`${a} + ${b*q} ÷ ${b} × ${c} − ${b*q}`,`괄호 없으면 곱셈과 나눗셈을 먼저, 앞에서부터. 그다음 덧셈과 뺄셈.`,row(a,'+',b*q,'÷',b,'×',c,'−',b*q,'=',`<span class="vgrp">${SL(r)}</span>`),r,{ansText:`= ${r}`}); },
-  ()=>{ const a=rnd(2,6), b=rnd(2,6), c=rnd(2,5), d=rnd(1,9); const r=(a+b)*c-d; return C36('rami',`(${a} + ${b}) × ${c} − ${d}`,`괄호 먼저, 곱셈, 그다음 뺄셈.`,row(`(${a} + ${b})`,'×',c,'−',d),r,optsFrom(r,[a+b*c-d,(a+b)*(c-d),(a+b)*c+d,a+b*(c-d)])); },
+  ()=>{ const a=rnd(2,6), b=rnd(2,6), c=rnd(2,5), d=rnd(1,7); const r=(a+b)*c-d; return C36('rami',`(${a} + ${b}) × ${c} − ${d}`,`괄호 먼저, 곱셈, 그다음 뺄셈.`,row(`(${a} + ${b})`,'×',c,'−',d),r,optsFrom(r,[a+b*c-d,(a+b)*(c-d),(a+b)*c+d,a+b*(c-d)])); },
  ]],
 ]);
 const divisors=n=>{ const r=[]; for(let i=1;i<=n;i++) if(n%i===0) r.push(i); return r; };
@@ -3319,7 +3319,7 @@ unit(5,'5-2 평균과 가능성',[
   ()=>{ const n=rnd(3,5), avg=rnd(3,9); let v=Array(n).fill(avg); for(let i=0;i<n-1;i++){ const d=rnd(0,2); v[i]+=d; v[n-1]-=d; } if(v.some(x=>x<1)) return G36['S4-14'][0](); return WN(`도토리 ${v.join(', ')}개를 고르게 하면 한 사람에 몇 개?`,'',avg,'','개'); },
  ]],
  ['S4-15','평균 구하기','평균 구하기',[
-  ()=>{ const n=rnd(3,5), avg=rnd(10,40); let v=Array(n).fill(avg); for(let i=0;i<n-1;i++){ const d=rnd(-5,5); v[i]+=d; v[n-1]-=d; } return WN(`${v.join(', ')}의 평균은?`,tbl(v.map((_,i)=>`${i+1}회`),v,['회','점수']),avg,'','점'); },
+  ()=>{ const n=rnd(3,5), avg=rnd(25,45); let v=Array(n).fill(avg); for(let i=0;i<n-1;i++){ const d=rnd(-5,5); v[i]+=d; v[n-1]-=d; } return WN(`${v.join(', ')}의 평균은?`,tbl(v.map((_,i)=>`${i+1}회`),v,['회','점수']),avg,'','점'); },
   ()=>{ const n=rnd(3,5), avg=rnd(10,40); return WN(`${n}명의 평균이 ${avg}점이면 점수의 합은?`,'',n*avg,'','점'); },
  ]],
  ['S4-16','평균으로 비교해요','평균 활용',[
@@ -4224,7 +4224,7 @@ const WORD_EXTRA={
  'S6-71':()=>{ const a=rnd(2,9)*2, h=rnd(3,12); const q=WN(`밑변 ${a} m, 높이 ${h} m인 삼각형 모양 꽃밭의 넓이는?`,'<div class="wordtag">📖 생활 속 문제</div>',a*h/2,'','m²'); q.word=true; return q; },
  'S6-78':()=>{ const a=rnd(10,30), b=rnd(10,20), c=rnd(5,15); const q=WN(`가로 ${a} cm, 세로 ${b} cm, 높이 ${c} cm인 상자에 들어가는 부피는 몇 cm³일까요?`,'<div class="wordtag">📖 생활 속 문제</div>',a*b*c,'','cm³'); q.word=true; return q; },
  'S6-75':()=>{ const r=rnd(2,10); const s=String(+(r*r*3.14).toFixed(2)); const q=W36(WHO(),`반지름이 ${r} m인 둥근 꽃밭의 넓이는 몇 m²일까요? (원주율 3.14)`,' ','<div class="wordtag">📖 생활 속 문제</div>'+row(decS(s),'m²'),s,{ansText:`${s} m²`}); q.word=true; return q; },
- 'S4-15':()=>{ const n=rnd(3,5), avg=rnd(20,40); let v=Array(n).fill(avg); for(let i=0;i<n-1;i++){ const d=rnd(-6,6); v[i]+=d; v[n-1]-=d; } const q=WN(`붕붕이가 ${n}일 동안 꽃을 ${v.join('송이, ')}송이 찾았어요. 하루 평균 몇 송이를 찾았을까요?`,'<div class="wordtag">📖 생활 속 문제</div>',avg,'','송이'); q.word=true; return q; },
+ 'S4-15':()=>{ const n=rnd(3,5), avg=rnd(26,45); let v=Array(n).fill(avg); for(let i=0;i<n-1;i++){ const d=rnd(-6,6); v[i]+=d; v[n-1]-=d; } const q=WN(`붕붕이가 ${n}일 동안 꽃을 ${v.join('송이, ')}송이 찾았어요. 하루 평균 몇 송이를 찾았을까요?`,'<div class="wordtag">📖 생활 속 문제</div>',avg,'','송이'); q.word=true; return q; },
  'S5-21':()=>{ const a=rnd(1,4), b=rnd(1,4); if(a===b) return WORD_EXTRA['S5-21'](); const u=rnd(3,9); const q=WN(`쏙쏙이와 두더지가 도토리 ${(a+b)*u}개를 ${a} : ${b}로 나누었어요. 쏙쏙이는 몇 개를 가질까요?`,'<div class="wordtag">📖 생활 속 문제</div>',a*u,'','개'); q.word=true; return q; },
  'S5-16':()=>{ const p=rnd(1,6)*5, price=rnd(2,20)*1000; const q=WN(`${price}원짜리 장난감을 ${p}% 할인해서 팔아요. 할인한 가격은 얼마일까요?`,'<div class="wordtag">📖 생활 속 문제</div>',price*(100-p)/100,'','원'); q.word=true; return q; } };
 Object.entries(WORD_EXTRA).forEach(([ep,g])=>G36[ep].push(g));

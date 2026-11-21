@@ -219,5 +219,13 @@ h = h.replace(_g, "c=rnd(2,9), a=b*q+rnd(1,20); const r=a+q*c-(b*q);")
 # --- 분모가 같은 분수 비교(S3-19#1): 늘 작은 분수가 앞이라 정답이 언제나 '<'였음 → 앞뒤를 무작위로 ---
 _g="()=>{ const d=rnd(4,9), a=rnd(1,d-2), b=rnd(a+1,d-1); return C36('rami',`□ 안에 알맞은 것은?`,`${sino(d)}분의 ${sino(a)}와 ${sino(d)}분의 ${sino(b)}. 부등호를 넣어 보세요.`,row(fr(a,d),'□',fr(b,d)),'<',['<','>','=']); },"; assert h.count(_g)==1
 h = h.replace(_g, "()=>{ const d=rnd(4,9); let a=rnd(1,d-2), b=rnd(a+1,d-1); if(Math.random()<0.5) [a,b]=[b,a]; return C36('rami',`□ 안에 알맞은 것은?`,`${sino(d)}분의 ${sino(a)}와 ${sino(d)}분의 ${sino(b)}. 부등호를 넣어 보세요.`,row(fr(a,d),'□',fr(b,d)),a<b?'<':'>',['>','=','<']); },")
+# --- 음수 답: (a + b) × c − d 틀(S3-67#1)에서 (2 + 2) × 2 − 9 = −1이 나올 수 있었음. 초등은 음수를 다루지 않는다 ---
+_g="()=>{ const a=rnd(2,6), b=rnd(2,6), c=rnd(2,5), d=rnd(1,9); const r=(a+b)*c-d;"; assert h.count(_g)==1
+h = h.replace(_g, "()=>{ const a=rnd(2,6), b=rnd(2,6), c=rnd(2,5), d=rnd(1,7); const r=(a+b)*c-d;")
+# --- 음수 자료: 평균 틀에서 마지막 값이 avg − (차의 합)이라 음수가 될 수 있었음(예: 15, 14, 12, 11, -2) ---
+_g="()=>{ const n=rnd(3,5), avg=rnd(10,40); let v=Array(n).fill(avg); for(let i=0;i<n-1;i++){ const d=rnd(-5,5); v[i]+=d; v[n-1]-=d; }"; assert h.count(_g)>=1
+h = h.replace(_g, "()=>{ const n=rnd(3,5), avg=rnd(25,45); let v=Array(n).fill(avg); for(let i=0;i<n-1;i++){ const d=rnd(-5,5); v[i]+=d; v[n-1]-=d; }")
+_g="'S4-15':()=>{ const n=rnd(3,5), avg=rnd(20,40); let v=Array(n).fill(avg); for(let i=0;i<n-1;i++){ const d=rnd(-6,6);"; assert h.count(_g)==1
+h = h.replace(_g, "'S4-15':()=>{ const n=rnd(3,5), avg=rnd(26,45); let v=Array(n).fill(avg); for(let i=0;i<n-1;i++){ const d=rnd(-6,6);")
 open('out/index.html', 'w', encoding='utf-8').write(h)
 print('built', len(out))
