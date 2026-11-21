@@ -1,0 +1,15 @@
+const { chromium } = require('playwright'); const fs=require('fs');
+// 쓰기형(보기 없는) 틀의 예상 오답 현황: 틀마다 12번 뽑아 예상 오답(q.mis)이 붙은 비율과 평균 개수를 센다. → x32_out.md(단원별 표)
+(async()=>{ const b=await chromium.launch(); const p=await b.newPage(); p.on('pageerror',e=>console.log('페이지 오류',e.message)); await p.goto('file://'+process.cwd()+'/out/index.html'); await p.waitForTimeout(1500);
+ const r=await p.evaluate(()=>{ const rows=[]; const unitOf={}; UNITS36.forEach(u=>u.eps.forEach(e=>unitOf[e]=u.grade+'-'+(u.sem||'')+' '+u.title));
+  const pl=h=>String(h||'').replace(/<[^>]+>/g,' ').replace(/\s+/g,' ').trim();
+  const scan=(lab,e,i,g)=>{ let n=0,w=0,has=0,cnt=0,kind={manip:0,write:0},ex=''; for(let t=0;t<12;t++){ let q; try{ q=g(); }catch(x){ return; } if(!q) return; n++; if(q.opts&&q.opts.length>=2) continue; if(q.manip||q.onMount){ kind.manip++; continue; } w++; const k=Object.keys(q.mis||{}).length; if(k){ has++; cnt+=k; } else if(!ex) ex=pl(q.q).slice(0,50)+' ∥ '+pl(q.ans).slice(0,16); }
+   if(!n) return; if(kind.manip>n/2){ rows.push({lab,e,id:e+'#'+i,type:'manip'}); return; } if(w<=n/2) return; rows.push({lab,e,unit:lab==='EP'?'1~2학년':(unitOf[e]||e),id:e+'#'+i,type:'write',rate:has/w,avg:has?cnt/has:0,ex}); };
+  for(const e of Object.keys(G36)) G36[e].forEach((g,i)=>scan('36',e,i,g)); for(const e of Object.keys(G)) G[e].forEach((g,i)=>scan('EP',e,i,g)); return rows; });
+ const W=r.filter(x=>x.type==='write'), dom=x=>x.lab==='EP'?'1~2학년 수와 연산':({S2:'수와 연산(3~6)',S3:'수와 연산(3~6)',S4:'자료와 가능성',S5:'변화와 관계',S6:'도형과 측정'}[x.e.slice(0,2)]||x.e.slice(0,2));
+ const tab=(key)=>{ const m={}; for(const x of W){ const k=key(x); const u=m[k]=m[k]||{n:0,full:0,part:0,none:0,avg:0}; u.n++; if(x.rate>=0.99) u.full++; else if(x.rate>0) u.part++; else u.none++; u.avg+=x.avg; } return m; };
+ let out='| 영역 | 쓰기형 틀 | 예상 오답 늘 있음 | 가끔 있음 | 없음 | 틀당 예상 오답 수 |\n|---|---|---|---|---|---|\n'; const d=tab(dom); for(const k of Object.keys(d)){ const u=d[k]; out+=`| ${k} | ${u.n} | ${u.full} | ${u.part} | ${u.none} | ${(u.avg/u.n).toFixed(1)} |\n`; }
+ out+=`| 합계 | ${W.length} | ${W.filter(x=>x.rate>=0.99).length} | ${W.filter(x=>x.rate>0&&x.rate<0.99).length} | ${W.filter(x=>x.rate===0).length} | ${(W.reduce((s,x)=>s+x.avg,0)/W.length).toFixed(1)} |\n`;
+ out+='\n조작·그리기 틀(예상 오답 대상 아님): '+r.filter(x=>x.type==='manip').length+'\n\n### 단원별(3~6학년, 예상 오답 없는 틀이 있는 단원만)\n| 단원 | 쓰기형 틀 | 없음 | 예 |\n|---|---|---|---|\n';
+ const u=tab(x=>x.unit); const exm={}; for(const x of W) if(x.rate===0&&!exm[x.unit]) exm[x.unit]=x.id+' '+x.ex; for(const k of Object.keys(u).sort()) if(u[k].none&&k!=='1~2학년') out+=`| ${k} | ${u[k].n} | ${u[k].none} | ${exm[k]||''} |\n`;
+ fs.writeFileSync('x32_out.md',out); fs.writeFileSync('x32_none.txt',W.filter(x=>x.rate===0).map(x=>x.id+' | '+x.unit+' | '+x.ex).join('\n')); console.log(out.split('\n###')[0]); await b.close(); })();

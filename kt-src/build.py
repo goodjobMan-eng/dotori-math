@@ -208,5 +208,10 @@ _g="const boxSvg=(a,b,c)=>SV(220,150,"; assert h.count(_g)==1
 h = h.replace(_g, "const boxSvg=(a,b,c)=>SV(220,162,")
 _g="(a?lab(85,148,a+' cm')"; assert h.count(_g)==1
 h = h.replace(_g, "(a?lab(85,158,a+' cm')")
+# --- 조사: "조이 7개" → "조가", "풀통는" → "풀통은" ---
+_g="C36('halmi',`${nm}이 ${k}개인 수는?`,`${nm}이 ${sino(k)} 개이면 얼마일까?"; assert h.count(_g)==1
+h = h.replace(_g, "C36('halmi',`${nm}${nm==='조'?'가':'이'} ${k}개인 수는?`,`${nm}${nm==='조'?'가':'이'} ${sino(k)} 개이면 얼마일까?")
+_g="CF(`${o}는 어떤 모양일까요?`"; assert h.count(_g)==1
+h = h.replace(_g, "CF(`${o}${((o.charCodeAt(o.length-1)-0xAC00)%28)?'은':'는'} 어떤 모양일까요?`")
 open('out/index.html', 'w', encoding='utf-8').write(h)
 print('built', len(out))
