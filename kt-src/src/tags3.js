@@ -697,6 +697,9 @@ Object.assign(MIS,{
 'N2-10':['묶음의 수와 한 묶음의 크기를 혼동','몇 개씩인지, 몇 묶음인지 따로 적어 봐요.'],
 'N2-11':['자리를 맞추지 않고 낱개를 묶음 자리에 더함','낱개는 낱개끼리, 묶음은 묶음끼리 더해요.'],
 'N2-12':['작은 수에서 큰 수를 뺄 수 없으면 0이라고 씀','뺄 수 없으면 윗자리에서 받아내려요.'],
+'G1-01':['상자·둥근기둥·공 모양의 특징(평평한 면, 둥근 면)을 구별하지 못함','평평한 면이 있는지, 잘 굴러가는지 살펴봐요.'],
+'G1-02':['네모·세모·동그라미(변과 꼭짓점의 수)를 구별하지 못함','뾰족한 곳과 곧은 선이 몇 개인지 세어 봐요.'],
+'G1-04':['왼쪽과 오른쪽을 혼동','밥 먹는 손, 글씨 쓰는 손이 어느 쪽인지 떠올려요.'],
 'N3-43':['어림할 때 반올림하지 않고 앞자리만 읽음','가까운 몇백으로 바꿔서 어림해요. 50이 넘으면 올려요.'],
 'N3-44':['어림하라는데 정확한 값을 계산해 답함','약 얼마인지 물으면 가까운 몇백으로 바꿔 계산해요.'],
 'G2-14':['놓인 방향이 바뀌면 다른 모양이라고 봄','돌려 놓아도 뾰족한 곳과 곧은 선의 수는 그대로예요.'],
@@ -1003,21 +1006,61 @@ R36['S5-14#2']=_whole; R36['S5-14#4']=_whole;
 R36['S5-16#7']=_tg(o=>/^설탕 \d+ g$|^소금 \d+ g$/.test(o)?'R6-01':null);
 R36['S5-18#1']=(q,s)=>{ const [a,b]=_N(s); const g=_gcd2(a,b); return [[`${b/g} : ${a/g}`,'R6-01'],[`1 : ${b-(a-1)}`,'R6-10']]; };
 R36['S5-21#4']=(q,s)=>{ const [N,a,b]=_N(s); const u=N/(a+b); return [[_like(q,N/2),'R6-13'],[_like(q,u),'R6-16'],[_like(q,u*Math.max(a,b)),'N1-13']]; };
+// --- 카본 교차 확인(11/21)으로 보강한 둘째 오답 ---
+R36['S2-11#1']=(q,s)=>{ const [a,b]=_N(s); return [[a-b,'N3-11'],[q.ans-1,'N2-09'],[a*b,'N3-30']]; };
+R36['S3-25#1']=(q)=>[[1,'N3-12'],[q.ans===3?2:3,'N3-33']];
+R36['S3-27#1']=(q,s)=>{ const [a]=_N(s); return [[a+10,'N2-05'],[a*_N(s)[1],'F']]; };
+R36['S3-68#0']=(q,s)=>{ const n=_N(s)[0]; return [[n,'N5-10']].concat(q.opts.filter(o=>o!==q.ans).map(o=>[o,(o===n||o===1)?'N5-10':(o*o>n?'N5-19':'F')])); };
+{ const _dn=R36['S3-98#4']; R36['S3-98#4']=(q,s)=>{ const [[d,n]]=_FR(s), k=_N(s.replace(/\d+분의 \d+/,''))[0]; const r=_dn(q,s); if((k*d)%n===0) r.splice(1,0,[String(k*d/n),'N6-02']); return r; }; R36['S3-98#5']=R36['S3-98#4']; }
+R36['S3-112#1']=(q,s)=>{ const [a,b]=_N(s); return [[_r6(+q.ans*10),'N6-09'],[_r6(a/b-Math.floor(a/b)),'N6-05'],[_r6(+q.ans/10),'F']]; };
+R36['S5-12#3']=(q,s)=>{ const v=_N(s); if(v.length<5) return []; return [[v[3]+(v[3]-v[1]),'R4-01'],[v[4]+(v[1]-v[0]),'R5-02']]; };
+// --- 도형과 측정(S6) ---
+R36['S6-01#0']=_tg(()=>'+G1-01'); R36['S6-01#1']=R36['S6-01#0']; R36['S6-01#2']=R36['S6-01#0'];
+R36['S6-03#0']=_tg(()=>'+G1-02'); R36['S6-03#1']=R36['S6-03#0']; R36['S6-03#3']=R36['S6-03#0']; R36['S6-05#2']=R36['S6-03#0']; R36['S6-06#0']=R36['S6-03#0']; R36['S6-06#1']=R36['S6-03#0']; R36['S6-04#3']=R36['S6-03#0'];
+R36['S6-04#0']=_tg(o=>/원/.test(o)?'G2-04':'+G1-02'); R36['S6-04#1']=R36['S6-04#0'];
+R36['S6-07#0']=_tg(()=>'+G2-15'); R36['S6-07#2']=R36['S6-07#0']; R36['S6-07#4']=R36['S6-07#0']; R36['S6-08#0']=R36['S6-07#0']; R36['S6-08#1']=R36['S6-07#0']; R36['S6-08#2']=R36['S6-07#0'];
+R36['S6-02#2']=_tg(o=>/^(왼쪽|오른쪽)$/.test(o)?'G1-04':'F');
+R36['S6-09#1']=_tg((o,q)=>{ const a=String(q.ans).match(/^(\d+)시 (\d+)분$/), b=o.match(/^(\d+)시 (\d+)분$/); return a&&b&&a[2]===b[2]&&+b[1]===+a[1]+1?'G2-06':'F'; });
+R36['S6-16#2']=_tg(()=>'+G3-07');
+R36['S6-17#1']=_tg(()=>'+G3-06');
+R36['S6-18#0']=_tg(o=>/^직각$/.test(o)?'F':'G4-07');
+R36['S6-18#5']=_tg(o=>/큰 부채/.test(o)?'G3-01':'F');
+R36['S6-19#0']=_tg(()=>'+G4-09'); R36['S6-29#0']=R36['S6-19#0']; R36['S6-29#1']=R36['S6-19#0']; R36['S6-29#2']=R36['S6-19#0'];
+R36['S6-19#2']=_tg(o=>/^가$/.test(o)?'G3-03':'F');
+R36['S6-36#3']=(q,s)=>{ const m=s.match(/(\d+)시간 (\d+)분 [−-] (\d+)시간 (\d+)분/); if(!m) return []; const [h1,m1,h2,m2]=m.slice(1).map(Number); const tot=(h1-h2)*60+(m1-m2); const r=[[`${(h1-h2)*100+m1-m2}분`,'G2-03']]; if(m1<m2) r.push([`${h1-h2}시간 ${m2-m1}분`,'N2-02'],[`${tot+60}분`,'N2-08']); return r; };
+R36['S6-22#3']=_tg(o=>/뒤집힌다|바뀐다/.test(o)?'G4-15':'F');
+R36['S6-23#3']=_tg((o)=>/[↓]/.test(o)?'G4-14':null);
+R36['S6-24#4']=_tg((o,q)=>({'↓':'↑','↑':'↓','→':'←','←':'→'})[String(q.ans)]===o?'G4-10':null);
+R36['S6-21#0']=_tg(o=>/비스듬한/.test(o)?'G5-02':'F');
+R36['S6-28#3']=_tg(o=>/^나$/.test(o)?'G4-02':'F');
+R36['S6-28#4']=_tg(o=>/^(정삼각형|이등변삼각형)$/.test(o)?'+G4-02':'F');
+R36['S6-31#0']=_tg(o=>/사다리꼴이 아니다|직사각형이 아니다|평행사변형이 아니다/.test(o)?'G4-05':'F');
+R36['S6-33#1']=_tg(()=>'+G4-06');
+const _corr=_tg(()=>'+G5-08'); R36['S6-52#1']=_corr; R36['S6-53#2']=_corr; R36['S6-53#3']=_corr; R36['S6-55#0']=_corr; R36['S6-54#4']=_corr;
+R36['S6-58#2']=_tg(o=>/^5개$/.test(o)?'G5-06':'F');
+R36['S6-59#2']=_tg(o=>/삼각형/.test(o)?'G6-02':'F'); R36['S6-61#1']=_tg(o=>/직사각형/.test(o)?'G6-02':'F');
+R36['S6-59#6']=_tg(o=>/바닥에/.test(o)?'G6-01':'F');
+R36['S6-78#6']=_tg(o=>/^6배$/.test(o)?'N2-05':null);
+R36['S6-64#0']=_tg(o=>/^원$/.test(o)?'G6-16':'F'); R36['S6-64#1']=_tg(o=>/삼각형/.test(o)?'G6-16':'F');
+R36['S6-63#3']=_tg(()=>'+G6-15');
+R36['S6-74#5']=_tg(o=>/더 크다/.test(o)?'+G6-11':null);
+R36['S6-75#2']=(q,s)=>{ const r=_N(s)[0], u=String(q.ans).replace(/^[\d.]+/,''); return [[_r6(r*3.14)+u,'G6-18'],[_r6(4*r*r*3.14)+u,'G3-04'],[_r6(2*r*3.14)+u,'G6-12']]; };
+R36['S6-74#3']=(q,s)=>{ const r=_N(s)[0], u=String(q.ans).replace(/^[\d.]+/,''); return [[_r6(r*3.14)+u,'G3-04'],[_r6(r*r*3.14)+u,'G6-12']]; };
 // 한 번호에 서로 다른 문제가 섞여 있는 틀(고정 문항 묶음)은 문제 글이 이 꼴일 때만 규칙을 쓴다. 규칙을 더할 때 x30.js로 꼴을 확인할 것.
 const G36G={'S2-14#1':/청이의 답은/,'S3-104#4':/계산하면\?$/,'S3-19#2':/똑같이 \d+칸으로 나눈/,'S3-20#2':/^더 큰 분수는\?$/,'S3-21#4':/개인 수는\?$/,'S3-27#5':/^23 × 14/,'S3-48#5':/계산하면\?$/,
  'S3-51#4':/계산하면\?$/,'S3-55#4':/받아내림하면\?$/,'S4-09#3':/한 칸은\?$/,'S4-19#4':/^전체 \d+명 중/,'S4-20#3':/전체가/,'S5-03#4':/바로 아래 칸/,'S5-04#1':/덧셈표/,'S5-05#1':/규칙은\?$/,
- 'S5-14#2':/비는\?$/,'S5-14#4':/비는\?$/,'S5-21#4':/적게 갖는 쪽은 몇 개/,'S4-18#2':/회전판/,'S4-05#2':/몇 명 더 많/,'S5-06#2':/번째 수는\?$/,'S5-09#2':/□ \+ \d+에서/,'S5-18#1':/간단한 자연수의 비/};
+ 'S5-14#2':/비는\?$/,'S5-14#4':/비는\?$/,'S5-21#4':/적게 갖는 쪽은 몇 개/,'S4-18#2':/회전판/,'S4-05#2':/몇 명 더 많/,'S5-06#2':/번째 수는\?$/,'S5-09#2':/□ \+ \d+에서/,'S5-18#1':/간단한 자연수의 비/,'S3-27#1':/에서 \d+ × 10은\?$/,'S5-12#3':/□가 \d+이면 △는\?$/,'S6-36#3':/시간 \d+분 [−-] \d+시간/,'S6-75#2':/^반지름이 \d+ cm인 원의 넓이/,'S6-74#3':/^반지름이 \d+ cm인 원의 원주/,'S6-09#1':/시각은\?$/,'S6-78#6':/몇 배/,'S6-02#2':/오른손|왼손/};
 function g36Wrong(ep,i,q){ if(!q||q.manip||q.onMount||!Array.isArray(q.opts)||q.opts.length<2||q.opts.some(o=>o!==null&&typeof o==='object')) return q;
   const A=String(q.ans); q.mis=q.mis||{}; q.fx=q.fx||{}; const isU=o=>String(o)!==A&&!q.mis[String(o)];   // 실수형(F)으로만 표시된 보기도 더 나은 후보가 있으면 바꾼다
   if(!q.opts.some(isU)) return q;
   const f=R36[ep+'#'+i], gd=G36G[ep+'#'+i]; let cand=[]; if(f&&(!gd||gd.test(_pl(q.q).replace(/\u200B/g,'').replace(/\s+/g,' ').trim()))){ try{ cand=f(q,_pl(q.q).replace(/​/g,'').replace(/\s+/g,' ').trim())||[]; }catch(e){ cand=[]; } }
-  const num=typeof q.ans==='number', used=new Set(Object.values(q.mis)), seen=new Set(q.opts.map(String)), add=[];
-  for(const [v,c] of cand){ const s=String(v); if(v==null||s===A||/NaN|undefined|Infinity/.test(s)||(num&&!(+v>=0))) continue;
+  const num=typeof q.opts[0]==='number'&&typeof q.ans==='number', numOpt=q.opts.every(o=>typeof o==='number'), used=new Set(Object.values(q.mis)), seen=new Set(q.opts.map(String)), add=[];
+  for(let [v,c] of cand){ const s=String(v); if(v==null||s===A||/NaN|undefined|Infinity/.test(s)||(num&&!(+v>=0))) continue; const dup=typeof c==='string'&&c[0]==='+'; if(dup) c=c.slice(1);
     const ex=q.opts.find(o=>String(o)===s);
-    if(ex!==undefined){ if(!isU(ex)) continue; if(c==='F') q.fx[s]=1; else if(!used.has(c)){ q.mis[s]=c; used.add(c); delete q.fx[s]; } continue; }
+    if(ex!==undefined){ if(!isU(ex)) continue; if(c==='F') q.fx[s]=1; else if(dup||!used.has(c)){ q.mis[s]=c; used.add(c); delete q.fx[s]; } continue; }
     if(c!=='F'&&used.has(c)) continue; if(seen.has(s)) continue; seen.add(s); if(c!=='F') used.add(c); add.push([v,c]); }
   const opts=q.opts.slice(); let rest=opts.filter(isU);
-  for(const [v,c] of add){ const val=num?+v:String(v); if(c==='F'&&!rest.length) continue;
+  for(const [v,c] of add){ const val=numOpt?+v:String(v); if(c==='F'&&!rest.length) continue;
     if(rest.length){ const r=rest.shift(); opts[opts.indexOf(r)]=val; delete q.fx[String(r)]; } else if(opts.length<5){ opts.splice((opts.length*3+String(v).length)%(opts.length+1),0,val); } else continue;
     if(c==='F') q.fx[String(val)]=1; else q.mis[String(val)]=c; }
   for(const r of opts.filter(isU)) q.fx[String(r)]=1;
