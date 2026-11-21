@@ -181,5 +181,25 @@ _d="const bubbleSay=(root,who,text)=>{"; assert h.count(_d)==1
 h = h.replace(_d, _d+" text=fixJosa(text);")
 _e="const mixTxt=(w,n,d)=>n?`${w}와 ${d}분의 ${n}`:`${w}`;"; assert h.count(_e)==1
 h = h.replace(_e, "const mixTxt=(w,n,d)=>n?`${w}${/[013678]$/.test(String(w))?'과':'와'} ${d}분의 ${n}`:`${w}`;")
+# --- 100의 단위 이름: '창고 한 칸' → '상자'(2026.9.27. 교수님 결정, 시리즈 기획서) ---
+for _o,_n,_c in [("100은 창고 한 칸","100은 상자 하나",1),("${crateSVG()}창고</div>","${crateSVG()}상자</div>",1),
+  ("개는 창고 몇 칸?","개는 상자 몇 개?",1),("} 개는 창고 몇 칸일까요? 창고 한 칸은 백 개예요.","} 개는 상자 몇 개일까요? 상자 하나는 백 개예요.",1),
+  ("`창고 ${c}칸은 도토리 몇 개?`","`상자 ${c}개는 도토리 몇 개?`",1),("창고 한 칸에는 도토리가 백 개 들어간단다. 창고 ${nativeCount(c)} 칸이면 몇 개일까?","상자 하나에는 도토리가 백 개 들어간단다. 상자 ${GAE(c)}면 몇 개일까?",1),
+  ("창고 ${nativeCount(c)} 칸, 바구니","상자 ${GAE(c)}, 바구니",3),("창고 100, 바구니 10","상자 100, 바구니 10",1),
+  ("창고 ${nativeCount(k)} 칸이면 모두 몇 개일까?","상자 ${GAE(k)}면 모두 몇 개일까?",1),("수레 1000, 창고 100","수레 1000, 상자 100",1),
+  ("'창고 상자'","'상자'",None),("창고 상자는 백 개","상자는 백 개",None)]:
+    assert (h.count(_o)==_c) if _c else h.count(_o)>=1, (_o,h.count(_o))
+    h = h.replace(_o,_n)
+# --- 꺾은선그래프 세로 눈금 숫자가 12개를 넘으면 한 칸 건너 적는다(겹침 방지) ---
+_f='for(let v=base;v<=top;v+=step){ const y=H-B-(v-base)*sc; g+=`<line x1="${L}" y1="${y}" x2="${W-4}" y2="${y}" stroke="#E5D3B5"/><text x="${L-4}" y="${y+4}" text-anchor="end" font-size="11">${v}</text>`; }'
+assert h.count(_f)==1
+h = h.replace(_f, 'const _nt=Math.round((top-base)/step); '+_f.replace('g+=`<line','const _lb=(_nt<=12||Math.round((v-base)/step)%2===0)?v:\'\'; g+=`<line').replace('${v}</text>','${_lb}</text>'))
+# --- 그림 점검 1회차: 직사각형·마름모를 치수 비율대로, 직육면체 높이 글자 잘림 ---
+_g="if(kind==='rect') s=`<rect x=\"40\" y=\"20\" width=\"160\" height=\"90\" ${F}/>`+lab(120,130,a+' cm')+lab(20,70,b+' cm');"; assert h.count(_g)==1
+h = h.replace(_g, "if(kind==='rect'){ const k=Math.min(160/a,90/b), w=Math.max(34,a*k), hh=Math.max(26,b*k), x=120-w/2, y=62-hh/2; s=`<rect x=\"${x}\" y=\"${y}\" width=\"${w}\" height=\"${hh}\" ${F}/>`+lab(120,y+hh+20,a+' cm')+lab(Math.max(22,x-22),67,b+' cm'); }")
+_g="else if(kind==='rhom') s=`<polygon points=\"120,10 200,65 120,120 40,65\" ${F}/><line x1=\"40\" y1=\"65\" x2=\"200\" y2=\"65\" ${D}/><line x1=\"120\" y1=\"10\" x2=\"120\" y2=\"120\" ${D}/>`+lab(165,58,a+' cm')+lab(140,100,b);"; assert h.count(_g)==1
+h = h.replace(_g, "else if(kind==='rhom'){ const bv=parseFloat(b)||a, k=Math.min(160/a,110/bv), hx=Math.max(24,a*k/2), hy=Math.max(20,bv*k/2); s=`<polygon points=\"120,${65-hy} ${120+hx},65 120,${65+hy} ${120-hx},65\" ${F}/><line x1=\"${120-hx}\" y1=\"65\" x2=\"${120+hx}\" y2=\"65\" ${D}/><line x1=\"120\" y1=\"${65-hy}\" x2=\"120\" y2=\"${65+hy}\" ${D}/>`+lab(120+hx*0.55,58,a+' cm')+lab(142,65+Math.max(18,hy*0.6),b); }")
+_g="+(a?lab(85,148,a+' cm')+lab(190,140,b+' cm')+lab(8,98,c+' cm'):''),260);"; assert h.count(_g)==1
+h = h.replace(_g, "+(a?lab(85,148,a+' cm')+lab(190,140,b+' cm')+lab(44,98,c+' cm'):''),260);")
 open('out/index.html', 'w', encoding='utf-8').write(h)
 print('built', len(out))
