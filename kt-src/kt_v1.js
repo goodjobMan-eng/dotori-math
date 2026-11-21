@@ -91,7 +91,7 @@ ADD('S3-61', ()=>{ const a=rnd(2,8)+rnd(1,9)/10, b=rnd(1,9)/10+rnd(1,9)/100; con
   return MC(`${D1(a)} + ${D1(b)}`, '', D1(right), [[D1(endAlign),'N4-03'],[D1(+(right+1).toFixed(2)),null]]); });
 
 /* 3-2 수와 연산: 5학년 */
-ADD('S3-63', ()=>{ const a=rnd(20,40), b=rnd(2,6), c=rnd(2,5); return WM(`${a} − ${b} × ${c}`, '', a-b*c, [[(a-b)*c,'N5-01']]); });
+ADD('S3-63', ()=>{ const b=rnd(2,6), c=rnd(2,5), a=b*c+rnd(3,25); return WM(`${a} − ${b} × ${c}`, '', a-b*c, [[(a-b)*c,'N5-01']]); });
 ADD('S3-65', ()=>{ const a=rnd(2,9), b=rnd(2,9), c=rnd(2,5); return WM(`${a} + ${b} × ${c}`, '', a+b*c, [[(a+b)*c,'N5-01']]); });
 ADD('S3-72', ()=>{ const g=rnd(2,6), x=rnd(2,3), y=x+1; const a=g*x, b=g*y; return WM(`${a}와 ${b}의 최소공배수는?`, '', g*x*y, [[g,'N5-02'],[a*b,null]]); });
 ADD('S3-71', ()=>{ const g=rnd(2,6), x=rnd(2,3), y=x+1; const a=g*x, b=g*y; return WM(`${a}와 ${b}의 최대공약수는?`, '', g, [[g*x*y,'N5-02']]); });
