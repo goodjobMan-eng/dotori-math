@@ -5986,6 +5986,15 @@ B('S6-16', ['3 m 50 cm와 40 cm를 더하면 얼마일까요?','3 m 90 cm',[['43
 Object.assign(MIS,{
 'R1-04':['수가 몇씩 변하는지 잘못 봄','앞뒤 수의 차를 두 군데 넘게 확인해요.'],
 'N1-06':['0을 더하거나 빼면 0이 된다고 봄','0은 아무것도 없다는 뜻이라, 더하거나 빼도 수가 그대로예요.'],
+'N1-07':['세면서 하나를 더 세거나 덜 셈','하나씩 짚으면서 한 번씩만 세어요.'],
+'N1-08':['남은 것(모르는 부분)이 아니라 전체나 덜어 낸 수를 답함','무엇을 묻는지 다시 읽고, 남은 것만 세어요.'],
+'N1-09':['이어 세기·거꾸로 세기를 처음 수부터 세어 1이 어긋남','처음 수는 이미 센 수예요. 그다음 수부터 세어요.'],
+'N1-10':['묶음(십·백)과 낱개를 구별하지 않고 숫자만 더함','바구니 하나는 열 개, 상자 하나는 백 개예요.'],
+'N1-12':['세 수 계산에서 한 번만 계산하고 멈춤','앞의 두 수를 계산한 다음, 남은 수까지 계산해요.'],
+'N1-13':['많다·적다(크다·작다)의 방향을 혼동','무엇을 고르라고 했는지(더 큰 것, 더 작은 것) 다시 읽어요.'],
+'N2-09':['곱셈구구에서 한 묶음을 더 세거나 덜 셈','몇 번 뛰었는지 손가락으로 세면서 확인해요.'],
+'N2-10':['묶음의 수와 한 묶음의 크기를 혼동','몇 개씩인지, 몇 묶음인지 따로 적어 봐요.'],
+'N2-11':['자리를 맞추지 않고 낱개를 묶음 자리에 더함','낱개는 낱개끼리, 묶음은 묶음끼리 더해요.'],
 'G2-14':['놓인 방향이 바뀌면 다른 모양이라고 봄','돌려 놓아도 뾰족한 곳과 곧은 선의 수는 그대로예요.'],
 'G2-15':['비교한 결과를 반대로 읽음','저울은 내려간 쪽이 무겁고, 옮겨 부어 넘치면 처음 그릇이 더 많이 담겨요.'],
 'G2-16':['높이나 크기 한 가지만 보고 양이 같다고 봄','높이나 크기가 같아도 담기는 양과 무게는 다를 수 있어요.']});
@@ -6133,18 +6142,84 @@ function fixJosa(t){ if(typeof t!=='string'||t.indexOf('​')<0) return t;
   const P={'은':['은','는'],'는':['은','는'],'이':['이','가'],'가':['이','가'],'을':['을','를'],'를':['을','를'],'과':['과','와'],'와':['과','와'],'이에요':['이에요','예요'],'예요':['이에요','예요'],'이야':['이야','야'],'야':['이야','야'],'이란다':['이란다','란다'],'란다':['이란다','란다']};
   return t.replace(/([가-힣])​(으로|로|이에요|예요|이란다|란다|이야|야|은|는|이|가|을|를|과|와)(?=[\s,.?!~…]|$)/g,(m,ch,j)=>{ const jong=(ch.charCodeAt(0)-0xAC00)%28; const nj=(j==='으로'||j==='로')?((jong>0&&jong!==8)?'으로':'로'):P[j][jong>0?0:1]; return ch+'​'+nj; }); }
 if(typeof say==='function'){ const _say=say; say=function(text,who,cb){ return _say(fixJosa(text),who,cb); }; }
-/* 1~2학년 보기 넓히기: 그 단원의 대표 오개념 답이 보기에 꼭 들어가게 한다(코드 없는 오답 하나를 바꿈). 난수를 쓰지 않아 씨앗 재생성과 맞는다. */
-function epWrong(q){ if(!q||!Array.isArray(q.opts)||q.opts.length<3||q.opts.some(o=>typeof o!=='number')||typeof q.ans!=='number') return q;
-  const s=String(q.q).replace(/<[^>]+>/g,' ').replace(/​/g,'').replace(/\s+/g,' ').trim(); let m, add=[];
-  if((m=s.match(/^(\d) [+−-] 0 = \?$/))&&+m[1]>0) add.push([0,'N1-06']);
-  else if((m=s.match(/^(1\d) [−-] (\d) = \?$/))&&(+m[1]%10)<+m[2]) add.push([10+(+m[2]-(+m[1]%10)),'N2-02']);
-  else if((m=s.match(/^(\d\d) [−-] (\d\d) = \?$/))&&(+m[1]%10)<(+m[2]%10)) add.push([+m[1]-+m[2]+10,'N2-08']);
-  else if((m=s.match(/^□ \+ (\d+) = (\d+)$/))||(m=s.match(/^(\d+) \+ □ = (\d+)$/))) add.push([+m[1]+ +m[2],'N1-03']);
-  else if((m=s.match(/^(\d)의 (\d)배는\?$/))&&(+m[1])*(+m[2])!==+m[1]+ +m[2]) add.push([+m[1]+ +m[2],'N2-05']);
-  for(const [v,c] of add){ if(v===q.ans||v<0) continue; q.mis=q.mis||{};
-    if(!q.opts.includes(v)){ let k=-1; for(let i=q.opts.length-1;i>=0;i--){ if(q.opts[i]!==q.ans&&!q.mis[q.opts[i]]){ k=i; break; } } if(k<0) continue; q.opts[k]=v; }
-    if(!q.mis[v]) q.mis[v]=c; }
+/* ===== 1~2학년 보기 규칙 엔진 (2026-11-21) =====
+   원칙: 객관식 오답은 모두 '그 답이 나오는 오개념'에서 만든다(무작위 오답 금지). 문제 글의 꼴마다 오개념 규칙을 적용해
+   [오답, 코드] 후보를 만들고, 정답 + 후보 최대 3개(4지)로 보기를 다시 짠다. 후보가 2개 못 되면 원래 보기로 채운다.
+   난수를 쓰지 않으므로 씨앗 재생성(KT.regen)과 맞는다. 규칙을 더할 때는 EPR 배열에 한 줄. 점검: node x28.js, node x29.js */
+const EPR=[
+ [/^(\d+) \+ (\d+) = \?$/,(m)=>{ const a=+m[1],b=+m[2],s=a+b,r=[]; if(b===0||a===0) r.push([0,'N1-06']);
+    if(a>=10&&b>=10&&a%10+b%10>=10){ r.push([s-10,'N2-01']); r.push([+(''+(Math.floor(a/10)+Math.floor(b/10))+(a%10+b%10)),'N2-07']); }
+    else if(a>=10&&b<10&&a%10+b<10) r.push([a+b*10,'N2-11']); else if(a>=10&&b>=10) r.push([a+b%10,'N2-11']);
+    r.push([s-1,'N1-09'],[s+1,'N1-07']); if(a!==b&&s<20) r.push([Math.abs(a-b),'N1-03']); return r; }],
+ [/^(\d+) [−-] (\d+) = \?$/,(m)=>{ const a=+m[1],b=+m[2],d=a-b,r=[]; if(b===0) r.push([0,'N1-06']);
+    if(a>=10&&a%10<b%10){ r.push([(Math.floor(a/10)-Math.floor(b/10))*10+(b%10-a%10),'N2-02']); if(b>=10) r.push([d+10,'N2-08']); }
+    if(b!==d&&b>0) r.push([b,'N1-08']); r.push([d+1,'N1-09'],[d-1,'N1-07']); if(a<10) r.push([a+b,'N1-03']); return r; }],
+ [/^(\d+) \+ (\d+) \+ (\d+) = \?$/,(m)=>{ const a=+m[1],b=+m[2],c=+m[3],s=a+b+c; return [[a+b,'N1-12'],[s-10,'N2-01'],[s-1,'N1-09'],[s+1,'N1-07']]; }],
+ [/^(\d+) [−-] (\d+) [−-] (\d+) = \?$/,(m)=>{ const a=+m[1],b=+m[2],c=+m[3],d=a-b-c; return [[a-b,'N1-12'],[a-b+c,'N1-03'],[d+1,'N1-09'],[d-1,'N1-07']]; }],
+ [/^(\d+) \+ (\d+) [−-] (\d+) = \?$/,(m)=>{ const a=+m[1],b=+m[2],c=+m[3],d=a+b-c; return [[a+b,'N1-12'],[a+b+c,'N1-03'],[d+1,'N1-07'],[d-1,'N1-09']]; }],
+ [/^(\d+) × (\d+) = \?$/,(m)=>{ const a=+m[1],b=+m[2],r=[]; if(a===0||b===0) r.push([a+b,'N2-06'],[1,'N2-06'],[a+b+1,'N2-06']); else if(a===1||b===1) r.push([a+b,'N2-06'],[1,'N2-10'],[0,'N2-06']); else r.push([a+b,'N2-05']);
+    if(a>1&&b>0) r.push([a*(b+1),'N2-09'],[a*(b-1),'N2-09']); return r; }],
+ [/^(\d+)단: /,(m,q)=>{ const a=+m[1],b=q.ans/a; return Number.isInteger(b)?[[a+b,'N2-05'],[a*(b+1),'N2-09'],[a*(b-1),'N2-09']]:[]; }],
+ [/^(\d+) × □ = (\d+)$/,(m,q)=>{ const a=+m[1],t=+m[2]; return [[t-a,'N2-05'],[q.ans+1,'N2-09'],[q.ans-1,'N2-09'],[t,'N1-05']]; }],
+ [/^(\d+) = □ \+ (\d+)$|^(\d+) = (\d+) \+ □$/,(m,q)=>{ const N=+(m[1]||m[3]),a=+(m[2]||m[4]); return [[N,'N1-05'],[N+a,'N1-03'],[q.ans+1,'N1-07'],[q.ans-1,'N1-07']]; }],
+ [/^(\d+) \+ □ = (\d+)$|^□ \+ (\d+) = (\d+)$/,(m,q)=>{ const a=+(m[1]||m[3]),t=+(m[2]||m[4]); return [[a+t,'N1-03'],[t,'N1-05'],[q.ans+1,'N1-07'],[q.ans-1,'N1-07']]; }],
+ [/^(\d+) [−-] □ = (\d+)$/,(m,q)=>{ const t=+m[1],a=+m[2]; return [[t+a,'N1-03'],[a,'N1-05'],[q.ans+1,'N1-07'],[q.ans-1,'N1-07']]; }],
+ [/^□ [−-] (\d+) = (\d+)$/,(m,q)=>{ const a=+m[1],x=+m[2]; return [[Math.abs(x-a),'N1-03'],[x,'N1-05'],[q.ans+1,'N1-07'],[q.ans-1,'N1-07']]; }],
+ [/^(\d+) \+ (\d+) = □ \+ (\d+)$/,(m,q)=>{ const a=+m[1],b=+m[2],c=+m[3]; return [[a+b,'N1-05'],[a+b+c,'N1-03'],[q.ans+1,'N1-07']]; }],
+ [/^(\d+)[은는] (\d+)[와과] 몇\?$|^(\d+)[을를] (\d+)[와과] □로 갈라요/,(m,q)=>{ const N=+(m[1]||m[3]),a=+(m[2]||m[4]); return [[N,'N1-08'],[N+a,'N1-03'],[q.ans+1,'N1-07'],[q.ans-1,'N1-07']]; }],
+ [/^(\d+)[와과] (\d+)[을를] 모으면\?$/,(m,q)=>{ const a=+m[1],b=+m[2],r=[]; if(a!==b) r.push([Math.abs(a-b),'N1-03']); r.push([a+b+1,'N1-07'],[a+b-1,'N1-09']); return r; }],
+ [/빨간 공 (\d+)개, 파란 공 (\d+)개\. 빨간 공이 몇 개 더/,(m)=>{ const a=+m[1],b=+m[2]; return [[a+b,'N1-03'],[a,'N1-08'],[b,'N1-08']]; }],
+ [/^(\d+)[와과] □[을를] 모으면 10이 돼요/,(m)=>{ const a=+m[1]; return [[10-a+1,'N1-02'],[10-a-1,'N1-02'],[10+a,'N1-03']]; }],
+ [/^10을 만들려면 (\d+)[와과] 몇\?$/,(m,q)=>{ const a=+m[1]; return [[10-a+1,'N1-02'],[10-a-1,'N1-02'],[10+a,'N1-03']]; }],
+ [/^나 (\d+)개 줘! 도토는 몇 개 남지\?$/,(m,q)=>{ const a=+m[1],N=q.ans+a,r=[]; if(a!==q.ans) r.push([a,'N1-08']); r.push([N,'N1-08'],[q.ans+1,'N1-09'],[q.ans-1,'N1-07']); return r; }],
+ [/^(\d+)보다 1 큰 수/,(m)=>{ const a=+m[1]; return [[a-1,'N1-01'],[a,'N1-07'],[a+2,'N1-07']]; }],
+ [/^(\d+)보다 1 작은 수/,(m)=>{ const a=+m[1]; return [[a+1,'N1-01'],[a,'N1-07'],[a-2,'N1-07']]; }],
+ [/^(\d+)씩 (뛰어 세기|거꾸로), 다음은\?$/,(m,q)=>{ const k=+m[1],dn=m[2]==='거꾸로'?-1:1, c=q.ans-dn*k, r=[[c-dn*k,'N1-01'],[c+dn,'R1-04']]; if(k===10) r.push([c+dn*100,'N4-09']); else if(k===100) r.push([c+dn*10,'N4-09']); else r.push([c+dn*2*k,'R1-04']); return r; }],
+ [/^(\d+)씩 (\d+)묶음, 모두 몇 개\?$/,(m)=>{ const a=+m[1],b=+m[2]; return [[a+b,'N2-05'],[b,'N2-10'],[a*(b+1),'N2-09'],[a*(b-1),'N2-09']]; }],
+ [/^(\d+)의 (\d+)배는\?$/,(m)=>{ const a=+m[1],b=+m[2]; return [[a+b,'N2-05'],[a*(b+1),'N2-09'],[a*(b-1),'N2-09']]; }],
+ [/^(\d+)[은는] (\d+)의 몇 배\?$/,(m,q)=>{ const X=+m[1],a=+m[2]; return [[X-a,'N2-05'],[q.ans+1,'N2-09'],[q.ans-1,'N2-09']]; }],
+ [/^(\d+)씩 묶으면 몇 묶음\?$/,(m,q)=>{ const a=+m[1]; return [[a,'N2-10'],[q.ans+1,'N2-09'],[q.ans-1,'N2-09'],[q.ans*a,'N2-10']]; }],
+ [/^상자 (\d+)개는 도토리 몇 개\?$/,(m)=>{ const c=+m[1]; return [[c*10,'N4-07'],[c,'N4-15'],[c*1000,'N4-07']]; }],
+ [/^바구니 (\d+)개는 도토리 몇 개\?$/,(m)=>{ const c=+m[1]; return [[c,'N4-15'],[c*100,'N4-07'],[c*10+10,'N1-07']]; }],
+ [/^도토리 (\d+)개는 상자 몇 개\?$/,(m,q)=>{ const X=+m[1]; return [[X/10,'N4-07'],[q.ans+1,'N1-07'],[q.ans-1,'N1-07']]; }],
+ [/^(\d+)에서 ([천백십일])의 자리 숫자는\?$|^(\d+), (천)의 자리 숫자는\?$/,(m,q)=>{ const ds=String(m[1]||m[3]).split('').map(Number); return ds.filter(d=>d!==q.ans).map(d=>[d,'N4-09']); }],
+ [/^(\d+)에서 ([천백십일])의 자리 숫자 (\d)[은는] 얼마\?$/,(m,q)=>{ const d=+m[3],k='일십백천'.indexOf(m[2]),r=[[d,'N4-15']]; for(let e=0;e<String(m[1]).length;e++) if(e!==k&&e>0) r.push([d*10**e,'N4-09']); return r; }],
+ [/^(\d+)\+(\d+)=(\d+)이면, \d+[−-](\d+)=\?$/,(m,q)=>{ const a=+m[1],b=+m[2],c=+m[3],x=+m[4]; return [[c,'N1-08'],[x,'N1-08'],[c+x,'N1-03']]; }],
+ [/^(\d+)[−-](\d+)=(\d+)이면, (\d+)\+(\d+)=\?$/,(m,q)=>{ const a=+m[1],b=+m[2],c=+m[3]; return [[c,'N1-08'],[b,'N1-08'],[Math.abs(c-b),'N1-03'],[a+1,'N1-07']]; }],
+ [/^['‘].*['’][은는] 숫자로\?$/,(m,q)=>{ const n=q.ans; if(n<10) return [[n+1,'N1-01'],[n-1,'N1-01']]; const ds=String(n).split(''), r=[]; if(ds.includes('0')) r.push([+ds.filter((d,i)=>i===0||d!=='0').join(''),'N4-01']);
+    for(let i=0;i<ds.length-1&&r.length<3;i++) if(ds[i]!==ds[i+1]&&!(i===0&&ds[i+1]==='0')){ const e=ds.slice(); [e[i],e[i+1]]=[e[i+1],e[i]]; r.push([+e.join(''),'N4-09']); } return r; }],
+ [/^[\d, ]+, 다음은\?$/,(m,q)=>[[q.ans+1,'N1-01'],[q.ans+2,'N1-01'],[q.ans===0?3:q.ans-1,'N1-07']]],
+ [/째 도토리는 몇 번\?$/,(m,q)=>[[q.ans+1,'N1-07'],[q.ans-1,'N1-07'],[q.ans+2,'N1-07']]],
+ [/^더 큰 수는\?$/,(m,q)=>{ const v=(String(q.visual||'').replace(/<[^>]+>/g,' ').match(/\d+/g)||[]).map(Number).filter(x=>x!==q.ans); return v.length?[[v[0],'N1-13']]:[]; }],
+ [/^도토리 10개면 바구니 몇 개\?$/,()=>[[10,'N4-15'],[2,'N1-07'],[0,'N1-07']]],
+ [/^바구니 하나는 도토리 몇 개\?$/,()=>[[1,'N4-15'],[9,'N1-07'],[11,'N1-07']]],
+ [/^(\d+)[은는] 바구니 몇 개와 낱개 (\d+)개\?$/,(m,q)=>{ const n=+m[1],s=+m[2],r=[]; if(s!==q.ans) r.push([s,'N4-09']); r.push([n,'N4-15'],[q.ans+1,'N1-07'],[q.ans-1,'N1-07']); return r; }],
+ [/^(도토리가 몇 개일까요\?|모두 몇 개일까요\?)$/,(m,q)=>{ const n=q.ans,r=[]; if(n<10) return [[n+1,'N1-07'],[n-1,'N1-07'],[n+2,'N1-07']];
+    const ds=String(n).split('').map(Number), sum=ds.reduce((x,y)=>x+y,0);
+    if(ds.includes(0)&&n>=100) r.push([+ds.filter((d,i)=>i===0||d!==0).join(''),'N4-01']);
+    if(n<100){ if(ds[0]!==ds[1]&&ds[1]>0) r.push([ds[1]*10+ds[0],'N4-09']); } else if(ds[0]!==ds[1]) r.push([+(''+ds[1]+ds[0]+ds.slice(2).join('')),'N4-09']);
+    r.push([sum,'N1-10']); r.push([n+10,'N1-07'],[n-10,'N1-07']); return r; }],
+];
+const ORDW=['첫째','둘째','셋째','넷째','다섯째','여섯째','일곱째','여덟째','아홉째','열째'];
+function epWrongS(q,s){ const o=q.opts.map(String), ans=String(q.ans); q.mis=q.mis||{}; const set=(v,c)=>{ if(v!==ans&&!q.mis[v]) q.mis[v]=c; };
+  if(/누가 더 (많|적)을까요\?|어느 창고가 더 많을까요\?|텅 빈 주머니는 어느 쪽\?/.test(s)){ for(const v of o) set(v,/같아요|둘 다/.test(v)?'F':'N1-13'); return q; }
+  if(/몇째일까요\?$/.test(s)){ const zw=ans.indexOf('\u200B')>=0, k=ORDW.indexOf(ans.replace(/\u200B/g,'')); if(k<0) return q; const W2=w=>zw?'\u200B'+w+'\u200B':w; const want=[k+1,k-1,k+2,k-2].filter(i=>i>=0&&i<ORDW.length).slice(0,3).map(i=>ORDW[i]);
+    const all=[k,...want.map(w=>ORDW.indexOf(w))].sort((a,b)=>a-b).map(i=>W2(ORDW[i])); const r=(k*3+1)%all.length; q.opts=all.slice(r).concat(all.slice(0,r)); q.mis={}; for(const w of want) q.mis[W2(w)]='N1-07'; return q; }
+  if(/묶음을 곱셈식으로!$/.test(s)){ for(const v of o) set(v,/\+/.test(v)?'N2-05':'N2-09'); return q; }
   return q; }
+function epWrong(q){ if(!q||!Array.isArray(q.opts)||q.opts.length<3) return q;
+  if(typeof q.ans!=='number'||q.opts.some(o=>typeof o!=='number')){ try{ return epWrongS(q,String(q.q).replace(/<[^>]+>/g,' ').replace(/​/g,'').replace(/\s+/g,' ').trim()); }catch(e){ return q; } }
+  const s=String(q.q).replace(/<[^>]+>/g,' ').replace(/​/g,'').replace(/\s+/g,' ').trim();
+  if(q.opts.some(o=>typeof o!=='number')) return q;
+  let cand=null; for(const [re,f] of EPR){ const m=s.match(re); if(m){ try{ cand=f(m,q); }catch(e){ cand=null; } break; } }
+  if(!cand) return q;
+  const old=q.mis||{}, seen=new Set([q.ans]), wrong=[];
+  for(const o of q.opts) if(o!==q.ans&&old[o]&&!seen.has(o)){ seen.add(o); wrong.push([o,old[o]]); }          // 이미 코드가 붙은 오답은 살린다
+  for(const [v,c] of cand){ if(wrong.length>=3) break; if(!Number.isInteger(v)||v<0||seen.has(v)) continue; seen.add(v); wrong.push([v,c]); }
+  if(wrong.length<2){ for(const o of q.opts){ if(wrong.length>=2) break; if(!seen.has(o)){ seen.add(o); wrong.push([o,'F']); } } }
+  wrong.length=Math.min(wrong.length,3);
+  const all=[q.ans,...wrong.map(w=>w[0])].sort((a,b)=>a-b); const k=(q.ans*7+all.length*3+wrong.reduce((x,w)=>x+w[0],0))%all.length;   // 정답 자리가 한쪽에 몰리지 않게 돌린다
+  q.opts=all.slice(k).concat(all.slice(0,k)); q.mis={}; for(const [v,c] of wrong) if(c) q.mis[v]=c; return q; }
 function fixEP(q){ if(q){ for(const k of ['speech','ansSpeech','hint']) if(typeof q[k]==='string') q[k]=fixJosa(q[k]); } if(q&&typeof q.q==='string'){ q.q=q.q.replace(/(하나​?['’])은/,'$1는'); q.q=q.q.replace(/^(['‘].*?([가-힣])​?['’])[은는] 숫자로\?$/,(m,a,ch)=>a+(((ch.charCodeAt(0)-0xAC00)%28)?'은':'는')+' 숫자로?');
   { const m=q.q.match(/^(\d+)에서 숫자 (\d)([은는]) 얼마\?$/); const an=+q.ans; if(m&&an>0){ const pl=an>=1000?'천':an>=100?'백':an>=10?'십':'일'; q.q=`${m[1]}에서 ${pl}의 자리 숫자 ${m[2]}${m[3]} 얼마?`; } } } return q; }
 if(typeof G!=='undefined') for(const e of Object.keys(G)) G[e]=G[e].map(g=>function(){ return epWrong(fixEP(g.apply(this,arguments))); });
@@ -6459,7 +6534,7 @@ Object.assign(MISC,{'G4-18':[['GC08',.9]],'G4-19':[['GC10',.9]],'G5-16':[['GC11'
 Object.assign(MISC,{'G3-09':[['GC05',.9]],'G3-10':[['GC05',.9]],'G5-17':[['GC14',.9]]});
 Object.assign(MISC,{'G4-20':[['GC09',.9]],'G6-19':[['GC19',.9]]});
 Object.assign(MISC,{'G2-11':[['GC02',.9]],'G2-12':[['GC02',.9]],'G2-13':[['GC03',.9]]});
-Object.assign(MISC,{'N1-06':[['C02',.9]],'R1-04':[['RC01',.9]],'G2-14':[['GC01',.9]],'G2-15':[['GC03',.9]],'G2-16':[['GC03',.9]]});
+Object.assign(MISC,{'N1-06':[['C02',.9]],'N1-07':[['C01',.9]],'N1-08':[['C02',.9]],'N1-09':[['C02',.9]],'N1-10':[['C03',.9]],'N1-12':[['C02',.9]],'N1-13':[['C01',.9]],'N2-09':[['C07',.9]],'N2-10':[['C07',.9]],'N2-11':[['C03',.9]],'R1-04':[['RC01',.9]],'G2-14':[['GC01',.9]],'G2-15':[['GC03',.9]],'G2-16':[['GC03',.9]]});
 Object.assign(MISC,{'G6-20':[['GC17',.9]]});
 
 /* ---------- 4-1. PC 에셋 폴더에서 가져온 그림: 캐릭터 8명(자세 7장씩)과 배경 3장 ---------- */
