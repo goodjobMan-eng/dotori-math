@@ -1020,6 +1020,7 @@ const WHO_IDX={doto:0,rami:1,halmi:2,cheong:3};
 const GRADE_JU={2:['째깍이','도토','붕붕이'],3:['람이','대롱이','길쭉이'],4:['반반이','부엉 박사님','윙윙이'],5:['구리 아저씨','쏙쏙이','콩알이'],6:['대롱이','할머니','개미 반장']};
 const CH_KO={doto:'도토',rami:'람이',halmi:'할머니',cheong:'청이'}, MOOD_KO={base:'기본',happy:'기쁨',oops:'놀람',point:'가리키기'};
 const chip=(who,mood)=>(typeof S!=='undefined'&&S&&S.mode==='ep36'&&S.chars&&!S.idle)?juImg(S.chars[WHO_IDX[who]??0],mood):chip0(who,mood);
+const praiseChip=(who,mood)=>who==='halmi'?chip0('halmi',mood):chip(who,mood);   /* '우리 강아지' 같은 할머니 말은 어느 단원에서든 할머니가 */
 function chip0(who, mood){ return `<img class="chr" src="${A[CH_KO[who]+'_'+(MOOD_KO[mood]||'기본')]}" alt="${CH_KO[who]}">`; }
 function talker(who){ if(typeof S!=='undefined'&&S&&S.mode==='ep36'&&S.chars&&!S.idle) return juImg(S.chars[WHO_IDX[who]??0],rndPick('point','one','base','wave')); const k=CH_KO[who]+'_'+POSE_OF[who]+'_closed'; return `<img class="chr" data-who="${who}" src="${POSE[k]||A[CH_KO[who]+'_가리키기']}" alt="${CH_KO[who]}">`; }
 const NAMES = {doto:'도토', rami:'람이', halmi:'할머니', cheong:'청이'};
@@ -2436,7 +2437,7 @@ function game(g){
   document.getElementById('speak').onclick=()=>say(g.speech,g.who);
   document.getElementById('skipgame').onclick=advance;
   const done=(msg)=>{ if(root.cleanup) root.cleanup(); root.querySelectorAll('button,.opt').forEach(b=>b.disabled=true); root.style.pointerEvents='none';
-    sfx(last?'win':'clap'); const [who,pr]=pick(PRAISE); document.getElementById('gdone').innerHTML=`<div class="gdone">${chip(who,'happy')}<div class="msg">${pr}<br><span style="font-size:.95rem;color:var(--ink-soft)">${msg}</span></div></div><button class="next" id="gnext">${last?'결과 보기 ★':'다음 →'}</button>`; S.results[S.i]=true; logAct(true,'g');
+    sfx(last?'win':'clap'); const [who,pr]=pick(PRAISE); document.getElementById('gdone').innerHTML=`<div class="gdone">${praiseChip(who,'happy')}<div class="msg">${pr}<br><span style="font-size:.95rem;color:var(--ink-soft)">${msg}</span></div></div><button class="next" id="gnext">${last?'결과 보기 ★':'다음 →'}</button>`; S.results[S.i]=true; logAct(true,'g');
     document.getElementById('skipgame').hidden=true; say(`${pr} ${msg}`,who); document.getElementById('gnext').onclick=advance; setTimeout(()=>document.getElementById('gdone').scrollIntoView({block:'nearest',behavior:'smooth'}),80); };
   try{ g.mount(root, done); setupDock(root); }catch(e){ console.error(e); root.innerHTML='<div class="voicewarn">게임을 불러오지 못했어요. 건너뛰고 문제를 풀어요.</div>'; }
   setTimeout(()=>say(g.speech,g.who),300);
@@ -2461,7 +2462,7 @@ function question(q){
   document.getElementById('speak').onclick=()=>say(q.speech,q.who);
   document.querySelectorAll('.opt').forEach(b=>b.onclick=()=>answer(b,q));
   if(q.write) (S.mode==='ep36'?mountWriteQ36:mountWriteQ)(q);
-  if(S.mode==='ep36'){ const vz=document.getElementById('visual'); mountMemos(vz); if((UNITS36[S.ui]||{}).grade===2&&!S.retry) vz.insertAdjacentHTML('afterbegin','<div class="withadult sm">👨‍👩‍👧 어른과 함께 읽어요</div>'); }
+  if(S.mode==='ep36'){ const vz=document.getElementById('visual'); mountMemos(vz); if(false) vz.insertAdjacentHTML('afterbegin','<div class="withadult sm">👨‍👩‍👧 어른과 함께 읽어요</div>'); }
   if(q.onMount) q.onMount(document.getElementById('visual'));
   if(S.mode==='ep36') addScratch();
   if(q.manip){ q.manip.mount(document.getElementById('manip')); document.getElementById('mdone').onclick=()=>{ const ok=q.manip.check(); try{ if(S.tries===0&&q.manip.state){ q._mstate=String(q.manip.state()).slice(0,24); if(!ok&&q.manip.mcode) q._mcode=q.manip.mcode(); } }catch(e){} answer({dataset:{v:ok?q.ans:'__no'},classList:{add(){}},disabled:false},q); if(!ok&&S.tries>=2&&q.manip.reveal){ q.manip.reveal(); const mv=document.getElementById('mval'); if(mv) mv.textContent='정답 모양이에요'; } }; }
@@ -2474,7 +2475,7 @@ function answer(btn,q){
   if(correct){ sfx('good');
     btn.classList.add('ok'); document.querySelectorAll('.opt').forEach(b=>{ b.disabled=true; if(b!==btn) b.classList.add('dim'); });
     S.results[S.i]=S.tries===0; logAct(S.tries===0,'q'); const [who,msg]=pick(PRAISE);
-    fb.innerHTML=`<div class="fb ok">${chip(who,'happy')}<div class="msg">${msg}<br><span style="font-size:1rem;color:var(--ink-soft)">정답은 ${q.ansText||q.ans}</span></div></div><button class="next" id="next">${last?'결과 보기 ★':'다음 →'}</button>`;
+    fb.innerHTML=`<div class="fb ok">${praiseChip(who,'happy')}<div class="msg">${msg}<br><span style="font-size:1rem;color:var(--ink-soft)">정답은 ${q.ansText||q.ans}</span></div></div><button class="next" id="next">${last?'결과 보기 ★':'다음 →'}</button>`;
     say(`정답! ${q.ansSpeech}. ${msg}`,who); document.getElementById('next').onclick=goNext;
   } else {
     S.tries++; btn.classList.add('no'); btn.disabled=true; sfx('bad');
@@ -4305,7 +4306,7 @@ function conceptCard(ep,go){ const u=UNITS36[S.ui]; let ex=null; for(const g of 
     <div class="stage ccard"><div class="cc-top">${juImg(S.chars[0],'one','cc-ch')}<div><div class="cc-unit">${u?u.title:''}</div><h2>${EPS36[ep][0]}</h2><div class="cc-topic">${EPS36[ep][1]}</div></div></div>
       <div class="cc-box"><div class="cc-h">⭐ 이것만 기억해요</div><p>${tipFor(ep)}</p></div>
       ${ex?`<div class="cc-box ex"><div class="cc-h">✏️ 예시: ${unwrap(ex.q)}</div><ol>${solveSteps(ex).map(x=>`<li>${fixJ(x)}</li>`).join('')}</ol><div class="sv-a">답 <b>${ex.ansText||ex.ans}</b></div></div>`:''}
-      ${u&&u.grade===2?'<div class="withadult">👨‍👩‍👧 글이 어려우면 어른과 함께 읽어요</div>':''}
+      ${false?'<div class="withadult">👨‍👩‍👧 글이 어려우면 어른과 함께 읽어요</div>':''}
       <button class="next" id="ccgo">문제 풀러 가기 →</button></div>`;
   document.getElementById('back').onclick=backToList; document.getElementById('ccgo').onclick=go; }
 
@@ -6702,6 +6703,18 @@ function unitChunk(q){ if(!q||typeof q.visual!=='string'||q.visual.indexOf('uchu
   q.visual=q.visual.replace(/<span class="vgrp">((?:<span class="vslot[^"]*"><\/span>|<em class="dot"><\/em>)+)<\/span><b>([^<]{1,6})<\/b>/g,'<span class="uchunk"><span class="vgrp">$1</span><b>$2</b></span>'); return q; }
 { const _t=tagQ; tagQ=function(ep,i,q){ q=_t(ep,i,q); try{ q=unitChunk(q); }catch(e){} return q; }; }
 
+
+// ===== 3-42. 덧셈표·곱셈표를 묻는데 표가 없던 문제에 표를 붙인다 (교수님 지적 11/22) =====
+// 글로만 "덧셈표에서 오른쪽으로 한 칸 갈 때마다…"를 물으면 표를 떠올리지 못하는 아이는 풀 수 없다. 문제에 나온 단(6단 등)이 들어가게 표를 그리고, 그 줄을 칠한다.
+function opTable(op,rows,cols,hiRow){ const f=(x,y)=>op==='+'?x+y:x*y;
+  return `<table class="dt num"><tr><th>${op}</th>${cols.map(x=>`<th>${x}</th>`).join('')}</tr>${rows.map(x=>`<tr><th>${x}</th>${cols.map(y=>`<td${x===hiRow?' style="background:#FFE3B0"':''}>${f(x,y)}</td>`).join('')}</tr>`).join('')}</table>`; }
+function tableVis(q){ if(!q||(q.visual&&String(q.visual).trim())) return q; const t=_pl(String(q.q)); const m=t.match(/(덧셈표|곱셈표)/); if(!m) return q;
+  const op=m[1]==='덧셈표'?'+':'×', dan=(t.match(/(\d)단/)||[])[1], d=dan?+dan:null;
+  let rows=[1,2,3,4,5]; if(d){ const lo=Math.max(1,Math.min(d-2,5)); rows=[lo,lo+1,lo+2,lo+3,lo+4]; }
+  const cols=op==='+'?[1,2,3,4,5]:[1,2,3,4,5,6];
+  q.visual=opTable(op,rows,cols,d||(op==='+'?null:null)); return q; }
+{ const _t=tagQ; tagQ=function(ep,i,q){ q=_t(ep,i,q); try{ q=tableVis(q); }catch(e){} return q; }; }
+
 /* ---------- 3-12. 개념 조각과 보기별 무게 (오개념 코드 → 모르는 개념 조각) ---------- */
 // 교수님 지적(2026-11-20): 오답에 코드만 붙일 게 아니라 "이 보기를 고른 아이는 어떤 개념을 모른다"는 가정과 무게가 있어야 한다.
 // CPC: 조각 → [이름, 처음 배우는 학년-학기, 선수 조각들]. MISC: 오개념 코드 → [[주 조각, 무게], [부 조각, 무게]].
@@ -7685,7 +7698,7 @@ body{background-image:none}body:before{background:#FFF7EC var(--kt-grain)!import
 .kt-mode:active{transform:translateY(3px);filter:none}.kt-mode:focus-visible,.kt-tree:focus-visible,.kt-chip:focus-visible{outline:3px solid #3F7A34;outline-offset:3px}
 .kt-faces{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:6px 0 14px}.kt-faces.small{grid-template-columns:repeat(4,1fr);gap:8px}.kt-pick{display:flex;flex-direction:column;align-items:center;gap:4px;padding:8px 2px;border:0;background:none;cursor:pointer;font-family:"Jua",sans-serif;color:var(--ink)}.kt-pick b{font-weight:400;font-size:.95rem}.kt-pick.on .kt-face{outline:3px solid #3F7A34;outline-offset:2px}.kt-pick:focus-visible{outline:3px solid #3F7A34;border-radius:14px}
 .kt-face.tiny{width:34px;height:34px;border-width:2px}.kt-face.tiny img{height:30px;margin-bottom:-2px}
-#kt-me{position:fixed;top:calc(8px + env(safe-area-inset-top));right:10px;z-index:900;display:flex;align-items:center;gap:6px;padding:4px 12px 4px 4px;border:2px solid #7A4A1E;border-radius:999px;background:#FFF8EC;box-shadow:0 3px 0 rgba(90,53,22,.22);font-family:"Jua",sans-serif;font-size:1rem;color:#5A3516;cursor:pointer}
+#kt-me{position:fixed;bottom:calc(14px + env(safe-area-inset-bottom));left:10px;z-index:900;display:flex;align-items:center;gap:6px;padding:4px 12px 4px 4px;border:2px solid #7A4A1E;border-radius:999px;background:#FFF8EC;box-shadow:0 3px 0 rgba(90,53,22,.22);font-family:"Jua",sans-serif;font-size:1rem;color:#5A3516;cursor:pointer}
 #kt-me b{font-weight:400;white-space:nowrap}
 @media print{#kt-me{display:none}}
 .kt-face{display:grid;place-items:end center;width:72px;height:72px;border-radius:46% 54% 50% 50%/52% 48% 52% 48%;background:var(--fc);border:3px solid #7A4A1E;overflow:hidden}.kt-face img{height:62px;margin-bottom:-4px}.kt-faces.small .kt-face{width:60px;height:60px}.kt-faces.small .kt-face img{height:52px}.kt-face.tiny{display:inline-grid;width:26px;height:26px;border-width:2px;vertical-align:-7px;margin-right:4px}.kt-face.tiny img{height:22px;margin-bottom:-2px}

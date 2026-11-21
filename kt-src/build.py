@@ -295,6 +295,16 @@ h = h.replace(_g, "tools.querySelector('.wmode').onclick=()=>{ mode=mode==='hand
 # --- km·m 덧셈(S6-39): m가 늘 세 자리이고 받아올림이 없어 오개념이 안 드러났음 → 두 자리 m와 받아올림이 섞여 나오게 ---
 _g="()=>{ const a=rnd(1,4), b=rnd(100,499), c=rnd(1,4), d=rnd(100,499); return WN2(`${a} km ${b} m + ${c} km ${d} m`,'',a+c,'km',b+d,'m'); }"; assert h.count(_g)==1
 h = h.replace(_g, "()=>{ const a=rnd(1,4), b=rnd(0,1)?rnd(20,95):rnd(300,950), c=rnd(1,4), d=rnd(0,1)?rnd(20,95):rnd(300,950), t=b+d; return WN2(`${a} km ${b} m + ${c} km ${d} m`,'',a+c+(t>=1000?1:0),'km',t%1000,'m'); }")
+# --- 교수님 11/22: '어른과 함께 읽어요' 표시는 빼고, '우리 강아지' 칭찬은 할머니가 한다 ---
+for _g in ["if((UNITS36[S.ui]||{}).grade===2&&!S.retry) vz.insertAdjacentHTML('afterbegin','<div class=\"withadult sm\">", "${u&&u.grade===2?'<div class=\"withadult\">"]:
+    assert h.count(_g)==1, _g
+h = h.replace("if((UNITS36[S.ui]||{}).grade===2&&!S.retry) vz.insertAdjacentHTML('afterbegin','<div class=\"withadult sm\">", "if(false) vz.insertAdjacentHTML('afterbegin','<div class=\"withadult sm\">")
+h = h.replace("${u&&u.grade===2?'<div class=\"withadult\">", "${false?'<div class=\"withadult\">")
+_g="const chip=(who,mood)=>(typeof S!=='undefined'&&S&&S.mode==='ep36'&&S.chars&&!S.idle)?juImg(S.chars[WHO_IDX[who]??0],mood):chip0(who,mood);"; assert h.count(_g)==1
+h = h.replace(_g, _g+"\nconst praiseChip=(who,mood)=>who==='halmi'?chip0('halmi',mood):chip(who,mood);   /* '우리 강아지' 같은 할머니 말은 어느 단원에서든 할머니가 */")
+for _g in ["const [who,pr]=pick(PRAISE); document.getElementById('gdone').innerHTML=`<div class=\"gdone\">${chip(who,'happy')}", "const [who,msg]=pick(PRAISE);\n    fb.innerHTML=`<div class=\"fb ok\">${chip(who,'happy')}"]:
+    assert h.count(_g)==1, _g
+    h = h.replace(_g, _g.replace("${chip(who,'happy')}","${praiseChip(who,'happy')}"))
 open('out/index.html', 'w', encoding='utf-8').write(h)
 print('built', len(out))
 

@@ -1357,3 +1357,15 @@ ADD('S6-39', ()=>{ const c=rnd(1,2), a=c+rnd(2,3), b=rnd(10,90), d=rnd(b+10,Math
 function unitChunk(q){ if(!q||typeof q.visual!=='string'||q.visual.indexOf('uchunk')>=0) return q;
   q.visual=q.visual.replace(/<span class="vgrp">((?:<span class="vslot[^"]*"><\/span>|<em class="dot"><\/em>)+)<\/span><b>([^<]{1,6})<\/b>/g,'<span class="uchunk"><span class="vgrp">$1</span><b>$2</b></span>'); return q; }
 { const _t=tagQ; tagQ=function(ep,i,q){ q=_t(ep,i,q); try{ q=unitChunk(q); }catch(e){} return q; }; }
+
+
+// ===== 3-42. 덧셈표·곱셈표를 묻는데 표가 없던 문제에 표를 붙인다 (교수님 지적 11/22) =====
+// 글로만 "덧셈표에서 오른쪽으로 한 칸 갈 때마다…"를 물으면 표를 떠올리지 못하는 아이는 풀 수 없다. 문제에 나온 단(6단 등)이 들어가게 표를 그리고, 그 줄을 칠한다.
+function opTable(op,rows,cols,hiRow){ const f=(x,y)=>op==='+'?x+y:x*y;
+  return `<table class="dt num"><tr><th>${op}</th>${cols.map(x=>`<th>${x}</th>`).join('')}</tr>${rows.map(x=>`<tr><th>${x}</th>${cols.map(y=>`<td${x===hiRow?' style="background:#FFE3B0"':''}>${f(x,y)}</td>`).join('')}</tr>`).join('')}</table>`; }
+function tableVis(q){ if(!q||(q.visual&&String(q.visual).trim())) return q; const t=_pl(String(q.q)); const m=t.match(/(덧셈표|곱셈표)/); if(!m) return q;
+  const op=m[1]==='덧셈표'?'+':'×', dan=(t.match(/(\d)단/)||[])[1], d=dan?+dan:null;
+  let rows=[1,2,3,4,5]; if(d){ const lo=Math.max(1,Math.min(d-2,5)); rows=[lo,lo+1,lo+2,lo+3,lo+4]; }
+  const cols=op==='+'?[1,2,3,4,5]:[1,2,3,4,5,6];
+  q.visual=opTable(op,rows,cols,d||(op==='+'?null:null)); return q; }
+{ const _t=tagQ; tagQ=function(ep,i,q){ q=_t(ep,i,q); try{ q=tableVis(q); }catch(e){} return q; }; }
