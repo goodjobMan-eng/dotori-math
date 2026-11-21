@@ -6264,10 +6264,52 @@ R36['S3-84#1']=(q)=>[[q.ans+1,'N5-08'],[q.ans-1,'F']];
 R36['S3-84#2']=(q)=>[[q.ans+1,'N5-08'],[q.ans-1,'N5-16']];
 R36['S3-84#4']=(q,s)=>{ const b=_N(s)[0]; return [[b,'N5-08'],[b-1,'N5-16']]; };
 R36['S3-87#1']=(q,s)=>{ const n=_N(s)[0]; return [[Math.round(n/10)*10,'N5-14'],[Math.floor(n/100)*100===q.ans?Math.ceil(n/100)*100+100:Math.floor(n/100)*100,'F'],[Math.round(n/1000)*1000,'N5-14']]; };
+// --- 자료와 가능성(S4), 변화와 관계(S5) ---
+const _tg=f=>(q,s)=>q.opts.filter(o=>String(o)!==String(q.ans)&&!q.mis[String(o)]).map(o=>[o,f(String(o),q,s)]).filter(x=>x[1]);
+R36['S4-01#3']=_tg(()=>'D1-01');
+R36['S4-05#2']=(q,s)=>{ const v=_N(s); const mx=Math.max(...v), mn=Math.min(...v); return [[_like(q,mx+mn),'N1-03'],[_like(q,mx),'N1-08'],[_like(q,mx-v.slice().sort((a,b)=>a-b)[1]),'F']]; };
+R36['S4-08#2']=_tg(o=>/개수|수$/.test(o)?'D3-01':'F');
+R36['S4-09#3']=(q,s)=>{ const [k,t]=_N(s); return [[_like(q,1),'D4-01'],[_like(q,t),'N1-08'],[_like(q,k),'F']]; };
+R36['S4-11#2']=(q,s)=>{ const m=[...s.matchAll(/(\d+)시 (\d+)도/g)].map(x=>[+x[1],+x[2]]); if(m.length<3) return []; let mi=0; m.forEach((x,i)=>{ if(x[1]>m[mi][1]) mi=i; }); const r=[]; if(mi>0) r.push([`${m[mi-1][0]}시와 ${m[mi][0]}시 사이`,'D4-03']); return r; };
+R36['S4-12#3']=_tg(o=>/변했다|크게/.test(o)?'D4-02':'F');
+R36['S4-15#5']=(q,s)=>{ const u=String(q.ans).replace(/[\d.\s]/g,''); if(!u) return []; const d=[...s.matchAll(new RegExp('(\\d+)'+u,'g'))].map(m=>+m[1]); if(d.length<3) return []; const sum=d.reduce((a,b)=>a+b,0), nz=d.filter(x=>x>0).length; const r=[[_like(q,sum),'D5-04']]; if(nz&&nz<d.length&&sum%nz===0) r.push([_like(q,sum/nz),'D5-08']); const mid=(Math.max(...d)+Math.min(...d))/2; if(Number.isInteger(mid)) r.push([_like(q,mid),'D5-02']); return r; };
+R36['S4-17#0']=_tg(o=>/반반/.test(o)?'D5-05':'D5-06'); R36['S4-17#1']=R36['S4-17#0'];
+R36['S4-17#2']=_tg(()=>'N1-13');
+const _probG=(q,s)=>{ const A=String(q.ans), r=[[A==='1'?'0':'1','D5-06'],[A==='2분의 1'?null:'2분의 1','D5-05']]; let m;
+  if(/주사위.*짝수/.test(s)) r.push(['3','D5-07'],['6분의 1','D5-09']); else if((m=s.match(/똑같이 (\d+)칸.*?(\d+)칸을/))) r.push([m[2],'D5-07'],[_fr(+m[1],1),'D5-09']); else if((m=s.match(/(\d+)개만/))) r.push([m[1],'D5-07']);
+  return r.filter(x=>x[0]!=null); };
+R36['S4-18#0']=_probG; R36['S4-22#4']=_probG; R36['S4-18#1']=_probG; R36['S4-18#2']=_probG;
+R36['S4-18#3']=_tg(o=>/확실/.test(o)?'D5-06':'F');
+R36['S4-19#2']=(q,s)=>{ const [N,k]=_N(s); return [[`${k}%`,'D6-01'],[`${N}%`,'N1-08']]; };
+R36['S4-19#3']=(q,s)=>{ const [a,b]=_N(s); return [[`${b}%`,'D6-03'],[`${a+b}%`,'N1-03']]; };
+R36['S4-19#4']=(q,s)=>{ const [N,k]=_N(s); return [[`${k}%`,'D6-01'],[`${N/k}%`,'R6-01']]; };
+R36['S4-20#2']=(q,s)=>{ const pc=_N(s)[0]; return [[`${pc}°`,'D6-04'],[`${_r6(pc*1.8)}°`,'D6-06']]; };
+R36['S4-20#3']=(q,s)=>{ const [pc,N]=_N(s); return [[_like(q,pc),'D6-01'],[_like(q,N),'N1-08']]; };
+// 반복 규칙(이모지): 바로 앞의 것을 이어 쓰면 R1-01, 마디 안의 다른 것은 R1-02
+const _emo=(q)=>{ const v=Array.from(String(q.visual||'').replace(/<[^>]+>/g,' ').replace(/\s+/g,'')).filter(c=>c!=='?'&&c!=='️'&&c.codePointAt(0)>0x2000); const prev=v[v.length-1]; return q.opts.filter(o=>String(o)!==String(q.ans)&&!q.mis[String(o)]).map(o=>[o,String(o)===prev?'R1-01':(v.includes(String(o))?'R1-02':'F')]); };
+R36['S5-01#1']=_emo; R36['S5-01#2']=_emo; R36['S5-01#4']=_emo;
+R36['S5-01#3']=_tg(()=>'R1-02');
+R36['S5-03#1']=_tg(o=>/^1씩/.test(o)?'R1-03':'R1-04');
+R36['S5-03#3']=_tg(o=>/작아진다/.test(o)?'N1-01':'R1-03');
+R36['S5-03#4']=(q)=>[[q.ans-9,'R1-03'],[q.ans-20,'N1-01']];
+R36['S5-05#1']=_tg(o=>/작아진다/.test(o)?'N1-01':'R1-04'); R36['S5-04#1']=R36['S5-05#1'];
+R36['S5-06#2']=(q,s)=>{ const v=_N(s), a=v[0], d=v[1]-v[0], k=v[v.length-1]; return [[a+d*k,'N1-07'],[d*k,'F']]; };
+R36['S5-07#1']=_tg(o=>/^순서 \+ \d+$/.test(o)?'R5-02':'F');
+R36['S5-09#2']=(q,s)=>{ const [a,b,c]=_N(s); return [[a+b,'R4-02'],[a+b+c,'N1-03']]; };
+R36['S5-13#3']=_tg(o=>/^\d+ : \d+$/.test(o)?'N1-13':null); R36['S5-13#4']=_tg(o=>/^레몬/.test(o)?'N1-13':null);
+const _whole=(q,s)=>{ const [a,b]=_N(s); return [[`${a} : ${b}`,'R6-03'],[`${a+b} : ${a}`,'R6-01'],[`${b} : ${a+b}`,'F']]; };
+R36['S5-14#2']=_whole; R36['S5-14#4']=_whole;
+R36['S5-16#7']=_tg(o=>/^설탕 \d+ g$|^소금 \d+ g$/.test(o)?'R6-01':null);
+R36['S5-18#1']=(q,s)=>{ const [a,b]=_N(s); const g=_gcd2(a,b); return [[`${b/g} : ${a/g}`,'R6-01'],[`1 : ${b-(a-1)}`,'R6-10']]; };
+R36['S5-21#4']=(q,s)=>{ const [N,a,b]=_N(s); const u=N/(a+b); return [[_like(q,N/2),'R6-13'],[_like(q,u),'R6-16'],[_like(q,u*Math.max(a,b)),'N1-13']]; };
+// 한 번호에 서로 다른 문제가 섞여 있는 틀(고정 문항 묶음)은 문제 글이 이 꼴일 때만 규칙을 쓴다. 규칙을 더할 때 x30.js로 꼴을 확인할 것.
+const G36G={'S2-14#1':/청이의 답은/,'S3-104#4':/계산하면\?$/,'S3-19#2':/똑같이 \d+칸으로 나눈/,'S3-20#2':/^더 큰 분수는\?$/,'S3-21#4':/개인 수는\?$/,'S3-27#5':/^23 × 14/,'S3-48#5':/계산하면\?$/,
+ 'S3-51#4':/계산하면\?$/,'S3-55#4':/받아내림하면\?$/,'S4-09#3':/한 칸은\?$/,'S4-19#4':/^전체 \d+명 중/,'S4-20#3':/전체가/,'S5-03#4':/바로 아래 칸/,'S5-04#1':/덧셈표/,'S5-05#1':/규칙은\?$/,
+ 'S5-14#2':/비는\?$/,'S5-14#4':/비는\?$/,'S5-21#4':/적게 갖는 쪽은 몇 개/,'S4-18#2':/회전판/,'S4-05#2':/몇 명 더 많/,'S5-06#2':/번째 수는\?$/,'S5-09#2':/□ \+ \d+에서/,'S5-18#1':/간단한 자연수의 비/};
 function g36Wrong(ep,i,q){ if(!q||q.manip||q.onMount||!Array.isArray(q.opts)||q.opts.length<2||q.opts.some(o=>o!==null&&typeof o==='object')) return q;
   const A=String(q.ans); q.mis=q.mis||{}; q.fx=q.fx||{}; const isU=o=>String(o)!==A&&!q.mis[String(o)];   // 실수형(F)으로만 표시된 보기도 더 나은 후보가 있으면 바꾼다
   if(!q.opts.some(isU)) return q;
-  const f=R36[ep+'#'+i]; let cand=[]; if(f){ try{ cand=f(q,_pl(q.q).replace(/​/g,'').replace(/\s+/g,' ').trim())||[]; }catch(e){ cand=[]; } }
+  const f=R36[ep+'#'+i], gd=G36G[ep+'#'+i]; let cand=[]; if(f&&(!gd||gd.test(_pl(q.q).replace(/\u200B/g,'').replace(/\s+/g,' ').trim()))){ try{ cand=f(q,_pl(q.q).replace(/​/g,'').replace(/\s+/g,' ').trim())||[]; }catch(e){ cand=[]; } }
   const num=typeof q.ans==='number', used=new Set(Object.values(q.mis)), seen=new Set(q.opts.map(String)), add=[];
   for(const [v,c] of cand){ const s=String(v); if(v==null||s===A||/NaN|undefined|Infinity/.test(s)||(num&&!(+v>=0))) continue;
     const ex=q.opts.find(o=>String(o)===s);
