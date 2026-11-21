@@ -2,7 +2,7 @@ const { chromium } = require('playwright');
 // 음수 검사(초등은 자연수·분수·소수 범위, 음수 없음): 모든 틀을 200번씩 뽑아 정답·보기·예상 오답·풀이·문제·힌트·읽어 주는 글에 음수가 있는지 본다.
 (async()=>{ const b=await chromium.launch(); const p=await b.newPage(); p.on('pageerror',e=>console.log('페이지 오류',e.message)); await p.goto('file://'+process.cwd()+'/out/index.html'); await p.waitForTimeout(1500);
  const r=await p.evaluate(()=>{ const bad={}; let n=0; const pl=h=>String(h==null?'':h).replace(/<[^>]+>/g,' ').replace(/[​]/g,'').replace(/\s+/g,' ').trim();
-  const negVal=s=>/^[-−]\s*\d/.test(String(s).trim());                       // 값 자체가 음수(보기·정답·예상 오답)
+  const negVal=s=>/^[-−]\s*\d/.test(String(s).trim())||/(^|[\s:(,])[-−]\d/.test(String(s));   // 값 안 어디든 '-9'처럼 붙은 음수                       // 값 자체가 음수(보기·정답·예상 오답)
   const negTxt=s=>/(=|은|는|이|가|면|,|\()\s*[-−]\d/.test(s)||/^[-−]\d/.test(s)||/영하|마이너스|음수/.test(s);   // 글 속 음수
   const scan=(e,i,g)=>{ for(let k=0;k<600;k++){ let q; try{ q=g(); }catch(x){ return; } if(!q||typeof q!=='object') return; n++; const id=e+'#'+i; if(bad[id]) return; const flag=(w,s)=>{ bad[id]=w+' ∥ '+pl(q.q).slice(0,50)+' ∥ '+String(s).slice(0,60); };
     if(typeof q.ans==='number'&&q.ans<0||negVal(pl(q.ans))) return flag('정답',q.ans); for(const o of (q.opts||[])){ const s=pl(typeof o==='object'?(o.v??o.label):o); if(negVal(s)) return flag('보기',s); }

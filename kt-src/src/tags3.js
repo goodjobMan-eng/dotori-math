@@ -1077,7 +1077,7 @@ R36['S5-13#3']=_tg(o=>/^\d+ : \d+$/.test(o)?'N1-13':null); R36['S5-13#4']=_tg(o=
 const _whole=(q,s)=>{ const [a,b]=_N(s); return [[`${a} : ${b}`,'R6-03'],[`${a+b} : ${a}`,'R6-01'],[`${b} : ${a+b}`,'F']]; };
 R36['S5-14#2']=_whole; R36['S5-14#4']=_whole;
 R36['S5-16#7']=_tg(o=>/^설탕 \d+ g$|^소금 \d+ g$/.test(o)?'R6-01':null);
-R36['S5-18#1']=(q,s)=>{ const [a,b]=_N(s); const g=_gcd2(a,b); return [[`${b/g} : ${a/g}`,'R6-01'],[`1 : ${b-(a-1)}`,'R6-10']]; };
+R36['S5-18#1']=(q,s)=>{ const [a,b]=_N(s); const g=_gcd2(a,b); return [[`${b/g} : ${a/g}`,'R6-01'],[a>b?`${a-(b-1)} : 1`:`1 : ${b-(a-1)}`,'R6-10']]; };   /* 같은 수를 빼서 줄임. 음수가 나오지 않게 작은 쪽을 1로 */
 R36['S5-21#4']=(q,s)=>{ const [N,a,b]=_N(s); const u=N/(a+b); return [[_like(q,N/2),'R6-13'],[_like(q,u),'R6-16'],[_like(q,u*Math.max(a,b)),'N1-13']]; };
 // --- 카본 교차 확인(11/21)으로 보강한 둘째 오답 ---
 R36['S2-11#1']=(q,s)=>{ const [a,b]=_N(s); return [[a-b,'N3-11'],[q.ans-1,'N2-09'],[a*b,'N3-30']]; };
@@ -1145,12 +1145,32 @@ function g36Wrong(ep,i,q){ if(!q||q.manip||q.onMount||!Array.isArray(q.opts)||q.
 /* ---------- 3-36. 보기 자리 섞기 ----------
    보기의 자리(1번·2번…)는 오개념 종류나 정답과 아무 관계가 없어야 한다. 규칙이 보기를 끼워 넣는 순서가 자리에 남지 않게, 모든 처리가 끝난 뒤 한 번 섞는다.
    Math.random을 쓰지만 씨앗 재생성(withSeed) 안에서 불리므로 같은 씨앗이면 같은 순서다. 부등호(>, =, <)처럼 순서가 약속인 보기는 그대로 둔다. 점검: node x37.js */
+/* 복수 정답 막기: 정답과 값이 같은 오답 보기(8.5와 8.50, 3분의 1과 6분의 2)는 뺀다. 분수는 문제가 꼴(기약분수·대분수·가분수 등)을 요구하지 않을 때만. */
+/* 쓰기형 10: 시간·복합 단위의 덧셈과 뺄셈(답 = 큰 단위 숫자 + 작은 단위 숫자를 이어 쓴 열쇠). 칸 수가 정답과 같은 오답만 쓸 수 있으므로 길이가 같을 때만 단다.
+   60에서 받아올림·받아내림을 100으로 한 답(G2-03), 받아올림한 1을 더하지 않은 답(N2-01), 작은 단위를 큰 쪽에서 작은 쪽으로 뺀 답(N2-02). */
+function codeW10(q){ if(!q||q.opts&&q.opts.length||q.manip||q.onMount||q.mis) return q; const A=String(q.ans); if(!/^\d+$/.test(A)) return q; const Q=_pl(q.q).replace(/,/g,'').replace(/\s+/g,' ').trim(), mis={}, clash=new Set(); let m;
+  const add=(k,c)=>{ k=String(k); if(k===A||k.length!==A.length||/-/.test(k)) return; if(k in mis){ if(mis[k]!==c) clash.add(k); return; } mis[k]=c; };
+  const tsub=(H,M,h,d)=>{ let tm=H*60+M-h*60-d; if(tm<0) return; if(`${Math.floor(tm/60)}${tm%60}`!==A) return; if(M<d){ add(`${H-h-1}${M+100-d}`,'G2-03'); add(`${H-h}${d-M}`,'N2-02'); } };
+  const tadd=(H,M,h,d)=>{ const tm=H*60+M+h*60+d; if(`${Math.floor(tm/60)}${tm%60}`!==A) return; if(M+d>=60){ add(`${H+h}${M+d-60}`,'N2-01'); if(M+d>=100) add(`${H+h+1}${M+d-100}`,'G2-03'); } };
+  if((m=Q.match(/(\d+)시간? (\d+)분 − (?:(\d+)시간 )?(\d+)분/))) tsub(+m[1],+m[2],+(m[3]||0),+m[4]);
+  else if((m=Q.match(/(\d+)시 (\d+)분에서 (\d+)분 전/))) tsub(+m[1],+m[2],0,+m[3]);
+  else if((m=Q.match(/(\d+)시 (\d+)분에 끝났어요.*?(\d+)분 동안/))) tsub(+m[1],+m[2],0,+m[3]);
+  else if((m=Q.match(/(\d+)시간 (\d+)분 \+ (?:(\d+)시간 )?(\d+)분/))) tadd(+m[1],+m[2],+(m[3]||0),+m[4]);
+  else if((m=Q.match(/(\d+)시 (\d+)분에서 (\d+)분 뒤/))||(m=Q.match(/(\d+)시 (\d+)분에 [^.]*?(\d+)분 동안/))) tadd(+m[1],+m[2],0,+m[3]);
+  else if((m=Q.match(/(\d+) (km|kg|L|m|cm) (\d+) (m|g|mL|cm|mm) ([+−]) (?:(\d+) (?:km|kg|L|m|cm) )?(\d+) (?:m|g|mL|cm|mm)\b/))||(m=Q.match(/(\d+) (km|kg|L|m|cm) (\d+) (m|g|mL|cm|mm)[^+−\d]*?()()(\d+) (?:m|g|mL|cm|mm)[을를] (더|꺼|따|썼|마)/))){
+    const base=m[2]==='m'?100:m[2]==='cm'?10:1000, X=+m[1], y=+m[3], Z=+(m[6]||0), w=+m[7], plus=m[5]==='+'||m[8]==='더'; const tot=plus?X*base+y+Z*base+w:X*base+y-Z*base-w; if(tot<0||`${Math.floor(tot/base)}${tot%base}`!==A) return q;
+    if(plus&&y+w>=base) add(`${X+Z}${y+w-base}`,'N2-01'); if(!plus&&y<w){ add(`${X-Z}${w-y}`,'N2-02'); add(`${X-Z}${y+base-w}`,'N2-08'); } }
+  clash.forEach(k=>delete mis[k]); if(Object.keys(mis).length) q.mis=mis; return q; }
+function dropEqualOpts(q){ try{ if(!q||!Array.isArray(q.opts)||q.opts.length<2) return q; const A=String(q.ans), Q=_pl(q.q), num=s=>/^\d+(\.\d+)?$/.test(s)?parseFloat(s):null, fr=s=>{ const m=String(s).match(/^(?:(\d+)[과와] )?(\d+)분의 (\d+)$/); return m?+(m[1]||0)+ +m[3]/+m[2]:null; };
+  const av=num(A), af=fr(A), formAsked=/기약|약분|통분|가분수|대분수|나타내|같은|소수로|분수로/.test(Q); const same=o=>{ const s=String(o); if(s===A) return false; if(av!=null&&num(s)!=null) return Math.abs(num(s)-av)<1e-9; if(af!=null&&fr(s)!=null&&!formAsked) return Math.abs(fr(s)-af)<1e-9; return false; };
+  const keep=q.opts.filter(o=>!same(o)); if(keep.length<q.opts.length&&keep.length<2){ const m=A.match(/^(\d+)분의 (\d+)$/), alt=m?`${m[1]}분의 ${+m[2]+1}`:av!=null?String(+(av+1).toFixed(6)):null; if(alt&&!keep.includes(alt)){ keep.push(alt); (q.fx=q.fx||{})[alt]=1; } }   /* 보기가 둘뿐이면 실수형 보기 하나로 바꿔 넣는다 */
+  if(keep.length<q.opts.length+ (keep.length>=2&&q.opts.some(same)?1:0)&&keep.length>=2&&q.opts.some(same)){ for(const o of q.opts) if(same(o)){ if(q.mis) delete q.mis[String(o)]; if(q.fx) delete q.fx[String(o)]; } q.opts=keep; } }catch(e){} return q; }
 function mixOpts(q){ try{ if(!q||typeof q!=='object'||q.manip||q.onMount||!Array.isArray(q.opts)||q.opts.length<2) return q; if(q.opts.every(o=>/^[<>=＞＜]$/.test(String(o).trim()))) return q;
   const a=q.opts; for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } }catch(e){} return q; }
 { const _t=tagQ; tagQ=function(ep,i,q){ q=_t(ep,i,q); try{ q=g36Wrong(ep,i,q); }catch(e){}
   /* 문제 글을 다듬은(fixText) 뒤의 글로 한 번 더: 쓰기형인데 아직 예상 오답이 없으면 글을 읽는 규칙을 다시 돌린다 */
-  try{ if(q&&typeof q==='object'&&!(q.opts&&q.opts.length)&&!q.manip&&!q.onMount&&!TAG3[ep+'#'+i]&&!(q.mis&&Object.keys(q.mis).length)){ delete q.mis; for(const f of [codeW2,codeW3,codeW7,codeW8,codeW9]){ try{ f(q); }catch(e){} if(q.mis) break; } } }catch(e){}
-  return mixOpts(q); }; }
+  try{ if(q&&typeof q==='object'&&!(q.opts&&q.opts.length)&&!q.manip&&!q.onMount&&!TAG3[ep+'#'+i]&&!(q.mis&&Object.keys(q.mis).length)){ delete q.mis; for(const f of [codeW2,codeW3,codeW7,codeW8,codeW9,codeW10]){ try{ f(q); }catch(e){} if(q.mis) break; } } }catch(e){}
+  return mixOpts(dropEqualOpts(q)); }; }
 try{ window.__R36=R36; window.__G36G=G36G; window.__MIS=MIS; }catch(e){}
 
 
