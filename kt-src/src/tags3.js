@@ -976,7 +976,7 @@ R36['S3-17#4']=(q)=>q.opts.filter(o=>/분의 [2-9]/.test(String(o))).map(o=>[o,'
 R36['S3-21#4']=(q,s)=>{ const k=_N(s)[1]; return [[k,'N3-27'],[_r6(k/100),'N3-08']]; };
 R36['S3-22#1']=(q,s)=>{ const [a,b]=_N(s); if(/더 큰 수는\?$/.test(s)&&/^[<>]$/.test(String(q.ans))) q.q=`${a} □ ${b}, □에 알맞은 것은?`; const big=q.ans==='<'?b:a, sm=q.ans==='<'?a:b; const dmax=x=>Math.max(...String(x).replace('.','').split('').map(Number)); return [[q.ans==='<'?'>':'<',dmax(sm)>dmax(big)?'N3-37':'N3-08']]; };
 R36['S3-22#2']=(q,s)=>{ const a=_N(s)[0]; return [[+(String(a)+'1'),'N3-08'],[_r6(a+1),'N3-29'],[_r6(a-0.1),'N1-01']]; };
-R36['S3-56#2']=(q,s)=>{ const n=String(_N(s)[0]); return [[+n.split('.')[1][0],'N4-24'],[+n[0],'F']]; };
+R36['S3-56#2']=(q,s)=>{ const n=String(_N(s)[0]); return [[+n.split('.')[1][0],'N4-24'],[+n[0],'N4-09']]; };   /* 자연수 부분의 숫자를 고름 = 자리 이름을 틀림 */
 R36['S3-56#3']=(q,s)=>{ const c=_N(s)[0]; return [[(c/10).toFixed(1),'N3-28'],[String(c),'N3-27']]; };
 R36['S3-57#1']=(q,s)=>{ const n=String(_N(s)[0]).split('.'); const un=x=>String(x).replace(/​/g,''); let r=[]; try{ r.push([`${un(sinoRaw(+n[0]))} 점 ${un(sinoRaw(+n[1]))}`,'N3-08']); }catch(e){} return r.concat(q.opts.filter(o=>/^영 점/.test(String(o))).map(o=>[o,'F']),q.opts.filter(o=>!/^영 점/.test(String(o))&&String(o)!==String(q.ans)).map(o=>[o,'N4-23'])); };
 R36['S3-58#0']=()=>[['=','F']]; R36['S3-58#2']=()=>[['같다','F']];
@@ -988,10 +988,10 @@ R36['S3-96#0']=(q)=>[[_r6(+q.ans*10),'N5-07'],[_r6(+q.ans/10),'F']];
 R36['S3-101#5']=(q)=>[[_r6(+q.ans*10),'N6-07']];
 R36['S3-112#1']=(q)=>[[_r6(+q.ans/10),'F']]; R36['S3-112#4']=(q)=>q.opts.filter(o=>String(o)!==String(q.ans)).map(o=>[o,'F']); R36['S3-112#5']=(q)=>q.opts.filter(o=>String(o)!==String(q.ans)).map(o=>[o,'F']);
 // --- 큰 수 ---
-R36['S3-39#2']=(q)=>[[q.ans*10,'F']];
+R36['S3-39#2']=(q)=>[[q.ans*10,'+N4-07']];   /* 0의 개수를 틀림 */
 R36['S3-40#0']=(q,s)=>{ const n=_N(s)[0], z=String(n); const r=[]; try{ if(/0/.test(z.slice(1))) r.push([readBig(+(z[0]+z.slice(1).replace('0',''))),'N4-01']); r.push([readBig(n+1000),'F'],[readBig(n+100),'F']); }catch(e){} return r; };
 R36['S3-41#0']=(q,s)=>{ const n=_N(s)[0]; try{ return [[readBig(n*10),'N4-08'],[readBig(Math.floor(n/10)),'N4-09']]; }catch(e){ return []; } };
-R36['S3-40#2']=(q)=>q.opts.filter(o=>String(o)!==String(q.ans)).map(o=>[o,'F']);
+R36['S3-40#2']=(q)=>q.opts.filter(o=>String(o)!==String(q.ans)).map(o=>[o,'+N4-09']);   /* 다른 자리의 숫자를 고름 */
 R36['S3-41#2']=(q)=>[[q.ans*10,'N4-07'],[q.ans/10,'N4-01']];
 R36['S3-42#0']=(q)=>{ const L=String(q.ans).length; return q.opts.filter(o=>String(o)!==String(q.ans)).map(o=>[o,String(o).length<L?'N4-01':'N4-07']); };
 R36['S3-43#0']=(q,s)=>{ const st=_N(s)[0], last=q.ans-st; return [[last+st/10,'N4-09'],[last+st*10,'N4-07'],[last-st,'N1-01']]; };
@@ -1258,11 +1258,12 @@ function epWrong(q){ if(!q||!Array.isArray(q.opts)||q.opts.length<3) return q;
   wrong.length=Math.min(wrong.length,3);
   const all=[q.ans,...wrong.map(w=>w[0])].sort((a,b)=>a-b); const k=(q.ans*7+all.length*3+wrong.reduce((x,w)=>x+w[0],0))%all.length;   // 정답 자리가 한쪽에 몰리지 않게 돌린다
   q.opts=all.slice(k).concat(all.slice(0,k)); q.mis={}; for(const [v,c] of wrong) if(c) q.mis[v]=c; return q; }
-function fixEP(q){ if(q){ for(const k of ['speech','ansSpeech','hint']) if(typeof q[k]==='string') q[k]=fixJosa(q[k]); } if(q&&typeof q.q==='string'){ q.q=q.q.replace(/(하나​?['’])은/,'$1는'); q.q=q.q.replace(/^(['‘].*?([가-힣])​?['’])[은는] 숫자로\?$/,(m,a,ch)=>a+(((ch.charCodeAt(0)-0xAC00)%28)?'은':'는')+' 숫자로?');
+function fixEP(q){ if(q){ /* 빼기 기호를 하이픈(-)이 아니라 −로 통일 */ for(const k of ['q','ansText','hint']) if(typeof q[k]==='string') q[k]=q[k].replace(/(\d)\s-\s(\d)/g,'$1 − $2'); if(typeof q.visual==='string') q.visual=q.visual.replace(/>-<\/(i|span|b)>/g,'>−</$1>').replace(/(\d)\s-\s(\d)/g,'$1 − $2'); }
+  if(q){ for(const k of ['speech','ansSpeech','hint']) if(typeof q[k]==='string') q[k]=fixJosa(q[k]); } if(q&&typeof q.q==='string'){ q.q=q.q.replace(/(하나​?['’])은/,'$1는'); q.q=q.q.replace(/^(['‘].*?([가-힣])​?['’])[은는] 숫자로\?$/,(m,a,ch)=>a+(((ch.charCodeAt(0)-0xAC00)%28)?'은':'는')+' 숫자로?');
   { const m=q.q.match(/^(\d+)에서 숫자 (\d)([은는]) 얼마\?$/); const an=+q.ans; if(m&&an>0){ const pl=an>=1000?'천':an>=100?'백':an>=10?'십':'일'; q.q=`${m[1]}에서 ${pl}의 자리 숫자 ${m[2]}${m[3]} 얼마?`; } } } return q; }
 /* 1~2학년 쓰기형(보기 없는) 틀: 객관식과 같은 규칙(EPR)으로 '오개념이면 쓰는 답'을 계산해 예상 오답으로 단다 */
 function epWrite(q){ try{ if(!q||typeof q!=='object'||(q.opts&&q.opts.length)||q.manip||q.onMount||(q.mis&&Object.keys(q.mis).length)) return q; const A=String(q.ans); if(!/^\d+$/.test(A)) return q;
-  const cands=[_pl(q.q), String(q.ansText||'').replace(/= \d+\s*$/,'= ?')]; for(const t of cands){ const u=String(t).replace(/\s+/g,' ').trim(); for(const [re,f] of EPR){ const m=u.match(re); if(!m) continue; if(!/[+×−-]/.test(u)) continue;
-      const n=(u.match(/\d+/g)||[]).map(Number), ops=u.match(/[+×−-]/g)||[]; let v=n[0]; ops.forEach((o,i)=>{ const y=n[i+1]; v=o==='+'?v+y:o==='×'?v*y:v-y; }); if(String(v)!==A) continue;   /* 식을 계산한 값이 정답과 같을 때만 */
+  const q0=_pl(q.q).replace(/\s+/g,' ').trim(), cands=[q0, q0.replace(/ 수를 써요$/,' 수는?'), String(q.ansText||'').replace(/= \d+\s*$/,'= ?')]; if(/^빈칸을 찾아요$/.test(q0)){ let V=_pl(q.visual).replace(/\s+/g,' ').trim().replace(/^[+−-] (?=[+−-])/,''); V=/^[+−-] \d/.test(V)?'□ '+V:V.replace(/([+−-]) =/,'$1 □ ='); cands.push(V.replace(/-/g,'−')); }   /* 그림 칸의 식(□ − 3 = 5)을 글로 되살려 객관식 규칙에 맞춘다 */ for(const t of cands){ const u=String(t).replace(/\s+/g,' ').trim(); if(!u) continue; for(const [re,f] of EPR){ const m=u.match(re); if(!m) continue;
+      if(/^\d+ [+×−-] \d+ = \?$/.test(u)){ const n=(u.match(/\d+/g)||[]).map(Number), o=(u.match(/[+×−-]/)||[])[0], v=o==='+'?n[0]+n[1]:o==='×'?n[0]*n[1]:n[0]-n[1]; if(String(v)!==A) continue; }   /* 순수한 식이면 계산한 값이 정답과 같을 때만. □·말로 된 꼴은 객관식과 같은 규칙을 그대로 쓴다 */
       const mis={}, clash=new Set(); for(const [w,c] of (f(m,q)||[])){ const k=String(w); if(k===A||!/^\d+$/.test(k)||typeof c!=='string'||c==='F') continue; if(k in mis){ if(mis[k]!==c) clash.add(k); continue; } mis[k]=c; } clash.forEach(k=>delete mis[k]); if(Object.keys(mis).length){ q.mis=mis; return q; } } } }catch(e){} return q; }
 if(typeof G!=='undefined') for(const e of Object.keys(G)) G[e]=G[e].map(g=>function(){ return mixOpts(epWrite(epWrong(fixEP(g.apply(this,arguments))))); });
