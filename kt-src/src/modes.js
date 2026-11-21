@@ -40,6 +40,8 @@ function checkActs(B,c){ const g0=+CPC[c][1][0], gradeOf=ep=>{ const u=UNITS36[u
 const armOf=c=>{ let h=0; for(const ch of did()+c) h=(h*31+ch.charCodeAt(0))>>>0; return h%2?'B':'A'; };
 function lecPlan(st,c){ st.lec=st.lec||{}; let L=st.lec[c]; if(!L) L=st.lec[c]={arm:armOf(c),mr:[],k:(CPL[c]||[]).find(lecHas)||''}; return L; }
 function pieceVideo(c,L){ const card=!L.k&&typeof KCARDS!=='undefined'&&!!KCARDS[c];   /* 강의 영상이 없는 조각은 개념 카드가 영상 자리를 대신한다 */
+  /* 영상을 본 날이 지났는데 이 조각이 또 비어 있다고 확정되면, 같은 영상을 다시 틀지 않고 다른 방법(개념 카드)으로 한 번 더 */
+  if(L.v&&L.v!=='skip'&&L.v!==dstr(Date.now())&&!L.cv&&typeof KCARDS!=='undefined'&&KCARDS[c]){ L.cv=dstr(Date.now()); return {kind:'card',c,why:'again',key:'card:'+c,label:'개념 카드'}; }
   if((!L.k&&!card)||L.v) return null; const t=dstr(Date.now());
   if(L.arm==='B'){ if(L.mr.length<2) return null; if(L.mr.every(x=>x)){ L.v='skip'; return null; } }       // 문제 먼저: 두 문제를 다 맞혔으면 강의는 건너뜀
   L.v=t; if(cfg().share&&KT_ENDPOINT){ const qu=J(QK,[]); qu.push([t,L.k||('card:'+c),-1,0,0,(card?'K ':'V ')+c,1,null,0,0,'',L.arm,0,0,'c']); W(QK,qu.slice(-3000)); }

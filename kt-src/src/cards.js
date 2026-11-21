@@ -60,7 +60,7 @@ KCARDS.C05=()=>{ const HW=1; const mk=()=>{ const t=kcR(3,6), o=kcR(1,4), b=kcR(
   {h:kcBlk(t-1,o,10)+kcEq(`${t*10+o} − ${b} = ${t*10+o-b}`), s:`묶음 1개를 풀어 <b>낱개 10개</b>로 바꿔요. 묶음은 ${t-1}개, 낱개는 ${o+10}개. ${o+10} − ${b} = ${o+10-b}이에요.`},
   {h:kcBlk(t2,o2)+kcEq(`${t2*10+o2} − ${b2} = □`), s:'묶음 1개를 풀어서 빼 보세요.', ans:d2, opts:kcO(d2,t2*10+(b2-o2),d2+10), why:'묶음 1개를 풀었으니 묶음이 1개 줄어요. 큰 수에서 작은 수를 그냥 빼면 안 돼요.'}], hw:HW}; };
 KCARDS.C06=()=>{ const a=kcR(12,29), b=kcR(11,25), s=a+b, bar=`<div class="kc-bar"><span style="flex:${a};background:#F8C98A">${a}</span><span style="flex:${b};background:#A9D2F0">${b}</span></div><div style="width:92%;text-align:center;font-size:1.1rem">전체 ${s}</div>`; return {t:'덧셈과 뺄셈은 한 가족', p:[
-  {h:bar, s:`전체 <b>${s}</b>는 ${a}와 ${b}로 되어 있어요.`},
+  {h:bar, s:`띠 전체의 길이는 <b>${s}</b>, 두 부분의 길이는 ${a}, ${b}.`},
   {h:bar+kcEq(`${s} − ${a} = ${b}`)+kcEq(`${b} + ${a} = ${s}`), s:`전체에서 한쪽을 빼면 다른 쪽이 남아요. 뺄셈을 했으면 <b>남은 수에 뺀 수를 더해서</b> 전체가 되는지 확인해요.`},
   {h:kcEq(`${s} − ${b} = ${a}`), s:'이 뺄셈이 맞는지 확인하는 덧셈식은?', ans:`${a} + ${b} = ${s}`, opts:kcO(`${a} + ${b} = ${s}`,`${s} + ${b} = ${s+b}`,`${s} + ${a} = ${s+a}`), why:'남은 수에 뺀 수를 더하면 처음 수가 되어야 해요.'}]}; };
 KCARDS.C07=()=>{ const HW=1; let n=kcR(2,5), g=kcR(3,4), n2=kcR(2,6), g2=kcR(3,5); if(n===g) n=n===2?5:n-1; if(n2===g2) n2=n2===2?6:n2-1; return {t:'곱셈의 뜻', p:[
@@ -81,18 +81,47 @@ KCARDS.C10=()=>{ const mk=()=>{ const d=kcR(2,4), h=kcR(1,2), o=kcR(Math.ceil(10
   {h:kcBlk(Math.floor(d*o/10),d*o%10,0,0)+kcEq(`${N} ÷ ${d} = ${h}0${o}`), s:`십 모형 ${Math.floor(d*o/10)}개는 ${d}묶음으로 나눌 수 없어요. 그 자리 몫에 <b>0</b>을 써요. 십 모형 ${Math.floor(d*o/10)}개를 낱개 ${Math.floor(d*o/10)*10}개로 풀어 낱개 ${d*o%10}개와 합치면 <b>${d*o}개</b>, ${d}묶음으로 나누면 ${o}개씩이에요.`},
   {h:kcEq(`${N2} ÷ ${d2} = □`), s:'나눌 수 없는 자리에 0을 쓰는 것을 잊지 마세요.', ans:q2, opts:kcO(q2,h2*10+o2,h2*100+o2*10), why:'십의 자리를 나눌 수 없으면 몫의 십의 자리에 0을 써요.'}]}; };
 
+const kcF=(a,b)=>`<span class="frac"><b>${a}</b><i></i><b>${b}</b></span>`;
+const kcFb=(n,k,w=260,lab='')=>`<div style="display:flex;align-items:center;gap:8px;width:100%;justify-content:center"><span style="display:inline-flex;width:${w}px;height:34px;border:2px solid #B5701F;border-radius:6px;overflow:hidden">${Array.from({length:n},(_,i)=>`<i style="flex:1;border-left:${i?'1.5px solid #B5701F':'0'};background:${i<k?'#F0A050':'#fff'}"></i>`).join('')}</span>${lab?`<span style="font-size:1.3rem">${lab}</span>`:''}</div>`;
+KCARDS.C12=()=>{ const n=[4,5,6,8][kcR(0,3)], k=kcR(1,n-1); let n2=[5,6,8,10][kcR(0,3)], k2=kcR(1,n2-2); return {t:'분수의 뜻', p:[
+  {h:kcFb(4,1,240,kcF(1,4))+`<div style="display:flex;align-items:center;gap:8px"><span style="display:inline-flex;width:240px;height:34px;border:2px solid #B5701F;border-radius:6px;overflow:hidden"><i style="flex:3;background:#F0A050"></i><i style="flex:1;border-left:1.5px solid #B5701F;background:#fff"></i><i style="flex:2;border-left:1.5px solid #B5701F;background:#fff"></i><i style="flex:2;border-left:1.5px solid #B5701F;background:#fff"></i></span><span style="font-size:1.3rem">✗</span></div>`, s:'위 띠는 <b>똑같이</b> 4로 나눈 것 중 1이라서 4분의 1이에요. 아래 띠는 크기가 달라서 4분의 1이 아니에요.'},
+  {h:kcFb(n,k,260,kcF(k,n)), s:`전체를 똑같이 <b>${n}칸</b>으로 나눈 것 중 <b>${k}칸</b>을 ${n}분의 ${k}라고 해요. 아래 수(분모)는 <b>전체 칸 수</b>, 위 수(분자)는 색칠한 칸 수예요.`},
+  {h:kcFb(n2,k2,260,`<span class="frac"><b>${k2}</b><i></i><b>?</b></span>`), s:`색칠한 부분은 몇 분의 ${k2}일까요? 분모를 골라 보세요.`, ans:n2, opts:kcO(n2,n2-k2,n2+1), why:'분모는 색칠하지 않은 칸이 아니라 전체 칸 수예요.'}]}; };
+KCARDS.C14=()=>{ const ds=shuffle([2,3,4,5,6,8].slice()).slice(0,3).sort((a,b)=>a-b), mx=ds[0]; return {t:'단위분수의 크기', p:[
+  {h:[2,3,4].map(d=>kcFb(d,1,240,kcF(1,d))).join(''), s:'같은 띠를 2칸, 3칸, 4칸으로 똑같이 나누고 한 칸씩 칠했어요.'},
+  {h:[2,3,4].map(d=>kcFb(d,1,240,kcF(1,d))).join(''), s:'나누는 칸이 <b>많을수록 한 칸은 작아져요.</b> 그래서 2분의 1이 가장 크고, 4분의 1이 가장 작아요. 분모가 크다고 큰 수가 아니에요.'},
+  {h:`<div class="kc-eq">${shuffle(ds.slice()).map(d=>kcF(1,d)).join(' &nbsp; ')}</div>`, s:'이 가운데 가장 큰 분수의 분모는?', ans:mx, opts:kcO(mx,ds[2],ds[1]), why:'분모가 작을수록 한 칸이 커요. 띠를 떠올려 봐요.'}]}; };
+KCARDS.C15=()=>{ const b=[3,4,5,6][kcR(0,3)], q=kcR(1,2), r=kcR(1,b-1), a=b*q+r; const b2=[3,4,5,6,7][kcR(0,4)], q2=kcR(1,3), r2=kcR(1,b2-1), a2=b2*q2+r2; return {t:'가분수와 대분수', p:[
+  {h:Array.from({length:q},()=>kcFb(b,b,200)).join('')+kcFb(b,r,200)+`<div class="kc-eq">${kcF(a,b)}</div>`, s:`${b}분의 1이 <b>${a}개</b> 있어요. ${b}칸이 다 차면 1이에요.`},
+  {h:`<div class="kc-eq">${kcF(a,b)} = ${q}${kcF(r,b)}</div>`, s:`${a}개 가운데 ${b}개씩 ${q}묶음이 1이 되어 <b>${q}</b>, 남은 ${r}칸이 ${b}분의 ${r}이에요. 그래서 ${q}와 ${b}분의 ${r}이에요.`},
+  {h:`<div class="kc-eq">${kcF(a2,b2)} = □${kcF(r2,b2)}</div>`, s:`${b2}칸씩 묶으면 1이 몇 개 나올까요?`, ans:q2, opts:kcO(q2,q2+1,r2===q2?q2+2:r2), why:`${a2}을 ${b2}씩 묶어 봐요. 남은 것이 분자가 돼요.`}]}; };
+KCARDS.C16=()=>{ const t=kcR(5,9), h=kcR(1,4), p=kcR(1,9), set=[`0.${t}`,`0.${h}${kcR(1,9)}`,`0.${p===t?p-1||1:0}${kcR(1,9)}${kcR(1,9)}`]; return {t:'소수의 자릿값과 크기', p:[
+  {h:kcFb(10,3,260,'0.3'), s:'1을 똑같이 10칸으로 나눈 한 칸이 <b>0.1</b>이에요. 3칸은 0.3이에요.'},
+  {h:`<div class="kc-eq">0.9와 0.10</div>`+kcFb(10,9,240,'0.9')+kcFb(10,1,240,'0.10'), s:'0.10은 0.1과 같아요. 소수는 <b>숫자가 길다고 큰 것이 아니에요.</b> 소수 첫째 자리부터 차례로 견줘요. 0.9가 더 커요.'},
+  {h:`<div class="kc-eq">${shuffle(set.slice()).join(' &nbsp; ')}</div>`, s:'가장 큰 수는 무엇일까요?', ans:set[0], opts:set.slice(), why:'소수 첫째 자리 숫자부터 견줘요. 자릿수가 많은 것이 큰 것이 아니에요.'}]}; };
+KCARDS.C19=()=>{ const n=[5,6,7,8][kcR(0,3)], a=kcR(1,n-3), b=kcR(1,n-1-a); const n2=[5,7,8,9][kcR(0,3)], a2=kcR(1,n2-3), b2=kcR(1,n2-1-a2); return {t:'분모가 같은 분수의 덧셈', p:[
+  {h:kcFb(n,a,240,kcF(a,n))+kcFb(n,b,240,kcF(b,n)), s:`${n}분의 ${a}과 ${n}분의 ${b}을 더해요. 칸의 크기는 둘 다 ${n}분의 1이에요.`},
+  {h:`<div style="display:flex;justify-content:center"><span style="display:inline-flex;width:240px;height:34px;border:2px solid #B5701F;border-radius:6px;overflow:hidden">${Array.from({length:n},(_,i)=>`<i style="flex:1;border-left:${i?'1.5px solid #B5701F':'0'};background:${i<a?'#F0A050':i<a+b?'#7FB8E6':'#fff'}"></i>`).join('')}</span></div><div class="kc-eq">${kcF(a,n)} + ${kcF(b,n)} = ${kcF(a+b,n)}</div>`, s:`칸을 모으면 ${a + b}칸. 칸의 크기는 그대로라서 <b>분모는 ${n} 그대로</b>, 분자끼리만 더해요.`},
+  {h:`<div class="kc-eq">${kcF(a2,n2)} + ${kcF(b2,n2)} = <span class="frac"><b>${a2+b2}</b><i></i><b>?</b></span></div>`, s:'분모는 얼마일까요?', ans:n2, opts:kcO(n2,n2*2,n2+1), why:'칸을 모아도 한 칸의 크기는 그대로예요. 분모끼리 더하지 않아요.'}]}; };
+KCARDS.C20=()=>{ const mk=()=>{ const a=kcR(11,49)/10, b=kcR(101,499)/100; return [a,b]; }; const [a,b]=mk(), [a2,b2]=mk(), f=x=>x.toFixed(2).replace(/0$/,'').replace(/\.$/,''), s2=f(a2+b2), mis=f((Math.round(a2*10)+Math.round(b2*100))/100);
+  const col=(x,y)=>`<div style="font-size:1.7rem;font-family:inherit;text-align:right;line-height:1.35;display:inline-block;border-bottom:2.5px solid #4A2E14;padding:0 8px">${x.toFixed(2).replace(/0$/,'<span style="opacity:.3">0</span>')}<br>+ ${y.toFixed(2)}</div>`; return {t:'소수의 덧셈은 소수점을 맞춰서', p:[
+  {h:col(a,b), s:`${a} + ${b}. 소수점끼리 세로로 맞춰 써요. 빈 자리는 0이 있다고 생각해요.`},
+  {h:col(a,b)+kcEq(`= ${f(a+b)}`), s:`같은 자리끼리 더하면 ${f(a+b)}. 끝자리를 맞추면 자리가 어긋나서 틀려요. <b>소수점을 맞춰요.</b>`},
+  {h:kcEq(`${a2} + ${b2} = □`), s:'소수점을 맞춰 더해 보세요.', ans:s2, opts:kcO(s2,mis,f(a2+b2+1)), why:'끝자리가 아니라 소수점을 세로로 맞춰요.'}]}; };
 const kcJ=x=>{ try{ return typeof fixJ==='function'?fixJ(String(x)):String(x); }catch(e){ return String(x); } };
-function cardStep(stp){ const mk=KCARDS[stp.c]; if(!mk){ S.si++; return step(); } let C=mk(), pi=0, tries=0; const who='halmi';
-  const draw=()=>{ const P=C.p[pi], last=pi===C.p.length-1, hw=last&&C.hw&&typeof P.ans==='number'&&typeof writePad==='function'; app.className='wrap';
-    app.innerHTML=`<div class="top"><button class="back" id="back">← 목록</button><div class="crumb">${S.title}</div><span style="width:70px"></span></div>${stepsBar()}
-      <div class="stage"><div class="talker">${talker(who)}<div class="bubble"><div class="who">${NAMES[who]}</div><div class="q">${C.t}</div><div class="hint">문제를 풀기 전에 잠깐 같이 볼까?</div></div></div>
+/* 손글씨로 쓸지: 입력 방식을 고른 적이 있으면 그것을, 아니면 1~2학년이면 손글씨 */
+function kcHand(){ let im=null; try{ im=localStorage.getItem('dotori-input'); }catch(e){} if(im) return im==='hand'; try{ const u=S&&S.ui!=null&&typeof UNITS36!=='undefined'?UNITS36[S.ui]:null; return !(u&&u.grade>=3); }catch(e){ return true; } }
+function cardStep(stp,done){ done=done||(()=>{ S.si++; step(); }); const mk=KCARDS[stp.c]; if(!mk) return done(); kcSeen(stp.c,stp.why||'v'); let C=mk(), pi=0, tries=0; const who='halmi';
+  const draw=()=>{ const P=C.p[pi], last=pi===C.p.length-1, hw=last&&C.hw&&kcHand()&&typeof P.ans==='number'&&typeof writePad==='function'; app.className='wrap';
+    app.innerHTML=`<div class="top"><button class="back" id="back">← 목록</button><div class="crumb">${S.title}</div><span style="width:70px"></span></div>${S.steps&&S.si!=null&&!stp.inline?stepsBar():''}
+      <div class="stage"><div class="talker">${talker(who)}<div class="bubble"><div class="who">${NAMES[who]}</div><div class="q">${C.t}</div><div class="hint">${stp.why==='ladder'?'같은 곳에서 두 번 막혔네. 잠깐 같이 볼까?':stp.why==='stuck'?'조금 어려웠지? 쉬운 것부터 같이 보자.':stp.why==='again'?'영상을 봤는데 한 번 더 다른 방법으로 볼까?':'문제를 풀기 전에 잠깐 같이 볼까?'}</div></div></div>
       <div class="kc-dots">${C.p.map((_,k)=>`<i class="${k===pi?'on':''}"></i>`).join('')}</div>
       <div class="kc-pic">${P.h}</div><div class="kc-say">${kcJ(P.s)}</div>
       ${!last?'':hw?`<div id="kchw"></div><div class="wtools"><button class="wclr" id="kcclr" aria-label="모두 지우기">지우기</button><button class="next" id="kcok">다 썼어!</button></div>`:`<div class="kc-opts">${shuffle(P.opts.slice()).map(o=>`<button data-v="${o}">${o}</button>`).join('')}</div>`}
       ${last?'<div class="kc-why" id="kcwhy"></div><button class="ghost" id="kcre" style="display:none;width:100%">다른 수로 다시 해 보기</button>':''}
       <button class="next" id="next"${last?' style="display:none"':''}>${last?'문제 풀러 가기 →':'다음 →'}</button></div>`;
     document.getElementById('back').onclick=backToList; try{ hush(); say(kcJ(P.s).replace(/<[^>]+>/g,''),who); }catch(e){}
-    const nx=document.getElementById('next'); nx.onclick=()=>{ if(last){ S.si++; step(); } else { pi++; draw(); } };
+    const nx=document.getElementById('next'); nx.onclick=()=>{ if(last){ kcDone(stp.c,tries); done(); } else { pi++; draw(); } };
     if(!last) return; const why=document.getElementById('kcwhy'), re=document.getElementById('kcre');
     const good=()=>{ try{ sfx('good'); }catch(e){} why.textContent='맞아요!'; nx.style.display=''; };
     const bad=()=>{ tries++; try{ sfx('bad'); }catch(e){} why.textContent='💡 '+kcJ(P.why); re.style.display=''; };   /* 틀리면 같은 문제를 다시 고르게 하지 않고 수를 바꿔 다시 낸다(찍어서 넘어가지 못하게) */
@@ -102,3 +131,13 @@ function cardStep(stp){ const mk=KCARDS[stp.c]; if(!mk){ S.si++; return step(); 
     else app.querySelectorAll('.kc-opts button').forEach(b=>b.onclick=()=>{ app.querySelectorAll('.kc-opts button').forEach(x=>x.disabled=true); if(String(b.dataset.v)===String(P.ans)){ b.classList.add('ok'); good(); } else { b.classList.add('no'); bad(); } }); };
   draw(); }
 { const _step0=step; step=function(){ const s=S&&S.steps&&S.steps[S.si]; if(s&&s.kind==='card') return cardStep(s); return _step0(); }; }
+
+/* 카드를 본 기록(기기 안): 어떤 조각을 왜(v 영상 대신, again 영상 뒤에도, ladder 같은 실수 두 번, stuck 연속 오답) 봤는지, 마지막 장을 몇 번 만에 맞혔는지.
+   카드 바로 뒤 '비슷한 문제'의 정답 여부는 문제 기록에 방식 's'로 남는다 → 카드별 효과를 견줄 수 있다. */
+const KCK='dotori-kt-cards';
+function kcSeen(c,why){ try{ const L=JSON.parse(localStorage.getItem(KCK)||'[]'); L.push({c,why,t:Date.now()}); localStorage.setItem(KCK,JSON.stringify(L.slice(-300))); }catch(e){} }
+function kcDone(c,tries){ try{ const L=JSON.parse(localStorage.getItem(KCK)||'[]'); const x=[...L].reverse().find(r=>r.c===c&&r.tries==null); if(x) x.tries=tries; localStorage.setItem(KCK,JSON.stringify(L)); }catch(e){} }
+
+
+
+{ const _ra=runAct; runAct=function(){ const a=S.acts[S.i]; if(a&&a.kind==='card'){ S.tries=0; return cardStep({kind:'card',c:a.c,why:a.why,inline:true},()=>{ S.results[S.i]=null; S.i++; S.i<S.acts.length?runAct():result(); }); } return _ra(); }; }
