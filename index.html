@@ -7549,7 +7549,10 @@ const _ch0=chapter; chapter=function(ch){ const r=_ch0.apply(this,arguments); tr
    한 세트에 사다리는 두 번까지, 같은 조각은 한 번만. 세트 점수에는 영향을 주지 않는다(카드는 점수 칸이 없고, 덧붙인 문제는 맞히면 별이 늘 뿐). */
 function sameFormQ(q,code){ for(let t=0;t<8;t++){ let n=null;
     try{ if(q._e!=null&&typeof gen1==='function') n=gen1(q._e,q._ei,(Math.random()*1e9)|0); else if(q._ep&&G36[q._ep]){ n=G36[q._ep][q._ti!=null?q._ti:q._ei](); if(n){ n._ep=q._ep; n._ti=q._ti; } } }catch(e){ n=null; }
-    if(!n||n.manip||n.onMount) continue; if(String(n.q)===String(q.q)&&String(n.ans)===String(q.ans)) continue; if(code&&n.mis&&!Object.values(n.mis).includes(code)&&t<5) continue; n._scaf=1; return n; } return null; }
+    if(!n||n.manip||n.onMount) continue; if(String(n.q)===String(q.q)&&String(n.ans)===String(q.ans)) continue; if(code&&n.mis&&!Object.values(n.mis).includes(code)&&t<5) continue; n._scaf=1; return n; }
+  /* 같은 꼴이 늘 같은 문제를 내면 같은 편의 다른 꼴에서 고른다 */
+  try{ const ep=q._ep, F=ep&&G36[ep]; if(F) for(const i of shuffle(F.map((_,k)=>k))){ if(i===(q._ti!=null?q._ti:q._ei)) continue; const n=F[i](); if(!n||n.manip||n.onMount||n.write!==q.write) continue; if(code&&!(n.mis&&Object.values(n.mis).includes(code))) continue; n._ep=ep; n._ti=i; n._scaf=1; return n; } }catch(e){}
+  return null; }
 function ladderAfter(q,ok,m){ if(!S||!S.acts||S.diag||q.diag||q._probe||q._scaf||q._chk) return; if(S._ld==null){ S._ld={n:0,pc:{},run:0,done:{}}; }
   const L=S._ld; if(q._firstSeen) return; q._firstSeen=1;
   if(ok){ L.run=0; return; } L.run++;
@@ -7627,7 +7630,39 @@ function parentPage(){ if(typeof S!=='undefined'&&S) S.idle=true; try{ hush(); }
   try{ const st=document.querySelector('#app .stage'); if(st) st.insertAdjacentHTML('afterbegin',`<div class="btns" style="margin:0 0 10px"><button class="ghost" id="kt-parent2">보호자에게 보여 줄 한 장</button></div>`); document.getElementById('kt-parent2').onclick=parentPage; }catch(e){}
   return r; }; }
 
-try{ window._parentPage=parentPage; window._ladderAfter=ladderAfter; window._MISC=MISC; }catch(e){}
+
+/* 받침에 따라 '이라고/라고' */
+function jRago(g){ const ch=String(g).trim().slice(-1); if(/[0-9]/.test(ch)) return [0,1,3,6,7,8].includes(+ch)?'이라고':'라고'; const c=ch.charCodeAt(0); if(c>=0xAC00&&c<=0xD7A3) return (c-0xAC00)%28?'이라고':'라고'; return '라고'; }
+/* ===== 아이가 낸 답으로 말하기 (로드맵 1단계-②) =====
+   '틀린 이유 보기'를 켰을 때 나오는 한마디 앞에 아이가 낸 답을 붙인다: "885라고 했구나. 받아올림한 1을 더해요…" */
+{ const _ar2=afterRec; afterRec=function(q,given,ok,m){ _ar2(q,given,ok,m); try{ if(!ok&&q._tip&&q.hint1===q._tip){ const g=clean(given); if(g&&g.length<=14&&!/^m:|^ok:/.test(g)){ q.hint1=`<b>${esc(g)}</b>${jRago(g)} 했구나. ${q._tip}`; q._tip=q.hint1; } } }catch(e){} }; }
+
+/* ===== 막힘 감지 (로드맵 2단계-⑥) =====
+   한 문제 앞에서 오래 멈춰 있으면(1~2학년 40초, 3~6학년 70초) '같이 알아볼까?' 단추를 띄운다. 누르면 그 문제 오답들이 가리키는 개념 카드를 먼저 보고 같은 문제로 돌아온다.
+   도움을 받은 뒤의 답은 지식추적에 넣지 않는다(q._kt). */
+let _stuckT=null;
+function stuckArm(q){ clearTimeout(_stuckT); if(!q||!S||!S.acts||S.diag||q.diag||q._probe||q._kt||q._helped) return; const codes=Object.values(q.mis||{}).filter(m=>MISC[m]); const c=codes.map(m=>MISC[m][0][0]).find(c=>KCARDS[c]); if(!c) return;
+  const at=S.i, wait=(q._e!=null||((UNITS36[S.ui]||{}).grade||3)<3)?40000:70000;
+  _stuckT=setTimeout(()=>{ try{ if(!S||S.i!==at||S.acts[S.i].q!==q||S.tries>0||document.querySelector('#fb .fb')) return; const fb=document.getElementById('fb'); if(!fb||document.getElementById('kt-stuck')) return;
+    fb.insertAdjacentHTML('afterbegin',`<button class="ghost" id="kt-stuck" style="width:100%;margin:6px 0">💡 어려우면 같이 알아볼까?</button>`);
+    document.getElementById('kt-stuck').onclick=()=>{ q._helped=1; q._kt=1; S.acts.splice(S.i,0,{kind:'card',c,why:'stuck'}); runAct(); }; }catch(e){} },wait); }
+{ const _qq=question; question=function(q){ const r=_qq.apply(this,arguments); try{ stuckArm(q); }catch(e){} return r; }; }
+
+/* ===== 자신 있었는지 묻기 (로드맵 2단계-⑧ 대신) =====
+   교사는 아이가 '찍어서 맞혔는지'를 표정으로 안다. 앱은 물어본다: 오개념 보기가 있는 객관식을 처음에 맞혔을 때, 세트에 두 번까지, 네 번에 한 번꼴로
+   '확실해요 / 헷갈렸어요 / 찍었어요'. 찍었다고 하면 같은 꼴 문제를 세트 끝에 한 번 더 내서 확인한다. 기록은 기기 안 dotori-kt-conf. */
+const CFK='dotori-kt-conf';
+{ const _an=answer; answer=function(btn,q){ const first=S&&S.tries===0; const r=_an.apply(this,arguments);
+  try{ if(!first||!q||q._scaf||q.diag||q._probe||!S||!S.acts||S.diag||!q.opts||q.opts.length<3||!q.mis||!Object.keys(q.mis).length) return r;
+    const v=btn&&btn.dataset?btn.dataset.v:null; if(String(v)!==String(q.ans)) return r; S._cf=S._cf||0; if(S._cf>=2||Math.random()>0.25) return r; S._cf++;
+    const m=document.querySelector('#fb .msg'); if(!m) return r; const Q=(S.acts[S.i]&&S.acts[S.i].q)||q;
+    m.insertAdjacentHTML('beforeend',`<div class="kt-conf" style="margin-top:10px;font-size:1rem">자신 있었어? <span style="display:inline-flex;gap:6px;flex-wrap:wrap;margin-top:6px">${['확실해요','헷갈렸어요','찍었어요'].map(x=>`<button class="ghost" data-c="${x}" style="padding:6px 10px;font-size:.95rem">${x}</button>`).join('')}</span></div>`);
+    m.querySelectorAll('.kt-conf button').forEach(b=>b.onclick=()=>{ const c=b.dataset.c; m.querySelector('.kt-conf').innerHTML=c==='찍었어요'?'솔직하게 말해 줘서 고마워! 비슷한 문제를 하나 더 풀어 보자.':c==='헷갈렸어요'?'헷갈려도 맞혔네! 비슷한 문제를 한 번 더 볼게.':'좋아요!';
+      try{ const L=JSON.parse(localStorage.getItem(CFK)||'[]'); L.push({t:Date.now(),ep:Q._ep||Q._e,c}); localStorage.setItem(CFK,JSON.stringify(L.slice(-300))); }catch(e){}
+      if(c!=='확실해요'){ const sib=sameFormQ(Q._ep?Q:q,null); if(sib){ sib._conf=1; S.acts.push({kind:'q',q:sib}); } } }); }catch(e){}
+  return r; }; }
+
+try{ window._sameFormQ=sameFormQ; window._jRago=jRago; window._parentPage=parentPage; window._ladderAfter=ladderAfter; window._MISC=MISC; }catch(e){}
 
 /* ---------- 11. 기존 화면에 연결 ---------- */
 const css=document.createElement('style'); css.textContent=`.kt-kc{display:inline-block;margin:3px;padding:4px 10px;border-radius:999px;font-size:.85rem;border:2px solid #d9c7a8;background:#fff}
@@ -7813,11 +7848,11 @@ KCARDS.C03=()=>{ const HW=1; const t=kcR(2,5), t2=kcR(2,8); let o=kcR(1,9), o2=k
 KCARDS.C04=()=>{ const HW=1; const mk=()=>{ const t=kcR(1,3), o=kcR(5,9), b=kcR(11-o,9); return [t,o,b]; }; const [t,o,b]=mk(), [t2,o2,b2]=mk(), s2=t2*10+o2+b2; return {t:'받아올림이 있는 덧셈', p:[
   {h:kcBlk(t,o,b)+kcEq(`${t*10+o} + ${b}`), s:`낱개 ${o}개와 ${b}개를 모으면 <b>${o+b}개</b>. 낱개가 10개를 넘었어요.`},
   {h:kcBlk(t+1,o+b-10)+kcEq(`${t*10+o} + ${b} = ${t*10+o+b}`), s:`낱개 10개를 <b>묶음 1개</b>로 바꿔 십의 자리로 올려요. 묶음은 ${t} + 1 = ${t+1}개, 낱개는 ${o+b-10}개예요.`},
-  {h:kcBlk(t2,o2,b2)+kcEq(`${t2*10+o2} + ${b2} = □`), s:'낱개 10개를 묶음으로 바꿔 올려 보세요.', ans:s2, opts:kcO(s2,s2-10,+(`${t2}${o2+b2}`)), why:'낱개가 10개를 넘으면 묶음 1개로 바꿔 십의 자리에 더해요.'}], hw:HW}; };
+  {h:kcBlk(t2,o2,b2)+kcEq(`${t2*10+o2} + ${b2}`)+kcEq(`낱개: ${o2} + ${b2} = ${o2+b2}`)+kcEq(`묶음: ${t2} + □`), s:'낱개가 10개를 넘었어요. 묶음에는 몇을 더할까요?', ans:1, opts:kcO(1,0,10), why:'낱개 10개가 묶음 1개로 바뀌어요. 묶음에 1을 더해요.', full:s2}], hw:HW}; };
 KCARDS.C05=()=>{ const HW=1; const mk=()=>{ const t=kcR(3,6), o=kcR(1,4), b=kcR(o+2,9); return [t,o,b]; }; const [t,o,b]=mk(), [t2,o2,b2]=mk(), d2=t2*10+o2-b2; return {t:'받아내림이 있는 뺄셈', p:[
   {h:kcBlk(t,o)+kcEq(`${t*10+o} − ${b}`), s:`낱개가 ${o}개뿐이라 ${b}개를 뺄 수 없어요.`},
   {h:kcBlk(t-1,o,10)+kcEq(`${t*10+o} − ${b} = ${t*10+o-b}`), s:`묶음 1개를 풀어 <b>낱개 10개</b>로 바꿔요. 묶음은 ${t-1}개, 낱개는 ${o+10}개. ${o+10} − ${b} = ${o+10-b}이에요.`},
-  {h:kcBlk(t2,o2)+kcEq(`${t2*10+o2} − ${b2} = □`), s:'묶음 1개를 풀어서 빼 보세요.', ans:d2, opts:kcO(d2,t2*10+(b2-o2),d2+10), why:'묶음 1개를 풀었으니 묶음이 1개 줄어요. 큰 수에서 작은 수를 그냥 빼면 안 돼요.'}], hw:HW}; };
+  {h:kcBlk(t2,o2)+kcEq(`${t2*10+o2} − ${b2}`)+kcEq(`묶음 1개를 풀면 낱개는 □개`), s:`낱개 ${o2}개에서 ${b2}개를 뺄 수 없어요. 묶음 1개를 풀면 낱개는 몇 개가 될까요?`, ans:o2+10, opts:kcO(o2+10,o2,10), full:d2, why:'묶음 1개를 풀었으니 묶음이 1개 줄어요. 큰 수에서 작은 수를 그냥 빼면 안 돼요.'}], hw:HW}; };
 KCARDS.C06=()=>{ const a=kcR(12,29), b=kcR(11,25), s=a+b, bar=`<div class="kc-bar"><span style="flex:${a};background:#F8C98A">${a}</span><span style="flex:${b};background:#A9D2F0">${b}</span></div><div style="width:92%;text-align:center;font-size:1.1rem">전체 ${s}</div>`; return {t:'덧셈과 뺄셈은 한 가족', p:[
   {h:bar, s:`띠 전체의 길이는 <b>${s}</b>, 두 부분의 길이는 ${a}, ${b}.`},
   {h:bar+kcEq(`${s} − ${a} = ${b}`)+kcEq(`${b} + ${a} = ${s}`), s:`전체에서 한쪽을 빼면 다른 쪽이 남아요. 뺄셈을 했으면 <b>남은 수에 뺀 수를 더해서</b> 전체가 되는지 확인해요.`},
@@ -7834,11 +7869,11 @@ KCARDS.C09=()=>{ const mk=()=>{ const t=kcR(1,3), o=kcR(3,8), b=kcR(Math.ceil(10
   const area=(t,o,b)=>`<span class="kc-box" style="width:${44+t*30}px;height:${22+b*9}px">${t*10} × ${b}</span><span class="kc-box" style="width:${28+o*5}px;height:${22+b*9}px;background:#CFE6F7">${o} × ${b}</span>`; return {t:'두 자리 수의 곱셈', p:[
   {h:area(t,o,b)+kcEq(`${a} × ${b}`), s:`${a}을 <b>${t*10}과 ${o}</b>로 갈라서 따로 곱해요.`},
   {h:area(t,o,b)+kcEq(`${t*10*b} + ${o*b} = ${a*b}`), s:`${t*10} × ${b} = <b>${t*10*b}</b>, ${o} × ${b} = <b>${o*b}</b>. 십의 자리 ${t}는 ${t*10}이니까 ${t*b}가 아니라 ${t*10*b}이에요. ${o*b}의 ${Math.floor(o*b/10)*10}은 십의 자리로 올라가 더해져요.`},
-  {h:area(t2,o2,b2)+kcEq(`${a2} × ${b2} = □`), s:'갈라서 곱한 다음 더해 보세요.', ans:a2*b2, opts:kcO(a2*b2,t2*b2*10+(o2*b2)%10,t2*b2+o2*b2), why:`${t2*10} × ${b2}와 ${o2} × ${b2}를 구해서 더해요. 올린 수도 잊지 말아요.`}]}; };
+  {h:area(t2,o2,b2)+kcEq(`${a2} × ${b2} = ${t2*10} × ${b2} + ${o2} × ${b2}`)+kcEq(`= □ + ${o2*b2}`), s:`${t2*10} × ${b2}는 얼마일까요?`, ans:t2*10*b2, opts:kcO(t2*10*b2,t2*b2,t2*10+b2), full:a2*b2, why:`${t2*10} × ${b2}와 ${o2} × ${b2}를 구해서 더해요. 올린 수도 잊지 말아요.`}]}; };
 KCARDS.C10=()=>{ const mk=()=>{ const d=kcR(2,4), h=kcR(1,2), o=kcR(Math.ceil(10/d),9); return [d,h,o]; }; const [d,h,o]=mk(), [d2,h2,o2]=mk(), N=d*(h*100+o), N2=d2*(h2*100+o2), q2=h2*100+o2; return {t:'몫에 0이 들어가는 나눗셈', p:[
   {h:kcBlk(Math.floor(d*o/10),d*o%10,0,d*h)+kcEq(`${N} ÷ ${d}`), s:`백 모형 ${d*h}개를 ${d}묶음으로 똑같이 나누면 <b>${h}개씩</b>. 몫의 백의 자리는 ${h}예요.`},
   {h:kcBlk(Math.floor(d*o/10),d*o%10,0,0)+kcEq(`${N} ÷ ${d} = ${h}0${o}`), s:`십 모형 ${Math.floor(d*o/10)}개는 ${d}묶음으로 나눌 수 없어요. 그 자리 몫에 <b>0</b>을 써요. 십 모형 ${Math.floor(d*o/10)}개를 낱개 ${Math.floor(d*o/10)*10}개로 풀어 낱개 ${d*o%10}개와 합치면 <b>${d*o}개</b>, ${d}묶음으로 나누면 ${o}개씩이에요.`},
-  {h:kcEq(`${N2} ÷ ${d2} = □`), s:'나눌 수 없는 자리에 0을 쓰는 것을 잊지 마세요.', ans:q2, opts:kcO(q2,h2*10+o2,h2*100+o2*10), why:'십의 자리를 나눌 수 없으면 몫의 십의 자리에 0을 써요.'}]}; };
+  {h:kcEq(`${N2} ÷ ${d2}`)+kcEq(`백의 자리 몫: ${h2}`)+kcEq(`십 모형 ${Math.floor(d2*o2/10)}개 ÷ ${d2} → 십의 자리 몫 □`), s:'십의 자리 몫은 얼마일까요?', ans:0, opts:kcO(0,1,Math.floor(d2*o2/10)||2), full:q2, why:'십의 자리를 나눌 수 없으면 몫의 십의 자리에 0을 써요.'}]}; };
 
 const kcF=(a,b)=>`<span class="frac"><b>${a}</b><i></i><b>${b}</b></span>`;
 const kcFb=(n,k,w=260,lab='')=>`<div style="display:flex;align-items:center;gap:8px;width:100%;justify-content:center"><span style="display:inline-flex;width:${w}px;height:34px;border:2px solid #B5701F;border-radius:6px;overflow:hidden">${Array.from({length:n},(_,i)=>`<i style="flex:1;border-left:${i?'1.5px solid #B5701F':'0'};background:${i<k?'#F0A050':'#fff'}"></i>`).join('')}</span>${lab?`<span style="font-size:1.3rem">${lab}</span>`:''}</div>`;
@@ -7927,25 +7962,25 @@ KCARDS.C29=()=>{ const P=[[6,3,4],[3,3,4],[4,2,3],[6,2,3],[2,2,5],[4,4,5],[3,3,5
 KCARDS.C30=()=>{ const mk=()=>{ const d=kcR(2,9), q=kcR(2,9); return [d*q/10,d/10,q]; }; const [a,b,q]=mk(), [a2,b2,q2]=mk(); return {t:'소수로 나누기', p:[
   {h:kcEq(`${kcD(a)} ÷ ${kcD(b)}`), s:'나누는 수가 소수예요. 두 수에 똑같이 10을 곱해도 몫은 같아요.'},
   {h:kcEq(`${kcD(a)} ÷ ${kcD(b)} = ${kcD(a*10)} ÷ ${kcD(b*10)} = ${q}`), s:'두 수의 소수점을 <b>똑같이 한 칸씩</b> 옮겨 자연수 나눗셈으로 바꿔요. 한쪽만 옮기면 안 돼요.'},
-  {h:kcEq(`${kcD(a2)} ÷ ${kcD(b2)} = □`), s:'몫은 얼마일까요?', ans:q2, opts:kcO(q2,kcD(q2/10),q2*10), why:'나누어지는 수와 나누는 수의 소수점을 같은 칸만큼 옮겨요.'}]}; };
+  {h:kcEq(`${kcD(a2)} ÷ ${kcD(b2)} = □ ÷ ${kcD(b2*10)}`), s:'두 수에 똑같이 10을 곱하면 □는 얼마일까요?', ans:kcD(a2*10), opts:kcO(kcD(a2*10),kcD(a2),kcD(a2*100)), full:q2, why:'나누어지는 수와 나누는 수의 소수점을 같은 칸만큼 옮겨요.'}]}; };
 const kcSvg=(w,h,body)=>`<svg viewBox="0 0 ${w} ${h}" width="${w}" height="${h}" style="max-width:100%">${body}</svg>`;
 const kcClock=(h,m)=>{ const a=(m/60)*360, b=((h%12)+m/60)*30, P=(deg,r)=>[70+r*Math.sin(deg*Math.PI/180),70-r*Math.cos(deg*Math.PI/180)]; let g=`<circle cx="70" cy="70" r="62" fill="#fff" stroke="#6B3E1C" stroke-width="5"/>`; for(let k=1;k<=12;k++){ const [x,y]=P(k*30,48); g+=`<text x="${x}" y="${y+5}" font-size="14" text-anchor="middle" fill="#4A2E14">${k}</text>`; } const [x1,y1]=P(b,30), [x2,y2]=P(a,50); return kcSvg(140,140,g+`<line x1="70" y1="70" x2="${x1}" y2="${y1}" stroke="#4A2E14" stroke-width="6" stroke-linecap="round"/><line x1="70" y1="70" x2="${x2}" y2="${y2}" stroke="#D45F16" stroke-width="3.5" stroke-linecap="round"/><circle cx="70" cy="70" r="4" fill="#4A2E14"/>`); };
 const kcGrid=(w,h,c=18)=>kcSvg(w*c+4,h*c+4,Array.from({length:w*h},(_,i)=>`<rect x="${2+(i%w)*c}" y="${2+Math.floor(i/w)*c}" width="${c}" height="${c}" fill="#FFE3B0" stroke="#B5701F"/>`).join(''));
-KCARDS.GC02=()=>{ const h=kcR(1,4), m=kcR(30,55), d=kcR(61-m,59), h2=kcR(1,4), m2=kcR(25,55), d2=kcR(61-m2,59), tot=m2+d2; return {t:'60분은 1시간', p:[
+KCARDS.GC02=()=>{ const h=kcR(1,4), m=kcR(30,55), d=kcR(61-m,Math.min(59,99-m)), h2=kcR(1,4), m2=kcR(25,55), d2=kcR(61-m2,Math.min(59,99-m2)), tot=m2+d2; return {t:'60분은 1시간', p:[
   {h:kcClock(3,0)+kcClock(4,0), s:'긴바늘이 한 바퀴 도는 데 <b>60분</b>, 그동안 짧은바늘은 숫자 한 칸. 그래서 60분은 1시간이에요.'},
   {h:kcEq(`${h}시간 ${m}분 + ${d}분`)+kcEq(`= ${h}시간 ${m+d}분 = ${h+1}시간 ${m+d-60}분`), s:'분끼리 더해 <b>60분이 넘으면 1시간으로 바꿔요.</b> 100분이 아니라 60분이에요.'},
-  {h:kcEq(`${h2}시간 ${m2}분 + ${d2}분 = □시간 ${tot-60}분`), s:'몇 시간일까요?', ans:h2+1, opts:kcO(h2+1,h2,h2+2), why:`${m2} + ${d2}분은 60분을 넘어요. 60분을 1시간으로 바꿔 더해요.`}]}; };
+  {h:kcEq(`${h2}시간 ${m2}분 + ${d2}분 = □`), s:'얼마일까요?', ans:`${h2+1}시간 ${tot-60}분`, opts:[`${h2+1}시간 ${tot-60}분`,`${h2}시간 ${tot}분`,`${h2+1}시간 ${tot}분`], why:`${m2} + ${d2}분은 60분을 넘어요. 60분을 1시간으로 바꿔 더해요.`}]}; };
 KCARDS.GC05=()=>{ const r=kcR(3,8), d2=kcR(3,9)*2; const circ=(r,lab,dia)=>kcSvg(150,150,`<circle cx="75" cy="75" r="62" fill="#FFF3DE" stroke="#B5701F" stroke-width="3"/><circle cx="75" cy="75" r="3.5" fill="#4A2E14"/>`+(dia?`<line x1="13" y1="75" x2="137" y2="75" stroke="#D45F16" stroke-width="3"/>`:`<line x1="75" y1="75" x2="137" y2="75" stroke="#D45F16" stroke-width="3"/>`)+`<text x="${dia?75:106}" y="68" font-size="15" text-anchor="middle" fill="#4A2E14">${lab}</text>`); return {t:'원의 반지름과 지름', p:[
   {h:circ(r,`${r} cm`,0), s:`원의 중심에서 원 위의 한 점까지가 <b>반지름</b>이에요. 이 원의 반지름은 ${r} cm.`},
   {h:circ(r,`${r*2} cm`,1), s:`중심을 지나 원의 한쪽 끝에서 다른 쪽 끝까지가 <b>지름</b>. 지름은 반지름의 2배라서 ${r*2} cm예요.`},
   {h:circ(0,`지름 ${d2} cm`,1), s:'이 원의 반지름은 몇 cm일까요?', ans:d2/2, opts:kcO(d2/2,d2,d2*2), why:'반지름은 지름의 반이에요.'}]}; };
-KCARDS.GC06=()=>{ const mk=()=>{ let a,b; do{ a=kcR(35,75); b=kcR(35,75); }while(a+b>130||a+b<90); return [a,b,180-a-b]; }; const [a,b,c]=mk(), [a2,b2,c2]=mk();
+KCARDS.GC06=()=>{ const mk=()=>{ let a,b; do{ a=kcR(35,75); b=kcR(35,75); }while(a+b>130||a+b<=90); return [a,b,180-a-b]; }; const [a,b,c]=mk(), [a2,b2,c2]=mk();
   const tri=(a,b,lab)=>{ const W=240,B=200,ra=a*Math.PI/180, rb=b*Math.PI/180, x0=B*Math.tan(rb)/(Math.tan(ra)+Math.tan(rb)), y0=x0*Math.tan(ra), sc=Math.min(1,110/y0), BB=B*sc, x=x0*sc, y=y0*sc, L=20+(B-BB)/2; const P=[[L,130],[L+BB,130],[L+x,130-y]]; return kcSvg(W,145,`<polygon points="${P.map(p=>p.join(',')).join(' ')}" fill="#FFF3DE" stroke="#B5701F" stroke-width="3"/>${(()=>{ const cx=(P[0][0]+P[1][0]+P[2][0])/3, cy=(P[0][1]+P[1][1]+P[2][1])/3; return P.map((v,i)=>`<text x="${v[0]+(cx-v[0])*.38}" y="${v[1]+(cy-v[1])*.38+5}" font-size="14" text-anchor="middle" fill="${i===2?'#D45F16':'#4A2E14'}">${lab[i]}</text>`).join(''); })()}`); };
   return {t:'삼각형 세 각의 합', p:[
   {h:tri(a,b,[a+'°',b+'°',c+'°']), s:'삼각형의 세 각을 잘라 한 줄로 이어 붙이면 <b>일직선</b>이 돼요.'},
   {h:tri(a,b,[a+'°',b+'°',c+'°'])+kcEq(`${a}° + ${b}° + ${c}° = 180°`), s:'그래서 삼각형 세 각의 합은 언제나 <b>180°</b>. 사각형은 삼각형 2개라서 360°예요.'},
   {h:tri(a2,b2,[a2+'°',b2+'°','?']), s:'?의 각은 몇 도일까요?', ans:c2, opts:kcO(c2,360-a2-b2,a2+b2), why:'180°에서 두 각을 빼요. 360°는 사각형이에요.'}]}; };
-KCARDS.GC11=()=>{ const w=kcR(3,6), h=kcR(2,4), w2=kcR(3,8), h2=kcR(2,6); return {t:'넓이는 칸의 수', p:[
+KCARDS.GC11=()=>{ const w=kcR(3,6), h=kcR(2,4), w2=kcR(5,8), h2=kcR(2,4); return {t:'넓이는 칸의 수', p:[
   {h:kcGrid(w,h), s:`한 칸이 1 cm²(가로 1 cm, 세로 1 cm)예요. 칸이 가로에 ${w}개씩 ${h}줄.`},
   {h:kcGrid(w,h)+kcEq(`${w} × ${h} = ${w*h} cm²`), s:`그래서 넓이는 가로 × 세로 = ${w*h} cm². 둘레(테두리 길이)와는 달라요.`},
   {h:kcEq(`가로 ${w2} cm, 세로 ${h2} cm인 직사각형의 넓이`), s:'몇 cm²일까요?', ans:w2*h2, opts:kcO(w2*h2,2*(w2+h2),w2+h2), why:'넓이는 칸의 수, 가로 × 세로예요. 테두리를 더하는 것은 둘레예요.'}]}; };
@@ -7955,19 +7990,19 @@ KCARDS.GC16=()=>{ const a=kcR(2,4), b=kcR(2,3), c=kcR(2,3), a2=kcR(2,5), b2=kcR(
   {h:box(a,b,c), s:`1 cm³ 쌓기나무를 가로 ${a}개, 세로 ${b}개로 한 층을 깔고 ${c}층 쌓았어요.`},
   {h:box(a,b,c)+kcEq(`${a} × ${b} × ${c} = ${a*b*c} cm³`), s:`한 층에 ${a*b}개, ${c}층이라 모두 ${a*b*c}개. 부피 = 가로 × 세로 × 높이예요. 겉에 보이는 면만 세면 안 돼요.`},
   {h:kcEq(`가로 ${a2} cm, 세로 ${b2} cm, 높이 ${c2} cm`), s:'부피는 몇 cm³일까요?', ans:a2*b2*c2, opts:kcO(a2*b2*c2,2*(a2*b2+b2*c2+a2*c2),4*(a2+b2+c2)), why:'쌓기나무 수를 세는 것과 같아요. 세 길이를 곱해요.'}]}; };
-KCARDS.GC18=()=>{ const r=kcR(2,6), r2=kcR(2,9); return {t:'원주와 원주율', p:[
+KCARDS.GC18=()=>{ const r=kcR(2,6), r2=kcR(3,9); return {t:'원주와 원주율', p:[
   {h:kcSvg(260,110,`<circle cx="55" cy="55" r="40" fill="#FFF3DE" stroke="#B5701F" stroke-width="3"/><line x1="15" y1="55" x2="95" y2="55" stroke="#D45F16" stroke-width="3"/><line x1="115" y1="55" x2="250" y2="55" stroke="#B5701F" stroke-width="5"/><text x="182" y="80" font-size="14" text-anchor="middle" fill="#4A2E14">원주 ≈ 지름 × 3.14</text>`), s:'원의 둘레(원주)를 펴 보면 <b>지름의 약 3.14배</b>예요. 이 3.14를 원주율이라고 해요.'},
   {h:kcEq(`반지름 ${r} cm → 지름 ${2*r} cm`)+kcEq(`원주 = ${2*r} × 3.14 = ${kcD(2*r*3.14)} cm`), s:'원주는 <b>지름</b> × 원주율. 반지름이 주어지면 먼저 2배를 해서 지름을 구해요.'},
   {h:kcEq(`반지름 ${r2} cm인 원의 원주`), s:'몇 cm일까요?', ans:kcD(2*r2*3.14), opts:kcO(kcD(2*r2*3.14),kcD(r2*3.14),kcD(r2*r2*3.14)), why:'반지름이 아니라 지름에 3.14를 곱해요.'}]}; };
-KCARDS.RC04=()=>{ const a=kcR(2,5), b=kcR(a+1,9), a2=kcR(2,5), b2=[4,5,8,10][kcR(0,3)]; return {t:'비와 비율', p:[
+KCARDS.RC04=()=>{ const a=kcR(2,5), b=kcR(a+1,9), b2=[4,5,7,8,9][kcR(0,4)], a2=kcR(2,Math.min(5,b2-1)); return {t:'비와 비율', p:[
   {h:kcAc(a)+`<b style="font-size:1.4rem">:</b>`+`<span class="kc-ac">${'🍂'.repeat(b)}</span>`, s:`도토리 ${a}개, 나뭇잎 ${b}개. 나뭇잎에 대한 도토리의 비는 <b>${a} : ${b}</b>.`},
-  {h:kcEq(`${a} : ${b}`)+kcEq(`비율 = ${kcF(a,b)}`), s:`'~에 대한'이 붙은 쪽(나뭇잎)이 <b>기준량</b>이라 뒤에, 분모에 와요. 순서를 바꾸면 다른 비예요.`},
-  {h:kcEq(`${a2} : ${b2}의 비율을 소수로`), s:'얼마일까요?', ans:kcD(a2/b2), opts:kcO(kcD(a2/b2),kcD(b2/a2),kcD(a2/(a2+b2))), why:'비율 = 비교하는 양 ÷ 기준량. 뒤의 수로 나눠요.'}]}; };
+  {h:kcEq(`${a} : ${b}`)+kcEq(`비율 = ${kcF(a,b)}`), s:`'나뭇잎에 대한'처럼 '~에 대한'이 붙은 쪽이 <b>기준량</b>이에요. 기준량은 기호 : 의 오른쪽, 비율에서는 분모에 와요. 순서를 바꾸면 다른 비예요.`},
+  {h:kcEq(`${a2} : ${b2}`), s:'이 비의 비율을 분수로 나타내면?', ans:`${b2}분의 ${a2}`, opts:[`${b2}분의 ${a2}`,`${a2}분의 ${b2}`,`${a2+b2}분의 ${a2}`], why:'비율 = 비교하는 양 ÷ 기준량. 기호 : 의 오른쪽 수가 분모예요.'}]}; };
 KCARDS.RC05=()=>{ const p=[10,20,25,30][kcR(0,3)], N=kcR(2,9)*1000, p2=[10,20,30,40][kcR(0,3)], N2=kcR(2,9)*1000; return {t:'백분율과 할인', p:[
   {h:kcFb(10,p/10|0,260,p+'%'), s:`백분율은 <b>100을 기준으로</b> 나타낸 비율이에요. ${p}%는 100 가운데 ${p}이에요.`},
   {h:kcEq(`${N}원의 ${p}% = ${N*p/100}원`)+kcEq(`할인한 값 = ${N} − ${N*p/100} = ${N-N*p/100}원`), s:'할인은 할인되는 금액을 구해서 <b>원래 값에서 빼요.</b> 할인 금액이 곧 내야 할 돈이 아니에요.'},
   {h:kcEq(`${N2}원짜리를 ${p2}% 할인하면`), s:'얼마를 내야 할까요?', ans:N2-N2*p2/100, opts:kcO(N2-N2*p2/100,N2*p2/100,N2-p2), why:`먼저 ${N2}원의 ${p2}%를 구하고, 원래 값에서 빼요.`}]}; };
-KCARDS.RC08=()=>{ const a=kcR(1,4), b=kcR(a+1,6), u=kcR(2,6), T=(a+b)*u, a2=kcR(1,4), b2=kcR(a2+1,7), u2=kcR(2,6), T2=(a2+b2)*u2; return {t:'비례배분', p:[
+KCARDS.RC08=()=>{ const a=kcR(1,4), b=kcR(a+1,6), u=kcR(2,6), T=(a+b)*u, a2=kcR(2,4), b2=kcR(a2+1,7), u2=kcR(2,6), T2=(a2+b2)*u2; return {t:'비례배분', p:[
   {h:kcPl(a,u)+'<b style="font-size:1.4rem">|</b>'+kcPl(b,u), s:`도토리 ${T}개를 ${a} : ${b}로 나눠요. 전체를 ${a} + ${b} = <b>${a+b}묶음</b>으로 봐요.`},
   {h:kcEq(`한 묶음 = ${T} ÷ ${a+b} = ${u}`)+kcEq(`${u} × ${a} = ${a*u}, &nbsp;${u} × ${b} = ${b*u}`), s:'한 묶음을 구한 뒤 각자의 묶음 수만큼 곱해요. 두 몫을 더하면 처음 수가 돼요.'},
   {h:kcEq(`${T2}개를 ${a2} : ${b2}로 나누면 앞의 몫은?`), s:'몇 개일까요?', ans:a2*u2, opts:kcO(a2*u2,b2*u2,u2), why:'전체를 (앞 + 뒤)묶음으로 나누어 한 묶음을 먼저 구해요.'}]}; };
@@ -7977,16 +8012,16 @@ KCARDS.DC04=()=>{ const mk=()=>{ const avg=kcR(4,9), d=[kcR(-3,3),kcR(-3,3)]; co
   {h:bars(v), s:`세 친구가 도토리를 ${v.join(', ')}개 모았어요. 높은 막대에서 낮은 막대로 옮겨 <b>고르게</b> 하면 얼마씩일까요?`},
   {h:bars([avg,avg,avg])+kcEq(`(${v.join(' + ')}) ÷ 3 = ${avg}`), s:`모두 더해 사람 수로 나누면 ${avg}개씩. 이것이 평균이에요. 합계를 평균이라고 하면 안 돼요.`},
   {h:bars(v2), s:'평균은 몇 개일까요?', ans:avg2, opts:kcO(avg2,v2.reduce((a,b)=>a+b,0),Math.round((Math.max(...v2)+Math.min(...v2))/2)===avg2?avg2+1:Math.round((Math.max(...v2)+Math.min(...v2))/2)), why:'모두 더한 다음 사람 수로 나눠요.'}]}; };
-KCARDS.GC03=()=>{ const k=kcR(1,4), g=kcR(100,900), k2=kcR(1,5), g2=kcR(10,95); return {t:'큰 단위와 작은 단위', p:[
+KCARDS.GC03=()=>{ const k=kcR(1,4), g=kcR(100,900), k2=kcR(1,5), g2=kcR(0,1)?kcR(1,9):kcR(11,99); return {t:'큰 단위와 작은 단위', p:[
   {h:kcEq('1 kg = 1000 g')+kcEq('1 L = 1000 mL')+kcEq('1 m = 100 cm'), s:'큰 단위 1에 작은 단위가 몇 개 들어가는지가 단위마다 달라요. kg과 L는 <b>1000</b>, m는 <b>100</b>이에요.'},
   {h:kcEq(`${k} kg ${g} g = ${k*1000+g} g`), s:`${k} kg은 ${k*1000} g. 여기에 ${g} g을 더해요.`.replace(/(\d+) g을/,(m0,n)=>`${n} g${[0,1,3,6,7,8].includes(n%10)?'을':'를'}`)},
-  {h:kcEq(`${k2} kg ${g2} g = □ g`), s:'몇 g일까요? 빈 자리에 주의해요.', ans:k2*1000+g2, opts:kcO(k2*1000+g2,+(`${k2}${g2}`),k2*100+g2), why:`1 kg은 1000 g이라서 ${k2} kg은 ${k2*1000} g이에요. 숫자를 이어 붙이면 안 돼요.`}]}; };
+  {h:kcEq(`${k2} kg ${g2} g = □ g`), s:'몇 g일까요? 빈 자리에 주의해요.', ans:k2*1000+g2, opts:kcO(k2*1000+g2,+(`${k2}${g2}`),k2*1000+g2*10), why:`1 kg은 1000 g이라서 ${k2} kg은 ${k2*1000} g이에요. 숫자를 이어 붙이면 안 돼요.`}]}; };
 KCARDS.GC08=()=>{ const tri=(pts,marks)=>kcSvg(160,120,`<polygon points="${pts}" fill="#FFF3DE" stroke="#B5701F" stroke-width="3"/>${marks||''}`); const S=[['정삼각형','세 변의 길이가 모두 같아요.'],['이등변삼각형','두 변의 길이가 같아요.'],['직각삼각형','한 각이 직각이에요.']]; const qk=kcR(0,1);
   return {t:'삼각형의 이름', p:[
   {h:tri('80,15 140,110 20,110')+tri('80,10 120,110 40,110'), s:'왼쪽은 세 변의 길이가 모두 같은 <b>정삼각형</b>, 오른쪽은 두 변의 길이가 같은 <b>이등변삼각형</b>이에요.'},
   {h:kcEq('정삼각형 → 이등변삼각형'), s:'정삼각형은 두 변의 길이도 같으니까 <b>이등변삼각형이기도 해요.</b> 하지만 이등변삼각형이 모두 정삼각형인 것은 아니에요.'},
   {h:kcEq(qk?'세 변이 8 cm, 8 cm, 8 cm인 삼각형':'세 변이 7 cm, 7 cm, 4 cm인 삼각형'), s:'이 삼각형을 부를 수 있는 이름을 모두 고른 것은?', ans:qk?'정삼각형, 이등변삼각형':'이등변삼각형', opts:qk?['정삼각형, 이등변삼각형','정삼각형만','이등변삼각형만']:['이등변삼각형','정삼각형','직각삼각형'], why:qk?'세 변이 같으면 두 변도 같아요. 이름이 둘이에요.':'두 변만 같아요. 세 변이 다 같지는 않아요.'}]}; };
-KCARDS.GC10=()=>{ const q=kcR(0,2), Q=[['정사각형','직사각형이라고 부를 수 있을까요?','있어요'],['직사각형','정사각형이라고 부를 수 있을까요?','없어요'],['마름모','평행사변형이라고 부를 수 있을까요?','있어요']][q];
+KCARDS.GC10=()=>{ const q=kcR(0,2), Q=[['정사각형','모두 직사각형이라고 부를 수 있을까요?','있어요'],['직사각형','모두 정사각형이라고 부를 수 있을까요?','없어요'],['마름모','모두 평행사변형이라고 부를 수 있을까요?','있어요']][q];
   return {t:'사각형의 포함 관계', p:[
   {h:kcSvg(240,90,`<rect x="10" y="15" width="100" height="60" fill="#FFF3DE" stroke="#B5701F" stroke-width="3"/><rect x="150" y="10" width="70" height="70" fill="#FFE3B0" stroke="#B5701F" stroke-width="3"/>`), s:'직사각형은 <b>네 각이 모두 직각</b>. 정사각형은 네 각이 모두 직각이고 <b>네 변의 길이도 같아요.</b>'},
   {h:kcEq('정사각형 ⊂ 직사각형'), s:'그래서 정사각형은 직사각형의 조건을 다 가져요. <b>정사각형은 직사각형</b>이에요. 거꾸로 직사각형은 네 변이 같지 않을 수 있어 정사각형이 아닐 수 있어요.'},
@@ -8018,7 +8053,7 @@ const kcFs=(tf,lab)=>`<span style="display:inline-flex;flex-direction:column;ali
 KCARDS.GC01=()=>{ const n=kcR(3,6), n2=kcR(3,7); return {t:'변과 꼭짓점', p:[
   {h:kcPoly(n), s:'도형의 곧은 선을 <b>변</b>, 두 변이 만나는 점을 <b>꼭짓점</b>이라고 해요.'},
   {h:kcPoly(n), s:`이 도형은 변이 ${n}개, 꼭짓점도 ${n}개예요. 변과 꼭짓점의 수는 같아요.`},
-  {h:kcPoly(n2), s:'꼭짓점은 몇 개일까요?', ans:n2, opts:kcO(n2,n2*2,n2-1), why:'뾰족한 점만 세요. 변까지 함께 세지 않아요.'}]}; };
+  {h:kcPoly(n2), s:'꼭짓점은 몇 개일까요?', ans:n2, opts:kcO(n2,n2*2,n2+1), why:'뾰족한 점만 세요. 변까지 함께 세지 않아요.'}]}; };
 KCARDS.GC04=()=>{ const T=[[3,'직각'],[2,'직각보다 작아요'],[5,'직각보다 커요'],[9,'직각'],[1,'직각보다 작아요'],[4,'직각보다 커요']][kcR(0,5)];
   const ck=h=>{ const P=(deg,r)=>[50+r*Math.sin(deg*Math.PI/180),50-r*Math.cos(deg*Math.PI/180)], [x1,y1]=P(h*30,26), [x2,y2]=P(0,38); return kcSvg(100,100,`<circle cx="50" cy="50" r="44" fill="#fff" stroke="#6B3E1C" stroke-width="4"/><line x1="50" y1="50" x2="${x1}" y2="${y1}" stroke="#4A2E14" stroke-width="5" stroke-linecap="round"/><line x1="50" y1="50" x2="${x2}" y2="${y2}" stroke="#D45F16" stroke-width="3" stroke-linecap="round"/>`); };
   return {t:'직각', p:[
@@ -8039,7 +8074,7 @@ KCARDS.GC12=()=>{ const a=kcR(3,6), b=a+kcR(1,3), c=b+kcR(1,2), k=kcR(0,2), side
   {h:kcSvg(240,100,`<polygon points="15,90 95,90 35,20" fill="#FFF3DE" stroke="#B5701F" stroke-width="3"/><polygon points="135,90 215,90 155,20" fill="#FFE3B0" stroke="#B5701F" stroke-width="3"/>`), s:'모양과 크기가 같아서 <b>포개었을 때 꼭 겹치는</b> 두 도형을 합동이라고 해요.'},
   {h:kcSvg(240,110,`<polygon points="15,90 95,90 35,20" fill="#FFF3DE" stroke="#B5701F" stroke-width="3"/><text x="10" y="105" font-size="13">ㄱ</text><text x="95" y="105" font-size="13">ㄴ</text><text x="30" y="15" font-size="13">ㄷ</text><polygon points="135,90 215,90 155,20" fill="#FFE3B0" stroke="#B5701F" stroke-width="3"/><text x="130" y="105" font-size="13">ㄹ</text><text x="215" y="105" font-size="13">ㅁ</text><text x="150" y="15" font-size="13">ㅂ</text>`), s:'포갰을 때 겹치는 변을 <b>대응변</b>이라고 해요. 대응변의 길이는 서로 같아요. 변 ㄱㄴ과 변 ㄹㅁ이 대응변이에요.'},
   {h:kcEq(`변 ${nm[0][0]} = ${a} cm, 변 ${nm[1][0]} = ${b} cm, 변 ${nm[2][0]} = ${c} cm`), s:`두 삼각형은 합동이에요. 변 ${nm[k][1]}의 길이는?`, ans:sides[k], opts:kcO(sides[k],sides[(k+1)%3],sides[(k+2)%3]), why:'변 ㄹㅁ은 ㄱㄴ, 변 ㅁㅂ은 ㄴㄷ, 변 ㄹㅂ은 ㄱㄷ과 포개져요.'}]}; };
-KCARDS.GC13=()=>{ const d=kcR(1,4), d2=kcR(1,5); const g=(d,dot)=>{ const c=22; let r=''; for(let y=0;y<4;y++) for(let x=0;x<10;x++) r+=`<rect x="${5+x*c}" y="${5+y*c}" width="${c}" height="${c}" fill="#fff" stroke="#EADBC2"/>`; r+=`<line x1="${5+5*c}" y1="0" x2="${5+5*c}" y2="${10+4*c}" stroke="#D45F16" stroke-width="3" stroke-dasharray="6 4"/>`; r+=`<circle cx="${5+(5-d)*c}" cy="${5+1.5*c}" r="7" fill="#F0A050"/>`; if(dot) r+=`<circle cx="${5+(5+d)*c}" cy="${5+1.5*c}" r="7" fill="#7FB8E6"/>`; return kcSvg(10+10*c,10+4*c,r); };
+KCARDS.GC13=()=>{ const d=kcR(1,4), d2=kcR(2,5); const g=(d,dot)=>{ const c=22; let r=''; for(let y=0;y<4;y++) for(let x=0;x<10;x++) r+=`<rect x="${5+x*c}" y="${5+y*c}" width="${c}" height="${c}" fill="#fff" stroke="#EADBC2"/>`; r+=`<line x1="${5+5*c}" y1="0" x2="${5+5*c}" y2="${10+4*c}" stroke="#D45F16" stroke-width="3" stroke-dasharray="6 4"/>`; r+=`<circle cx="${5+(5-d)*c}" cy="${5+1.5*c}" r="7" fill="#F0A050"/>`; if(dot) r+=`<circle cx="${5+(5+d)*c}" cy="${5+1.5*c}" r="7" fill="#7FB8E6"/>`; return kcSvg(10+10*c,10+4*c,r); };
   return {t:'선대칭의 대응점', p:[
   {h:g(d,false), s:'점선을 따라 접으면 꼭 겹치는 도형을 선대칭도형, 점선을 <b>대칭축</b>이라고 해요.'},
   {h:g(d,true), s:`주황 점은 대칭축에서 ${d}칸. 접으면 겹치는 파란 점도 <b>대칭축에서 ${d}칸</b>이에요. 대응점은 대칭축에서 같은 거리에 있어요.`},
@@ -8048,7 +8083,7 @@ KCARDS.GC14=()=>{ const Q=[['면','6'],['모서리','12'],['꼭짓점','8']], k=
   {h:kcSvg(180,120,`<polygon points="20,40 120,40 120,110 20,110" fill="#FFE3B0" stroke="#B5701F" stroke-width="2.5"/><polygon points="20,40 55,10 155,10 120,40" fill="#FBD9A6" stroke="#B5701F" stroke-width="2.5"/><polygon points="120,40 155,10 155,80 120,110" fill="#E8B06A" stroke="#B5701F" stroke-width="2.5"/><polyline points="20,110 55,80 155,80" fill="none" stroke="#B5701F" stroke-dasharray="5 4"/><line x1="55" y1="10" x2="55" y2="80" stroke="#B5701F" stroke-dasharray="5 4"/>`), s:'직사각형 6개로 둘러싸인 도형이 직육면체예요. 보이지 않는 모서리는 <b>점선</b>으로 그려요.'},
   {h:kcEq('면 6 &nbsp; 모서리 12 &nbsp; 꼭짓점 8'), s:'마주 보는 면은 3쌍이고 서로 평행해요. 한 면과 만나는 면 4개는 그 면과 수직이에요. 보이는 것만 세면 틀려요.'},
   {h:kcEq(`직육면체의 ${Q[k][0]} 수`), s:'몇 개일까요?', ans:+Q[k][1], opts:kcO(+Q[k][1],[3,9,7][k],[8,6,12][k]), why:'점선으로 그린 보이지 않는 부분까지 세요.'}]}; };
-KCARDS.GC17=()=>{ const mk=()=>[[kcR(1,3),kcR(1,3)],[kcR(1,3),kcR(0,3)]]; const M=mk(), M2=mk(); const tab=M=>`<table style="font-size:1.5rem;border-collapse:collapse">${M.map(r=>`<tr>${r.map(c=>`<td style="width:46px;height:46px;border:2px solid #B5701F;text-align:center;background:${c?'#FFE3B0':'#fff'}">${c||''}</td>`).join('')}</tr>`).join('')}</table>`; const sum=M=>M.flat().reduce((a,b)=>a+b,0), cells=M=>M.flat().filter(x=>x).length;
+KCARDS.GC17=()=>{ const mk=()=>{ for(;;){ const M=[[kcR(1,3),kcR(1,3)],[kcR(1,3),kcR(0,3)]], f=M.flat().filter(x=>x); if(new Set(f).size>=2&&Math.max(...f)>=2) return M; } }; const M=mk(), M2=mk(); const tab=M=>`<table style="font-size:1.5rem;border-collapse:collapse">${M.map(r=>`<tr>${r.map(c=>`<td style="width:46px;height:46px;border:2px solid #B5701F;text-align:center;background:${c?'#FFE3B0':'#fff'}">${c||''}</td>`).join('')}</tr>`).join('')}</table>`; const sum=M=>M.flat().reduce((a,b)=>a+b,0), cells=M=>M.flat().filter(x=>x).length;
   return {t:'쌓기나무 세기', p:[
   {h:tab(M), s:'위에서 본 모양의 각 칸에 <b>그 자리에 쌓인 개수</b>를 써요.'},
   {h:tab(M)+kcEq(`${M.flat().filter(x=>x).join(' + ')} = ${sum(M)}`), s:`칸의 수를 모두 더하면 쌓기나무는 ${sum(M)}개. 위에서 보이는 칸만 세면 안 돼요.`},
@@ -8087,7 +8122,9 @@ KCARDS.DC06=()=>{ const p=[10,15,20,25,30,35,40][kcR(0,6)], N=[200,300,400,500][
   {h:`<div class="kc-bar"><span style="flex:${p};background:#F8C98A">${p}%</span><span style="flex:${100-p};background:#A9D2F0">${100-p}%</span></div>`, s:'띠그래프는 <b>전체를 100%</b>로 보고 부분이 차지하는 비율을 띠의 길이로 나타내요.'},
   {h:kcEq(`${N}명의 ${p}% = ${N*p/100}명`), s:`전체가 ${N}명이면 ${p}%는 ${N} × ${p} ÷ 100 = ${N*p/100}명. 퍼센트 수를 사람 수로 읽으면 안 돼요.`},
   {h:`<div class="kc-bar"><span style="flex:${p2};background:#F8C98A">${p2}%</span><span style="flex:${100-p2};background:#A9D2F0">${100-p2}%</span></div>`, s:`전체 ${N2}명 가운데 주황 부분은 몇 명일까요?`, ans:N2*p2/100, opts:kcO(N2*p2/100,p2,N2-p2), why:`전체 ${N2}명의 ${p2}%를 구해요.`}]}; };
-const kcJ=x=>{ try{ return typeof fixJ==='function'?fixJ(String(x)):String(x); }catch(e){ return String(x); } };
+/* 수 뒤 조사를 받침에 맞게(태그를 건너뛰어 본다): 3이에요/2예요, 3을/2를, 3은/2는, 3과/2와 */
+const kcPJ=t=>String(t).replace(/(\d)((?:<\/[a-z]+>)?)(이에요|예요|을|를|은|는|과|와)(?=[\s,.!?<]|$)/g,(m,d,tag,j)=>{ const b=[0,1,3,6,7,8].includes(+d); const P={이에요:['이에요','예요'],예요:['이에요','예요'],을:['을','를'],를:['을','를'],은:['은','는'],는:['은','는'],과:['과','와'],와:['과','와']}[j]; return d+tag+(b?P[0]:P[1]); });
+const kcJ=x=>{ let t=String(x); try{ if(typeof fixJ==='function') t=fixJ(t); }catch(e){} return kcPJ(t); };
 /* 손글씨로 쓸지: 입력 방식을 고른 적이 있으면 그것을, 아니면 1~2학년이면 손글씨 */
 function kcHand(){ let im=null; try{ im=localStorage.getItem('dotori-input'); }catch(e){} if(im) return im==='hand'; try{ const u=S&&S.ui!=null&&typeof UNITS36!=='undefined'?UNITS36[S.ui]:null; return !(u&&u.grade>=3); }catch(e){ return true; } }
 function cardStep(stp,done){ done=done||(()=>{ S.si++; step(); }); const mk=KCARDS[stp.c]; if(!mk) return done(); kcSeen(stp.c,stp.why||'v'); let C=mk(), pi=0, tries=0; const who='halmi';
@@ -8102,7 +8139,7 @@ function cardStep(stp,done){ done=done||(()=>{ S.si++; step(); }); const mk=KCAR
     document.getElementById('back').onclick=backToList; try{ hush(); say(kcJ(P.s).replace(/<[^>]+>/g,''),who); }catch(e){}
     const nx=document.getElementById('next'); nx.onclick=()=>{ if(last){ kcDone(stp.c,tries); done(); } else { pi++; draw(); } };
     if(!last) return; try{ window.__kcAns=String(P.ans); }catch(e){} const why=document.getElementById('kcwhy'), re=document.getElementById('kcre');
-    const good=()=>{ try{ sfx('good'); }catch(e){} why.textContent='맞아요!'; nx.style.display=''; };
+    const good=()=>{ try{ sfx('good'); }catch(e){} why.textContent=P.full!=null?`맞아요! 그래서 답은 ${P.full}${[2,4,5,9].includes(+String(P.full).slice(-1))?'예요':'이에요'}.`:'맞아요!'; nx.style.display=''; };
     const bad=()=>{ tries++; try{ sfx('bad'); }catch(e){} why.textContent='💡 '+kcJ(P.why); re.style.display=''; };   /* 틀리면 같은 문제를 다시 고르게 하지 않고 수를 바꿔 다시 낸다(찍어서 넘어가지 못하게) */
     re.onclick=()=>{ C=mk(); pi=tries>=2?0:C.p.length-1; if(tries>=2) tries=0; draw(); };                                   /* 두 번 틀리면 첫 장부터 다시 */
     if(hw){ const pad=writePad(document.getElementById('kchw'),String(P.ans),'write',null,{}); document.getElementById('kcclr').onclick=()=>pad.clear();

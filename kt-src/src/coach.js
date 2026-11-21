@@ -7,7 +7,10 @@
    한 세트에 사다리는 두 번까지, 같은 조각은 한 번만. 세트 점수에는 영향을 주지 않는다(카드는 점수 칸이 없고, 덧붙인 문제는 맞히면 별이 늘 뿐). */
 function sameFormQ(q,code){ for(let t=0;t<8;t++){ let n=null;
     try{ if(q._e!=null&&typeof gen1==='function') n=gen1(q._e,q._ei,(Math.random()*1e9)|0); else if(q._ep&&G36[q._ep]){ n=G36[q._ep][q._ti!=null?q._ti:q._ei](); if(n){ n._ep=q._ep; n._ti=q._ti; } } }catch(e){ n=null; }
-    if(!n||n.manip||n.onMount) continue; if(String(n.q)===String(q.q)&&String(n.ans)===String(q.ans)) continue; if(code&&n.mis&&!Object.values(n.mis).includes(code)&&t<5) continue; n._scaf=1; return n; } return null; }
+    if(!n||n.manip||n.onMount) continue; if(String(n.q)===String(q.q)&&String(n.ans)===String(q.ans)) continue; if(code&&n.mis&&!Object.values(n.mis).includes(code)&&t<5) continue; n._scaf=1; return n; }
+  /* 같은 꼴이 늘 같은 문제를 내면 같은 편의 다른 꼴에서 고른다 */
+  try{ const ep=q._ep, F=ep&&G36[ep]; if(F) for(const i of shuffle(F.map((_,k)=>k))){ if(i===(q._ti!=null?q._ti:q._ei)) continue; const n=F[i](); if(!n||n.manip||n.onMount||n.write!==q.write) continue; if(code&&!(n.mis&&Object.values(n.mis).includes(code))) continue; n._ep=ep; n._ti=i; n._scaf=1; return n; } }catch(e){}
+  return null; }
 function ladderAfter(q,ok,m){ if(!S||!S.acts||S.diag||q.diag||q._probe||q._scaf||q._chk) return; if(S._ld==null){ S._ld={n:0,pc:{},run:0,done:{}}; }
   const L=S._ld; if(q._firstSeen) return; q._firstSeen=1;
   if(ok){ L.run=0; return; } L.run++;
@@ -85,4 +88,36 @@ function parentPage(){ if(typeof S!=='undefined'&&S) S.idle=true; try{ hush(); }
   try{ const st=document.querySelector('#app .stage'); if(st) st.insertAdjacentHTML('afterbegin',`<div class="btns" style="margin:0 0 10px"><button class="ghost" id="kt-parent2">보호자에게 보여 줄 한 장</button></div>`); document.getElementById('kt-parent2').onclick=parentPage; }catch(e){}
   return r; }; }
 
-try{ window._parentPage=parentPage; window._ladderAfter=ladderAfter; window._MISC=MISC; }catch(e){}
+
+/* 받침에 따라 '이라고/라고' */
+function jRago(g){ const ch=String(g).trim().slice(-1); if(/[0-9]/.test(ch)) return [0,1,3,6,7,8].includes(+ch)?'이라고':'라고'; const c=ch.charCodeAt(0); if(c>=0xAC00&&c<=0xD7A3) return (c-0xAC00)%28?'이라고':'라고'; return '라고'; }
+/* ===== 아이가 낸 답으로 말하기 (로드맵 1단계-②) =====
+   '틀린 이유 보기'를 켰을 때 나오는 한마디 앞에 아이가 낸 답을 붙인다: "885라고 했구나. 받아올림한 1을 더해요…" */
+{ const _ar2=afterRec; afterRec=function(q,given,ok,m){ _ar2(q,given,ok,m); try{ if(!ok&&q._tip&&q.hint1===q._tip){ const g=clean(given); if(g&&g.length<=14&&!/^m:|^ok:/.test(g)){ q.hint1=`<b>${esc(g)}</b>${jRago(g)} 했구나. ${q._tip}`; q._tip=q.hint1; } } }catch(e){} }; }
+
+/* ===== 막힘 감지 (로드맵 2단계-⑥) =====
+   한 문제 앞에서 오래 멈춰 있으면(1~2학년 40초, 3~6학년 70초) '같이 알아볼까?' 단추를 띄운다. 누르면 그 문제 오답들이 가리키는 개념 카드를 먼저 보고 같은 문제로 돌아온다.
+   도움을 받은 뒤의 답은 지식추적에 넣지 않는다(q._kt). */
+let _stuckT=null;
+function stuckArm(q){ clearTimeout(_stuckT); if(!q||!S||!S.acts||S.diag||q.diag||q._probe||q._kt||q._helped) return; const codes=Object.values(q.mis||{}).filter(m=>MISC[m]); const c=codes.map(m=>MISC[m][0][0]).find(c=>KCARDS[c]); if(!c) return;
+  const at=S.i, wait=(q._e!=null||((UNITS36[S.ui]||{}).grade||3)<3)?40000:70000;
+  _stuckT=setTimeout(()=>{ try{ if(!S||S.i!==at||S.acts[S.i].q!==q||S.tries>0||document.querySelector('#fb .fb')) return; const fb=document.getElementById('fb'); if(!fb||document.getElementById('kt-stuck')) return;
+    fb.insertAdjacentHTML('afterbegin',`<button class="ghost" id="kt-stuck" style="width:100%;margin:6px 0">💡 어려우면 같이 알아볼까?</button>`);
+    document.getElementById('kt-stuck').onclick=()=>{ q._helped=1; q._kt=1; S.acts.splice(S.i,0,{kind:'card',c,why:'stuck'}); runAct(); }; }catch(e){} },wait); }
+{ const _qq=question; question=function(q){ const r=_qq.apply(this,arguments); try{ stuckArm(q); }catch(e){} return r; }; }
+
+/* ===== 자신 있었는지 묻기 (로드맵 2단계-⑧ 대신) =====
+   교사는 아이가 '찍어서 맞혔는지'를 표정으로 안다. 앱은 물어본다: 오개념 보기가 있는 객관식을 처음에 맞혔을 때, 세트에 두 번까지, 네 번에 한 번꼴로
+   '확실해요 / 헷갈렸어요 / 찍었어요'. 찍었다고 하면 같은 꼴 문제를 세트 끝에 한 번 더 내서 확인한다. 기록은 기기 안 dotori-kt-conf. */
+const CFK='dotori-kt-conf';
+{ const _an=answer; answer=function(btn,q){ const first=S&&S.tries===0; const r=_an.apply(this,arguments);
+  try{ if(!first||!q||q._scaf||q.diag||q._probe||!S||!S.acts||S.diag||!q.opts||q.opts.length<3||!q.mis||!Object.keys(q.mis).length) return r;
+    const v=btn&&btn.dataset?btn.dataset.v:null; if(String(v)!==String(q.ans)) return r; S._cf=S._cf||0; if(S._cf>=2||Math.random()>0.25) return r; S._cf++;
+    const m=document.querySelector('#fb .msg'); if(!m) return r; const Q=(S.acts[S.i]&&S.acts[S.i].q)||q;
+    m.insertAdjacentHTML('beforeend',`<div class="kt-conf" style="margin-top:10px;font-size:1rem">자신 있었어? <span style="display:inline-flex;gap:6px;flex-wrap:wrap;margin-top:6px">${['확실해요','헷갈렸어요','찍었어요'].map(x=>`<button class="ghost" data-c="${x}" style="padding:6px 10px;font-size:.95rem">${x}</button>`).join('')}</span></div>`);
+    m.querySelectorAll('.kt-conf button').forEach(b=>b.onclick=()=>{ const c=b.dataset.c; m.querySelector('.kt-conf').innerHTML=c==='찍었어요'?'솔직하게 말해 줘서 고마워! 비슷한 문제를 하나 더 풀어 보자.':c==='헷갈렸어요'?'헷갈려도 맞혔네! 비슷한 문제를 한 번 더 볼게.':'좋아요!';
+      try{ const L=JSON.parse(localStorage.getItem(CFK)||'[]'); L.push({t:Date.now(),ep:Q._ep||Q._e,c}); localStorage.setItem(CFK,JSON.stringify(L.slice(-300))); }catch(e){}
+      if(c!=='확실해요'){ const sib=sameFormQ(Q._ep?Q:q,null); if(sib){ sib._conf=1; S.acts.push({kind:'q',q:sib}); } } }); }catch(e){}
+  return r; }; }
+
+try{ window._sameFormQ=sameFormQ; window._jRago=jRago; window._parentPage=parentPage; window._ladderAfter=ladderAfter; window._MISC=MISC; }catch(e){}
