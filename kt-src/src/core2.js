@@ -284,8 +284,13 @@ body{background-image:none}body:before{background:#FFF7EC var(--kt-grain)!import
 .kt-mode:active{transform:translateY(3px);filter:none}.kt-mode:focus-visible,.kt-tree:focus-visible,.kt-chip:focus-visible{outline:3px solid #3F7A34;outline-offset:3px}
 .kt-faces{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:6px 0 14px}.kt-faces.small{grid-template-columns:repeat(4,1fr);gap:8px}.kt-pick{display:flex;flex-direction:column;align-items:center;gap:4px;padding:8px 2px;border:0;background:none;cursor:pointer;font-family:"Jua",sans-serif;color:var(--ink)}.kt-pick b{font-weight:400;font-size:.95rem}.kt-pick.on .kt-face{outline:3px solid #3F7A34;outline-offset:2px}.kt-pick:focus-visible{outline:3px solid #3F7A34;border-radius:14px}
 .kt-face.tiny{width:34px;height:34px;border-width:2px}.kt-face.tiny img{height:30px;margin-bottom:-2px}
-#kt-me{position:fixed;bottom:calc(14px + env(safe-area-inset-bottom));left:10px;z-index:900;display:flex;align-items:center;gap:6px;padding:4px 12px 4px 4px;border:2px solid #7A4A1E;border-radius:999px;background:#FFF8EC;box-shadow:0 3px 0 rgba(90,53,22,.22);font-family:"Jua",sans-serif;font-size:1rem;color:#5A3516;cursor:pointer}
+#kt-me{position:fixed;top:calc(10px + env(safe-area-inset-top));right:10px;z-index:900;display:flex;align-items:center;gap:6px;padding:4px 12px 4px 4px;border:2px solid #7A4A1E;border-radius:999px;background:#FFF8EC;box-shadow:0 3px 0 rgba(90,53,22,.22);font-family:"Jua",sans-serif;font-size:1rem;color:#5A3516;cursor:pointer}
 #kt-me b{font-weight:400;white-space:nowrap}
+#kt-me.inrow{position:static;margin-left:auto;flex:0 0 auto;box-shadow:none}
+.top .dots{flex-wrap:nowrap;min-width:0;gap:clamp(2px,1vw,5px)}.top .dots .dot{flex:0 1 12px;min-width:5px}.top .dots .dot.now{flex:0 1 26px}
+.top .crumb{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+#kt-me.inrow+.speak,#kt-me.inrow+#speak{margin-left:6px}
+#kt-me.face{padding:3px;gap:0}#kt-me.face b{display:none}#kt-me.face .kt-face.tiny{width:34px;height:34px;margin:0}#kt-me.face .kt-face.tiny img{height:30px}
 @media print{#kt-me{display:none}}
 .kt-face{display:grid;place-items:end center;width:72px;height:72px;border-radius:46% 54% 50% 50%/52% 48% 52% 48%;background:var(--fc);border:3px solid #7A4A1E;overflow:hidden}.kt-face img{height:62px;margin-bottom:-4px}.kt-faces.small .kt-face{width:60px;height:60px}.kt-faces.small .kt-face img{height:52px}.kt-face.tiny{display:inline-grid;width:26px;height:26px;border-width:2px;vertical-align:-7px;margin-right:4px}.kt-face.tiny img{height:22px;margin-bottom:-2px}
 .kt-chips{display:flex;flex-wrap:wrap;gap:8px;margin:4px 2px 8px}
@@ -389,9 +394,19 @@ function importAll(txt){ let o; try{ o=JSON.parse(txt); }catch(e){ return false;
   try{ Object.keys(localStorage).filter(k=>k.startsWith('dotori-')).forEach(k=>localStorage.removeItem(k)); ks.forEach(k=>localStorage.setItem(k,o[k])); }catch(e){ return false; } return true; }
 window.KT={probePool,probeTops,qInfo,bestQ,slotPage,switchSlot,curSlot,slotName,knownSlots,exportAll,importAll,checkPieces,pieceStage,CPL,CPC,MISC,weakPieces,state,gradePage:g=>gradePage(g),startQuick,startDaily,pref,setPref,rec:(q,g,ok)=>(q&&q._e!=null?recEP:rec)(q,g,ok),factKey,dueFacts,startReview,report,status,epKC,MIS,LADDER,regen,formsOf,startDiag,startFocus,teacherPage,course};
 function myBadge(){ try{ let b=document.getElementById('kt-me'); const id=curSlot();
-  if(id==='0'){ if(b) b.remove(); return; }
-  if(!b){ b=document.createElement('button'); b.id='kt-me'; b.type='button'; document.body.appendChild(b); b.onclick=()=>slotPage(false); }
-  b.innerHTML=`${slotFace(id,'tiny')}<b>${slotName(id)}</b>`; b.setAttribute('aria-label','내 친구: '+slotName(id)+' (바꾸기)'); }catch(e){} }
+  if(id==='0'){ if(b) b.remove(); _meEl=null; return; }
+  if(!b) b=_meEl; if(!b){ b=document.createElement('button'); b.id='kt-me'; b.type='button'; document.body.appendChild(b); b.onclick=()=>slotPage(false); } _meEl=b;
+  b.innerHTML=`${slotFace(id,'tiny')}<b>${slotName(id)}</b>`; b.setAttribute('aria-label','내 친구: '+slotName(id)+' (바꾸기)'); placeBadge(); }catch(e){} }
+/* 내 친구 표시 자리(교수님 11/22): '나'는 오른쪽 위가 익숙하다. 다만 떠 있으면 🔊 단추·진행 점을 가리므로
+   맨 위 줄(.top)이 있는 화면에서는 그 줄 안 오른쪽 끝(🔊 바로 왼쪽)에 넣고, 문제 화면(🔊 있음)에서는 얼굴만 작게.
+   맨 위 줄이 없는 화면(처음 화면)에서만 오른쪽 위에 이름과 함께 띄운다. 화면이 바뀔 때마다 다시 자리를 잡는다. */
+let _meEl=null;   /* 화면을 다시 그리면 맨 위 줄 안의 표시도 함께 지워지므로 붙잡아 두었다가 다시 넣는다 */
+function placeBadge(){ const b=document.getElementById('kt-me')||_meEl; if(!b) return; const top=document.querySelector('#app .top');
+  if(top){ const sp=top.querySelector('#speak,.speak'); b.classList.add('inrow'); b.classList.toggle('face',!!sp); if(sp){ if(b.nextSibling!==sp||b.parentNode!==top) top.insertBefore(b,sp); } else if(b.parentNode!==top||top.lastElementChild!==b) top.appendChild(b); }
+  else { b.classList.remove('inrow','face'); if(b.parentNode!==document.body) document.body.appendChild(b); }
+  /* 맨 위 줄의 제목(예: '선생님용')이 잘리면 이름은 빼고 얼굴만 */
+  if(top&&!b.classList.contains('face')){ const cr=top.querySelector('.crumb'); if(cr&&cr.scrollWidth>cr.clientWidth+1) b.classList.add('face'); } }
+try{ new MutationObserver(()=>placeBadge()).observe(document.getElementById('app'),{childList:true}); }catch(e){}
 (function boot(){ const h=location.hash; const c=cfg();
   if(h==='#kt-share-on'){ c.share=true; did(); setCfg(c); } else if(h==='#kt-share-off'){ c.share=false; W(QK,[]); setCfg(c); } else if(h==='#kt-reset'){ try{ localStorage.removeItem(DK); }catch(e){} did(); }
   if(h.startsWith('#kt-')) history.replaceState(null,'',location.pathname+location.search);
