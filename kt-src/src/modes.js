@@ -94,15 +94,27 @@ function bandPage(next){ hush(); app.className='wrap';
 
 function modesHTML(){ const P=pref(), st=state(), done=st.daily&&st.daily.d===dstr(Date.now());
   const sub=done?`${st.streak||1}일째 이어서 풀고 있어요`:P.band?`내 수준에 맞춘 ${P.pace}문제`:'내 수준에 맞춰 매일 조금씩';
-  return `<div class="kt-modes"><button class="kt-mode" id="kt-quick"><img class="who" src="${JU['청이']['자세_만세']}" alt=""><b>가볍게 풀기</b><span>5문제만 풀고 끝</span></button>
-    <button class="kt-mode" id="kt-daily"><img class="who" src="${JU['부엉 박사님']['자세_손가락하나']}" alt=""><b>오늘의 문제</b><span>${sub}</span>${done?'<i class="stamp">다 풀었어요</i>':''}</button></div>
-    <div class="kt-chips"><button class="kt-chip" id="kt-hard" style="border-color:#D45F16;color:#B4480C">도전 문장제</button><button class="kt-chip${P.why?' on':''}" id="kt-why">틀린 이유 보기 ${P.why?'켜짐':'꺼짐'}</button><button class="kt-chip" id="kt-pace">하루 ${P.pace}문제</button><button class="kt-chip" id="kt-slot">${slotName(curSlot())?slotFace(curSlot(),'tiny')+slotName(curSlot()):'내 친구 고르기'}</button><button class="kt-chip" id="kt-band">${bandName(P.band)}</button>${P.band>=3&&!st.lvl?'<button class="kt-chip" id="kt-diag">내 수준 정확히 찾기</button>':''}</div>
+  const diag=P.band>=3&&!st.lvl;
+  /* 홈 정리(11/22, 카본 교차검토): 주 활동 하나를 크게, 다른 활동은 작은 판자로. 설정은 맨 위 '설정'으로 옮기고 칩 줄은 없앤다. */
+  return `<div class="kt-main"><button class="kt-mode kt-big" id="kt-daily"><img class="who" src="${JU['부엉 박사님']['자세_손가락하나']}" alt=""><b>오늘의 문제</b><span>${sub}</span>${done?'<i class="stamp">다 풀었어요</i>':''}</button></div>
+    <div class="kt-small${diag?' three':''}"><button class="kt-mode kt-sm" id="kt-quick"><b>가볍게 풀기</b><span>5문제만</span></button><button class="kt-mode kt-sm" id="kt-hard"><b>도전 문장제</b><span>어려운 이야기 문제</span></button>${diag?'<button class="kt-mode kt-sm" id="kt-diag"><b>내 수준 찾기</b><span>처음 한 번</span></button>':''}</div>
     <h2 class="sec">골라서 풀기</h2>`; }
 function bindModes(){ const on=(id,f)=>{ const b=document.getElementById(id); if(b) b.onclick=f; };
-  on('kt-quick',startQuick); on('kt-daily',startDaily); on('kt-diag',startDiag);
-  on('kt-why',()=>{ setPref({why:!pref().why}); home(); });
-  on('kt-pace',()=>{ const p=pref().pace; setPref({pace:p===5?10:p===10?15:5}); home(); });
-  on('kt-band',()=>bandPage(home)); on('kt-slot',()=>slotPage(false)); on('kt-hard',hardPage); }
+  on('kt-quick',startQuick); on('kt-daily',startDaily); on('kt-diag',startDiag); on('kt-hard',hardPage); homeTop(); }
+/* 처음 화면 맨 위 줄: 스크롤해도 붙어 있고, 오른쪽에 '설정'과 내 친구(placeBadge가 이 줄 끝에 넣음) */
+function homeTop(){ const root=document.getElementById('app'); if(!root||root.querySelector('.kt-hometop')) return;
+  root.insertAdjacentHTML('afterbegin','<div class="top kt-hometop"><button class="kt-gear" id="kt-set" type="button">설정</button></div>');
+  document.getElementById('kt-set').onclick=setPage; setTimeout(()=>{ const t=root.querySelector('.kt-hometop'); if(t&&root.firstElementChild!==t) root.prepend(t); try{ placeBadge(); }catch(e){} }); }
+function setPage(){ hush(); app.className='wrap'; const P=pref();
+  const row=(t,c)=>`<div class="kt-setrow"><span>${t}</span><div>${c}</div></div>`;
+  app.innerHTML=`<div class="top"><button class="back" id="back">← 처음</button><div class="crumb">설정</div></div>
+    <div class="stage kt-set">${row('내 친구',`<button class="kt-opt on" id="s-slot">${slotName(curSlot())||'고르기'}</button>`)}
+    ${row('푸는 학년',`<button class="kt-opt on" id="s-band">${bandName(P.band)}</button>`)}
+    ${row('하루 문제 수',[5,10,15].map(n=>`<button class="kt-opt${P.pace===n?' on':''}" data-pace="${n}">${n}문제</button>`).join(''))}
+    ${row('틀린 이유 보기',`<button class="kt-opt${P.why?' on':''}" data-why="1">켜기</button><button class="kt-opt${P.why?'':' on'}" data-why="0">끄기</button>`)}</div>`;
+  document.getElementById('back').onclick=home; document.getElementById('s-slot').onclick=()=>slotPage(false); document.getElementById('s-band').onclick=()=>bandPage(setPage);
+  app.querySelectorAll('[data-pace]').forEach(b=>b.onclick=()=>{ setPref({pace:+b.dataset.pace}); setPage(); });
+  app.querySelectorAll('[data-why]').forEach(b=>b.onclick=()=>{ setPref({why:b.dataset.why==='1'}); setPage(); }); }
 /* 도전 문장제: 영역을 골라 복합 개념 문장제 5문제 (난이도 '상'은 임시 표시, 나중에 통계로 다시 가린다) */
 function hardPage(){ if(!pref().band) return bandPage(hardPage); hush(); app.className='wrap'; const b=pref().band;
   app.innerHTML=`<div class="top"><button class="back" id="back">← 처음</button><div class="crumb">도전 문장제</div><span style="width:70px"></span></div>

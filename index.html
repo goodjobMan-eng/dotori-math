@@ -3144,7 +3144,7 @@ function logAct(ok,kind){ const st=loadStats(); st.n++; if(ok) st.ok++; if(kind=
 function logSet(score){ const st=loadStats(); st.sets.push({k:S.saveKey,t:S.title,s:score,ts:Date.now()}); if(st.sets.length>200) st.sets=st.sets.slice(-200); saveStats(st); }
 const avgSet=st=>st.sets.length?Math.round(st.sets.reduce((a,x)=>a+x.s,0)/st.sets.length*10)/10:null;
 function statsCard(){ const st=loadStats(); if(!st.n) return ''; const t=st.days[todayKey()]||{n:0,ok:0}; const pct=Math.round(st.ok/st.n*100);
-  return `<button class="statcard" id="statsbtn"><div class="sc-row"><div class="sc-item"><b>${st.n}</b><span>푼 활동</span></div><div class="sc-item"><b>${pct}%</b><span>정답률</span></div><div class="sc-item"><b>${avgSet(st)??'-'}</b><span>평균 점수</span></div><div class="sc-item"><b>${st.streak}</b><span>연속 정답${st.streak>=5?' 🔥':''}</span></div></div><div class="sc-foot">오늘 ${t.n}개 풀고 ${t.ok}개 맞았어요 · 최고 연속 ${st.best} · 자세히 보기 →</div></button>`; }
+  return `<button class="statcard mini" id="statsbtn"><span>오늘 <b>${t.n}</b>문제</span><span>맞힘 <b>${t.ok}</b></span><span>연속 <b>${st.streak}</b></span><i>자세히 →</i></button>`; }
 function statsPage(){ if(typeof S!=='undefined'&&S) S.idle=true; hush(); app.className='wrap'; const st=loadStats(); const best=load(); const pct=st.n?Math.round(st.ok/st.n*100):0;
   const days=[]; for(let i=6;i>=0;i--){ const d=new Date(); d.setDate(d.getDate()-i); const k=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; days.push({k,lab:['일','월','화','수','목','금','토'][d.getDay()],v:st.days[k]||{n:0,ok:0}}); }
   const mx=Math.max(1,...days.map(d=>d.v.n));
@@ -8290,15 +8290,27 @@ function bandPage(next){ hush(); app.className='wrap';
 
 function modesHTML(){ const P=pref(), st=state(), done=st.daily&&st.daily.d===dstr(Date.now());
   const sub=done?`${st.streak||1}일째 이어서 풀고 있어요`:P.band?`내 수준에 맞춘 ${P.pace}문제`:'내 수준에 맞춰 매일 조금씩';
-  return `<div class="kt-modes"><button class="kt-mode" id="kt-quick"><img class="who" src="${JU['청이']['자세_만세']}" alt=""><b>가볍게 풀기</b><span>5문제만 풀고 끝</span></button>
-    <button class="kt-mode" id="kt-daily"><img class="who" src="${JU['부엉 박사님']['자세_손가락하나']}" alt=""><b>오늘의 문제</b><span>${sub}</span>${done?'<i class="stamp">다 풀었어요</i>':''}</button></div>
-    <div class="kt-chips"><button class="kt-chip" id="kt-hard" style="border-color:#D45F16;color:#B4480C">도전 문장제</button><button class="kt-chip${P.why?' on':''}" id="kt-why">틀린 이유 보기 ${P.why?'켜짐':'꺼짐'}</button><button class="kt-chip" id="kt-pace">하루 ${P.pace}문제</button><button class="kt-chip" id="kt-slot">${slotName(curSlot())?slotFace(curSlot(),'tiny')+slotName(curSlot()):'내 친구 고르기'}</button><button class="kt-chip" id="kt-band">${bandName(P.band)}</button>${P.band>=3&&!st.lvl?'<button class="kt-chip" id="kt-diag">내 수준 정확히 찾기</button>':''}</div>
+  const diag=P.band>=3&&!st.lvl;
+  /* 홈 정리(11/22, 카본 교차검토): 주 활동 하나를 크게, 다른 활동은 작은 판자로. 설정은 맨 위 '설정'으로 옮기고 칩 줄은 없앤다. */
+  return `<div class="kt-main"><button class="kt-mode kt-big" id="kt-daily"><img class="who" src="${JU['부엉 박사님']['자세_손가락하나']}" alt=""><b>오늘의 문제</b><span>${sub}</span>${done?'<i class="stamp">다 풀었어요</i>':''}</button></div>
+    <div class="kt-small${diag?' three':''}"><button class="kt-mode kt-sm" id="kt-quick"><b>가볍게 풀기</b><span>5문제만</span></button><button class="kt-mode kt-sm" id="kt-hard"><b>도전 문장제</b><span>어려운 이야기 문제</span></button>${diag?'<button class="kt-mode kt-sm" id="kt-diag"><b>내 수준 찾기</b><span>처음 한 번</span></button>':''}</div>
     <h2 class="sec">골라서 풀기</h2>`; }
 function bindModes(){ const on=(id,f)=>{ const b=document.getElementById(id); if(b) b.onclick=f; };
-  on('kt-quick',startQuick); on('kt-daily',startDaily); on('kt-diag',startDiag);
-  on('kt-why',()=>{ setPref({why:!pref().why}); home(); });
-  on('kt-pace',()=>{ const p=pref().pace; setPref({pace:p===5?10:p===10?15:5}); home(); });
-  on('kt-band',()=>bandPage(home)); on('kt-slot',()=>slotPage(false)); on('kt-hard',hardPage); }
+  on('kt-quick',startQuick); on('kt-daily',startDaily); on('kt-diag',startDiag); on('kt-hard',hardPage); homeTop(); }
+/* 처음 화면 맨 위 줄: 스크롤해도 붙어 있고, 오른쪽에 '설정'과 내 친구(placeBadge가 이 줄 끝에 넣음) */
+function homeTop(){ const root=document.getElementById('app'); if(!root||root.querySelector('.kt-hometop')) return;
+  root.insertAdjacentHTML('afterbegin','<div class="top kt-hometop"><button class="kt-gear" id="kt-set" type="button">설정</button></div>');
+  document.getElementById('kt-set').onclick=setPage; setTimeout(()=>{ const t=root.querySelector('.kt-hometop'); if(t&&root.firstElementChild!==t) root.prepend(t); try{ placeBadge(); }catch(e){} }); }
+function setPage(){ hush(); app.className='wrap'; const P=pref();
+  const row=(t,c)=>`<div class="kt-setrow"><span>${t}</span><div>${c}</div></div>`;
+  app.innerHTML=`<div class="top"><button class="back" id="back">← 처음</button><div class="crumb">설정</div></div>
+    <div class="stage kt-set">${row('내 친구',`<button class="kt-opt on" id="s-slot">${slotName(curSlot())||'고르기'}</button>`)}
+    ${row('푸는 학년',`<button class="kt-opt on" id="s-band">${bandName(P.band)}</button>`)}
+    ${row('하루 문제 수',[5,10,15].map(n=>`<button class="kt-opt${P.pace===n?' on':''}" data-pace="${n}">${n}문제</button>`).join(''))}
+    ${row('틀린 이유 보기',`<button class="kt-opt${P.why?' on':''}" data-why="1">켜기</button><button class="kt-opt${P.why?'':' on'}" data-why="0">끄기</button>`)}</div>`;
+  document.getElementById('back').onclick=home; document.getElementById('s-slot').onclick=()=>slotPage(false); document.getElementById('s-band').onclick=()=>bandPage(setPage);
+  app.querySelectorAll('[data-pace]').forEach(b=>b.onclick=()=>{ setPref({pace:+b.dataset.pace}); setPage(); });
+  app.querySelectorAll('[data-why]').forEach(b=>b.onclick=()=>{ setPref({why:b.dataset.why==='1'}); setPage(); }); }
 /* 도전 문장제: 영역을 골라 복합 개념 문장제 5문제 (난이도 '상'은 임시 표시, 나중에 통계로 다시 가린다) */
 function hardPage(){ if(!pref().band) return bandPage(hardPage); hush(); app.className='wrap'; const b=pref().band;
   app.innerHTML=`<div class="top"><button class="back" id="back">← 처음</button><div class="crumb">도전 문장제</div><span style="width:70px"></span></div>
@@ -8534,6 +8546,14 @@ body{background-image:none}body:before{background:#FFF7EC var(--kt-grain)!import
 #kt-me.face{padding:3px;gap:0}#kt-me.face b{display:none}#kt-me.face .kt-face.tiny{width:34px;height:34px;margin:0}#kt-me.face .kt-face.tiny img{height:30px}
 @media print{#kt-me{display:none}}
 .kt-face{display:grid;place-items:end center;width:72px;height:72px;border-radius:46% 54% 50% 50%/52% 48% 52% 48%;background:var(--fc);border:3px solid #7A4A1E;overflow:hidden}.kt-face img{height:62px;margin-bottom:-4px}.kt-faces.small .kt-face{width:60px;height:60px}.kt-faces.small .kt-face img{height:52px}.kt-face.tiny{display:inline-grid;width:26px;height:26px;border-width:2px;vertical-align:-7px;margin-right:4px}.kt-face.tiny img{height:22px;margin-bottom:-2px}
+.kt-hometop{position:sticky;top:0;z-index:50;justify-content:flex-end;margin:-6px -4px 8px;padding:calc(6px + env(safe-area-inset-top)) 4px 6px;background:#FFF7EC}
+.kt-hometop #kt-me.inrow{margin-left:8px}.kt-gear{order:-1;margin-left:auto;padding:6px 14px;border:2px solid #7A4A1E;border-radius:999px;background:#FFF8EC;font-family:"Jua",sans-serif;font-size:1rem;color:#5A3516;cursor:pointer}
+.kt-main{margin:40px 0 12px}.kt-mode.kt-big{width:100%;min-height:132px}.kt-mode.kt-big b{font-size:clamp(1.7rem,7vw,2.2rem)}.kt-mode.kt-big .who{height:84px;top:-46px;right:8%}
+.kt-small{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:0 0 14px}.kt-small.three{grid-template-columns:repeat(3,1fr)}
+.kt-mode.kt-sm{min-height:86px;padding:14px 6px 12px calc(6px + 4%)}.kt-mode.kt-sm b{font-size:clamp(1rem,4.3vw,1.2rem)}.kt-mode.kt-sm span{font-size:.76rem}
+.kt-set{text-align:left}.kt-setrow{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:14px 4px;border-bottom:2px dashed #E3CFA8}.kt-setrow>span{font-family:"Jua",sans-serif;font-size:1.1rem;color:#5A3516}.kt-setrow>div{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
+.kt-opt{padding:7px 12px;border:2px solid #C9A77A;border-radius:12px;background:#fff;font-family:"Jua",sans-serif;font-size:.95rem;color:#7B5632;cursor:pointer}.kt-opt.on{border-color:#3F7A34;background:#E4F1D8;color:#2F5F27}
+.statcard.mini{display:flex;align-items:center;justify-content:center;gap:14px;flex-wrap:wrap;padding:10px 14px;font-family:"Jua",sans-serif;font-size:1rem;color:#5A3516;text-align:center}.statcard.mini b{font-size:1.5rem;color:#D45F16;margin:0 2px}.statcard.mini i{font-style:normal;color:#9A7A55;font-size:.9rem}
 .kt-chips{display:flex;flex-wrap:wrap;gap:8px;margin:4px 2px 8px}
 .kt-chip{position:relative;padding:7px 13px 7px 25px;border:0;background:#E9D2A6;color:#5A3516;font-family:"Jua",sans-serif;font-size:.88rem;cursor:pointer;clip-path:polygon(11px 0,100% 0,100% 100%,11px 100%,0 50%)}
 .kt-chip::before{content:"";position:absolute;left:12px;top:50%;width:6px;height:6px;margin-top:-3px;border-radius:50%;background:var(--bg)}
