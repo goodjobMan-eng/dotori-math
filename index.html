@@ -7964,6 +7964,20 @@ NX['S6-77']=[()=>{ const a=rnd(4,9), c=rnd(2,4); return _W(`부피가 1 cm³인 
 try{ for(const ep of Object.keys(NX)){ if(!G36[ep]) continue; for(const g of NX[ep]){ (window._NTW=window._NTW||[]).push([ep,G36[ep].length,g]); G36[ep].push(g); } } }catch(e){}
 window._NX=NX;
 
+// ===== 3-65. 글로만 단서를 주는 쌓기나무 문제에 '직접 쌓아 보는 판' (교수님 11/22: 단서는 주는데 쌓아 보려니 쌓을 곳이 없다) =====
+// 채점하지 않는 연습판. 문제마다 따로 묶지 않고 문서 전체에서 한 번만 듣는다(문제 틀·채점 흐름을 건드리지 않음). 누르면 쌓이고, 길게 누르거나 오른쪽 단추면 빠짐.
+const skScratchHTML=()=>{ const H=Array.from({length:SK_N},()=>Array(SK_N).fill(0)); return `<details class="skscr-d" style="margin:8px auto 0;max-width:300px;width:100%"><summary style="list-style:none;cursor:pointer;text-align:center;font-family:Jua,sans-serif;font-size:.98rem;color:#7B5632;background:#FFF3D6;border:2px solid #E3CFA8;border-radius:999px;padding:6px 10px">🧱 직접 쌓아 보기 (채점하지 않아요)</summary><div class="skscratch" data-h="${H.flat().join('')}" data-rot="0" style="margin:6px auto 0;background:#FFFDF6;border:2px dashed #E3CFA8;border-radius:12px;padding:6px 6px 8px;touch-action:manipulation;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none"><div class="skscr-b">${skIsoSvg(H,{s:26,click:true,cls:'sk3d'})}</div><div style="display:flex;gap:6px;justify-content:center;align-items:center;font-size:.86rem;color:#7B5632"><button type="button" class="ghost skscr-rot" style="padding:4px 10px;font-size:.9rem">⟳ 돌려 보기</button><button type="button" class="ghost skscr-clr" style="padding:4px 10px;font-size:.9rem">처음부터</button><span class="skscr-n">0개</span></div><div style="font-size:.8rem;color:#9A8468;text-align:center">누르면 쌓여요 · 길게 누르면 빠져요</div></div></details>`; };
+(()=>{ if(window._skScr) return; window._skScr=1; const get=el=>{ const s=el.dataset.h||''; return Array.from({length:SK_N},(_,r)=>Array.from({length:SK_N},(_,c)=>+s[r*SK_N+c]||0)); };
+  const draw=(el,H)=>{ el.dataset.h=H.flat().join(''); el.querySelector('.skscr-b').innerHTML=skIsoSvg(H,{s:26,rot:+el.dataset.rot||0,click:true,cls:'sk3d'}); el.querySelector('.skscr-n').textContent=skSum(H)+'개'; };
+  let timer=0, held=false, sx=0, sy=0; const cancel=()=>{ if(timer){ clearTimeout(timer); timer=0; } };
+  const hit=e=>{ const t=e.target&&e.target.closest?e.target:null; if(!t) return null; const el=t.closest('.skscratch'); if(!el) return null; const c=t.closest('[data-r]'); return {el,rc:c?[+c.dataset.r,+c.dataset.c]:null,t}; };
+  document.addEventListener('pointerdown',e=>{ const h=hit(e); held=false; cancel(); if(!h||!h.rc||e.button===2) return; sx=e.clientX; sy=e.clientY; timer=setTimeout(()=>{ timer=0; held=true; const H=get(h.el); if(H[h.rc[0]][h.rc[1]]>0){ H[h.rc[0]][h.rc[1]]--; draw(h.el,H); } },450); },true);
+  document.addEventListener('pointermove',e=>{ if(timer&&Math.hypot(e.clientX-sx,e.clientY-sy)>12) cancel(); },true);
+  ['pointerup','pointercancel'].forEach(n=>document.addEventListener(n,cancel,true));
+  document.addEventListener('click',e=>{ const h=hit(e); if(!h) return; e.stopPropagation(); if(h.t.closest('.skscr-rot')){ h.el.dataset.rot=String(((+h.el.dataset.rot||0)+1)%4); draw(h.el,get(h.el)); return; } if(h.t.closest('.skscr-clr')){ draw(h.el,get(h.el).map(r=>r.map(()=>0))); return; } if(held){ held=false; return; } if(!h.rc) return; const H=get(h.el); if(H[h.rc[0]][h.rc[1]]<SK_MAXH){ H[h.rc[0]][h.rc[1]]++; draw(h.el,H); } },true);
+  document.addEventListener('contextmenu',e=>{ const h=hit(e); if(!h) return; e.preventDefault(); cancel(); if(held||!h.rc) return; const H=get(h.el); if(H[h.rc[0]][h.rc[1]]>0){ H[h.rc[0]][h.rc[1]]--; draw(h.el,H); } },true); })();
+{ const _t=tagQ; tagQ=function(ep,i,q){ q=_t(ep,i,q); try{ if(/^S6-6[45]$/.test(ep)&&q&&!q.manip&&!q.onMount&&typeof q.q==='string'&&!/skscratch/.test(String(q.visual||''))){ const t=_pl(q.q), v=String(q.visual||''); const pick=/^[①②③④]$/.test(String(q.ans)); if(!pick){ const sc=skScratchHTML(); q.visual=(v.trim()?v:'')+sc; if(typeof q._cpaBase==='string') q._cpaBase+=sc; } } }catch(e){} return q; }; }
+
 /* ---------- 3-12. 개념 조각과 보기별 무게 (오개념 코드 → 모르는 개념 조각) ---------- */
 // 교수님 지적(2026-11-20): 오답에 코드만 붙일 게 아니라 "이 보기를 고른 아이는 어떤 개념을 모른다"는 가정과 무게가 있어야 한다.
 // CPC: 조각 → [이름, 처음 배우는 학년-학기, 선수 조각들]. MISC: 오개념 코드 → [[주 조각, 무게], [부 조각, 무게]].
@@ -8663,6 +8677,7 @@ function qFromEp36(ep){ return bestQ([ep]); }                    // 그 편에�
 function qFromEp(e){ const fs=G[e]||[]; for(let t=0;t<8&&fs.length;t++){ let q; try{ q=fs[rnd(0,fs.length-1)](); }catch(x){ continue; } if(q&&!q.manip&&!q.onMount) return q; } return null; }
 function bag(){ const acts=[], seen=new Set(); return {acts, push(q,flag){ if(!q) return false; const k=keyOf(q); if(seen.has(k)) return false; seen.add(k); if(flag) q[flag]=1; acts.push({kind:'q',q}); return true; }}; }
 // 한 세트는 한 엔진(1~2학년 영상편 / 영역별)의 문제로만 만든다.
+try{ window.__runSet=(...a)=>runSet(...a); }catch(e){}
 function runSet(acts,title,flag,video){ if(!acts.length) return home(); const q0=acts[0].q, ep12=q0._e!=null;
   const base=ep12?{mode:'final',ch:chapterOf(q0._e)}:{mode:'ep36',retry:true,ep:q0._ep,ui:uix(q0._ep),ch:0,chars:CAST};
   const steps=video?[video,{kind:'acts'}]:[{kind:'acts'}];

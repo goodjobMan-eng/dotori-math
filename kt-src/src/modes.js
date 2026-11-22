@@ -19,6 +19,7 @@ function qFromEp36(ep){ return bestQ([ep]); }                    // 그 편에�
 function qFromEp(e){ const fs=G[e]||[]; for(let t=0;t<8&&fs.length;t++){ let q; try{ q=fs[rnd(0,fs.length-1)](); }catch(x){ continue; } if(q&&!q.manip&&!q.onMount) return q; } return null; }
 function bag(){ const acts=[], seen=new Set(); return {acts, push(q,flag){ if(!q) return false; const k=keyOf(q); if(seen.has(k)) return false; seen.add(k); if(flag) q[flag]=1; acts.push({kind:'q',q}); return true; }}; }
 // 한 세트는 한 엔진(1~2학년 영상편 / 영역별)의 문제로만 만든다.
+try{ window.__runSet=(...a)=>runSet(...a); }catch(e){}
 function runSet(acts,title,flag,video){ if(!acts.length) return home(); const q0=acts[0].q, ep12=q0._e!=null;
   const base=ep12?{mode:'final',ch:chapterOf(q0._e)}:{mode:'ep36',retry:true,ep:q0._ep,ui:uix(q0._ep),ch:0,chars:CAST};
   const steps=video?[video,{kind:'acts'}]:[{kind:'acts'}];
