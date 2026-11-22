@@ -191,6 +191,37 @@ function mountFree(q,host,ans,F){ const truth=F.p>=ans.length?ans:ans.slice(0,F.
     S.results[S.i]=false; logAct(false,'q'); done(); fb.innerHTML=`<div class="fb no">${chip('rami','base')}<div class="msg">괜찮아요, 같이 풀어 봐요!${solveHTML(q)}</div></div>`; txt=String(tv); paint(); F.box.classList.add('show'); addNext(fb); }
   paint(); }
 function mountWriteQ36(q){""")
+
+# ---- 분수 답: 분자·분모(·자연수 부분)마다 답 상자 하나 (교수님 11/22: 분모가 두 자리라고 칸 수로 알려 주는 것은 과한 힌트) ----
+_a = "  if(q.ub&&_m0!=='hand'){ const gs=[...document.querySelectorAll('#visual .vgrp')];"
+assert h.count(_a) == 1
+h = h.replace(_a, """  /* 숫자판 모드의 분수 답: 칸을 자릿수만큼 나누지 않고 분자·분모·자연수 부분마다 상자 하나. 여러 자리 수를 그대로 쓴다. 손글씨 모드는 칸 그대로. */
+  if(_m0!=='hand'&&!q.ub&&!q._step&&slots.length&&slots.some(x=>x.closest('.frac'))){ const cs=[]; slots.forEach(x=>{ const c=x.parentElement; if(!cs.includes(c)) cs.push(c); });
+    if(cs.every(c=>c.matches('.frac b.fs, .vgrp'))&&/^\\d+$/.test(ans)){ const lens=cs.map(c=>c.querySelectorAll('.vslot').length); slots.forEach(x=>x.remove()); const boxes=cs.map((c,i)=>{ const d=document.createElement('div'); d.className='ubox pbox empty'; d.dataset.i=i; c.appendChild(d); c.classList.add('hasfree'); return d; }); return mountParts(q,host,ans,boxes,lens); } }
+""" + _a)
+_a = "function mountUnit(q,host,ans,boxes){"
+assert h.count(_a) == 1
+h = h.replace(_a, """function mountParts(q,host,ans,boxes,lens){ const n=boxes.length; let vals=boxes.map(()=>''), sel=0, lock=false; const want=[]; { let p=0; lens.forEach(L=>{ want.push(ans.slice(p,p+L)); p+=L; }); }
+  const paint=()=>boxes.forEach((b,i)=>{ b.textContent=vals[i]; b.classList.toggle('empty',!vals[i]); b.classList.toggle('sel',!lock&&i===sel); });
+  const key=k=>{ if(lock) return; if(k==='⌫'){ if(!vals[sel]&&sel>0) sel--; else vals[sel]=vals[sel].slice(0,-1); } else if(k==='→') sel=(sel+1)%n; else if(vals[sel].length<4) vals[sel]+=k; paint(); };
+  boxes.forEach((b,i)=>b.onclick=()=>{ if(lock) return; sel=i; paint(); });
+  host.innerHTML=`<div class="numpad">${['1','2','3','4','5','6','7','8','9',n>1?'→':'','0','⌫'].map(k=>k===''?'<span></span>':`<button class="nk${/\\\\d/.test(k)?'':' fn'}" data-k="${k}"${k==='→'?' aria-label="다음 칸"':''}>${k==='→'?'다음 칸':k}</button>`).join('')}</div><div class="wtools"><button class="next wok">다 썼어!</button><button class="wmode">✍️ 손글씨</button></div>`;
+  host.querySelectorAll('.nk').forEach(b=>b.onclick=()=>key(b.dataset.k)); host.querySelector('.wok').onclick=()=>submit();
+  host.querySelector('.wmode').onclick=()=>{ try{ localStorage.setItem('dotori-input','hand'); }catch(e){} document.removeEventListener('keydown',onKey); document.getElementById('visual').innerHTML=q.visual; mountWriteQ36(q); };
+  const onKey=e=>{ if(!document.body.contains(boxes[0])||lock){ document.removeEventListener('keydown',onKey); return; } if(/^[0-9]$/.test(e.key)) key(e.key); else if(e.key==='Backspace') key('⌫'); else if(e.key==='Tab'||e.key===' '||e.key==='/'||e.key==='ArrowRight'||e.key==='ArrowDown') key('→'); else if(e.key==='Enter'){ const em=vals.findIndex(v=>!v); if(em>=0&&vals.some(v=>v)){ sel=em; paint(); } else submit(); } else return; e.preventDefault(); }; document.addEventListener('keydown',onKey);
+  const done=()=>{ lock=true; host.querySelector('.wtools')?.remove(); host.querySelector('.numpad')?.remove(); document.removeEventListener('keydown',onKey); paint(); };
+  const addNext=fb=>{ if(document.getElementById('next')) return; fb.insertAdjacentHTML('beforeend',`<button class="next" id="next">${S.i>=S.acts.length-1?'결과 보기 ★':'다음 →'}</button>`); const nb=document.getElementById('next'); nb.onclick=()=>{ S.i++; S.i<S.acts.length?runAct():result(); }; nb.scrollIntoView({block:'nearest',behavior:'smooth'}); };
+  function submit(){ if(lock) return; const fb=document.getElementById('fb'); const e=vals.findIndex(v=>!v);
+    if(e>=0){ sfx('bad'); host.classList.add('shakey'); setTimeout(()=>host.classList.remove('shakey'),450); sel=e; paint(); fb.innerHTML=`<div class="fb no"><div class="msg">빈 칸이 있어요. 칸을 누르고 수를 써요.</div></div>`; return; }
+    const norm=vals.map(v=>String(parseInt(v,10))); if(norm.every((v,i)=>v===String(parseInt(want[i],10)))){ done(); boxes.forEach((b,i)=>{ b.textContent=want[i]; b.classList.add('show'); }); answer({dataset:{v:ans},classList:{add(){}}},q); return; }
+    /* 예상 오답 열쇠는 자리마다 이어 붙인 글자(기존 칸 입력과 같은 꼴). 칸 수가 정답과 다르면 쉼표로 이어 코드 없이 기록 */
+    const given=vals.every((v,i)=>v.length===lens[i])?vals.join(''):vals.join(','); delete q._mcode;
+    if(S.tries===0&&window.KT) KT.rec(q,given,false); S.tries++; sfx('bad');
+    if(S.tries<2){ fb.innerHTML=`<div class="fb no">${chip('doto','oops')}<div class="msg">아깝다! 다시 생각해 봐요.<div class="hint1">💡 ${hintFor(q)}</div></div></div>`; vals=boxes.map(()=>''); sel=0; paint(); return; }
+    S.results[S.i]=false; logAct(false,'q'); done(); fb.innerHTML=`<div class="fb no">${chip('rami','base')}<div class="msg">괜찮아요, 같이 풀어 봐요!${solveHTML(q)}</div></div>`; vals=want.slice(); paint(); boxes.forEach(b=>b.classList.add('show')); addNext(fb); }
+  paint(); }
+""" + _a)
+
 _a = ".vgrp{display:inline-flex;gap:4px}"
 assert h.count(_a) == 1
 h = h.replace(_a, _a + ".vgrp.hasfree{display:inline-flex}.uchunk{display:inline-flex;align-items:center;gap:4px;flex-wrap:nowrap;white-space:nowrap}.uchunk .vgrp{gap:2px}.eqrow:has(.uchunk + .uchunk){gap:6px 6px;font-size:1.8rem}.eqrow:has(.uchunk + .uchunk) .uchunk{gap:2px}.eqrow:has(.uchunk + .uchunk) .wbox.sm{width:46px;height:64px}.eqrow:has(.uchunk + .uchunk) .vslot{min-width:46px;min-height:64px}.eqrow:has(.uchunk + .uchunk) b{min-width:0}.ubox{min-width:76px;height:58px;padding:0 10px;border:3px solid #E3C9A0;border-radius:14px;background:#fff;color:#2E2620;font-size:32px;font-weight:700;display:flex;align-items:center;justify-content:center;box-sizing:border-box;cursor:pointer}.ubox.sel{border-color:#E8963C;box-shadow:0 0 0 3px #FBE3C6}.ubox.show{border-color:#6BBF7A;background:#F2FBF3}.numpad .nk[data-k='→']{font-size:15px}.eqrow.stepq{font-size:1.5rem;gap:3px}.eqrow.stepq .vslot.mini{min-width:40px;min-height:48px}.eqrow.stepq .frac{margin:0 1px}.freeans{min-width:150px;height:60px;padding:0 16px;border:3px solid #E8963C;border-radius:16px;background:#fff;color:#2E2620;font-size:34px;font-weight:700;display:flex;align-items:center;justify-content:center;letter-spacing:1px;box-sizing:border-box}.freeans.empty::after{content:'답';color:#C9B79E;font-weight:400;font-size:22px}.freeans.show{border-color:#6BBF7A;background:#F2FBF3}")

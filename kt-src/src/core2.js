@@ -431,3 +431,14 @@ try{ new MutationObserver(()=>placeBadge()).observe(document.getElementById('app
     if(over()){ if(!el.classList.contains('wide')) el.style.gridTemplateColumns='repeat(2,1fr)'; if(over()) el.style.gridTemplateColumns='1fr'; if(over()) bs.forEach(b=>{ if(b.scrollWidth>b.clientWidth+1) b.style.whiteSpace=''; }); } };
   let raf=0; const run=()=>{ raf=0; document.querySelectorAll('.opts').forEach(el=>{ try{ fit(el); }catch(e){} }); };
   try{ new MutationObserver(()=>{ if(!raf) raf=requestAnimationFrame(run); }).observe(document.body,{childList:true,subtree:true}); addEventListener('resize',()=>{ if(!raf) raf=requestAnimationFrame(run); }); }catch(e){} })();
+
+/* 보기 제시 규칙(11/22, Claude 안 + 카본 반박 반영)
+   ① 그림 보기는 그림 카드를 직접 눌러도 고를 수 있다: 그림 아래 이름표(가·나·다, ①②③)와 같은 글자의 보기 단추를 대신 눌러 준다. 그림을 찾고 다시 번호 단추를 찾는 사이의 옮겨 누르기 실수를 줄인다(주의 분리).
+   ② 문제가 바뀐 직후 0.35초 동안은 보기 누름을 받지 않는다: 앞 문제에서 이어진 연타가 오답(오개념)으로 기록되지 않게. */
+(function(){ let shownAt=0; const lab=el=>{ const b=el.querySelector(':scope > b'); return b?b.textContent.trim():''; };
+  const mark=()=>{ document.querySelectorAll('.opts').forEach(o=>{ if(!o._seen){ o._seen=1; shownAt=Date.now(); } }); const opts=[...document.querySelectorAll('.opts > .opt')]; if(!opts.length) return; const names=new Set(opts.map(b=>b.textContent.trim()));
+    document.querySelectorAll('.tf').forEach(f=>{ const n=lab(f); if(n&&names.has(n)&&!f._pick){ f._pick=1; f.style.cursor='pointer'; f.style.borderRadius='12px'; f.style.padding='4px'; f.setAttribute('role','button'); f.setAttribute('aria-label','보기 '+n); } }); };
+  try{ new MutationObserver(()=>mark()).observe(document.body,{childList:true,subtree:true}); }catch(e){}
+  document.addEventListener('click',e=>{ const t=e.target; if(!t||!t.closest) return; const isOpt=t.closest('.opts > .opt'), fig=t.closest('.tf');
+    if((isOpt||fig)&&Date.now()-shownAt<(window._tapLockMs==null?350:window._tapLockMs)){ e.stopPropagation(); e.preventDefault(); return; }
+    if(fig&&fig._pick&&!isOpt){ const n=lab(fig), b=[...document.querySelectorAll('.opts > .opt')].find(x=>x.textContent.trim()===n&&!x.disabled); if(b){ fig.style.outline='3px solid #E88A2C'; setTimeout(()=>{ try{ fig.style.outline=''; }catch(_){} },500); b.click(); } } },true); })();

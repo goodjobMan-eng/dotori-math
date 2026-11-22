@@ -1166,7 +1166,13 @@ function dropEqualOpts(q){ try{ if(!q||!Array.isArray(q.opts)||q.opts.length<2) 
   const keep=q.opts.filter(o=>!same(o)); if(keep.length<q.opts.length&&keep.length<2){ const m=A.match(/^(\d+)분의 (\d+)$/), alt=m?`${m[1]}분의 ${+m[2]+1}`:av!=null?String(+(av+1).toFixed(6)):null; if(alt&&!keep.includes(alt)){ keep.push(alt); (q.fx=q.fx||{})[alt]=1; } }   /* 보기가 둘뿐이면 실수형 보기 하나로 바꿔 넣는다 */
   if(keep.length<q.opts.length+ (keep.length>=2&&q.opts.some(same)?1:0)&&keep.length>=2&&q.opts.some(same)){ for(const o of q.opts) if(same(o)){ if(q.mis) delete q.mis[String(o)]; if(q.fx) delete q.fx[String(o)]; } q.opts=keep; } }catch(e){} return q; }
 function mixOpts(q){ try{ if(!q||typeof q!=='object'||q.manip||q.onMount||!Array.isArray(q.opts)||q.opts.length<2) return q; if(q.opts.every(o=>/^[<>=＞＜]$/.test(String(o).trim()))) return q;
-  const a=q.opts; for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } }catch(e){} return q; }
+  /* 그림에 붙은 이름(가·나·다…, ㄱ·ㄴ·ㄷ…, ①②③…)이 보기면 섞지 않고 차례대로 둔다 (교수님 11/22: 순서대로 있어야 고를 때 안 헷갈림). 그림 쪽 순서가 이미 섞여 있어 정답 자리는 매번 다르다. */
+  for(const ord of ['가나다라마바사아','ㄱㄴㄷㄹㅁㅂㅅㅇ','①②③④⑤⑥⑦⑧','ABCDEFGH']){ if(q.opts.every(o=>{ const t=String(o).trim(); return t.length===1&&ord.includes(t); })){ q.opts.sort((x,y)=>ord.indexOf(String(x).trim())-ord.indexOf(String(y).trim())); return q; } }
+  const a=q.opts; for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; }
+  /* 긍정·부정 짝(있다/없다, 맞다/틀리다…)은 긍정을 앞에 고정: 정답이 어느 쪽인지는 문제마다 달라 자리가 답을 알려 주지 않고, 늘 같은 자리라 읽는 부담이 준다 */
+  if(a.length===2){ const neg=x=>/^(없다|틀리다|아니요|아니다|다르다|안 |될 수 없다|×)/.test(String(x).trim())||/(이|가) 아니다$|지 않다$|할 수 없다$/.test(String(x).trim()); if(neg(a[0])&&!neg(a[1])) a.reverse(); }
+  /* '같다·알 수 없다·모두 …' 같은 판단 보류형 보기는 늘 맨 끝 (뜻이 정해진 보기라 자리를 고정해도 답이 새지 않는다) */
+  else { const tail=x=>/^((둘이|크기가|길이가|두 \S+가|모두) )?같(다|아요)$|^알 수 없다$|^정할 수 없다$|^모두 (맞다|아니다)$/.test(String(x).trim()); const t=a.filter(tail); if(t.length&&t.length<a.length){ const h=a.filter(x=>!tail(x)); a.length=0; a.push(...h,...t); } } }catch(e){} return q; }
 { const _t=tagQ; tagQ=function(ep,i,q){ q=_t(ep,i,q); try{ q=g36Wrong(ep,i,q); }catch(e){}
   /* 문제 글을 다듬은(fixText) 뒤의 글로 한 번 더: 쓰기형인데 아직 예상 오답이 없으면 글을 읽는 규칙을 다시 돌린다 */
   try{ if(q&&typeof q==='object'&&!(q.opts&&q.opts.length)&&!q.manip&&!q.onMount&&!TAG3[ep+'#'+i]&&!(q.mis&&Object.keys(q.mis).length)){ delete q.mis; for(const f of [codeW2,codeW3,codeW7,codeW8,codeW9,codeW10]){ try{ f(q); }catch(e){} if(q.mis) break; } } }catch(e){}
@@ -1872,7 +1878,7 @@ function cpHops(x,n){ const tot=x*n, hi=Math.max(1,Math.ceil(tot+1e-9)); if(n>15
   for(let v=0;v<=hi+1e-9;v+=st){ const X=x0+L*v/hi, maj=Math.abs(v-Math.round(v))<1e-9; g+=`<line x1="${X}" y1="${maj?36:40}" x2="${X}" y2="${maj?52:48}" stroke="${CP_S}"/>`; if(maj) g+=`<text x="${X}" y="66" font-size="11" text-anchor="middle">${Math.round(v)}</text>`; }
   for(let k=0;k<n;k++){ const A=x0+L*k*x/hi, B=x0+L*(k+1)*x/hi; g+=`<path d="M${A},44 Q${(A+B)/2},${44-Math.min(30,(B-A)*0.8)} ${B},44" fill="none" stroke="#D45F16" stroke-width="1.8"/>`; } g+=`<text x="${x0+L*x/hi/2}" y="12" font-size="11" text-anchor="middle" fill="#D45F16">${x}</text>`; return cpSvg(g,W,72); }
 function cpDecArea(a,b){ const A=Math.round(a*10), B=Math.round(b*10); if(A>10||B>10||A<1||B<1) return ''; let g=''; for(let i=0;i<10;i++) for(let j=0;j<10;j++){ const c=j<A, r=i<B; g+=`<rect x="${2+j*12}" y="${2+i*12}" width="12" height="12" fill="${c&&r?'#E08A3C':c?'#F6D7A8':r?'#CFE6F5':'#fff'}" stroke="${CP_S}" stroke-width=".5"/>`; } return cpSvg(g,124,124,150); }
-function cpaVis(ep,q){ if(!/^S[2-6]-/.test(ep)||!q||q.manip||q.onMount||q._cpaPic!=null) return q; const V=String(q.visual||''); if(/<svg|<img|<table|○/.test(V)) return q;
+function cpaVis(ep,q){ if(!/^S[2-6]-/.test(ep)||!q||q.manip||q.onMount||q._cpaPic!=null) return q; const V=String(q.visual||''); if(/<svg|<img|<table|○/.test(V)) return q; if(/<div|<span/.test(V.replace(/<div class="eqrow">[\s\S]*$/,''))) return q;   /* 이미 그림(막대 등)이 있는 문제에는 덧붙이지 않는다 */
   const t=_pl(String(q.q)).replace(/\s+/g,' ').trim(); let pic=''; try{ pic=cpPic(ep,t); }catch(e){ pic=''; } if(!pic) return q;
   q._cpaPic=pic; q._cpaBase=V; q._svEp=ep; q.visual=pic+V; q._svShown=1; return q; }
 { const _t=tagQ; tagQ=function(ep,i,q){ q=_t(ep,i,q); try{ q=cpaVis(ep,q); }catch(e){} return q; }; }
@@ -2180,3 +2186,20 @@ function gxWordPic(ep,t){ let m; const two=(a,b)=>cpRow(a,b);
   if((m=t.match(/반지름 (\d+) cm인 원\(넓이 (\d+) cm²\)을 키워 지름 (\d+) cm인 원/))) return cpWrap(two(gxCircle({r:m[1]+' cm'}),gxCircle({d:m[3]+' cm'})));
   return ''; }
 { const _cp2=cpPic; cpPic=function(ep,t){ if(/^S6-/.test(ep)){ let r=''; try{ r=gxWordPic(ep,t); }catch(e){ r=''; } if(r) return r; } return _cp2(ep,t); }; }
+
+
+// ===== 3-57. 보기 제시 규칙 (교수님 11/22 "보기를 어떻게 제시해야 하는지 제미나이랑 생각해 봐") — 보기규칙.md '보기 제시' 절 참고 =====
+// 같은 자리 정답이 3번 넘게 이어지지 않게: 자리를 옮겨도 되는 보기(수·낱말·문장)일 때만 정답을 다른 자리와 맞바꾼다. 이름표·기호·짝·맨 끝 고정 보기는 건드리지 않는다.
+try{ const _raP=runAct; let last=[]; runAct=function(){ try{ const a=S&&S.acts&&S.acts[S.i]; const q=a&&a.kind==='q'&&a.q; if(q&&Array.isArray(q.opts)&&q.opts.length>=3&&!q._posDone){ q._posDone=1; const o=q.opts.map(x=>String(x).trim()), A=String(q.ans).trim();
+      const fixed=['가나다라마바사아','ㄱㄴㄷㄹㅁㅂㅅㅇ','①②③④⑤⑥⑦⑧'].some(s=>o.every(x=>x.length===1&&s.includes(x)))||o.every(x=>/^[<>=]$/.test(x)), tail=x=>/^((둘이|크기가|길이가|두 \S+가|모두) )?같(다|아요)$|^알 수 없다$|^정할 수 없다$|^모두 (맞다|아니다)$/.test(x);
+      let pos=o.indexOf(A); if(pos>=0){ if(!fixed&&!tail(A)&&last.length>=2&&last.slice(-2).every(p=>p===pos)){ const cand=o.map((x,i)=>i).filter(i=>i!==pos&&!tail(o[i])); if(cand.length){ const j=cand[Math.floor(Math.random()*cand.length)]; [q.opts[pos],q.opts[j]]=[q.opts[j],q.opts[pos]]; pos=j; } } last.push(pos); if(last.length>4) last.shift(); } } }catch(e){} return _raP.apply(this,arguments); }; }catch(e){}
+
+
+// ===== 3-58. 쌓기나무 문제인 것을 글에서 밝히기 (교수님 11/22: "쌓기나무 문제라는 걸 알려 줘야지, 갑자기 이러면 무슨 말이지 할 듯") =====
+// 공간과 입체(S6-64·65)에서 무엇을 두고 하는 말인지 빠진 문장을 고친다. 앞뒤 문제 없이 이 문제만 봐도 뜻이 통해야 한다(문제는 섞여서 나온다).
+const SK_TEXT=[
+  [/^위·앞·옆 모양으로 개수를 구했더니 가장 적으면 (\d+)개, 가장 많으면 (\d+)개였어요\. 알맞은 말은\?/,'쌓기나무로 쌓은 모양을 위·앞·옆에서 본 모양만 보고 쌓기나무의 개수를 구했더니, 가장 적으면 $1개, 가장 많으면 $2개였어요. 알맞은 말은?'],
+  [/^쌓은 모양을 하나로 정확히 정하려면 무엇이 더 있으면 좋을까\?/,'쌓기나무로 쌓은 모양을 위·앞·옆에서 본 모양만으로는 하나로 정할 수 없어요. 무엇이 더 있으면 정확히 정할 수 있을까요?'],
+  [/^위에서 본 모양 각 칸에 쌓은 개수가 ([\d, ]+?)(이에요|예요)\. 앞에서 보면 가장 높은 곳은 몇 층\?/,'쌓기나무를 한 줄로 쌓고, 위에서 본 모양의 각 칸에 쌓은 개수를 왼쪽부터 썼더니 $1$2. 앞에서 보면 가장 높은 곳은 몇 층일까요?'] ];
+function skText(ep,q){ if(!/^S6-6[45]$/.test(ep)||!q||typeof q.q!=='string') return q; for(const [re,to] of SK_TEXT){ const plain=_pl(q.q).trim(); if(re.test(plain)){ const nt=plain.replace(re,to); for(const k of ['q','say','tts','read']) if(typeof q[k]==='string'&&_pl(q[k]).trim()===plain) q[k]=nt; q.q=nt; break; } } return q; }
+{ const _t=tagQ; tagQ=function(ep,i,q){ q=_t(ep,i,q); try{ q=skText(ep,q); }catch(e){} return q; }; }
