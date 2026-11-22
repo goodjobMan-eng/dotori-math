@@ -11,7 +11,7 @@ const RE = {
   ep:   /^(S\d-\d{1,3}|EP\d{2})$/,
   code: /^[NRGD]\d-\d{2}$/,
   codes:/^([NRGD]\d-\d{2}(\|[NRGD]\d-\d{2}){0,3})?$/,
-  mode: /^[ugfdqrkABpn]$/,
+  mode: /^[ugfdqrkABpns]$/,
   given:/^[0-9A-Za-z가-힣ㄱ-ㅎ .:,/%°²³+×÷=−\-~()←→↑↓]{0,24}$/,
 };
 
@@ -27,7 +27,7 @@ function dayOk(day) {
   return Math.abs(Date.now() - t) <= 3 * 864e5;                        // 서버 날짜 ±3일만
 }
 function recOk(r) {                                                     // [day, ep, ti, v, seed, given, ok, code, ms, diag, 노출 코드들, 방식, 세트 안 순서, 다시 나온 문제, 응답 형태(c 고르기·w 쓰기·m 조작)]
-  return Array.isArray(r) && r.length === 15
+  return Array.isArray(r) && (r.length === 15 || (r.length === 16 && typeof r[15] === 'string' && /^[a-z]{0,4}$/.test(r[15])))   // 16번째 칸: 받은 도움(v 그림과 함께 나옴, e 선수 내용으로 바꿔 낸 문제)
     && typeof r[0] === 'string' && RE.day.test(r[0])
     && typeof r[1] === 'string' && RE.ep.test(r[1])
     && Number.isInteger(r[2]) && r[2] >= -1 && r[2] < 200

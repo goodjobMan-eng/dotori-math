@@ -8388,7 +8388,8 @@ const checkPieces=st=>weakPieces(st,true).filter(x=>x.s==='chk');
 const maskG=(q,g)=>(q.opts&&q.opts.length)||q.manip?g:(/^[0-9\-−.\/: ]{0,12}$/.test(String(g))?g:'STR');
 function recExtra(q){ let mode='u'; try{ mode=q._arm?q._arm:q._chk?'k':q.diag?'g':q._probe?'p':q._follow?'n':S.focus?'f':S.kt==='daily'?'d':S.kt==='quick'?'q':S.review?'r':'u'; }catch(e){}
   const ex=[...new Set(Object.values(q.mis||{}))].sort().slice(0,4).join('|'); let seq=0; try{ seq=Math.max(0,Math.min(99,S.i|0)); }catch(e){}
-  return [ex,mode,seq,q._review?1:0,q.manip?'m':(q.opts&&q.opts.length)?'c':'w']; }
+  /* 받은 도움(처방 효과를 보려면 필요): v 그림과 함께 나온 문제, e 갇혀서 선수 내용으로 바꿔 낸 문제 */ let help=''; try{ if(q._svShown||(q._cpaPic&&q._svShown!==0)) help+='v'; if(q._eased) help+='e'; }catch(e){}
+  return [ex,mode,seq,q._review?1:0,q.manip?'m':(q.opts&&q.opts.length)?'c':'w',help]; }
 function rec(q, given, ok){
   if(!q||q._kt) return; q._kt=1;
   const ep=q._ep||(S&&S.ep)||''; if(!/^S\d-\d{1,3}$/.test(String(ep))) return;       // 3~6학년 영역 문항만
@@ -9109,7 +9110,7 @@ const _sp0=statsPage; statsPage=function(){ const r=_sp0.apply(this,arguments);
 
 /* ---------- 12. 익명 묶음 전송 (교사가 켠 기기만) ---------- */
 // 주소 끝에 #kt-share-on / #kt-share-off / #kt-reset(기기 번호 새로 만들기) / #teacher(선생님용 화면)
-function cfg(){ return J(CK,{share:false,last:0,after:0}); }
+function cfg(){ return J(CK,{share:true,last:0,after:0}); }   /* 11/22 교수님: 무작위 기기 번호는 식별 정보로 보지 않는다 → 익명 전송 기본 켬(서버 주소가 비어 있으면 아무것도 보내지 않음). 끄기: 주소 끝 #kt-share-off */
 function setCfg(c){ W(CK,c); }
 const DAY=864e5;
 function maybeSend(){ if(!KT_ENDPOINT||!navigator.sendBeacon) return; const c=cfg(); if(!c.share) return; const qu=J(QK,[]), now=Date.now();
