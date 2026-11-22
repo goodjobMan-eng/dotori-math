@@ -8,9 +8,9 @@ const MAX_RECS = 2000;
 const RE = {
   did:  /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/,
   day:  /^\d{4}-\d{2}-\d{2}$/,
-  ep:   /^(S\d-\d{1,3}|EP\d{2})$/,
-  code: /^[NRGD]\d-\d{2}$/,
-  codes:/^([NRGD]\d-\d{2}(\|[NRGD]\d-\d{2}){0,3})?$/,
+  ep:   /^(S\d-\d{1,3}|EP\d{2}|card:[A-Z]{1,2}\d{2})$/,              // card:C12 = 개념 카드를 본 줄
+  code: /^([NRGD]\d-\d{2}|F)$/,                                    // F = 오개념으로 가르지 못한 그 밖의 오답
+  codes:/^(([NRGD]\d-\d{2}|F)(\|([NRGD]\d-\d{2}|F)){0,3})?$/,
   mode: /^[ugfdqrkABpns]$/,
   given:/^[0-9A-Za-z가-힣ㄱ-ㅎ .:,/%°²³+×÷=−\-~()←→↑↓]{0,24}$/,
 };
@@ -71,10 +71,15 @@ export default {
 
     // 한 기기는 하루 한 묶음만. 같은 날 두 번째는 거절(서버 폭주·도배 방지).
     const key = `raw/${body.day}/${body.did}.json`;
-    if (await env.BUCKET.head(key)) return reply(409, origin);
-    await env.BUCKET.put(key, JSON.stringify({ v: 2, did: body.did, day: body.day, recs: body.recs }), {
-      httpMetadata: { contentType: 'application/json' },
-    });
+    // 저장소: R2(BUCKET)가 묶여 있으면 R2, 없으면 KV(카드 등록 없이 무료로 시작할 수 있음. 하루 쓰기 1,000번·1GB까지).
+    const data = JSON.stringify({ v: 2, did: body.did, day: body.day, recs: body.recs });
+    if (env.BUCKET) {
+      if (await env.BUCKET.head(key)) return reply(409, origin);
+      await env.BUCKET.put(key, data, { httpMetadata: { contentType: 'application/json' } });
+    } else if (env.KV) {
+      if (await env.KV.get(key) !== null) return reply(409, origin);
+      await env.KV.put(key, data);
+    } else return reply(500, origin);
     return reply(204, origin);
   },
 };

@@ -2,7 +2,8 @@ name = "dotori-kt"
 main = "worker.js"
 compatibility_date = "2026-06-01"
 
-# 비공개 저장소. 공개 설정(Public access)은 켜지 않는다.
+# 저장소는 둘 중 하나. (가) KV — 카드 등록 없이 시작: 아래 r2_buckets 대신 [[kv_namespaces]] binding = "KV", id = "<만든 KV 이름공간 id>"
+# (나) R2 — 양이 많아지면: 비공개 저장소. 공개 설정(Public access)은 켜지 않는다. (결제 수단 등록 필요)
 [[r2_buckets]]
 binding = "BUCKET"
 bucket_name = "dotori-kt-raw"
