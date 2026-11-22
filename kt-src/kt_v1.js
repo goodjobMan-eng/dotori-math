@@ -8,7 +8,7 @@
 'use strict';
 
 /* ---------- 0. 설정 ---------- */
-const KT_ENDPOINT = '';            // 서버 배포 후 'https://<worker 주소>/v1/ingest' 를 넣는다. 비어 있으면 전송 기능 꺼짐.
+const KT_ENDPOINT = 'https://dotori-kt.abujangi41.workers.dev/v1/ingest';            // 서버 배포 후 'https://<worker 주소>/v1/ingest' 를 넣는다. 비어 있으면 전송 기능 꺼짐.
 const KT_VER = 1;                  // 문항·코드표 버전. 템플릿을 고치면 올린다.
 
 /* ---------- 1. 진단 문항 도우미 ---------- */
