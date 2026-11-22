@@ -2779,4 +2779,4 @@ window._GT=GT;
 window.ktStage=q=>{ try{ if(!q) return 1; if(q.manip||q.onMount) return 0; const t=String(q.q||'').replace(/<[^>]+>/g,' ').replace(/\s+/g,' ').trim(), a=String(q.ans==null?'':q.ans);
     if(q._hard||/ — /.test(a)||/까닭|바르게 (말|고쳐|구한|계산한)|누구일까요|이 말에 대한/.test(t)) return 3; const nums=(t.match(/\d+/g)||[]).length;
     if(t.length>=60&&nums>=3) return 3; if(q.word||(t.length>=26&&nums>=1&&/어요|았어요|였어요|려고|습니다|있어요/.test(t))) return 2; return 1; }catch(e){ return 1; } };
-window.KT_STAGE_NAME=['직접 해 보기','기본','문장제','생각 넓히기'];
+window.KT_STAGE_NAME=['만져 보기','기본 익히기','이야기 문제','도전 문제'];   /* 3~4학년이 알아듣는 이름(제미나이 제안) */

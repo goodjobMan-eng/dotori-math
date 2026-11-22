@@ -394,7 +394,7 @@ for _x,_y in [("const want={0:1,2:2};","const want={0:1,2:2,3:1};"),("[0,2].forE
 h=h[:_i]+_seg+h[_j:]
 # 조작 문제: [다 했어요]를 누른 때의 상태로 오개념을 판정(q.manip.wrong()이 보기 이름을 돌려주면 그 이름으로 기록)
 _a="answer({dataset:{v:ok?q.ans:'__no'},classList:{add(){}},disabled:false},q);"
-assert h.count(_a)==1; h=h.replace(_a,"let _wv='__no'; try{ if(!ok&&q.manip.wrong){ const w=q.manip.wrong(); if(w) _wv=w; } }catch(e){} answer({dataset:{v:ok?q.ans:_wv},classList:{add(){}},disabled:false},q);")
+assert h.count(_a)==1; h=h.replace(_a,"let _wv='__no'; try{ if(!ok&&q.manip.wrong){ const w=q.manip.wrong(); if(w) _wv=w; } }catch(e){} if(!ok) (q._mw=q._mw||[]).push(_wv); answer({dataset:{v:ok?q.ans:_wv},classList:{add(){}},disabled:false},q); try{ if(!ok&&S.tries>=2&&window.__manipFail) window.__manipFail(q); }catch(e){}")
 open('out/index.html', 'w', encoding='utf-8').write(h)
 print('built', len(out))
 

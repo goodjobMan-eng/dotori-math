@@ -11,6 +11,12 @@ function sameFormQ(q,code){ for(let t=0;t<8;t++){ let n=null;
   /* 같은 꼴이 늘 같은 문제를 내면 같은 편의 다른 꼴에서 고른다 */
   try{ const ep=q._ep, F=ep&&G36[ep]; if(F) for(const i of shuffle(F.map((_,k)=>k))){ if(i===(q._ti!=null?q._ti:q._ei)) continue; const n=F[i](); if(!n||n.manip||n.onMount||n.write!==q.write) continue; if(code&&!(n.mis&&Object.values(n.mis).includes(code))) continue; n._ep=ep; n._ti=i; n._scaf=1; return n; } }catch(e){}
   return null; }
+/* 남은 '새 내용' 문제를 같은 영역의 앞 단원(선수 내용) 문제로 바꾸고, 2문제만 더 풀고 끝낸다 */
+function easeNow(){ try{ const st=state(); for(let j=S.i+1;j<S.acts.length;j++){ const a=S.acts[j]; if(a.kind!=='q'||!a.q||!a.q._new||!a.q._ep) continue; const k=epKC(a.q._ep), s0=Object.keys(LADDER).find(x=>LADDER[x].includes(k)); if(!s0) continue; const i0=LADDER[s0].indexOf(k), pk=i0>0?LADDER[s0][i0-1]:k, eps=epsOf(pk).filter(e=>e!==a.q._ep&&(G36[e]||[]).length); if(!eps.length) continue; const done=eps.filter(e=>((st.ec||{})[e]||0)>=1), pool=done.length?done:eps.slice(0,2); const nq=bestQ([pool[Math.floor(Math.random()*pool.length)]]); if(nq){ nq._eased=1; a.q=nq; } }
+      /* 세트를 줄임: 선수 내용 2문제만 더 풀고 끝(성공 경험으로 마무리) */ { const rest=S.acts.slice(S.i+1).filter(a=>a.kind==='q'&&a.q), es=rest.filter(a=>a.q._eased).slice(0,2), ot=rest.filter(a=>!a.q._eased).slice(0,2-es.length); S.acts.length=S.i+1; S.acts.push(...es,...ot); }
+      S._eased=1; }catch(e){} }
+/* 조작에서 막기(11/23, 제미나이와 맞춘 조건): 새 내용의 '만져 보기'에서 도움말을 본 뒤에도 같은 오개념 상태를 두 번 내면(빈 제출·아무 상태는 해당 없음) 계산으로 넘기지 않고 선수 내용으로 돌린다 */
+try{ window.__manipFail=q=>{ try{ if(!S||!S.acts||!q||!q._new||q._stg!==0||S._eased) return; const h=q._mw||[]; if(h.length<2) return; const a=h[h.length-1], b=h[h.length-2]; if(!a||a==='__no'||a!==b||!(q.mis&&q.mis[a])) return; if(S._ld==null) S._ld={n:0,pc:{},run:0,done:{}}; if(S._ld.eased) return; S._ld.eased=1; S._ld.n=9; easeNow(); S._manipBlock=1; }catch(e){} }; }catch(e){}
 function ladderAfter(q,ok,m){ if(!S||!S.acts||S.diag||S.diagRun||q._probe||q._scaf||q._chk) return;   /* q.diag는 MC·WM으로 만든 문제마다 붙는 표시라 여기서 거르면 사다리가 거의 안 뜬다 → 수준 찾기 중(S.diagRun)만 거름 */ if(S._ld==null){ S._ld={n:0,pc:{},run:0,done:{}}; }
   const L=S._ld; if(q._firstSeen) return; q._firstSeen=1;
   /* 단계 흐름의 갈림(11/22 밤, 제미나이와 검토): 새 내용의 '기본' 단계에서 첫 시도 오답이 2번이면, 계산이 아직 서지 않은 것이므로 남은 문장제·생각 넓히기를 접고
@@ -22,9 +28,7 @@ function ladderAfter(q,ok,m){ if(!S||!S.acts||S.diag||S.diagRun||q._probe||q._sc
           if(add.length){ S.acts.length=S.i+1; S.acts.push(...keep,...add); } } } } }catch(e){}
   if(ok){ L.run=0; return; } L.run++; L.wr=(L.wr||0)+1;
   /* 갇힌 학생 넘기기(11/22): 한 세트에서 첫 시도 오답이 4번이면, 남은 '새 내용' 문제를 같은 영역의 앞 단원(선수 내용) 문제로 바꿔 끝까지 풀고 나가게 한다. 덧붙이는 문제도 더 넣지 않는다. */
-  if(L.wr>=4&&!L.eased){ L.eased=1; L.n=9; try{ const st=state(); for(let j=S.i+1;j<S.acts.length;j++){ const a=S.acts[j]; if(a.kind!=='q'||!a.q||!a.q._new||!a.q._ep) continue; const k=epKC(a.q._ep), s0=Object.keys(LADDER).find(x=>LADDER[x].includes(k)); if(!s0) continue; const i0=LADDER[s0].indexOf(k), pk=i0>0?LADDER[s0][i0-1]:k, eps=epsOf(pk).filter(e=>e!==a.q._ep&&(G36[e]||[]).length); if(!eps.length) continue; const done=eps.filter(e=>((st.ec||{})[e]||0)>=1), pool=done.length?done:eps.slice(0,2); const nq=bestQ([pool[Math.floor(Math.random()*pool.length)]]); if(nq){ nq._eased=1; a.q=nq; } }
-      /* 세트를 줄임: 선수 내용 2문제만 더 풀고 끝(성공 경험으로 마무리) */ { const rest=S.acts.slice(S.i+1).filter(a=>a.kind==='q'&&a.q), es=rest.filter(a=>a.q._eased).slice(0,2), ot=rest.filter(a=>!a.q._eased).slice(0,2-es.length); S.acts.length=S.i+1; S.acts.push(...es,...ot); }
-      S._eased=1; }catch(e){} return; }
+  if(L.wr>=4&&!L.eased){ L.eased=1; L.n=9; easeNow(); return; }
   /* 선수 내용에서도 두 번 더 틀리면 남은 문제를 접고 결과로 */ if(L.eased&&q._eased){ L.ew=(L.ew||0)+1; if(L.ew>=2){ try{ S.acts.length=S.i+1; }catch(e){} } return; }
   const c=m&&typeof MISC!=='undefined'&&MISC[m]?MISC[m][0][0]:null; if(c){ L.pc[c]=(L.pc[c]||0)+1; L.last=c; }
   if(L.n>=2) return; let why=null, pc=null;
