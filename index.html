@@ -7472,11 +7472,21 @@ try{ const a17=G36['S4-17']; if(a17){ const i=a17.findIndex(g=>{ try{ return /�
     const gen=()=>{ const same=Math.random()<0.34, r=rnd(1,4), b=same?r:(()=>{ let x; do{ x=rnd(1,4); }while(x===r); return x; })(); const ans=r===b?'같다':r>b?'빨간 공':'파란 공';
       const q=C36(WHO(),`빨간 공 ${r}개, 파란 공 ${b}개가 든 주머니에서 공 하나를 꺼낼 때, 꺼낼 가능성이 더 큰 것은?`,' ','',ans,shuffle(['빨간 공','파란 공']).concat('같다')); q.mis={}; if(r!==b) q.mis['같다']='D5-05'; return q; };
     if(i>=0) a17[i]=gen; else a17.push(gen); } }catch(e){}
-/* 비교 문제의 보기 둘(크다/작다)에 '같다'를 더한다: >·< → >·=·<, '더 큰/높은/긴/많이 들어가는 것은?' → 같다 */
+/* 비교 문제의 '같다' 보기 — 교육적으로 가려서 넣는다 (교수님 11/22 "교육적으로 고려해서 넣을지 말지 결정")
+   넣는다: ① >·=·< 기호 문제는 교과서 형식대로 늘 세 기호. ② 같음이 배울 내용인 곳은 '같다'가 정답인 경우도 넷에 한 번쯤 낸다 —
+           분수와 소수(5분의 1 = 0.2), 크기가 같은 분수(3분의 2 = 6분의 4), 소수 끝의 0(0.5 = 0.50), 사람 수가 다른 두 모둠의 평균이 같은 경우.
+   안 넣는다: 같은 분모 분수 비교(같을 수 없어 군더더기), 1~2학년 직접 비교(둘 중 고르기가 교육과정 형식, 읽을거리만 늘어남).
+              정답이 될 수 없는 '같다'는 아이가 금방 버리는 보기라 변별에 도움이 안 된다. */
 function eqOpt(q){ if(!q||q.manip||q.onMount||!Array.isArray(q.opts)||q.opts.length!==2) return q; const o=q.opts.map(String), t=_pl(String(q.q));
   if(o.includes('>')&&o.includes('<')){ q.opts=['>','=','<']; return q; }
-  if(/더 큰 것은\?|평균이 더 높은 모둠은|누구 연필이 더 길까요|더 많이 들어가는 것은|더 긴 것은\?|더 무거운 것은\?/.test(t)&&!o.includes('같다')&&(/\d/.test(t)||/누구 연필/.test(t))){ q.opts=o.concat(/누구/.test(t)?'길이가 같아요':'같다'); } return q; }
-{ const _t=tagQ; tagQ=function(ep,i,q){ q=_t(ep,i,q); try{ q=eqOpt(q); }catch(e){} return q; }; }
+  if(/평균이 더 높은 모둠은|^더 큰 수는\? [\d.]+, [\d.]+/.test(t)&&!o.includes('같다')) q.opts=o.concat('같다'); return q; }
+function eqCase(ep,q){ if(!q||q.manip||q.onMount||Math.random()>=0.25) return q; const t=_pl(String(q.q)).trim(); let nq=null;
+  if(ep==='S3-77'&&/^\d+분의 \d+ □ \d+\.\d+$/.test(t)){ const [d,n,dec]=rndPick([2,1,'0.5'],[4,1,'0.25'],[5,1,'0.2'],[5,2,'0.4'],[5,3,'0.6'],[4,3,'0.75'],[10,3,'0.3']); nq=C36(WHO(),`${d}분의 ${n} □ ${dec}`,' ','','=',['>','=','<']); nq.mis={}; }
+  else if(ep==='S3-77'&&/^\d+분의 \d+ □ \d+분의 \d+$/.test(t)){ let [a,b,c,d]=rndPick([2,1,4,2],[3,1,6,2],[3,2,6,4],[4,3,8,6],[5,2,10,4],[2,1,6,3],[4,1,8,2]); if(Math.random()<.5) [a,b,c,d]=[c,d,a,b]; nq=C36(WHO(),`${a}분의 ${b} □ ${c}분의 ${d}`,' ','','=',['>','=','<']); nq.mis={[a>c?'>':'<']:'N5-13'}; }
+  else if(ep==='S3-58'&&/^더 큰 수는\? [\d.]+, [\d.]+$/.test(t)){ const k=rnd(2,9), a=`0.${k}`, b=`0.${k}0`; nq=C36(WHO(),`더 큰 수는? ${a}, ${b}`,' ','','같다',[a,b,'같다']); nq.mis={[b]:'N4-02',[a]:'N4-13'}; }
+  else if(ep==='S4-16'&&/^가 모둠 [\d, ]+ \/ 나 모둠 [\d, ]+\. 평균이 더 높은 모둠은/.test(t)){ const T=rnd(13,17), A=shuffle([T-3,T+1,T+2]), B=shuffle([T-4,T-1,T+2,T+3]); nq=C36(WHO(),`가 모둠 ${A.join(', ')} / 나 모둠 ${B.join(', ')}. 평균이 더 높은 모둠은?`,' ','','같다',shuffle(['가 모둠','나 모둠']).concat('같다')); nq.mis={'나 모둠':'D5-04'}; }
+  if(!nq) return q; try{ nowrapExpr(nq); }catch(e){} try{ cpaVis(ep,nq); }catch(e){} return nq; }
+{ const _t=tagQ; tagQ=function(ep,i,q){ q=_t(ep,i,q); try{ q=eqOpt(q); }catch(e){} try{ q=eqCase(ep,q); }catch(e){} return q; }; }
 
 /* ---------- 3-12. 개념 조각과 보기별 무게 (오개념 코드 → 모르는 개념 조각) ---------- */
 // 교수님 지적(2026-11-20): 오답에 코드만 붙일 게 아니라 "이 보기를 고른 아이는 어떤 개념을 모른다"는 가정과 무게가 있어야 한다.
