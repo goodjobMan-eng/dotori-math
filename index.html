@@ -8019,6 +8019,71 @@ try{ const add=(ep,g)=>{ if(G36[ep]){ (window._NTW=window._NTW||[]).push([ep,G36
   add('S6-59',NK.prismSum); add('S6-58',NK.cubeNet); add('S4-06',NK.twoWay); add('S3-83',NK.recordCount); add('S4-19',NK.bandCells); add('S4-18',NK.addBalls);
 }catch(e){}
 
+// ===== 3-67. KMA(한국수학학력평가, ㈜에듀왕의 민간 평가) 2024 상반기~2026 상반기 초1~6 문제지 30개에서 되풀이되는 유형 (교수님 11/22) =====
+// 제미나이 노트북에 문제지 30개를 넣어 유형을 뽑고, 내 후보를 교사 입장에서 반박하게 함. 문항은 옮기지 않고 구조만, 수·상황은 새로.
+// 노트북이 '경시형이라 빼라'고 한 것은 뺌: 숫자 쓴 횟수 세기, 빨라지는 시계, 과부족, 토너먼트 경기 수, 연산 약속(★), 마주 보고 걷기.
+// 노트북이 보태라고 한 것: 맞닿은 원의 중심 잇기, 접은 종이의 각, 선대칭도형의 둘레, 간격과 나무 수, 반원의 둘레.
+const KM={}, _kw=(ans,arr)=>{ const seen=new Set(); return arr.filter(x=>x&&x[0]!=null&&Number.isInteger(x[0])&&x[0]>0&&x[0]!==ans&&!seen.has(x[0])&&seen.add(x[0])); };
+/* 합과 차 → 큰 수 */
+KM.sumDiff=()=>{ const small=rnd(11,38)*10, d=rnd(2,9)*10, big=small+d, S=big+small; return _W(`두 수의 합은 ${S}이고, 두 수의 차는 ${d}이에요. 두 수 가운데 큰 수는 얼마일까요?`,big,_kw(big,[[S-d,'N1-12'],[small,'N1-13'],[S+d,'N1-03']])); };
+/* 같게 하려면 몇 개를 주어야 하나 (차의 절반) */
+KM.giveEqual=()=>{ const b=rnd(12,40)*10, k=rnd(2,9)*10, a=b+2*k; return _W(`도토는 색종이를 ${a}장, 람이는 ${b}장 가지고 있어요. 두 사람의 색종이 수가 같아지려면 도토가 람이에게 몇 장을 주어야 할까요?`,k,_kw(k,[[2*k,'N1-12'],[(a+b)/2,'N1-08'],[b,'N1-08']]),'장'); };
+/* 거꾸로 생각하기: 나가고 들어온 뒤의 수 → 처음 수 */
+KM.busBack=()=>{ const z=rnd(120,400), x=rnd(15,95); let y=rnd(15,95); if(y===x) y+=3; return _W(`놀이공원에 사람들이 있었어요. ${x}명이 나가고 ${y}명이 새로 들어와서 지금은 ${z}명이에요. 처음에 있던 사람은 몇 명일까요?`,z+x-y,_kw(z+x-y,[[z-x+y,'N1-03'],[z,'N1-08'],[z+x+y,'N1-03']]),'명'); };
+/* 색 테이프 겹쳐 잇기 */
+KM.tapeOverlap=()=>{ const L=rnd(12,30), n=rndPick(2,3,4), k=rnd(2,5), ans=n*L-(n-1)*k, w=70, o=14; let g=''; for(let i=0;i<n;i++){ const x=8+i*(w-o); g+=`<rect x="${x}" y="${i%2?26:20}" width="${w}" height="22" fill="${['#FFD98A','#BFE3F5','#F9C6CF','#CDEBC5'][i]}" fill-opacity=".85" stroke="${GX_S}" stroke-width="1.4"/>`+gxT(x+w/2,(i%2?26:20)+15,L+' cm',11); if(i) g+=gxT(x+o/2,62,k+' cm',10,'#B04A2E'); } const W=16+n*w-(n-1)*o;
+  return _W(`길이가 ${L} cm인 색 테이프 ${n}장을 ${k} cm씩 겹쳐서 한 줄로 이어 붙였어요. 이어 붙인 색 테이프의 전체 길이는 몇 cm일까요?`,ans,_kw(ans,[[n*L-n*k,'N1-07'],[n*L,'N1-12'],[n*L+(n-1)*k,'N1-03']]),'cm',cpWrap(cpSvg(g,W,70,300))); };
+/* 덧셈 피라미드: 아래 두 칸의 합이 위 칸 */
+KM.pyramid=()=>{ const a=rnd(100,300), b=rnd(110,300), c=rnd(105,290), bx=(x,y,s,hi)=>`<rect x="${x}" y="${y}" width="76" height="30" rx="5" fill="${hi?'#FFF3C4':'#fff'}" stroke="${GX_S}" stroke-width="1.6"/>`+gxT(x+38,y+20,s,14,hi?'#B04A2E':'#4A2E14');
+  const g=bx(46,6,a+b)+bx(122,6,b+c)+bx(8,36,a)+bx(84,36,b)+bx(160,36,'㉠',1), ans=c; return _W('아래 두 칸의 수를 더하면 바로 위 칸의 수가 돼요. ㉠에 알맞은 수는 얼마일까요?',ans,_kw(ans,[[b+c+b,'N1-03'],[a+b,'N1-08'],[b+c-a,'N1-13']]),'',cpWrap(cpSvg(g,244,72,300))); };
+/* 정사각형 안에 꼭 맞는 원 */
+KM.circleInSquare=()=>{ const r=rnd(2,9), g=`<rect x="10" y="10" width="120" height="120" fill="#fff" stroke="${GX_S}" stroke-width="2"/><circle cx="70" cy="70" r="60" fill="${GX_F}" stroke="${GX_S}" stroke-width="2"/><line x1="70" y1="70" x2="130" y2="70" stroke="#B04A2E" stroke-width="2"/><circle cx="70" cy="70" r="3" fill="#4A2E14"/>`+gxT(100,64,r+' cm',12,'#B04A2E');
+  return _W(`정사각형 안에 원을 꼭 맞게 그렸어요. 원의 반지름이 ${r} cm일 때, 정사각형의 네 변의 길이의 합은 몇 cm일까요?`,8*r,_kw(8*r,[[4*r,'G3-04'],[2*r,'N1-12'],[16*r,'G3-04']]),'cm',cpWrap(cpSvg(g,140,140,180))); };
+/* 맞닿은 원 세 개의 중심을 이은 삼각형 */
+KM.circleCenters=()=>{ const r=rnd(2,9), R=34, P=[[44,104],[112,104],[78,104-R*Math.sqrt(3)]]; const g=P.map(p=>`<circle cx="${p[0]}" cy="${p[1].toFixed(1)}" r="${R}" fill="${GX_F}" fill-opacity=".6" stroke="${GX_S}" stroke-width="1.8"/>`).join('')+`<polygon points="${P.map(p=>p[0]+','+p[1].toFixed(1)).join(' ')}" fill="none" stroke="#B04A2E" stroke-width="2"/>`+P.map(p=>`<circle cx="${p[0]}" cy="${p[1].toFixed(1)}" r="3" fill="#4A2E14"/>`).join('');
+  return _W(`크기가 같은 원 3개를 서로 맞닿게 그렸어요. 원의 반지름이 ${r} cm일 때, 세 원의 중심을 이어 만든 삼각형의 세 변의 길이의 합은 몇 cm일까요?`,6*r,_kw(6*r,[[12*r,'G3-04'],[3*r,'G3-04'],[2*r,'N1-12']]),'cm',cpWrap(cpSvg(g,156,146,200))); };
+/* 전체의 몇 분의 몇을 쓰고 남은 양 */
+KM.fracRemain=()=>{ const b=rndPick(3,4,5,6,8), a=rnd(1,b-1), N=b*rnd(2,6), used=N*a/b, ans=N-used; if(2*a===b) return KM.fracRemain(); return _W(`구슬 ${N}개 가운데 ${b}분의 ${a}를 동생에게 주었어요. 남은 구슬은 몇 개일까요?`,ans,_kw(ans,[[used,'N1-08'],[N/b,'N3-07'],[N-a,'N3-07']]),'개'); };
+/* 직사각형 종이에서 정사각형을 가장 많이 */
+KM.cutSquares=()=>{ const s=rndPick(3,4,5,6), fa=rnd(3,6), fb=rnd(2,4), A=s*fa+rnd(1,s-1), B=s*fb+rnd(1,s-1), ans=fa*fb; if(A===B) return KM.cutSquares(); return _W(`가로 ${A} cm, 세로 ${B} cm인 직사각형 종이를 잘라 한 변이 ${s} cm인 정사각형을 만들려고 해요. 정사각형은 가장 많이 몇 장 만들 수 있을까요?`,ans,_kw(ans,[[Math.floor(A*B/(s*s)),'N6-10'],[fa+fb,'N2-05'],[(fa+1)*(fb+1),'N6-10']]),'장'); };
+/* 수 카드로 몫이 가장 큰 나눗셈 */
+KM.cardsDiv=()=>{ const d=shuffle([1,2,3,4,5,6,7,8,9]).slice(0,5).sort((x,y)=>y-x), dv=d[0]*100+d[1]*10+d[2], ds=d[4]*10+d[3], ans=Math.floor(dv/ds); return _W(`수 카드 ${shuffle(d.slice()).join(', ')}를 한 번씩 모두 써서 (세 자리 수) ÷ (두 자리 수)를 만들려고 해요. 몫이 가장 크게 되도록 만들었을 때, 몫은 얼마일까요?`,ans,_kw(ans,[[Math.floor(dv/(d[3]*10+d[4])),'N1-13'],[dv%ds,'N1-08'],[Math.floor((d[2]*100+d[3]*10+d[4])/(d[0]*10+d[1])),'N1-13']])); };
+/* 시곗바늘이 이루는 각 */
+KM.clockAngle=()=>{ if(rndPick(0,1)){ const h=rnd(1,5); return _W(`시계에서 숫자와 숫자 사이의 각은 30°예요. ${h}시 정각에 긴바늘과 짧은바늘이 이루는 작은 쪽의 각은 몇 도일까요?`,30*h,_kw(30*h,[[5*h,'G2-07'],[360-30*h,'G4-01'],[10*h,null]]),'°',cpWrap(gxClock(h,0))); }
+  const h=rnd(1,4), ans=165-30*h; return _W(`시계에서 숫자와 숫자 사이의 각은 30°예요. ${h}시 30분에 긴바늘과 짧은바늘이 이루는 작은 쪽의 각은 몇 도일까요? (30분 동안 짧은바늘은 숫자 사이의 절반인 15°만큼 움직여요.)`,ans,_kw(ans,[[180-30*h,null],[195-30*h,'N1-03'],[30*(6-h)+30,null]]),'°',cpWrap(gxClock(h,30))); };
+/* 남은 것의 몇 분의 몇을 또 썼을 때 */
+KM.remainOfRemain=()=>{ const b=rndPick(3,4,5), a=rnd(1,b-1), d=rndPick(2,3,4), c=rnd(1,d-1), N=b*d*rnd(2,5), r1=N*(b-a)/b, ans=r1*(d-c)/d; return _W(`리본 ${N} cm 가운데 어제는 전체의 ${b}분의 ${a}를 썼고, 오늘은 남은 리본의 ${d}분의 ${c}를 썼어요. 지금 남은 리본은 몇 cm일까요?`,ans,_kw(ans,[[N-N*a/b-N*c/d,'R6-06'],[r1*c/d,'N1-08'],[r1,'N1-12']]),'cm'); };
+/* 올림한 수와 버림한 수의 차 */
+KM.roundDiff=()=>{ const n=rnd(12,98)*100+rnd(1,8)*10+rnd(1,9), up=Math.ceil(n/100)*100, dn=Math.floor(n/10)*10, ans=up-dn; return _W(`${n}을 올림하여 백의 자리까지 나타낸 수와, ${n}을 버림하여 십의 자리까지 나타낸 수의 차는 얼마일까요?`.replace(/(\d)을/g,(m,c)=>c+('2459'.includes(c)?'를':'을')),ans,_kw(ans,[[100,'N5-14'],[10,'N5-14'],[up-n,'N1-08']])); };
+/* 남김없이 가장 큰 정사각형으로 자르기 */
+KM.gcdSquare=()=>{ const g=rndPick(4,5,6,8,10,12), [p,q]=rndPick([2,3],[3,4],[3,5],[2,5],[4,5]), A=g*q, B=g*p, ans=p*q; if(g===ans) return KM.gcdSquare(); return _W(`가로 ${A} cm, 세로 ${B} cm인 직사각형 종이를 남는 부분 없이 크기가 같은 가장 큰 정사각형 여러 개로 자르려고 해요. 정사각형은 모두 몇 개가 될까요?`,ans,_kw(ans,[[g,'N5-12'],[p+q,'N2-05'],[g*p*q,'N5-02']]),'개'); };
+/* 분모가 n인 진분수 가운데 기약분수의 수 */
+KM.irreducible=()=>{ const n=rndPick(6,8,9,10,12,15); let ans=0; for(let k=1;k<n;k++) if(_gcdN(k,n)===1) ans++; return _W(`분모가 ${n}인 진분수 가운데 기약분수는 모두 몇 개일까요?`,ans,_kw(ans,[[n-1,'N5-12'],[n-1-ans,'N1-08'],[Math.floor(n/2),'N5-11']]),'개'); };
+/* 꼭짓점·모서리·면의 수의 합 → 어떤 각기둥인지 */
+KM.prismName=()=>{ const n=rnd(3,8), S=6*n+2; return _W(`어떤 각기둥의 꼭짓점의 수, 모서리의 수, 면의 수를 모두 더했더니 ${S}개였어요. 이 각기둥의 한 밑면의 변은 몇 개일까요?`,n,_kw(n,[[(S-2)%4===0?(S-2)/4:null,'G6-03'],[n+2,'G6-03'],[2*n,'G6-03']]),'개'); };
+/* 원그래프: 두 항목의 비율 차와 인원 차 → 전체 */
+KM.pieDiff=()=>{ const T=rndPick(200,300,400,500), a=rndPick(30,35,40,45), b=rndPick(10,15,20,25), d=T*(a-b)/100; return _W(`좋아하는 운동을 조사해 원그래프로 나타냈더니 축구는 전체의 ${a}%, 야구는 전체의 ${b}%였어요. 축구를 좋아하는 학생이 야구를 좋아하는 학생보다 ${d}명 더 많다면, 조사한 학생은 모두 몇 명일까요?`,T,_kw(T,[[d*(a-b),'D6-01'],[(d*100)%a===0?d*100/a:null,'R6-06'],[T*a/100,'N1-08']]),'명'); };
+/* 접은 종이의 각: 접으면 같은 각이 두 개 */
+KM.foldAngle=()=>{ const a=rnd(2,14)*10, x=(180-a)/2, O=[110,96], ray=t=>{ const r=t*Math.PI/180; return [O[0]-78*Math.cos(r),O[1]-78*Math.sin(r)]; }, p1=ray(x), p2=ray(2*x); const g=`<line x1="14" y1="96" x2="206" y2="96" stroke="${GX_S}" stroke-width="2.4"/><line x1="${O[0]}" y1="${O[1]}" x2="${p1[0].toFixed(1)}" y2="${p1[1].toFixed(1)}" stroke="#B04A2E" stroke-width="2" stroke-dasharray="5 4"/><line x1="${O[0]}" y1="${O[1]}" x2="${p2[0].toFixed(1)}" y2="${p2[1].toFixed(1)}" stroke="${GX_S}" stroke-width="2.2"/>`+(()=>{ const m=t=>{ const r=t*Math.PI/180; return [O[0]-40*Math.cos(r),O[1]-40*Math.sin(r)+4]; }, a1=m(x/2), a2=m(1.5*x), a3=m(2*x+a/2); return gxT(a1[0],a1[1],'㉠',12,'#B04A2E')+gxT(a2[0],a2[1],'㉠',12,'#B04A2E')+gxT(a3[0],a3[1],a+'°',12); })();
+  return _W(`종이의 한 귀퉁이를 점선을 따라 접었더니, 곧은 변 위에 크기가 같은 각 ㉠이 2개 생기고 남은 각은 ${a}°였어요. 세 각을 모으면 180°예요. 각 ㉠은 몇 도일까요?`,x,_kw(x,[[180-a,'N1-12'],[(360-a)/2,'G4-12'],[a,'N1-08']]),'°',cpWrap(cpSvg(g,220,110,260),'접힌 각과 접기 전의 각은 크기가 같아요')); };
+/* 선대칭도형의 둘레: 한쪽 변만 주어짐 */
+KM.symPeri=()=>{ const a=rnd(4,9), b=rnd(3,8), c=rnd(2,6), g=`<polygon points="90,14 150,58 150,120 30,120 30,58" fill="${GX_F}" stroke="${GX_S}" stroke-width="2" stroke-linejoin="round"/><line x1="90" y1="4" x2="90" y2="132" stroke="#B04A2E" stroke-width="1.8" stroke-dasharray="6 4"/>`+gxT(48,32,a+' cm',12)+gxT(13,94,b+' cm',12,'#4A2E14','middle')+gxT(60,136,c+' cm',12)+gxT(98,12,'ㄱ',11,'#B04A2E','start')+gxT(98,134,'ㄴ',11,'#B04A2E','start'), ans=2*(a+b+c);
+  return _W(`직선 ㄱㄴ을 대칭축으로 하는 선대칭도형이에요. 대칭축의 왼쪽에 있는 변의 길이가 ${a} cm, ${b} cm, ${c} cm일 때, 이 도형의 둘레는 몇 cm일까요?`,ans,_kw(ans,[[a+b+c,'N1-12'],[2*(a+b)+c,'G5-10'],[2*(a+b),'G5-10']]),'cm',cpWrap(cpSvg(g,180,142,220))); };
+/* 간격의 수와 나무의 수 */
+KM.treeSpacing=()=>{ const d=rndPick(20,30,40), k=rnd(3,8), L=d*k, both=rndPick(false,true), ans=both?2*(k+1):k+1; return _W(`길이가 ${L} m인 길의 ${both?'양쪽':'한쪽'}에 처음부터 끝까지 ${d} m 간격으로 나무를 심으려고 해요. 나무는 모두 몇 그루 필요할까요?`,ans,_kw(ans,both?[[k+1,'N1-12'],[2*k,'N1-07'],[k,'N1-07']]:[[k,'N1-07'],[k-1,'N1-07'],[2*(k+1),null]]),'그루'); };
+/* 반원의 둘레: 굽은 선 + 곧은 선 */
+KM.halfCircle=()=>{ const d=rndPick(4,6,8,10,12,20), ans=d*3/2+d, g=`<path d="M20 90 A70 70 0 0 1 160 90 Z" fill="${GX_F}" stroke="${GX_S}" stroke-width="2.2"/>`+gxT(90,106,d+' cm',12); return _W(`지름이 ${d} cm인 원을 반으로 자른 반원이에요. 이 반원의 둘레는 몇 cm일까요? (원주율: 3)`,ans,_kw(ans,[[d*3/2,'N1-12'],[d*3+d,'G6-12'],[d*3/2+d/2,'G3-04']]),'cm',cpWrap(cpSvg(g,180,114,220))); };
+/* 정사각형을 한 줄로 이어 붙인 직사각형의 둘레 */
+KM.sqRowPeri=()=>{ const a=rnd(2,9), n=rnd(3,6), ans=2*(n+1)*a, u=34; let g=''; for(let i=0;i<n;i++) g+=`<rect x="${8+i*u}" y="10" width="${u}" height="${u}" fill="${GX_F}" stroke="${GX_S}" stroke-width="1.8"/>`; g+=gxT(8+u/2,58,a+' cm',11); return _W(`한 변의 길이가 ${a} cm인 정사각형 ${n}개를 한 줄로 겹치지 않게 이어 붙여 직사각형을 만들었어요. 이 직사각형의 둘레는 몇 cm일까요?`,ans,_kw(ans,[[4*a*n,null],[n*a*a,'G5-01'],[(n+1)*a,'N1-12']]),'cm',cpWrap(cpSvg(g,16+n*u,64,280))); };
+try{ const add=(ep,g)=>{ if(G36[ep]){ (window._NTW=window._NTW||[]).push([ep,G36[ep].length,g]); G36[ep].push(g); } };
+  add('S2-07',KM.sumDiff); add('S2-06',KM.giveEqual); add('S2-03',KM.busBack); add('S6-16',KM.tapeOverlap); add('S2-05',KM.pyramid);
+  add('S6-26',KM.circleInSquare); add('S6-26',KM.circleCenters); add('S3-35',KM.fracRemain); add('S6-66',KM.cutSquares); add('S6-66',KM.sqRowPeri);
+  add('S3-48',KM.cardsDiv); add('S6-49',KM.clockAngle); add('S6-49',KM.foldAngle); add('S3-46',KM.treeSpacing);
+  add('S3-91',KM.remainOfRemain); add('S3-86',KM.roundDiff); add('S3-73',KM.gcdSquare); add('S3-75',KM.irreducible); add('S6-54',KM.symPeri);
+  add('S6-59',KM.prismName); add('S4-21',KM.pieDiff); add('S6-74',KM.halfCircle);
+}catch(e){}
+window._KM=KM;
+
 /* ---------- 3-12. 개념 조각과 보기별 무게 (오개념 코드 → 모르는 개념 조각) ---------- */
 // 교수님 지적(2026-11-20): 오답에 코드만 붙일 게 아니라 "이 보기를 고른 아이는 어떤 개념을 모른다"는 가정과 무게가 있어야 한다.
 // CPC: 조각 → [이름, 처음 배우는 학년-학기, 선수 조각들]. MISC: 오개념 코드 → [[주 조각, 무게], [부 조각, 무게]].
