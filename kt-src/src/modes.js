@@ -77,13 +77,20 @@ function startDaily(opt){ const P=pref(); if(!P.band) return bandPage(startDaily
     while(B.acts.length<N&&g++<N*10){ const ep=nextEp(fr[g%fr.length],st); if(!ep) continue; if(!usedEp.has(ep)){ usedEp.add(ep); flowActs(B,ep,N-B.acts.length,st); } else { const q=qFromEp36(ep); if(q){ q._stg=window.ktStage(q); B.push(q,'_new'); } } } }
   let acts=B.acts; if(P.band!==1){ const head=shuffle(acts.slice(0,n0)), tail=acts.slice(n0).map((a,k)=>[a,k]).sort((x,y)=>((x[0].q._stg??1)-(y[0].q._stg??1))||(x[1]-y[1])).map(x=>x[0]); acts=head.concat(tail); }
   runSet(acts,cont?'계속 풀기':'오늘의 문제',{kt:'daily'},video); }
+try{ window.__flowActs=(ep,room)=>{ const B=bag(); flowActs(B,ep,room,state()); return B.acts; }; }catch(e){}
 // 한 편의 문제를 단계 차례로 담는다: 조작 1 → 기본(자리의 40%쯤) → 문장제 → 여러 개념 1. 단계 안에서는 지금 가장 많이 알려 줄 문제(bestQ).
 function flowActs(B,ep,room,st){ if(room<=0) return; const F=G36[ep]||[]; const by={0:[],1:[],2:[],3:[]}; F.forEach((g,i)=>{ try{ const q=g(); if(q) by[window.ktStage(q)].push(i); }catch(e){} });
   /* 자리가 10이면 조작 2 · 기본 3 · 문장제 3 · 생각 넓히기 2 (제미나이와 맞춘 배분). 자리가 적으면 줄이고, 그 편에 없는 단계의 몫은 기본으로 */
-  const want={0:Math.min(by[0].length,room>=8?2:room>=3?1:0),3:Math.min(by[3].length?2:0,room>=8?2:room>=4?1:0)}; want[2]=by[2].length?Math.min(3,Math.max(1,Math.round(room*.3))):0; want[1]=Math.max(room>=6?2:1,room-want[0]-want[2]-want[3]); while(want[0]+want[1]+want[2]+want[3]>room){ if(want[2]>1) want[2]--; else if(want[3]>1) want[3]--; else if(want[0]>1) want[0]--; else if(want[1]>1) want[1]--; else break; }
+  /* 조작은 1문제만(11/23 제미나이: 아는 아이에게 2문제는 낭비, 처음 보는 화면은 한 문제에 2분). 그 조작을 첫 시도에 틀렸을 때만 하나 더 낸다(coach.js) */
+  const want={0:Math.min(by[0].length,room>=3?1:0),3:Math.min(by[3].length?2:0,room>=8?2:room>=4?1:0)}; want[2]=by[2].length?Math.min(3,Math.max(1,Math.round(room*.3))):0; want[1]=Math.max(room>=6?2:1,room-want[0]-want[2]-want[3]); while(want[0]+want[1]+want[2]+want[3]>room){ if(want[2]>1) want[2]--; else if(want[3]>1) want[3]--; else if(want[0]>1) want[0]--; else if(want[1]>1) want[1]--; else break; }
   let left=room; const put=(q,s)=>{ if(!q||left<=0) return false; q._ep=ep; q._stg=s; if(B.push(q,'_new')){ left--; return true; } return false; };
   for(const i of shuffle(by[0].slice()).slice(0,want[0])){ for(let t=0;t<4;t++){ try{ const q=F[i](); if(q){ q._ti=i; if(put(q,0)) break; } }catch(e){ break; } } }
-  for(const s of [1,2,3]){ let n=0, guard=0; while(n<want[s]&&guard++<want[s]*6){ const q=bestQ([ep],x=>window.ktStage(x)===s,st); if(!q) break; if(put(q,s)) n++; } } }
+  for(const s of [1,2,3]){ let n=0, guard=0;
+    /* 이 단계에 '누르는 문제'(계산 순서·소수점 찍기·식 세우기·표에서 판단)가 있으면 하나는 그것으로 */
+    const ms=by[s].filter(i=>{ try{ const x=F[i](); return x&&x.manip; }catch(e){ return false; } }); if(ms.length&&want[s]>0){ const i=ms[rnd(0,ms.length-1)]; try{ const q=F[i](); if(q){ q._ti=i; if(put(q,s)) n++; } }catch(e){} }
+    while(n<want[s]&&guard++<want[s]*6){ const q=bestQ([ep],x=>window.ktStage(x)===s,st); if(!q) break; if(put(q,s)) n++; }
+    /* 가장 알맞은 문제만 고르다 같은 문제가 되풀이되어 자리를 못 채우면, 그 단계의 틀을 차례로 돌며 채운다 */
+    if(n<want[s]){ for(const i of shuffle(by[s].slice())){ if(n>=want[s]) break; for(let t=0;t<4&&n<want[s];t++){ try{ const q=F[i](); if(q&&!q.manip&&!q.onMount&&window.ktStage(q)===s){ q._ti=i; if(put(q,s)) n++; } }catch(e){ break; } } } } } }
 function finishDaily(S0){ const st=state(), t=dstr(Date.now());
   if(!st.daily||st.daily.d!==t){ st.streak=(st.daily&&st.daily.d===dstr(Date.now()-864e5))?(st.streak||0)+1:1; st.daily={d:t}; W(SK,st); }
   if(pref().band===1){ const idx=S0.acts.map((a,k)=>a.q&&a.q._new?k:-1).filter(k=>k>=0); if(idx.length>=3){ const acc=idx.filter(k=>S0.results[k]).length/idx.length; const i=ptr(); setPref({d12:Math.max(0,Math.min(EPO.length-1,i+(acc>=.8?1:acc<.5?-1:0)))});

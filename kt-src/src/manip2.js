@@ -514,3 +514,38 @@ try{ const add=(ep,g)=>{ if(G36[ep]&&g){ (window._NTW=window._NTW||[]).push([ep,
   add('S3-67',M2.qBuildChange); add('S3-66',M2.qBuildChange); add('S2-09',M2.qBuildShare); add('S2-08',M2.qBuildShare); add('S2-16',M2.qBuildTwo); add('S2-13',M2.qBuildTwo);
   add('S3-89',M2.qCounterMul); add('S3-95',M2.qCounterMul); add('S3-69',M2.qTwoCond); add('S3-72',M2.qTwoCond);
 }catch(e){}
+
+// ===== manip2 이어서(11/23 새벽): 두 막대 모형(싱가포르식) · 모눈에 점 찍어 도형 완성 =====
+/* 두 막대: mode 'set'(두 막대의 칸 수를 정해 합과 차를 맞춤) / 'move'(긴 막대에서 짧은 막대로 한 칸씩 옮겨 같게) */
+M2.bars=(mode,P)=>{ let A=mode==='set'?0:P.a, B=mode==='set'?0:P.b, moved=0; const MAX=mode==='set'?P.S:P.a;
+  const bar=(n,col,nm)=>`<div style="display:flex;align-items:center;gap:6px;width:100%;max-width:340px"><b style="min-width:42px">${nm}</b><div style="display:flex;flex-wrap:wrap;gap:1px;flex:1;min-height:26px">${Array.from({length:n},()=>`<span style="display:inline-block;width:${Math.max(8,Math.min(20,Math.floor(250/Math.max(MAX,10))))}px;height:24px;background:${col};border:1px solid #7A4A1E;border-radius:2px"></span>`).join('')}</div><b style="min-width:30px;text-align:right">${n}</b></div>`;
+  const o={ draw(){ let h=bar(A,'#F2A65A',P.names[0])+bar(B,'#8CC8EE',P.names[1]);
+      if(mode==='set') h+=`<div style="display:flex;gap:5px;flex-wrap:wrap;justify-content:center">${m2b('A5',`${P.names[0]} +5`)}${m2b('A1',`${P.names[0]} +1`)}${m2b('a1',`${P.names[0]} −1`,'font-size:.85rem')}</div><div style="display:flex;gap:5px;flex-wrap:wrap;justify-content:center">${m2b('B5',`${P.names[1]} +5`)}${m2b('B1',`${P.names[1]} +1`)}${m2b('b1',`${P.names[1]} −1`,'font-size:.85rem')}</div><div style="font-size:.95rem">합 <b>${A+B}</b> · 차 <b>${Math.abs(A-B)}</b></div>`;
+      else h+=`<div style="display:flex;gap:6px;flex-wrap:wrap;justify-content:center">${m2b('mv',`${P.names[0]} → ${P.names[1]} 한 칸 주기`,'background:#FFD98A')}${m2b('bk','한 칸 되돌리기','font-size:.85rem')}</div><div style="font-size:.95rem">지금까지 <b>${moved}칸</b> 주었어요</div>`; return h; },
+    on(a){ if(mode==='set'){ const d={A5:[5,0],A1:[1,0],a1:[-1,0],B5:[0,5],B1:[0,1],b1:[0,-1]}[a]; if(!d) return; A=Math.max(0,Math.min(MAX,A+d[0])); B=Math.max(0,Math.min(MAX,B+d[1])); } else if(a==='mv'){ if(A>0){ A--; B++; moved++; } } else if(a==='bk'){ if(moved>0){ A++; B--; moved--; } } },
+    check(){ return mode==='set'?(A+B===P.S&&A-B===P.d):(A===B); },
+    wrong(){ if(mode==='set'){ if(!A&&!B) return null; if(A===P.S-P.d&&B===P.d) return '합에서 차를 뺀 수를 그대로 놓았어요'; if(A-B===P.d&&A+B!==P.S) return '차만 맞췄어요'; if(A+B===P.S&&A-B!==P.d) return '합만 맞췄어요'; return null; } if(moved===P.a-P.b) return '차이만큼 모두 주었어요'; return null; },
+    reveal(){ if(mode==='set'){ A=(P.S+P.d)/2; B=(P.S-P.d)/2; } else { const k=(P.a-P.b)/2; A=P.a-k; B=P.b+k; moved=k; } },
+    goal(){ if(mode==='set'){ const ta=(n,c)=>{ const t=[]; for(let i=0;i<Math.floor(n/5);i++) t.push(c+'5'); for(let i=0;i<n%5;i++) t.push(c+'1'); return t; }, a=(P.S+P.d)/2, b=(P.S-P.d)/2; return {taps:ta(a,'A').concat(ta(b,'B')),mis:ta(P.S-P.d,'A').concat(ta(P.d,'B')),misName:'합에서 차를 뺀 수를 그대로 놓았어요'}; } const k=(P.a-P.b)/2; return {taps:Array(k).fill('mv'),mis:Array(P.a-P.b).fill('mv'),misName:'차이만큼 모두 주었어요'}; }, state:()=>({A,B,moved}) };
+  const m=m2make(o); m._o=o; return m; };
+M2.qBarsSumDiff=()=>{ const b=rnd(4,12), d=rnd(2,6), a=b+d, S=a+b; if(S-d===a||S>34) return M2.qBarsSumDiff(); return m2q(`도토와 람이가 주운 도토리는 모두 ${S}개이고, 도토가 람이보다 ${d}개 더 많이 주웠어요. 두 막대의 칸 수를 정해 두 사람이 주운 도토리 수를 나타내 보세요.`,'합과 차를 둘 다 맞춰야 해요. 차만큼을 먼저 떼어 놓고 나머지를 똑같이 나누어 봐요.',M2.bars('set',{S,d,names:['도토','람이']}),`도토 ${a}개, 람이 ${b}개`,{'합에서 차를 뺀 수를 그대로 놓았어요':'N1-12','차만 맞췄어요':'N1-12','합만 맞췄어요':'N1-12'}); };
+M2.qBarsGive=()=>{ const b=rnd(3,9), k=rnd(2,5), a=b+2*k; return m2q(`도토는 구슬이 ${a}개, 람이는 ${b}개 있어요. 도토가 람이에게 구슬을 한 개씩 주어 두 사람의 구슬 수가 같아지게 해 보세요.`,'한 개를 주면 도토는 1개 줄고 람이는 1개 늘어서, 차이는 2개씩 줄어요.',M2.bars('move',{a,b,names:['도토','람이']}),`${k}개를 주면 둘 다 ${b+k}개`,{'차이만큼 모두 주었어요':'N1-12'}); };
+
+/* 모눈의 점을 눌러 도형 완성하기: 세 점이 주어지고 네 번째 꼭짓점을 찍음 */
+M2.gridPt=(pts,ans,alts,W,H,label)=>{ let at=null; const u=30, X=x=>18+x*u, Y=y=>18+(H-y)*u, eq=(p,q)=>p&&q&&p[0]===q[0]&&p[1]===q[1];
+  const o={ draw(){ let g=''; for(let x=0;x<=W;x++) g+=`<line x1="${X(x)}" y1="${Y(0)}" x2="${X(x)}" y2="${Y(H)}" stroke="#E6D8BE"/>`; for(let y=0;y<=H;y++) g+=`<line x1="${X(0)}" y1="${Y(y)}" x2="${X(W)}" y2="${Y(y)}" stroke="#E6D8BE"/>`;
+      const all=at?pts.concat([at]):pts; if(at) g+=`<polygon points="${all.map(p=>X(p[0])+','+Y(p[1])).join(' ')}" fill="#FFE3B0" fill-opacity=".7" stroke="#7A4A1E" stroke-width="2"/>`; else g+=`<polyline points="${pts.map(p=>X(p[0])+','+Y(p[1])).join(' ')}" fill="none" stroke="#7A4A1E" stroke-width="2"/>`;
+      for(let x=0;x<=W;x++) for(let y=0;y<=H;y++){ if(pts.some(p=>p[0]===x&&p[1]===y)) continue; g+=`<circle data-ma="g${x}_${y}" cx="${X(x)}" cy="${Y(y)}" r="12" fill="${eq(at,[x,y])?'#E4604E':'#fff'}" fill-opacity="${eq(at,[x,y])?1:.01}" style="cursor:pointer"/><circle cx="${X(x)}" cy="${Y(y)}" r="2" fill="#C9B38C" pointer-events="none"/>`; }
+      pts.forEach((p,i)=>{ g+=`<circle cx="${X(p[0])}" cy="${Y(p[1])}" r="5" fill="#7A4A1E"/><text x="${X(p[0])-10}" y="${Y(p[1])-8}" font-size="13" font-weight="700" fill="#4A2E14">${'ㄱㄴㄷ'[i]}</text>`; }); if(at) g+=`<text x="${X(at[0])+8}" y="${Y(at[1])-8}" font-size="13" font-weight="700" fill="#D04A3A">ㄹ</text>`;
+      return `<svg viewBox="0 0 ${W*u+36} ${H*u+36}" style="width:100%;max-width:${Math.min(340,W*u+36)}px;touch-action:manipulation">${g}</svg><div style="font-size:.9rem;color:#8A6A4A">${label}</div>`; },
+    on(a){ const [x,y]=a.slice(1).split('_').map(Number); at=eq(at,[x,y])?null:[x,y]; },
+    check(){ return eq(at,ans); }, wrong(){ if(!at) return null; const k=at.join(','); return alts[k]||null; }, reveal(){ at=ans.slice(); },
+    goal(){ const mk=Object.keys(alts)[0]; return {taps:[`g${ans[0]}_${ans[1]}`],mis:mk?['g'+mk.replace(',','_')]:null,misName:mk?alts[mk]:null}; }, state:()=>({at:at?at.join('_'):'_'}) };
+  const m=m2make(o); m._o=o; return m; };
+M2.qGridPara=()=>{ const W=8, H=5, ax=rnd(1,2), ay=rnd(0,1), w=rnd(3,4), sx=rnd(1,2), h=rnd(2,3); const Aq=[ax+sx,ay+h], Bq=[ax,ay], Cq=[ax+w,ay], D=[ax+sx+w,ay+h]; if(D[0]>W||D[1]>H) return M2.qGridPara(); const alts={}; const up=[ax+w,ay+h]; if(up[0]!==D[0]) alts[up.join(',')]='비스듬한 변을 곧게 세웠어요'; const mir=[ax+w-sx,ay+h]; if(mir[0]>=0&&mir.join(',')!==D.join(',')&&!alts[mir.join(',')]&&!(mir[0]===Aq[0]&&mir[1]===Aq[1])) alts[mir.join(',')]='마주 보는 변이 나란하지 않아요';
+  return m2q('점 ㄱ, ㄴ, ㄷ이 있어요. 사각형 ㄱㄴㄷㄹ이 평행사변형이 되도록 점 ㄹ을 찍어 보세요.','마주 보는 변끼리 서로 평행하고 길이가 같아야 해요. ㄴ에서 ㄱ으로 가는 만큼 ㄷ에서도 가 봐요.',M2.gridPt([Aq,Bq,Cq],D,alts,W,H,'모눈의 점을 눌러 ㄹ을 찍어요'),'마주 보는 두 쌍의 변이 평행해요',{'비스듬한 변을 곧게 세웠어요':'G4-06','마주 보는 변이 나란하지 않아요':'G4-03'}); };
+M2.qGridRect=()=>{ const W=8, H=5, ax=rnd(1,3), ay=rnd(0,1), w=rnd(3,4), h=rnd(2,3), Aq=[ax,ay+h], Bq=[ax,ay], Cq=[ax+w,ay], D=[ax+w,ay+h], alts={}; alts[[ax+w+1,ay+h].join(',')]='직각이 아닌 각이 생겼어요'; alts[[ax+w,ay+h+1>H?ay+h-1:ay+h+1].join(',')]='마주 보는 변의 길이가 달라요';
+  return m2q('점 ㄱ, ㄴ, ㄷ이 있어요. 사각형 ㄱㄴㄷㄹ이 직사각형이 되도록 점 ㄹ을 찍어 보세요.','네 각이 모두 직각이어야 해요.',M2.gridPt([Aq,Bq,Cq],D,alts,W,H,'모눈의 점을 눌러 ㄹ을 찍어요'),'네 각이 모두 직각이에요',{'직각이 아닌 각이 생겼어요':'G3-02','마주 보는 변의 길이가 달라요':'G3-02'}); };
+try{ const add=(ep,g)=>{ if(G36[ep]&&g){ (window._NTW=window._NTW||[]).push([ep,G36[ep].length,g]); G36[ep].push(g); } };
+  add('S2-07',M2.qBarsSumDiff); add('S2-04',M2.qBarsSumDiff); add('S2-06',M2.qBarsGive); add('S2-01',M2.qBarsGive); add('S6-30',M2.qGridPara); add('S6-20',M2.qGridPara); add('S6-19',M2.qGridRect); add('S6-21',M2.qGridRect);
+}catch(e){}

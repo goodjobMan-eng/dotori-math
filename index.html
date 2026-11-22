@@ -8148,7 +8148,7 @@ window._GT=GT;
 
 // ===== 3-70. 문제의 단계(교수님 11/22 밤: 수업 → 구체적 조작 → 기본(암기·계산) → 문장제 → 여러 개념) =====
 // 0 조작, 1 기본, 2 문장제, 3 여러 개념·까닭. 틀마다 손으로 붙이지 않고 문제의 꼴로 가른다(편 연습의 순서, 오늘의 문제의 새 내용 순서에 씀).
-window.ktStage=q=>{ try{ if(!q) return 1; if(q.manip||q.onMount) return 0; const t=String(q.q||'').replace(/<[^>]+>/g,' ').replace(/\s+/g,' ').trim(), a=String(q.ans==null?'':q.ans);
+window.ktStage=q=>{ try{ if(!q) return 1; if(q._kst!=null) return q._kst; if(q.manip||q.onMount){ /* 기호 규칙을 누르는 조작은 '만져 보기'가 아니라 그 뒤 단계(제미나이 지적): 계산 순서·소수점 찍기 → 기본, 식 세우기 → 이야기 문제, 표에서 판단·반례·두 조건 → 도전 */ const tt=String(q.q||''); if(q.manip&&/계산할 차례대로|소수점을 찍어/.test(tt)) return 1; if(q.manip&&/식을 (하나로 )?세워/.test(tt)) return 2; if(q.manip&&/알맞은 칸을 골라|큰지 작은지 골라|같은지, 큰지 골라|틀렸다는 것을|이면서 .*인 수를 모두/.test(tt)) return 3; return 0; } const t=String(q.q||'').replace(/<[^>]+>/g,' ').replace(/\s+/g,' ').trim(), a=String(q.ans==null?'':q.ans);
     if(q._hard||/ — /.test(a)||/까닭|바르게 (말|고쳐|구한|계산한)|누구일까요|이 말에 대한/.test(t)) return 3; const nums=(t.match(/\d+/g)||[]).length;
     if(t.length>=60&&nums>=3) return 3; if(q.word||(t.length>=26&&nums>=1&&/어요|았어요|였어요|려고|습니다|있어요/.test(t))) return 2; return 1; }catch(e){ return 1; } };
 window.KT_STAGE_NAME=['만져 보기','기본 익히기','이야기 문제','도전 문제'];   /* 3~4학년이 알아듣는 이름(제미나이 제안) */
@@ -8685,6 +8685,41 @@ try{ const add=(ep,g)=>{ if(G36[ep]&&g){ (window._NTW=window._NTW||[]).push([ep,
   add('S3-77',M2.qMatHalf); add('S3-20',M2.qMatHalf); add('S6-31',M2.qMatQuad); add('S3-90',M2.qMatMul); add('S3-94',M2.qMatMul); add('S3-110',M2.qMatDiv); add('S3-108',M2.qMatDiv);
   add('S3-67',M2.qBuildChange); add('S3-66',M2.qBuildChange); add('S2-09',M2.qBuildShare); add('S2-08',M2.qBuildShare); add('S2-16',M2.qBuildTwo); add('S2-13',M2.qBuildTwo);
   add('S3-89',M2.qCounterMul); add('S3-95',M2.qCounterMul); add('S3-69',M2.qTwoCond); add('S3-72',M2.qTwoCond);
+}catch(e){}
+
+// ===== manip2 이어서(11/23 새벽): 두 막대 모형(싱가포르식) · 모눈에 점 찍어 도형 완성 =====
+/* 두 막대: mode 'set'(두 막대의 칸 수를 정해 합과 차를 맞춤) / 'move'(긴 막대에서 짧은 막대로 한 칸씩 옮겨 같게) */
+M2.bars=(mode,P)=>{ let A=mode==='set'?0:P.a, B=mode==='set'?0:P.b, moved=0; const MAX=mode==='set'?P.S:P.a;
+  const bar=(n,col,nm)=>`<div style="display:flex;align-items:center;gap:6px;width:100%;max-width:340px"><b style="min-width:42px">${nm}</b><div style="display:flex;flex-wrap:wrap;gap:1px;flex:1;min-height:26px">${Array.from({length:n},()=>`<span style="display:inline-block;width:${Math.max(8,Math.min(20,Math.floor(250/Math.max(MAX,10))))}px;height:24px;background:${col};border:1px solid #7A4A1E;border-radius:2px"></span>`).join('')}</div><b style="min-width:30px;text-align:right">${n}</b></div>`;
+  const o={ draw(){ let h=bar(A,'#F2A65A',P.names[0])+bar(B,'#8CC8EE',P.names[1]);
+      if(mode==='set') h+=`<div style="display:flex;gap:5px;flex-wrap:wrap;justify-content:center">${m2b('A5',`${P.names[0]} +5`)}${m2b('A1',`${P.names[0]} +1`)}${m2b('a1',`${P.names[0]} −1`,'font-size:.85rem')}</div><div style="display:flex;gap:5px;flex-wrap:wrap;justify-content:center">${m2b('B5',`${P.names[1]} +5`)}${m2b('B1',`${P.names[1]} +1`)}${m2b('b1',`${P.names[1]} −1`,'font-size:.85rem')}</div><div style="font-size:.95rem">합 <b>${A+B}</b> · 차 <b>${Math.abs(A-B)}</b></div>`;
+      else h+=`<div style="display:flex;gap:6px;flex-wrap:wrap;justify-content:center">${m2b('mv',`${P.names[0]} → ${P.names[1]} 한 칸 주기`,'background:#FFD98A')}${m2b('bk','한 칸 되돌리기','font-size:.85rem')}</div><div style="font-size:.95rem">지금까지 <b>${moved}칸</b> 주었어요</div>`; return h; },
+    on(a){ if(mode==='set'){ const d={A5:[5,0],A1:[1,0],a1:[-1,0],B5:[0,5],B1:[0,1],b1:[0,-1]}[a]; if(!d) return; A=Math.max(0,Math.min(MAX,A+d[0])); B=Math.max(0,Math.min(MAX,B+d[1])); } else if(a==='mv'){ if(A>0){ A--; B++; moved++; } } else if(a==='bk'){ if(moved>0){ A++; B--; moved--; } } },
+    check(){ return mode==='set'?(A+B===P.S&&A-B===P.d):(A===B); },
+    wrong(){ if(mode==='set'){ if(!A&&!B) return null; if(A===P.S-P.d&&B===P.d) return '합에서 차를 뺀 수를 그대로 놓았어요'; if(A-B===P.d&&A+B!==P.S) return '차만 맞췄어요'; if(A+B===P.S&&A-B!==P.d) return '합만 맞췄어요'; return null; } if(moved===P.a-P.b) return '차이만큼 모두 주었어요'; return null; },
+    reveal(){ if(mode==='set'){ A=(P.S+P.d)/2; B=(P.S-P.d)/2; } else { const k=(P.a-P.b)/2; A=P.a-k; B=P.b+k; moved=k; } },
+    goal(){ if(mode==='set'){ const ta=(n,c)=>{ const t=[]; for(let i=0;i<Math.floor(n/5);i++) t.push(c+'5'); for(let i=0;i<n%5;i++) t.push(c+'1'); return t; }, a=(P.S+P.d)/2, b=(P.S-P.d)/2; return {taps:ta(a,'A').concat(ta(b,'B')),mis:ta(P.S-P.d,'A').concat(ta(P.d,'B')),misName:'합에서 차를 뺀 수를 그대로 놓았어요'}; } const k=(P.a-P.b)/2; return {taps:Array(k).fill('mv'),mis:Array(P.a-P.b).fill('mv'),misName:'차이만큼 모두 주었어요'}; }, state:()=>({A,B,moved}) };
+  const m=m2make(o); m._o=o; return m; };
+M2.qBarsSumDiff=()=>{ const b=rnd(4,12), d=rnd(2,6), a=b+d, S=a+b; if(S-d===a||S>34) return M2.qBarsSumDiff(); return m2q(`도토와 람이가 주운 도토리는 모두 ${S}개이고, 도토가 람이보다 ${d}개 더 많이 주웠어요. 두 막대의 칸 수를 정해 두 사람이 주운 도토리 수를 나타내 보세요.`,'합과 차를 둘 다 맞춰야 해요. 차만큼을 먼저 떼어 놓고 나머지를 똑같이 나누어 봐요.',M2.bars('set',{S,d,names:['도토','람이']}),`도토 ${a}개, 람이 ${b}개`,{'합에서 차를 뺀 수를 그대로 놓았어요':'N1-12','차만 맞췄어요':'N1-12','합만 맞췄어요':'N1-12'}); };
+M2.qBarsGive=()=>{ const b=rnd(3,9), k=rnd(2,5), a=b+2*k; return m2q(`도토는 구슬이 ${a}개, 람이는 ${b}개 있어요. 도토가 람이에게 구슬을 한 개씩 주어 두 사람의 구슬 수가 같아지게 해 보세요.`,'한 개를 주면 도토는 1개 줄고 람이는 1개 늘어서, 차이는 2개씩 줄어요.',M2.bars('move',{a,b,names:['도토','람이']}),`${k}개를 주면 둘 다 ${b+k}개`,{'차이만큼 모두 주었어요':'N1-12'}); };
+
+/* 모눈의 점을 눌러 도형 완성하기: 세 점이 주어지고 네 번째 꼭짓점을 찍음 */
+M2.gridPt=(pts,ans,alts,W,H,label)=>{ let at=null; const u=30, X=x=>18+x*u, Y=y=>18+(H-y)*u, eq=(p,q)=>p&&q&&p[0]===q[0]&&p[1]===q[1];
+  const o={ draw(){ let g=''; for(let x=0;x<=W;x++) g+=`<line x1="${X(x)}" y1="${Y(0)}" x2="${X(x)}" y2="${Y(H)}" stroke="#E6D8BE"/>`; for(let y=0;y<=H;y++) g+=`<line x1="${X(0)}" y1="${Y(y)}" x2="${X(W)}" y2="${Y(y)}" stroke="#E6D8BE"/>`;
+      const all=at?pts.concat([at]):pts; if(at) g+=`<polygon points="${all.map(p=>X(p[0])+','+Y(p[1])).join(' ')}" fill="#FFE3B0" fill-opacity=".7" stroke="#7A4A1E" stroke-width="2"/>`; else g+=`<polyline points="${pts.map(p=>X(p[0])+','+Y(p[1])).join(' ')}" fill="none" stroke="#7A4A1E" stroke-width="2"/>`;
+      for(let x=0;x<=W;x++) for(let y=0;y<=H;y++){ if(pts.some(p=>p[0]===x&&p[1]===y)) continue; g+=`<circle data-ma="g${x}_${y}" cx="${X(x)}" cy="${Y(y)}" r="12" fill="${eq(at,[x,y])?'#E4604E':'#fff'}" fill-opacity="${eq(at,[x,y])?1:.01}" style="cursor:pointer"/><circle cx="${X(x)}" cy="${Y(y)}" r="2" fill="#C9B38C" pointer-events="none"/>`; }
+      pts.forEach((p,i)=>{ g+=`<circle cx="${X(p[0])}" cy="${Y(p[1])}" r="5" fill="#7A4A1E"/><text x="${X(p[0])-10}" y="${Y(p[1])-8}" font-size="13" font-weight="700" fill="#4A2E14">${'ㄱㄴㄷ'[i]}</text>`; }); if(at) g+=`<text x="${X(at[0])+8}" y="${Y(at[1])-8}" font-size="13" font-weight="700" fill="#D04A3A">ㄹ</text>`;
+      return `<svg viewBox="0 0 ${W*u+36} ${H*u+36}" style="width:100%;max-width:${Math.min(340,W*u+36)}px;touch-action:manipulation">${g}</svg><div style="font-size:.9rem;color:#8A6A4A">${label}</div>`; },
+    on(a){ const [x,y]=a.slice(1).split('_').map(Number); at=eq(at,[x,y])?null:[x,y]; },
+    check(){ return eq(at,ans); }, wrong(){ if(!at) return null; const k=at.join(','); return alts[k]||null; }, reveal(){ at=ans.slice(); },
+    goal(){ const mk=Object.keys(alts)[0]; return {taps:[`g${ans[0]}_${ans[1]}`],mis:mk?['g'+mk.replace(',','_')]:null,misName:mk?alts[mk]:null}; }, state:()=>({at:at?at.join('_'):'_'}) };
+  const m=m2make(o); m._o=o; return m; };
+M2.qGridPara=()=>{ const W=8, H=5, ax=rnd(1,2), ay=rnd(0,1), w=rnd(3,4), sx=rnd(1,2), h=rnd(2,3); const Aq=[ax+sx,ay+h], Bq=[ax,ay], Cq=[ax+w,ay], D=[ax+sx+w,ay+h]; if(D[0]>W||D[1]>H) return M2.qGridPara(); const alts={}; const up=[ax+w,ay+h]; if(up[0]!==D[0]) alts[up.join(',')]='비스듬한 변을 곧게 세웠어요'; const mir=[ax+w-sx,ay+h]; if(mir[0]>=0&&mir.join(',')!==D.join(',')&&!alts[mir.join(',')]&&!(mir[0]===Aq[0]&&mir[1]===Aq[1])) alts[mir.join(',')]='마주 보는 변이 나란하지 않아요';
+  return m2q('점 ㄱ, ㄴ, ㄷ이 있어요. 사각형 ㄱㄴㄷㄹ이 평행사변형이 되도록 점 ㄹ을 찍어 보세요.','마주 보는 변끼리 서로 평행하고 길이가 같아야 해요. ㄴ에서 ㄱ으로 가는 만큼 ㄷ에서도 가 봐요.',M2.gridPt([Aq,Bq,Cq],D,alts,W,H,'모눈의 점을 눌러 ㄹ을 찍어요'),'마주 보는 두 쌍의 변이 평행해요',{'비스듬한 변을 곧게 세웠어요':'G4-06','마주 보는 변이 나란하지 않아요':'G4-03'}); };
+M2.qGridRect=()=>{ const W=8, H=5, ax=rnd(1,3), ay=rnd(0,1), w=rnd(3,4), h=rnd(2,3), Aq=[ax,ay+h], Bq=[ax,ay], Cq=[ax+w,ay], D=[ax+w,ay+h], alts={}; alts[[ax+w+1,ay+h].join(',')]='직각이 아닌 각이 생겼어요'; alts[[ax+w,ay+h+1>H?ay+h-1:ay+h+1].join(',')]='마주 보는 변의 길이가 달라요';
+  return m2q('점 ㄱ, ㄴ, ㄷ이 있어요. 사각형 ㄱㄴㄷㄹ이 직사각형이 되도록 점 ㄹ을 찍어 보세요.','네 각이 모두 직각이어야 해요.',M2.gridPt([Aq,Bq,Cq],D,alts,W,H,'모눈의 점을 눌러 ㄹ을 찍어요'),'네 각이 모두 직각이에요',{'직각이 아닌 각이 생겼어요':'G3-02','마주 보는 변의 길이가 달라요':'G3-02'}); };
+try{ const add=(ep,g)=>{ if(G36[ep]&&g){ (window._NTW=window._NTW||[]).push([ep,G36[ep].length,g]); G36[ep].push(g); } };
+  add('S2-07',M2.qBarsSumDiff); add('S2-04',M2.qBarsSumDiff); add('S2-06',M2.qBarsGive); add('S2-01',M2.qBarsGive); add('S6-30',M2.qGridPara); add('S6-20',M2.qGridPara); add('S6-19',M2.qGridRect); add('S6-21',M2.qGridRect);
 }catch(e){}
 
 /* ---------- 3-12. 개념 조각과 보기별 무게 (오개념 코드 → 모르는 개념 조각) ---------- */
@@ -9448,13 +9483,20 @@ function startDaily(opt){ const P=pref(); if(!P.band) return bandPage(startDaily
     while(B.acts.length<N&&g++<N*10){ const ep=nextEp(fr[g%fr.length],st); if(!ep) continue; if(!usedEp.has(ep)){ usedEp.add(ep); flowActs(B,ep,N-B.acts.length,st); } else { const q=qFromEp36(ep); if(q){ q._stg=window.ktStage(q); B.push(q,'_new'); } } } }
   let acts=B.acts; if(P.band!==1){ const head=shuffle(acts.slice(0,n0)), tail=acts.slice(n0).map((a,k)=>[a,k]).sort((x,y)=>((x[0].q._stg??1)-(y[0].q._stg??1))||(x[1]-y[1])).map(x=>x[0]); acts=head.concat(tail); }
   runSet(acts,cont?'계속 풀기':'오늘의 문제',{kt:'daily'},video); }
+try{ window.__flowActs=(ep,room)=>{ const B=bag(); flowActs(B,ep,room,state()); return B.acts; }; }catch(e){}
 // 한 편의 문제를 단계 차례로 담는다: 조작 1 → 기본(자리의 40%쯤) → 문장제 → 여러 개념 1. 단계 안에서는 지금 가장 많이 알려 줄 문제(bestQ).
 function flowActs(B,ep,room,st){ if(room<=0) return; const F=G36[ep]||[]; const by={0:[],1:[],2:[],3:[]}; F.forEach((g,i)=>{ try{ const q=g(); if(q) by[window.ktStage(q)].push(i); }catch(e){} });
   /* 자리가 10이면 조작 2 · 기본 3 · 문장제 3 · 생각 넓히기 2 (제미나이와 맞춘 배분). 자리가 적으면 줄이고, 그 편에 없는 단계의 몫은 기본으로 */
-  const want={0:Math.min(by[0].length,room>=8?2:room>=3?1:0),3:Math.min(by[3].length?2:0,room>=8?2:room>=4?1:0)}; want[2]=by[2].length?Math.min(3,Math.max(1,Math.round(room*.3))):0; want[1]=Math.max(room>=6?2:1,room-want[0]-want[2]-want[3]); while(want[0]+want[1]+want[2]+want[3]>room){ if(want[2]>1) want[2]--; else if(want[3]>1) want[3]--; else if(want[0]>1) want[0]--; else if(want[1]>1) want[1]--; else break; }
+  /* 조작은 1문제만(11/23 제미나이: 아는 아이에게 2문제는 낭비, 처음 보는 화면은 한 문제에 2분). 그 조작을 첫 시도에 틀렸을 때만 하나 더 낸다(coach.js) */
+  const want={0:Math.min(by[0].length,room>=3?1:0),3:Math.min(by[3].length?2:0,room>=8?2:room>=4?1:0)}; want[2]=by[2].length?Math.min(3,Math.max(1,Math.round(room*.3))):0; want[1]=Math.max(room>=6?2:1,room-want[0]-want[2]-want[3]); while(want[0]+want[1]+want[2]+want[3]>room){ if(want[2]>1) want[2]--; else if(want[3]>1) want[3]--; else if(want[0]>1) want[0]--; else if(want[1]>1) want[1]--; else break; }
   let left=room; const put=(q,s)=>{ if(!q||left<=0) return false; q._ep=ep; q._stg=s; if(B.push(q,'_new')){ left--; return true; } return false; };
   for(const i of shuffle(by[0].slice()).slice(0,want[0])){ for(let t=0;t<4;t++){ try{ const q=F[i](); if(q){ q._ti=i; if(put(q,0)) break; } }catch(e){ break; } } }
-  for(const s of [1,2,3]){ let n=0, guard=0; while(n<want[s]&&guard++<want[s]*6){ const q=bestQ([ep],x=>window.ktStage(x)===s,st); if(!q) break; if(put(q,s)) n++; } } }
+  for(const s of [1,2,3]){ let n=0, guard=0;
+    /* 이 단계에 '누르는 문제'(계산 순서·소수점 찍기·식 세우기·표에서 판단)가 있으면 하나는 그것으로 */
+    const ms=by[s].filter(i=>{ try{ const x=F[i](); return x&&x.manip; }catch(e){ return false; } }); if(ms.length&&want[s]>0){ const i=ms[rnd(0,ms.length-1)]; try{ const q=F[i](); if(q){ q._ti=i; if(put(q,s)) n++; } }catch(e){} }
+    while(n<want[s]&&guard++<want[s]*6){ const q=bestQ([ep],x=>window.ktStage(x)===s,st); if(!q) break; if(put(q,s)) n++; }
+    /* 가장 알맞은 문제만 고르다 같은 문제가 되풀이되어 자리를 못 채우면, 그 단계의 틀을 차례로 돌며 채운다 */
+    if(n<want[s]){ for(const i of shuffle(by[s].slice())){ if(n>=want[s]) break; for(let t=0;t<4&&n<want[s];t++){ try{ const q=F[i](); if(q&&!q.manip&&!q.onMount&&window.ktStage(q)===s){ q._ti=i; if(put(q,s)) n++; } }catch(e){ break; } } } } } }
 function finishDaily(S0){ const st=state(), t=dstr(Date.now());
   if(!st.daily||st.daily.d!==t){ st.streak=(st.daily&&st.daily.d===dstr(Date.now()-864e5))?(st.streak||0)+1:1; st.daily={d:t}; W(SK,st); }
   if(pref().band===1){ const idx=S0.acts.map((a,k)=>a.q&&a.q._new?k:-1).filter(k=>k>=0); if(idx.length>=3){ const acc=idx.filter(k=>S0.results[k]).length/idx.length; const i=ptr(); setPref({d12:Math.max(0,Math.min(EPO.length-1,i+(acc>=.8?1:acc<.5?-1:0)))});
@@ -9618,10 +9660,13 @@ function ladderAfter(q,ok,m){ if(!S||!S.acts||S.diag||S.diagRun||q._probe||q._sc
   const L=S._ld; if(q._firstSeen) return; q._firstSeen=1;
   /* 단계 흐름의 갈림(11/22 밤, 제미나이와 검토): 새 내용의 '기본' 단계에서 첫 시도 오답이 2번이면, 계산이 아직 서지 않은 것이므로 남은 문장제·생각 넓히기를 접고
      같은 편의 '직접 해 보기' 1문제 + 기본 2문제로 바꿔 세트를 마친다(가장 적은 문제로 원리 → 계산을 다시 잡음). 조작 단계에서 틀린 것만으로는 막지 않는다(다음 기본 문제로 확인). */
+  /* 조건부 하나 더(11/23): 새 내용의 '만져 보기'를 첫 시도에 틀리면 같은 편의 다른 조작 문제를 바로 뒤에 한 번 더 내고, 그만큼 맨 뒤의 도전 문제 하나를 뺀다 */
+  try{ if(q._new&&q._stg===0&&!ok&&!S._m2nd&&!q._flowFix){ S._m2nd=1; const ep=q._ep, F=G36[ep]||[]; const mi=F.map((g,i)=>i).filter(i=>{ try{ const x=F[i](); return x&&(x.manip||x.onMount)&&window.ktStage(x)===0; }catch(e){ return false; } }); const pool=mi.filter(i=>i!==q._ti), pickM=(pool.length?pool:mi)[Math.floor(Math.random()*(pool.length?pool.length:mi.length))];
+      if(pickM!=null){ const x=F[pickM](); if(x){ x._ep=ep; x._ti=pickM; x._stg=0; x._new=1; x._m2=1; S.acts.splice(S.i+1,0,{kind:'q',q:x}); let cutj=-1; for(const want of [3,2,1]){ for(let j=S.acts.length-1;j>S.i+1;j--){ const a=S.acts[j]; if(a.kind==='q'&&a.q&&a.q._new&&a.q._stg===want){ cutj=j; break; } } if(cutj>=0) break; } if(cutj>=0) S.acts.splice(cutj,1); } } } }catch(e){}
   try{ if(q._new&&q._stg===1&&!ok&&!S._flowCut){ S._flw=(S._flw||0)+1; if(S._flw>=2){ const rest=S.acts.slice(S.i+1), hi=rest.filter(a=>a.kind==='q'&&a.q&&a.q._new&&a.q._stg>=2); if(hi.length){ S._flowCut=1; const ep=q._ep, F=G36[ep]||[], keep=rest.filter(a=>!(a.kind==='q'&&a.q&&a.q._new&&a.q._stg>=1)), add=[];
           const used=new Set(S.acts.map(a=>a.q&&a.q._ti!=null&&a.q._ep===ep?a.q._ti:-1)); const mi=F.map((g,i)=>i).filter(i=>{ try{ const x=F[i](); return x&&(x.manip||x.onMount); }catch(e){ return false; } }); const pickM=mi.filter(i=>!used.has(i)).concat(mi)[0];
           if(pickM!=null){ try{ const x=F[pickM](); x._ep=ep; x._ti=pickM; x._stg=0; x._new=1; x._flowFix=1; add.push({kind:'q',q:x}); }catch(e){} }
-          for(let t=0;t<8&&add.length<3;t++){ const x=bestQ([ep],y=>window.ktStage(y)===1); if(x&&!add.some(a=>String(a.q.q)===String(x.q))&&String(x.q)!==String(q.q)){ x._stg=1; x._new=1; x._flowFix=1; add.push({kind:'q',q:x}); } }
+          for(let t=0;t<8&&add.length<2;t++){ const x=bestQ([ep],y=>window.ktStage(y)===1); if(x&&!add.some(a=>String(a.q.q)===String(x.q))&&String(x.q)!==String(q.q)){ x._stg=1; x._new=1; x._flowFix=1; add.push({kind:'q',q:x}); } }
           if(add.length){ S.acts.length=S.i+1; S.acts.push(...keep,...add); } } } } }catch(e){}
   if(ok){ L.run=0; return; } L.run++; L.wr=(L.wr||0)+1;
   /* 갇힌 학생 넘기기(11/22): 한 세트에서 첫 시도 오답이 4번이면, 남은 '새 내용' 문제를 같은 영역의 앞 단원(선수 내용) 문제로 바꿔 끝까지 풀고 나가게 한다. 덧붙이는 문제도 더 넣지 않는다. */
