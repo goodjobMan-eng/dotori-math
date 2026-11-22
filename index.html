@@ -7388,7 +7388,7 @@ function gxPic(ep,t){ let m; const S=ep.slice(0,2), J=(n,x,y)=>/[136780]$/.test(
     if((m=t.match(/눈금 한 칸이 (\d+)(명|권)[^.]*막대가 (\d+)칸/))) return cpWrap(gxBarGrid([+m[3]],`한 칸 ${m[1]}${m[2]}`));
     if((m=t.match(/작은 눈금 (\d+)칸이 (\d+)명이에요\. 작은 눈금 (\d+)칸/))) return cpWrap(gxBarGrid([+m[3]],`${m[1]}칸 = ${m[2]}명`));
     if((m=t.match(/눈금 한 칸이 (\d+)권인 막대그래프에서 (\S+)[은는] (\d+)칸, (\S+)[은는] (\d+)칸, (\S+)[은는] (\d+)칸/))) return cpWrap(gxBarGrid([+m[3],+m[5],+m[7]],`한 칸 ${m[1]}권`,[m[2],m[4],m[6]]));
-    if((m=t.match(/((?:\d+[일월] \d+ ?(?:도|cm)(?:, )?){3,6})/))){ const it=[...m[1].matchAll(/(\d+[일월]) (\d+)/g)]; return cpWrap(gxLine(it.map(x=>+x[2]),it.map(x=>x[1]))); }
+    if((m=t.match(/((?:\d+[일월시] \d+ ?(?:도|cm)(?:, )?){3,6})/))){ const it=[...m[1].matchAll(/(\d+[일월시]) (\d+)/g)]; return cpWrap(gxLine(it.map(x=>+x[2]),it.map(x=>x[1]))); }
     if((m=t.match(/([가-힣]+) (\d+)명, ([가-힣]+) (\d+)명, ([가-힣]+) (\d+)명/))) return cpWrap(cpTable([m[1],m[3],m[5]],[m[2],m[4],m[6]],'과일','학생 수'),'표');
     if((m=t.match(/(\d+)명 중 (\d+)명은 몇 %/))&&[10,20,25,50].includes(+m[1])){ const N=+m[1], k=+m[2], per=N<=25?5:10; let g=''; for(let i=0;i<N;i++) g+=`<circle cx="${12+(i%per)*20}" cy="${12+Math.floor(i/per)*20}" r="8" fill="${i<k?'#F2A65A':'#fff'}" stroke="${GX_S}" stroke-width="1.3"/>`; return cpWrap(cpSvg(g,per*20+6,Math.ceil(N/per)*20+6,220),`${N}명 중 색칠한 ${k}명`); }
     return ''; }
@@ -7487,6 +7487,46 @@ function eqCase(ep,q){ if(!q||q.manip||q.onMount||Math.random()>=0.25) return q;
   else if(ep==='S4-16'&&/^가 모둠 [\d, ]+ \/ 나 모둠 [\d, ]+\. 평균이 더 높은 모둠은/.test(t)){ const T=rnd(13,17), A=shuffle([T-3,T+1,T+2]), B=shuffle([T-4,T-1,T+2,T+3]); nq=C36(WHO(),`가 모둠 ${A.join(', ')} / 나 모둠 ${B.join(', ')}. 평균이 더 높은 모둠은?`,' ','','같다',shuffle(['가 모둠','나 모둠']).concat('같다')); nq.mis={'나 모둠':'D5-04'}; }
   if(!nq) return q; try{ nowrapExpr(nq); }catch(e){} try{ cpaVis(ep,nq); }catch(e){} return nq; }
 { const _t=tagQ; tagQ=function(ep,i,q){ q=_t(ep,i,q); try{ q=eqOpt(q); }catch(e){} try{ q=eqCase(ep,q); }catch(e){} return q; }; }
+
+
+// ===== 3-55. 말로만 설명하던 뒤집기·돌리기 문제를 그림 고르기로 (교수님 11/22: "말이 너무 어렵지 않아?") =====
+// "위에 꼭짓점 가, 왼쪽 아래에 나…인 삼각형을 뒤집었어요. 가의 방향과 왼쪽에 놓이는 꼭짓점은?" → 꼭짓점 이름이 적힌 삼각형 그림을 보여 주고, 뒤집은 모양을 그림에서 고른다.
+// "위쪽 변은 빨간색, 오른쪽 변은 파란색인 정사각형을 돌렸어요…" → 색 변이 있는 정사각형 그림, 돌린 모양을 그림에서 고른다. 오답 그림마다 오개념 코드는 그대로.
+function mvTri(top,l,r,label,big){ const W=big?120:92, H=big?100:78, P=top?[[W/2,12],[14,H-14],[W-14,H-14]]:[[W/2,H-12],[14,14],[W-14,14]]; const T=(x,y,s)=>`<text x="${x}" y="${y}" font-size="${big?15:13}" font-weight="700" text-anchor="middle" fill="#4A2E14">${s}</text>`;
+  const g=`<polygon points="${P.map(p=>p.join(',')).join(' ')}" fill="#FFE3B0" stroke="#7A4A1E" stroke-width="2" stroke-linejoin="round"/>`+T(W/2,top?34:H-26,'가')+T(30,top?H-20:30,l)+T(W-30,top?H-20:30,r);
+  return `<div class="tf"><svg viewBox="0 0 ${W} ${H}" width="${W}" style="background:#fff;border-radius:8px">${g}</svg>${label?`<b>${label}</b>`:''}</div>`; }
+function mvSq(red,blue,label,big){ const W=big?110:86, a=14, b=W-14, S={위:[a,a,b,a],아래:[a,b,b,b],왼:[a,a,a,b],오른:[b,a,b,b]}, L=(k,c)=>{ const [x1,y1,x2,y2]=S[k]; return `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${c}" stroke-width="7" stroke-linecap="round"/>`; }, tx=(k,s,c)=>{ const [x1,y1,x2,y2]=S[k], mx=(x1+x2)/2, my=(y1+y2)/2, cx=W/2, cy=W/2; return `<text x="${mx+(cx-mx)*0.36}" y="${my+(cy-my)*0.36+4}" font-size="${big?12:10}" font-weight="700" text-anchor="middle" fill="${c}">${s}</text>`; };
+  const g=`<rect x="${a}" y="${a}" width="${b-a}" height="${b-a}" fill="#FFF6E2" stroke="#7A4A1E" stroke-width="2"/>`+L(red,'#D8402F')+L(blue,'#2F6FD0')+tx(red,'빨강','#B32A1C')+tx(blue,'파랑','#1F56AE');
+  return `<div class="tf"><svg viewBox="0 0 ${W} ${W}" width="${W}" style="background:#fff;border-radius:8px">${g}</svg>${label?`<b>${label}</b>`:''}</div>`; }
+function mvPickQ(q,orig,cands){ const seen=new Set(), use=[]; for(const c of cands){ if(seen.has(c[0])) continue; seen.add(c[0]); use.push(c); } const order=shuffle(use.map((_,i)=>i)), labs=['가','나','다','라'].slice(0,use.length).map(x=>x), names=['①','②','③','④'].slice(0,use.length), ans=names[order.indexOf(0)];
+  const vis=`<div class="tfrow">${orig}<span class="tarrow">→ ?</span></div><div class="tfrow" style="flex-wrap:wrap;gap:8px">${order.map((k,j)=>use[k][1](names[j])).join('')}</div>`;
+  const r=C36(WHO(),q,q,vis,ans,names.slice()); r.mis={}; order.forEach((k,j)=>{ if(k>0&&use[k][2]) r.mis[names[j]]=use[k][2]; }); return r; }
+function mvWordQ(ep,q){ if(!q||q.manip||q.onMount) return q; const t=_pl(String(q.q));
+  if(ep==='S6-23'&&/위에 꼭짓점 가, 왼쪽 아래에 나, 오른쪽 아래에 다가 있는 삼각형/.test(t)){ const ud=Math.random()<0.6, dir=ud?rndPick('아래쪽','위쪽'):rndPick('오른쪽','왼쪽');
+    const F=(top,l,r)=>[`${top}${l}${r}`,lab=>mvTri(top,l,r,lab)], flipUD=F(0,'나','다'), flipLR=F(1,'다','나'), rot=F(0,'다','나'), same=F(1,'나','다');
+    return mvPickQ(`이 삼각형을 ${dir}으로 뒤집으면 어떤 모양이 될까요?`,mvTri(1,'나','다','',true),ud?[flipUD,[...flipLR,'G4-14'],[...rot,'G4-04'],[...same,'G4-16']]:[flipLR,[...flipUD,'G4-14'],[...rot,'G4-04'],[...same,'G4-16']]); }
+  if(ep==='S6-24'&&/위쪽 변은 빨간색, 오른쪽 변은 파란색인 정사각형/.test(t)){ const ccw=Math.random()<0.5, F=(r,b)=>[r+b,lab=>mvSq(r,b,lab)], CCW=F('왼','위'), CW=F('오른','아래'), LR=F('위','왼'), R180=F('아래','왼');
+    return mvPickQ(`이 정사각형을 시계 ${ccw?'반대 ':''}방향으로 90° 돌리면 어떤 모양이 될까요?`,mvSq('위','오른','',true),ccw?[CCW,[...CW,'G4-10'],[...LR,'G4-04'],[...R180,'G4-13']]:[CW,[...CCW,'G4-10'],[...LR,'G4-04'],[...R180,'G4-13']]); }
+  return q; }
+{ const _t=tagQ; tagQ=function(ep,i,q){ q=_t(ep,i,q); try{ q=mvWordQ(ep,q); }catch(e){} return q; }; }
+
+
+// ===== 3-56. 도형을 말로만 설명한 문제에 그림 (3-55에 이어, 글이 긴 도형 문제 검토) =====
+function gxWordPic(ep,t){ let m; const two=(a,b)=>cpRow(a,b);
+  if((m=t.match(/자의 눈금 (\d+)에 있는 점 ㄱ에서 눈금 (\d+)에 있는 점 ㄴ까지/))){ const a=+m[1], b=+m[2], N=Math.max(12,b+1), u=280/N, x0=16; let g=`<rect x="${x0-6}" y="40" width="${N*u+12}" height="34" rx="4" fill="#FFF3C4" stroke="#B5701F" stroke-width="1.5"/>`; for(let i=0;i<=N;i++) g+=`<line x1="${x0+i*u}" y1="40" x2="${x0+i*u}" y2="52" stroke="#4A2E14"/>`+gxT(x0+i*u,67,i,9.5,'#4A2E14','middle',400);
+    g+=`<line x1="${x0+a*u}" y1="26" x2="${x0+b*u}" y2="26" stroke="${gxQ}" stroke-width="3"/><circle cx="${x0+a*u}" cy="26" r="4" fill="${GX_S}"/><circle cx="${x0+b*u}" cy="26" r="4" fill="${GX_S}"/>`+gxT(x0+a*u,16,'ㄱ',12)+gxT(x0+b*u,16,'ㄴ',12); return cpWrap(cpSvg(g,312,80)); }
+  if((m=t.match(/사각형 가\(가로 (\d+) cm, 세로 (\d+) cm\)와 나\(가로 (\d+) cm, 세로 (\d+) cm\)/))||(m=t.match(/가로 (\d+) cm, 세로 (\d+) cm인 직사각형 가와 가로 (\d+) cm, 세로 (\d+) cm인 직사각형 나/))||(m=t.match(/가로 (\d+) cm, 세로 (\d+) cm인 직사각형과 가로 (\d+) cm, 세로 (\d+) cm인 직사각형/))){ const R=(w,h,n)=>{ const sc=Math.min(100/w,90/h), W=Math.max(12,w*sc), H=Math.max(12,h*sc); return cpCol(`<svg viewBox="0 0 ${W+50} ${H+30}" width="${W+50}" style="background:#fff;border-radius:8px"><rect x="40" y="6" width="${W}" height="${H}" fill="${GX_F}" stroke="${GX_S}" stroke-width="2"/>${gxT(40+W/2,H+22,w+' cm',11)}${gxT(36,6+H/2+4,h+' cm',11,'#4A2E14','end')}</svg>`,`<b style="font-size:.95rem">${n}</b>`); }; return cpWrap(two(R(+m[1],+m[2],'가'),R(+m[3],+m[4],'나'))); }
+  if((m=t.match(/수직으로 그은 선분은 (\d+) cm, 비스듬히 그은 선분은 (\d+) cm/))) return cpWrap(cpSvg(`<line x1="16" y1="22" x2="264" y2="22" stroke="${GX_S}" stroke-width="2.2"/><line x1="16" y1="92" x2="264" y2="92" stroke="${GX_S}" stroke-width="2.2"/><line x1="80" y1="22" x2="80" y2="92" stroke="#2F6FA8" stroke-width="2"/><path d="M80,84 h8 v8" fill="none" stroke="#2F6FA8"/>`+gxT(70,60,m[1]+' cm',11,'#2F6FA8','end')+`<line x1="130" y1="22" x2="210" y2="92" stroke="#3F8F3F" stroke-width="2"/>`+gxT(182,54,m[2]+' cm',11,'#3F8F3F','start'),280,110));
+  if((m=t.match(/직각을 이루는 선분은 (\d+) cm, 가로로 반듯하게 그은 선분은 (\d+) cm, 더 비스듬한 선분은 (\d+) cm/))){ const g=`<line x1="20" y1="70" x2="250" y2="14" stroke="${GX_S}" stroke-width="2.2"/><line x1="30" y1="130" x2="260" y2="74" stroke="${GX_S}" stroke-width="2.2"/><line x1="78" y1="56" x2="92" y2="115" stroke="#2F6FA8" stroke-width="2"/>`+gxT(70,92,m[1]+' cm',11,'#2F6FA8','end')+`<line x1="120" y1="46" x2="182" y2="93" stroke="#3F8F3F" stroke-width="2"/>`+gxT(160,62,m[2]+' cm',11,'#3F8F3F','start')+`<line x1="185" y1="30" x2="250" y2="76" stroke="#B4480C" stroke-width="2" stroke-dasharray="0"/>`+gxT(232,48,m[3]+' cm',11,'#B4480C','start'); return cpWrap(cpSvg(g,280,140),'파란 선분이 두 직선과 직각'); }
+  if((m=t.match(/네 변이 모두 (\d+) cm이며 이웃한 두 각이 (\d+)°, (\d+)°인 사각형/))){ const g=`<polygon points="60,20 200,20 160,100 20,100" fill="${GX_F}" stroke="${GX_S}" stroke-width="2"/>`+gxT(130,14,m[1]+' cm',11)+gxT(194,66,m[1]+' cm',11,'#4A2E14','start')+gxT(46,92,m[2]+'°',11,gxQ)+gxT(150,92,m[3]+'°',11,gxQ); return cpWrap(cpSvg(g,240,112)); }
+  if((m=t.match(/가로 (\d+) cm, 세로 (\d+) cm인 직사각형에 세로 방향 대칭축/))) return cpWrap(cpSvg(`<rect x="40" y="16" width="170" height="96" fill="${GX_F}" stroke="${GX_S}" stroke-width="2"/><line x1="125" y1="6" x2="125" y2="122" stroke="${gxQ}" stroke-width="2" stroke-dasharray="6 4"/>`+gxT(125,134,m[1]+' cm',11)+gxT(36,68,m[2]+' cm',11,'#4A2E14','end')+`<circle cx="40" cy="16" r="4" fill="${GX_S}"/>`,230,140),'점선이 대칭축');
+  if(/밑면이 한 변 \d+ cm인 정사각형이고 옆면이 삼각형 4개인 입체도형/.test(t)) return cpWrap(svSketch({k:'pyr',n:4}));
+  if((m=t.match(/위에서 본 모양 각 칸에 쌓은 개수가 (\d), (\d), (\d)/))||(m=t.match(/한 줄로 놓인 세 자리에 쌓기나무를 왼쪽부터 (\d)개, (\d)개, (\d)개/))){ const H=[[0,0,0],[0,0,0],[+m[1],+m[2],+m[3]]]; return cpWrap(two(skBox(skNumSvg(H),'위에서 본 모양'),skBox(`<div style="width:150px">${skIsoSvg(H,{s:18})}</div>`,'쌓은 모양'))); }
+  if(/위에서 본 모양은 가로 2칸·세로 2칸이고, 앞과 오른쪽 옆에서 본 모양은 모두 왼쪽 2층·오른쪽 2층/.test(t)){ const H=[[0,0,0],[2,2,0],[2,2,0]]; return cpWrap(cpRow(skViewSvg('top',H),skViewSvg('front',H),skViewSvg('side',H))); }
+  if((m=t.match(/한 모서리가 1 cm인 쌓기나무로 한 모서리가 (\d) cm인 정육면체/))) return cpWrap(gxBox(m[1]+' cm',m[1]+' cm',m[1]+' cm',true),'쌓기나무 한 모서리 1 cm');
+  if((m=t.match(/반지름 (\d+) cm인 원\(넓이 (\d+) cm²\)을 키워 지름 (\d+) cm인 원/))) return cpWrap(two(gxCircle({r:m[1]+' cm'}),gxCircle({d:m[3]+' cm'})));
+  return ''; }
+{ const _cp2=cpPic; cpPic=function(ep,t){ if(/^S6-/.test(ep)){ let r=''; try{ r=gxWordPic(ep,t); }catch(e){ r=''; } if(r) return r; } return _cp2(ep,t); }; }
 
 /* ---------- 3-12. 개념 조각과 보기별 무게 (오개념 코드 → 모르는 개념 조각) ---------- */
 // 교수님 지적(2026-11-20): 오답에 코드만 붙일 게 아니라 "이 보기를 고른 아이는 어떤 개념을 모른다"는 가정과 무게가 있어야 한다.
