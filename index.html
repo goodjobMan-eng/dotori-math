@@ -7337,6 +7337,8 @@ function gxTimeline(segs,big,small,per,{mark=null}={}){ let pos=0, mx=0; segs.fo
   let g=`<line x1="${x0}" y1="${y}" x2="${x0+L}" y2="${y}" stroke="${GX_S}" stroke-width="2.2"/>`; for(let k=0;k<=nb*sub;k++){ const v=k*per/sub, maj=k%sub===0; g+=`<line x1="${X(v)}" y1="${y-(maj?9:5)}" x2="${X(v)}" y2="${y+(maj?9:5)}" stroke="${GX_S}" stroke-width="${maj?2:1}"/>`; if(maj) g+=gxT(X(v),y+23,k/sub===0?'0':`${k/sub}${big}`,nb>6?9:10.5); }
   pos=0; const cols=[gxQ,'#2F6FA8','#3F8F3F']; segs.forEach(([v,d,lab],i)=>{ const a=pos, b=pos+v*d, fw=d>0, h=Math.min(fw?34:16,Math.abs(X(b)-X(a))*0.5+8), col=cols[i%3];
     g+=`<path d="M${X(a)},${y-10} Q${(X(a)+X(b))/2},${y-10-h*2+ (fw?h:h)} ${X(b)},${y-10}" fill="none" stroke="${col}" stroke-width="2" ${fw?'':'stroke-dasharray="5 3"'}/>`+(fw?'':`<path d="M${X(b)},${y-10} l8,-6 l0,8 z" fill="${col}"/>`)+gxT((X(a)+X(b))/2,fw?y-14-h/2-2:y-16-h/2,lab+(fw?'':' 되돌아오기'),10,col); pos=b; });
+  /* 호가 눈금 사이에서 끝나면 허공에서 끊긴 것처럼 보인다(교수님 11/22): 끝난 자리를 선 위에 점으로 찍고 ?로 표시 */
+  if(mark==null&&pos>0&&pos<=hi){ const onMaj=Math.abs(pos/per-Math.round(pos/per))<1e-9; g+=`<line x1="${X(pos)}" y1="${y-10}" x2="${X(pos)}" y2="${y}" stroke="${gxQ}" stroke-width="1.5" stroke-dasharray="3 2"/><circle cx="${X(pos)}" cy="${y}" r="4.5" fill="${gxQ}"/>`+(onMaj?'':gxT(X(pos),y+23,'?',12,gxQ)); }
   if(mark!=null) g+=`<circle cx="${X(mark)}" cy="${y}" r="5" fill="${gxQ}"/>`+gxT(X(mark),y-14,`${mark}${small}`,10.5,gxQ);
   return cpSvg(g,W,y+30); }
 /* 달력 줄: 1주일 = 7칸, 1년 = 12칸 */
