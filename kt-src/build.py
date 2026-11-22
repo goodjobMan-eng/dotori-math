@@ -89,7 +89,7 @@ sub("const n=rnd(3,6); const nm=PNAME[n]; return MC(`옆으로 눕혀", "const n
 sub("'삼각뿔 (옆면이 삼각형이라서)'", "'삼각뿔'")
 rl("['원기둥에 모서리가 있을까?'", "    ['원기둥의 모서리는 몇 개?','0개',[['2개','G6-15'],['3개','G6-15']]],")
 rl("['구에 꼭짓점이 있을까?'", "  ['구의 꼭짓점은 몇 개?','0개',[['1개','G6-15'],['2개',null]]],")
-rl("['반 학생들이 좋아하는 과일의", "  ['반 학생들이 좋아하는 과일의 비율을 나타내기 좋은 그래프는?','원그래프',[['꺾은선그래프','D6-05'],['수 배열표',null]]],")
+rl("['반 학생들이 좋아하는 과일의", "  ['반 학생들이 좋아하는 과일별 학생 수를 비교하기 좋은 그래프는?','막대그래프',[['꺾은선그래프','D6-05'],['수 배열표',null]]],")
 rl("['평균은 반드시 자료", "  ['3, 4, 8의 평균을 5라고 구했어요. 자료에 5가 없는데 맞을까?','맞다. 평균은 자료에 없는 값일 수 있다',[['틀렸다. 평균은 자료 중 하나여야 한다','D5-01'],['틀렸다. 평균은 가장 큰 값이다',null]]],")
 rl("['평균은 가장 많이", "  ['2, 2, 2, 10의 평균은?','4',[['2','D5-01'],['6','D5-02']]],")
 sub(",[xs[1],'D5-01']", "")
@@ -116,6 +116,7 @@ out = '\n'.join(lines) + open('src/bank2.js', encoding='utf-8').read() + open('s
 open('kt.js', 'w', encoding='utf-8').write(out)
 
 h = open('/tmp/dotori-math/index.html', encoding='utf-8').read()
+_t="['수직','평행','합동']"; assert h.count(_t)==1; h=h.replace(_t,"['수직','평행','대각선']")   # 4학년 문항의 보기에 5학년 용어(합동)
 i = h.index("const em=equivMsg(q,r.guess); if(em){"); j = h.index("S.tries++; sfx('bad');", i); assert j - i < 300
 h = h[:j] + "if(S.tries===0&&window.KT) KT.rec(q,r.guess,false); " + h[j:]
 i2 = h.index("const r=pad.read(ans); const fb=document.getElementById('fb');"); j2 = h.index("S.tries++; sfx('bad');", i2); assert j2 - i2 < 500 and j2 < j

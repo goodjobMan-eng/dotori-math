@@ -115,7 +115,7 @@ function rec(q, given, ok){
   // 보기마다 무게가 다르다: 오개념 보기를 골랐으면 원인은 그 오개념이 가리키는 개념 조각에 있으므로 단원 숙달은 약하게, 조각은 세게 깎는다.
   const shield=!ok&&ctxShield(st,m,fk);
   const wk=ok?1:shield?.7:(m&&MISC[m])?.4*pieceL(st,MISC[m][0][0])+.1:(q.fx&&(q.fx[String(given)]||q.fx[gk]))?.3:.7;   // 선수 조각이 이미 비어 있으면 이 단원 숙달은 덜 깎는다
-  if(kc){ st.kc[kc]=bktW(st.kc[kc]==null?BKT.L0:st.kc[kc],ok,G,wk); st.kn[kc]=(st.kn[kc]||0)+1; }
+  if(kc){ st.kc[kc]=bktW(st.kc[kc]==null?BKT.L0:st.kc[kc],ok,G,wk); st.kn[kc]=(st.kn[kc]||0)+1; if(ok&&!nOpt){ st.kw=st.kw||{}; st.kw[kc]=(st.kw[kc]||0)+1; } }
   touchSlot(); if(!shield) pieceUpdate(st,q,m,ok,G,ms,fk); pieceCheck(st,q,ok,m,ms);
   if(q.mis){ for(const c of new Set(Object.values(q.mis))){ const e=st.mis[c]||(st.mis[c]={h:[],n:0,ep:[]}); e.h.push([fk,c===m?1:0,ok?1:0,nOpt||20]); e.h=e.h.slice(-8);
     if(c===m){ e.n++; if(!e.ep.includes(ep)) e.ep.push(ep); e.ep=e.ep.slice(-5); } } }
@@ -137,7 +137,7 @@ function status(code,st){ const e=(st||state()).mis[code]; if(!e||!e.h||!e.h.len
   if(K>=3&&(z1>=4*V1||(acc>=.4&&wrong.length>=3&&z2>=4*Math.max(V2,.01)))) return '확인';
   return z1>=V1?'의심':null; }
 // 문제 3개 미만으로는 숙달·미숙달을 단정하지 않는다.
-function kcStatus(k,st){ const p=st.kc[k], n=(st.kn||{})[k]||0; if(p==null) return st.est[k]?'추정':'모름'; if(n<3) return p>=.4&&st.est[k]?'추정':'연습'; return p>=.85?'숙달':p>=.4?'연습':'미숙달'; }
+function kcStatus(k,st){ const p=st.kc[k], n=(st.kn||{})[k]||0; if(p==null) return st.est[k]?'추정':'모름'; if(n<3) return p>=.4&&st.est[k]?'추정':'연습'; /* 고르기 문제만 연달아 맞혀서는 숙달로 보지 않는다(3지선다 3번 찍어 맞히면 0.94): 직접 쓰거나 조작해 맞힌 적이 있거나, 6문제 이상 풀었을 때만 숙달 */ const solid=((st.kw||{})[k]||0)>=1||n>=6; return p>=.85?(solid?'숙달':'연습'):p>=.4?'연습':'미숙달'; }
 function report(){ const st=state(); const mis=Object.keys(st.mis).map(c=>({c,s:status(c,st),n:st.mis[c].n,ep:st.mis[c].ep||[]})).filter(x=>x.s&&MIS[x.c]).sort((a,b)=>(a.s==='확인'?0:1)-(b.s==='확인'?0:1)||b.n-a.n);
   return {mis, kc:Object.keys(KCN).map(k=>({k,s:kcStatus(k,st),p:st.kc[k]}))}; }
 
@@ -440,5 +440,5 @@ try{ new MutationObserver(()=>placeBadge()).observe(document.getElementById('app
     document.querySelectorAll('.tf').forEach(f=>{ const n=lab(f); if(n&&names.has(n)&&!f._pick){ f._pick=1; f.style.cursor='pointer'; f.style.borderRadius='12px'; f.style.padding='4px'; f.setAttribute('role','button'); f.setAttribute('aria-label','보기 '+n); } }); };
   try{ new MutationObserver(()=>mark()).observe(document.body,{childList:true,subtree:true}); }catch(e){}
   document.addEventListener('click',e=>{ const t=e.target; if(!t||!t.closest) return; const isOpt=t.closest('.opts > .opt'), fig=t.closest('.tf');
-    if((isOpt||fig)&&Date.now()-shownAt<(window._tapLockMs==null?350:window._tapLockMs)){ e.stopPropagation(); e.preventDefault(); return; }
+    if((isOpt||fig)&&Date.now()-shownAt<(window._tapLockMs==null?(((document.querySelector('.bubble .q')||document.querySelector('.bubble')||{}).textContent||'').length>45?800:350):window._tapLockMs)){ e.stopPropagation(); e.preventDefault(); return; }
     if(fig&&fig._pick&&!isOpt){ const n=lab(fig), b=[...document.querySelectorAll('.opts > .opt')].find(x=>x.textContent.trim()===n&&!x.disabled); if(b){ fig.style.outline='3px solid #E88A2C'; setTimeout(()=>{ try{ fig.style.outline=''; }catch(_){} },500); b.click(); } } },true); })();
