@@ -121,3 +121,6 @@ const CFK='dotori-kt-conf';
   return r; }; }
 
 try{ window._sameFormQ=sameFormQ; window._jRago=jRago; window._parentPage=parentPage; window._ladderAfter=ladderAfter; window._MISC=MISC; }catch(e){}
+
+/* 입체도형 그림 발판: 그림으로 2번 맞히면 글로만, 글로만 틀리면 다시 그림 (tags3 3-49) */
+{ const _ar3=afterRec; afterRec=function(q,given,ok,m){ _ar3(q,given,ok,m); try{ window._svFade&&window._svFade(q,ok); }catch(e){} }; }

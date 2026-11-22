@@ -6959,6 +6959,87 @@ const slQ=()=>{ for(let t=0;t<200;t++){ const f=tRand(); const w=Math.max(...f.c
 try{ if(G36['S6-22']){ G36['S6-22']=G36['S6-22'].map(g=>{ try{ const q=g(); return q&&!q.manip&&/밀면 어떤 모양/.test(String(q.q))?slQ:g; }catch(e){ return g; } }); if(!G36['S6-22'].includes(slQ)) G36['S6-22'].push(slQ); } }catch(e){}
 window._slQ=slQ;
 
+
+// ===== 3-49. 입체도형: 처음엔 겨냥도·전개도 그림, 익숙해지면 글로만 (교수님 11/22) =====
+// 직육면체~구(S6-56~63) 문제에서 글에 나온 입체(n각기둥·n각뿔·직육면체·정육면체·원기둥·원뿔·구)를 그린다. '전개도'가 있으면 전개도, 없으면 겨냥도(보이지 않는 모서리는 점선).
+// 그림을 보고 처음 바로 맞힌 것이 그 편에서 2번이 되면 다음부터는 글로만. 글로만 나온 문제를 틀리면 다시 그림부터(발판을 붙였다 뗐다).
+const SV_EPS=new Set(['S6-56','S6-57','S6-58','S6-59','S6-60','S6-61','S6-62','S6-63']);
+const svNum={'삼':3,'사':4,'오':5,'육':6,'칠':7,'팔':8,'구':9,'십':10};
+function svShape(t){ let m=t.match(/밑면이 (\d+|삼|사|오|육|칠|팔|구|십)각형[^?]*각(기둥|뿔)/); if(m) return {k:m[2]==='기둥'?'prism':'pyr', n:svNum[m[1]]||+m[1]}; m=t.match(/(\d+|삼|사|오|육|칠|팔|구|십)각(기둥|뿔)/); if(m) return {k:m[2]==='기둥'?'prism':'pyr', n:svNum[m[1]]||+m[1]};
+  if(/정육면체/.test(t)) return {k:'cube'}; if(/직육면체/.test(t)) return {k:'box'}; if(/원기둥/.test(t)) return {k:'cyl'}; if(/원뿔/.test(t)) return {k:'cone'}; if(/(^|[^가-힣])구[는를의가에]/.test(t)) return {k:'sph'}; if(/눕혀/.test(t)) return null; if(/각기둥/.test(t)) return {k:'prism',n:5}; if(/각뿔/.test(t)) return {k:'pyr',n:4}; return null; }
+const SVF='#FFE3B0', SVS='#7A4A1E', svWrap=(g,W,H,cap)=>`<div style="display:flex;flex-direction:column;align-items:center"><svg viewBox="0 0 ${W} ${H}" width="${Math.min(W,240)}" style="max-width:100%;background:#fff;border-radius:10px">${g}</svg>${cap?`<div style="font-size:.8rem;color:#8A6A4A">${cap}</div>`:''}</div>`;
+const svL=(a,b,dash)=>`<line x1="${a[0].toFixed(1)}" y1="${a[1].toFixed(1)}" x2="${b[0].toFixed(1)}" y2="${b[1].toFixed(1)}" stroke="${SVS}" stroke-width="2" ${dash?'stroke-dasharray="5 4" stroke-opacity=".75"':''}/>`;
+const svP=(pts,fill=SVF)=>`<polygon points="${pts.map(p=>p.map(v=>v.toFixed(1)).join(',')).join(' ')}" fill="${fill}" stroke="${SVS}" stroke-width="2" stroke-linejoin="round"/>`;
+function svSketch(s){ const W=220,H=190, cx=110, R=62, sq=.36, off=Math.PI/2+0.35;
+  const base=(n,y)=>Array.from({length:n},(_,k)=>{ const a=off+2*Math.PI*k/n; return [cx+R*Math.cos(a), y+R*sq*Math.sin(a), Math.sin(a)]; });
+  if(s.k==='prism'||s.k==='pyr'){ const n=s.n, yb=150, yt=s.k==='prism'?55:0, B=base(n,yb), xs=B.map(p=>p[0]), mn=xs.indexOf(Math.min(...xs)), mx=xs.indexOf(Math.max(...xs)); let g='';
+    const back=k=>B[k][2]<-0.05&&k!==mn&&k!==mx;
+    if(s.k==='prism'){ const T=base(n,yt); g+=svP(T.map(p=>[p[0],p[1]]),'#FFF0D2');
+      for(let k=0;k<n;k++){ const j=(k+1)%n, mid=Math.sin(off+2*Math.PI*(k+.5)/n); g+=svL(B[k],B[j],mid<0); g+=svL(B[k],T[k],back(k)); }
+      for(let k=0;k<n;k++){ const j=(k+1)%n; g+=svL(T[k],T[j],false); } }
+    else { const A=[cx,22]; for(let k=0;k<n;k++){ const j=(k+1)%n, mid=Math.sin(off+2*Math.PI*(k+.5)/n); g+=svL(B[k],B[j],mid<0); g+=svL(B[k],A,back(k)); } }
+    return svWrap(g,W,H,'겨냥도'); }
+  if(s.k==='box'||s.k==='cube'){ const w=s.k==='cube'?90:120, h=s.k==='cube'?90:70, d=s.k==='cube'?40:44, x0=30, y0=60+(s.k==='cube'?0:15);
+    const P=(x,y,z)=>[x0+x+z*0.9, y0+h-y-z*0.7+ (s.k==='cube'?20:10)];
+    const v=[[0,0,0],[w,0,0],[w,h,0],[0,h,0],[0,0,d],[w,0,d],[w,h,d],[0,h,d]].map(a=>P(...a)); let g='';
+    g+=svP([v[0],v[1],v[2],v[3]])+svP([v[3],v[2],v[6],v[7]],'#FFF0D2')+svP([v[1],v[5],v[6],v[2]],'#F6CF95');
+    g+=svL(v[0],v[4],1)+svL(v[4],v[5],1)+svL(v[4],v[7],1); return svWrap(g,W,H+10,'겨냥도'); }
+  if(s.k==='cyl'){ const rx=60, ry=20, yt=45, yb=150; return svWrap(`<path d="M${cx-rx},${yt} L${cx-rx},${yb} A${rx},${ry} 0 0 0 ${cx+rx},${yb} L${cx+rx},${yt}" fill="${SVF}" stroke="${SVS}" stroke-width="2"/><ellipse cx="${cx}" cy="${yt}" rx="${rx}" ry="${ry}" fill="#FFF0D2" stroke="${SVS}" stroke-width="2"/><path d="M${cx-rx},${yb} A${rx},${ry} 0 0 1 ${cx+rx},${yb}" fill="none" stroke="${SVS}" stroke-width="2" stroke-dasharray="5 4" stroke-opacity=".75"/>`,W,H,'겨냥도'); }
+  if(s.k==='cone'){ const rx=62, ry=20, yb=150; return svWrap(`<path d="M${cx},22 L${cx-rx},${yb} A${rx},${ry} 0 0 0 ${cx+rx},${yb} Z" fill="${SVF}" stroke="${SVS}" stroke-width="2" stroke-linejoin="round"/><path d="M${cx-rx},${yb} A${rx},${ry} 0 0 1 ${cx+rx},${yb}" fill="none" stroke="${SVS}" stroke-width="2" stroke-dasharray="5 4" stroke-opacity=".75"/>`,W,H+10,'겨냥도'); }
+  if(s.k==='sph') return svWrap(`<circle cx="${cx}" cy="95" r="70" fill="${SVF}" stroke="${SVS}" stroke-width="2"/><path d="M40,95 A70,20 0 0 0 180,95" fill="none" stroke="${SVS}" stroke-width="1.6"/><path d="M40,95 A70,20 0 0 1 180,95" fill="none" stroke="${SVS}" stroke-width="1.6" stroke-dasharray="5 4" stroke-opacity=".6"/>`,W,H,'겨냥도');
+  return ''; }
+function svPoly(p1,p2,n){ const pts=[p1,p2]; let a=Math.atan2(p2[1]-p1[1],p2[0]-p1[0]); const L=Math.hypot(p2[0]-p1[0],p2[1]-p1[1]); for(let k=2;k<n;k++){ a+=2*Math.PI/n; const q=pts[k-1]; pts.push([q[0]+L*Math.cos(a),q[1]+L*Math.sin(a)]); } return pts; }
+function svNet(s){ let g='', W=240, H=200;
+  if(s.k==='prism'){ const n=s.n, a=Math.min(34,200/n), h=60, x0=(W-n*a)/2, yt=70; for(let k=0;k<n;k++) g+=svP([[x0+k*a,yt],[x0+(k+1)*a,yt],[x0+(k+1)*a,yt+h],[x0+k*a,yt+h]]);
+    const j=Math.floor(n/2); g+=svP(svPoly([x0+(j+1)*a,yt],[x0+j*a,yt],n),'#FFF0D2')+svP(svPoly([x0+j*a,yt+h],[x0+(j+1)*a,yt+h],n),'#FFF0D2'); H=yt+h+a*(n/(2*Math.PI))*2+20; }
+  else if(s.k==='pyr'){ const n=s.n, a=n>6?30:40, B=svPoly([W/2-a/2,0],[W/2+a/2,0],n); const cy=B.reduce((t,p)=>t+p[1],0)/n; const C=B.map(p=>[p[0],p[1]-cy+H/2]); g+=svP(C,'#FFF0D2');
+    const sl=a*1.25; for(let k=0;k<n;k++){ const p=C[k], q=C[(k+1)%n], mx=(p[0]+q[0])/2, my=(p[1]+q[1])/2, dx=q[0]-p[0], dy=q[1]-p[1], L=Math.hypot(dx,dy), nx=dy/L, ny=-dx/L; const ap=[mx+nx*sl,my+ny*sl]; g+=svP([p,q,ap]); } }
+  else if(s.k==='box'||s.k==='cube'){ const a=s.k==='cube'?38:46, b=s.k==='cube'?38:30, c=s.k==='cube'?38:24, x0=20, y0=20; const R=(x,y,w,h,f)=>svP([[x,y],[x+w,y],[x+w,y+h],[x,y+h]],f);
+    g+=R(x0+c,y0,a,c,'#FFF0D2')+R(x0,y0+c,c,b)+R(x0+c,y0+c,a,b)+R(x0+c+a,y0+c,c,b)+R(x0+2*c+a,y0+c,a,b)+R(x0+c,y0+c+b,a,c,'#FFF0D2'); H=y0+2*c+b+20; W=x0+2*c+2*a+20; }
+  else if(s.k==='cyl'){ const r=24, w=2*Math.PI*r, h=70, x0=(W-w)/2, y0=60; g+=svP([[x0,y0],[x0+w,y0],[x0+w,y0+h],[x0,y0+h]])+`<circle cx="${x0+w/2}" cy="${y0-r}" r="${r}" fill="#FFF0D2" stroke="${SVS}" stroke-width="2"/><circle cx="${x0+w/2}" cy="${y0+h+r}" r="${r}" fill="#FFF0D2" stroke="${SVS}" stroke-width="2"/>`; H=y0+h+2*r+10; }
+  else if(s.k==='cone'){ const Lr=90, r=30, th=2*Math.PI*r/Lr, cx=W/2, cy=20, a0=Math.PI/2-th/2, a1=Math.PI/2+th/2, p0=[cx+Lr*Math.cos(a0),cy+Lr*Math.sin(a0)], p1=[cx+Lr*Math.cos(a1),cy+Lr*Math.sin(a1)];
+    g+=`<path d="M${cx},${cy} L${p0[0].toFixed(1)},${p0[1].toFixed(1)} A${Lr},${Lr} 0 0 1 ${p1[0].toFixed(1)},${p1[1].toFixed(1)} Z" fill="${SVF}" stroke="${SVS}" stroke-width="2"/><circle cx="${cx}" cy="${cy+Lr+r}" r="${r}" fill="#FFF0D2" stroke="${SVS}" stroke-width="2"/>`; H=cy+Lr+2*r+10; }
+  else return svSketch(s);
+  return svWrap(g,W,H,'전개도'); }
+function svFadeGet(){ try{ return JSON.parse(localStorage.getItem('kt_svfade')||'{}'); }catch(e){ return {}; } }
+function svFadeSet(o){ try{ localStorage.setItem('kt_svfade',JSON.stringify(o)); }catch(e){} }
+window._svFade=(q,ok)=>{ try{ if(!q||!q._svEp) return; const o=svFadeGet(), ep=q._svEp; if(q._svShown){ if(ok&&!q._svDone) o[ep]=(o[ep]||0)+1; } else if(!ok) o[ep]=0; q._svDone=1; svFadeSet(o); }catch(e){} };
+function solidVis(ep,q){ if(!SV_EPS.has(ep)||!q||/<svg|<img/.test(String(q.visual||''))||q.manip||q.onMount) return q; const t=_pl(String(q.q)); const s=svShape(t); if(!s) return q;
+  q._svEp=ep; if((svFadeGet()[ep]||0)>=2){ q._svShown=0; return q; }
+  q.visual=(/전개도/.test(t)?svNet(s):svSketch(s))+(q.visual||''); q._svShown=1; return q; }
+{ const _t=tagQ; tagQ=function(ep,i,q){ q=_t(ep,i,q); try{ q=solidVis(ep,q); }catch(e){} return q; }; }
+window._solidVis=solidVis;
+
+
+// ===== 3-47b. 쌓기나무: 전체 개수를 알려 주기 (교수님 11/22: 개수를 알아야 숨은 쌓기나무가 있는지 알 수 있다) =====
+// ①(위·앞·옆) ③(입체+위)에 "쌓기나무 N개로 쌓았어요"를 붙이고, ⑥ 입체 그림 + 전체 개수만으로 똑같이 쌓기를 더한다.
+// ⑥은 숨은 자리가 여러 가지일 수 있어, 쌓은 모양이 그림과 똑같이 보이고(같은 그림) 개수가 N이면 정답.
+function skSig(H){ try{ const s=16, k=s*0.866, n=SK_N, cv=document.createElement('canvas'); cv.width=140; cv.height=150; const g=cv.getContext('2d');
+    const P=(x,y,z)=>[70+(x-y)*k,90+(x+y)*s/2-z*s], poly=(a,col)=>{ g.fillStyle=col; g.beginPath(); a.forEach((p,i)=>i?g.lineTo(...p):g.moveTo(...p)); g.closePath(); g.fill(); g.strokeStyle='#000'; g.lineWidth=1; g.stroke(); };
+    const order=[]; for(let y=0;y<n;y++) for(let x=0;x<n;x++) order.push([x,y]); order.sort((a,b)=>(a[0]+a[1])-(b[0]+b[1]));
+    for(const [x,y] of order) for(let z=0;z<H[y][x];z++){ poly([P(x,y+1,z),P(x+1,y+1,z),P(x+1,y+1,z+1),P(x,y+1,z+1)],'#f00'); poly([P(x+1,y,z),P(x+1,y+1,z),P(x+1,y+1,z+1),P(x+1,y,z+1)],'#0f0'); poly([P(x,y,z+1),P(x+1,y,z+1),P(x+1,y+1,z+1),P(x,y+1,z+1)],'#00f'); }
+    const d=g.getImageData(0,0,140,150).data; let h=0; for(let i=0;i<d.length;i+=4) h=(h*31+(d[i]>>6)*16+(d[i+1]>>6)*4+(d[i+2]>>6)+(d[i+3]>>6)*64)>>>0; return h; }catch(e){ return JSON.stringify(H); } }
+const skCnt=N=>`<div style="font-family:Jua,sans-serif;font-size:1.05rem;color:#4A2E14;align-self:center">쌓기나무<br><b style="font-size:1.5rem;color:#D45F16">${N}개</b>로<br>쌓았어요</div>`;
+SKQ[0]=()=>{ let H, sols; for(let t=0;t<200;t++){ H=skRand(5,10); sols=skSolutions(skTop(H)).filter(x=>skViewsEq(x,H)); if(sols.length<=4) break; } const N=skSum(H);
+  return MQ('쌓기나무로 쌓은 모양을 위, 앞, 옆에서 본 모양이에요. 똑같이 쌓아 보세요.','앞에서 본 모양은 줄마다 가장 높은 층을 보여 줘요. 쌓기나무 개수도 맞는지 세어 봐요.',
+    stack3D({cond:skCond(skViewSvg('top',H)+skViewSvg('front',H)+skViewSvg('side',H)+skCnt(N)), check:B=>skViewsEq(B,H)&&skSum(B)===N, reveal:H,
+      mcode:B=>(skSame(skFront(B),skFront(H))&&skSame(skSide(B),skSide(H))&&!skSame(skTop(B),skTop(H)))?'G6-10':(skViewsEq(B,H)&&skSum(B)<N?'G6-09':null)}),`모두 ${N}개`); };
+SKQ[2]=()=>{ let H, v; for(let t=0;t<300;t++){ H=skRand(6,11); v=skVisible(H); if(v.topOk&&v.vis<skSum(H)) break; } const N=skSum(H);
+  return MQ('그림과 똑같은 모양으로 쌓아 보세요. 위에서 본 모양과 쌓기나무 개수도 함께 보세요.','그림에 보이는 쌓기나무를 세어 보고, 전체 개수와 비교해요. 모자라면 보이지 않는 곳에 숨어 있어요.',
+    stack3D({cond:skCond(skBox(`<div style="width:170px">${skIsoSvg(H,{s:20})}</div>`,'쌓은 모양')+skBox(skViewSvg('top',H),'위에서 본 모양')+skCnt(N)), check:B=>skSame(B,H), reveal:H,
+      mcode:B=>skSum(B)===v.vis&&skSum(B)<N?'G6-09':null}),`모두 ${N}개`); };
+const skCountOnly=()=>{ let H, v; for(let t=0;t<300;t++){ H=skRand(6,11); v=skVisible(H); if(v.topOk&&v.vis<skSum(H)) break; } const N=skSum(H), sig=skSig(H);
+  return MQ(`쌓기나무 ${N}개로 그림과 같은 모양을 쌓았어요. 똑같이 쌓아 보세요.`,'그림에 보이는 쌓기나무는 몇 개인가요? 전체 개수보다 적다면 숨은 쌓기나무가 있어요. 위층 아래에는 반드시 쌓기나무가 있어요.',
+    stack3D({cond:skCond(skBox(`<div style="width:180px">${skIsoSvg(H,{s:20})}</div>`,'쌓은 모양')+skCnt(N)), check:B=>skSum(B)===N&&skSig(B)===sig, reveal:H,
+      mcode:B=>skSig(B)===sig&&skSum(B)<N?'G6-09':null}),`모두 ${N}개`); };
+SKQ.push(skCountOnly);
+try{ const fix=(ep,from,to)=>{ const a=G36[ep]; if(!a) return; const i=a.indexOf(from); if(i>=0) a[i]=to; };
+  /* 위에서 이미 넣은 ①·③을 새 판으로 바꾸고, ⑥을 S6-65 둘째에 */
+  const a64=G36['S6-64'], a65=G36['S6-65'];
+  if(a64){ const i=a64.findIndex(g=>{ try{ return /^위, 앞, 옆에서 본 모양이 되도록 쌓기나무를 쌓아/.test(g().q); }catch(e){ return false; } }); if(i>=0) a64[i]=SKQ[0]; }
+  if(a65){ const i=a65.findIndex(g=>{ try{ return /^그림과 똑같은 모양으로 쌓아 보세요\. 위에서 본 모양도/.test(g().q); }catch(e){ return false; } }); if(i>=0) a65[i]=SKQ[2]; a65.splice(1,0,skCountOnly); }
+}catch(e){}
+
 /* ---------- 3-12. 개념 조각과 보기별 무게 (오개념 코드 → 모르는 개념 조각) ---------- */
 // 교수님 지적(2026-11-20): 오답에 코드만 붙일 게 아니라 "이 보기를 고른 아이는 어떤 개념을 모른다"는 가정과 무게가 있어야 한다.
 // CPC: 조각 → [이름, 처음 배우는 학년-학기, 선수 조각들]. MISC: 오개념 코드 → [[주 조각, 무게], [부 조각, 무게]].
@@ -7920,6 +8001,9 @@ const CFK='dotori-kt-conf';
   return r; }; }
 
 try{ window._sameFormQ=sameFormQ; window._jRago=jRago; window._parentPage=parentPage; window._ladderAfter=ladderAfter; window._MISC=MISC; }catch(e){}
+
+/* 입체도형 그림 발판: 그림으로 2번 맞히면 글로만, 글로만 틀리면 다시 그림 (tags3 3-49) */
+{ const _ar3=afterRec; afterRec=function(q,given,ok,m){ _ar3(q,given,ok,m); try{ window._svFade&&window._svFade(q,ok); }catch(e){} }; }
 
 /* ---------- 11. 기존 화면에 연결 ---------- */
 const css=document.createElement('style'); css.textContent=`.kt-kc{display:inline-block;margin:3px;padding:4px 10px;border-radius:999px;font-size:.85rem;border:2px solid #d9c7a8;background:#fff}
