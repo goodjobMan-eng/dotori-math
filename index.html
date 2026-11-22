@@ -6526,6 +6526,7 @@ try{ window.__R36=R36; window.__G36G=G36G; window.__MIS=MIS; }catch(e){}
 function fixJosa(t){ if(typeof t!=='string'||t.indexOf('​')<0) return t;
   const P={'은':['은','는'],'는':['은','는'],'이':['이','가'],'가':['이','가'],'을':['을','를'],'를':['을','를'],'과':['과','와'],'와':['과','와'],'이에요':['이에요','예요'],'예요':['이에요','예요'],'이야':['이야','야'],'야':['이야','야'],'이란다':['이란다','란다'],'란다':['이란다','란다']};
   return t.replace(/([가-힣])​(으로|로|이에요|예요|이란다|란다|이야|야|은|는|이|가|을|를|과|와)(?=[\s,.?!~…]|$)/g,(m,ch,j)=>{ const jong=(ch.charCodeAt(0)-0xAC00)%28; const nj=(j==='으로'||j==='로')?((jong>0&&jong!==8)?'으로':'로'):P[j][jong>0?0:1]; return ch+'​'+nj; }); }
+try{ window.fixJosa=fixJosa; }catch(e){}   /* 놀이(bubbleSay)가 바깥에서 부르므로 전역으로 — 없으면 놀이가 멈춰 건너뛰어짐(교수님 11/22: 6과 4 가르기) */
 if(typeof say==='function'){ const _say=say; say=function(text,who,cb){ return _say(fixJosa(text),who,cb); }; }
 /* ===== 1~2학년 보기 규칙 엔진 (2026-11-21) =====
    원칙: 객관식 오답은 모두 '그 답이 나오는 오개념'에서 만든다(무작위 오답 금지). 문제 글의 꼴마다 오개념 규칙을 적용해
