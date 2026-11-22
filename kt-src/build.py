@@ -337,6 +337,18 @@ for _n in ['도토','람이','할머니','청이']:
         _k=_n+'_'+_m
         if _k in _A and _p in _JU.get(_n,{}): _A[_k]=_JU[_n][_p]
 h=h[:_ai+8]+_json.dumps(_A,ensure_ascii=False)[:-1]+'}'+h[_aj+1:]
+# 말하는 입 모양 그림(POSE, 놀이·말풍선의 캐릭터)도 시즌3 그림으로. 시즌3판에는 입 모양 그림이 없어 열린 입·닫힌 입을 같은 그림으로 둔다.
+_pi=h.index('const POSE={')+len('const POSE='); _d=0
+for _k in range(_pi,len(h)):
+    if h[_k]=='{': _d+=1
+    elif h[_k]=='}':
+        _d-=1
+        if _d==0: _pj=_k; break
+_P=_json.loads(h[_pi:_pj+1]); _PM={'cheer':'자세_만세','clap':'자세_박수','point':'자세_가리키기_오른쪽','wave':'자세_손흔들기'}
+for _k in list(_P):
+    _n,_pose,_mo=_k.split('_')
+    if _n in _JU and _PM.get(_pose) in _JU[_n]: _P[_k]=_JU[_n][_PM[_pose]]
+h=h[:_pi]+_json.dumps(_P,ensure_ascii=False)+h[_pj+1:]
 open('out/index.html', 'w', encoding='utf-8').write(h)
 print('built', len(out))
 
