@@ -1380,7 +1380,9 @@ function tableVis(q){ if(!q||(q.visual&&String(q.visual).trim())) return q; cons
 
 // ===== 3-43. 말풍선 속 식은 한 덩어리로 (교수님 11/22: 의미 단위 줄바꿈) =====
 // '2 × 8 = 4 × □ 의 □는?'이 '2 × 8 = 4 / × □ 의 □는?'으로 꺾이지 않게, 식(수·□·?와 연산 기호가 이어진 부분)을 줄바꿈 없는 덩어리로 감싼다.
-const EXPR_RE=/((?:\d[\d,.]*|□|\?)(?:\s*[+\-−×÷=<>:]\s*(?:\d[\d,.]*|□|\?))+)/g;
+/* 11/23: 분수('3분의 2')도 한 덩어리의 수로 본다. 전에는 '4분의 [3 ÷ 2]'처럼 분수 한가운데가 감싸져서 분수 모양으로 바뀌지 않았다(교수님 사진). */
+const _EXN='(?:(?:\\d+[과와] )?\\d+분의 \\d+|\\d[\\d,.]*|□|\\?)';
+const EXPR_RE=new RegExp('('+_EXN+'(?:\\s*[+\\-−×÷=<>:]\\s*'+_EXN+')+)','g');
 function nowrapExpr(q){ if(!q||typeof q.q!=='string'||q.q.indexOf('class="nw"')>=0) return q;
   q.q=q.q.split(/(<[^>]+>)/).map(seg=>seg.startsWith('<')?seg:seg.replace(EXPR_RE,m=>/[+\-−×÷=<>:]/.test(m)&&m.length>4?`<span class="nw">${m}</span>`:m)).join(''); return q; }
 { const _t=tagQ; tagQ=function(ep,i,q){ q=_t(ep,i,q); try{ q=nowrapExpr(q); }catch(e){} return q; }; }
@@ -1520,7 +1522,7 @@ function skViewSvg(kind,H,u=24,nolab){ const n=SK_N, lab={top:['위','#6BA34A'],
   return `<svg viewBox="-2 ${nolab?19:-1} ${cols*u+4} ${rows*u+(nolab?5:25)}" width="${cols*u+4}" style="background:transparent">${g}</svg>`; }
 function skNumSvg(H,u=24){ let g=`<circle cx="${SK_N*u/2}" cy="9" r="9" fill="#6BA34A"/><text x="${SK_N*u/2}" y="13" font-size="11" text-anchor="middle" fill="#fff" font-weight="700">위</text>`;
   for(let r=0;r<SK_N;r++) for(let c=0;c<SK_N;c++){ const v=H[r][c]; g+=`<rect x="${c*u}" y="${22+r*u}" width="${u}" height="${u}" fill="${v?'#E9B373':'#fff'}" stroke="${v?'#7A4A1E':'#C9BBA6'}" ${v?'':'stroke-dasharray="2 2"'}/>`+(v?`<text x="${c*u+u/2}" y="${22+r*u+u/2+5}" font-size="14" text-anchor="middle" font-weight="700" fill="#4A2E14">${v}</text>`:''); }
-  return `<svg viewBox="-2 -1 ${SK_N*u+4} ${SK_N*u+25}" width="${SK_N*u+4}" style="background:transparent">${g}<text x="${SK_N*u/2}" y="${SK_N*u+36}" font-size="10" text-anchor="middle" fill="#8A6A4A">↓앞</text></svg>`; }
+  return `<svg viewBox="-2 -1 ${SK_N*u+4} ${SK_N*u+25}" width="${SK_N*u+4}" style="background:transparent">${g}<text x="${SK_N*u/2}" y="${SK_N*u+19}" font-size="10" text-anchor="middle" fill="#8A6A4A">↓앞</text></svg>`; }
 function skLayerSvg(H,z,u=22){ let g=''; for(let r=0;r<SK_N;r++) for(let c=0;c<SK_N;c++){ const f=H[r][c]>=z; g+=`<rect x="${c*u}" y="${r*u}" width="${u}" height="${u}" fill="${f?'#E9B373':'#fff'}" stroke="${f?'#7A4A1E':'#C9BBA6'}" ${f?'':'stroke-dasharray="2 2"'}/>`; }
   return `<div style="text-align:center;font-size:.85rem"><svg viewBox="-1 -1 ${SK_N*u+2} ${SK_N*u+2}" width="${SK_N*u+2}" style="background:transparent">${g}</svg><br>${z}층</div>`; }
 const skCond=inner=>`<div class="skcond" style="display:flex;gap:10px;justify-content:center;align-items:flex-end;flex-wrap:wrap;background:#FFF8EC;border:2px solid #EBD9BC;border-radius:12px;padding:8px 10px;color:#4A2E14">${inner}</div>`;
@@ -2484,7 +2486,7 @@ try{ if(G36['S3-32']) G36['S3-32']=G36['S3-32'].map(g=>function(){ let q; for(le
 // 틀 3개 이하인 48편과 보기형만 있는 26편에 직접 써서 답하는 유형을 중심으로 1~3개씩 더함(카본과 유형을 맞춰 봄: 조건에 맞는 수·경계값·거꾸로 묻기·틀린 계산 고치기).
 const NX={}, _W=(q,ans,wr,post,vis)=>WM(q,vis||'',ans,wr,'',post||''), _gcdN=(a,b)=>{ while(b){ [a,b]=[b,a%b]; } return a; }, _lcmN=(a,b)=>a*b/_gcdN(a,b);
 /* 3-1 나눗셈·곱셈 */
-NX['S2-09']=[()=>{ const b=rnd(3,7), q=rnd(3,6); return _W(`${b*q} − ${Array(q).fill(b).join(' − ')} = 0 이에요. 이것을 나눗셈식으로 나타내면 ${b*q} ÷ ${b} = □ 예요. □에 알맞은 수는 얼마일까요?`,q,[[b,'N2-10'],[b*q-b,'N3-11']]); },
+NX['S2-09']=[()=>{ const b=rnd(3,7), q=rnd(3,6); return _W(`위의 뺄셈식을 나눗셈식으로 나타내면 ${b*q} ÷ ${b} = □ 예요. □에 알맞은 수는 얼마일까요?`,q,[[b,'N2-10'],[b*q-b,'N3-11']],'',`<div style="font-family:Jua,sans-serif;font-size:1.25rem;text-align:center;line-height:1.6;color:#4A2E14;background:#FFF8EC;border:2px solid #E3CFA8;border-radius:12px;padding:8px 10px;overflow-wrap:anywhere">${b*q} − ${Array(q).fill(b).join(' − ')} = 0</div>`); },
   ()=>{ let b=rnd(2,6), q=rnd(3,8); if(b===q) q++; const a=b*q; return cq(`바둑돌 ${a}개를 ${b}개씩 묶었더니 ${q}묶음이 되었어요. 알맞은 나눗셈식은 어느 것일까요?`,'',`${a} ÷ ${b} = ${q}`,[[`${a} ÷ ${q} = ${b}`,'N2-10'],[`${a} − ${b} = ${a-b}`,'N3-11'],[`${a} + ${b} = ${a+b}`,null]]); }];
 NX['S2-10']=[()=>{ let a=rnd(3,9), b=rnd(2,9); if(a===b) b=a===9?8:a+1; return _W(`${a} × ${b} = ${a*b} 를 보고 □에 알맞은 수를 구해 보세요. ${a*b} ÷ ${a} = □`,b,[[a,'N3-01'],[a*b-a,'N3-11']]); },
   ()=>{ let a=rnd(3,7), b=rnd(2,6); if(a===b) b++; const t=a*b; return cq(`구슬이 ${a}개씩 ${b}줄 있어요(모두 ${t}개). 알맞지 않은 식은 어느 것일까요?`,'',`${t} ÷ ${a} = ${a}`,[[`${a} × ${b} = ${t}`,null],[`${t} ÷ ${a} = ${b}`,null],[`${t} ÷ ${b} = ${a}`,null]]); }];
@@ -2778,7 +2780,9 @@ window._GT=GT;
 // 0 조작, 1 기본, 2 문장제, 3 여러 개념·까닭. 틀마다 손으로 붙이지 않고 문제의 꼴로 가른다(편 연습의 순서, 오늘의 문제의 새 내용 순서에 씀).
 window.ktStage=q=>{ try{ if(!q) return 1; if(q._kst!=null) return q._kst; if(q.manip||q.onMount){ /* 기호 규칙을 누르는 조작은 '만져 보기'가 아니라 그 뒤 단계(제미나이 지적): 계산 순서·소수점 찍기 → 기본, 식 세우기 → 이야기 문제, 표에서 판단·반례·두 조건 → 도전 */ const tt=String(q.q||''); if(q.manip&&/계산할 차례대로|소수점을 찍어/.test(tt)) return 1; if(q.manip&&/식을 (하나로 )?세워/.test(tt)) return 2; if(q.manip&&/알맞은 칸을 골라|큰지 작은지 골라|같은지, 큰지 골라|틀렸다는 것을|이면서 .*인 수를 모두/.test(tt)) return 3; return 0; } const t=String(q.q||'').replace(/<[^>]+>/g,' ').replace(/\s+/g,' ').trim(), a=String(q.ans==null?'':q.ans);
     if(q._hard||/ — /.test(a)||/까닭|바르게 (말|고쳐|구한|계산한)|누구일까요|이 말에 대한/.test(t)) return 3; const nums=(t.match(/\d+/g)||[]).length;
-    if(t.length>=60&&nums>=3) return 3; if(q.word||(t.length>=26&&nums>=1&&/어요|았어요|였어요|려고|습니다|있어요/.test(t))) return 2; return 1; }catch(e){ return 1; } };
+    if(t.length>=60&&nums>=3) return 3; /* 11/23 교수님: 식만 있는 문제('3분의 2 ÷ 9분의 4를 계산하면?')는 이야기 문제가 아님 → 수·분수·기호를 지우고 남는 글이 짧으면 기본. 반대로 '…이에요. …는?' 꼴의 이야기는 이야기 문제로(전에는 '이에요'를 놓쳤음). */
+    const rest=t.replace(/(?:\d+[과와] )?\d+분의 \d+|[\d.,]+|[+\-−×÷=<>:()□?\s]/g,''); if(!q.word&&rest.length<=12) return 1;
+    if(q.word||(t.length>=22&&nums>=1&&/어요|에요|예요|해요|돼요|려고|습니다|려면/.test(t))) return 2; return 1; }catch(e){ return 1; } };
 window.KT_STAGE_NAME=['만져 보기','기본 익히기','이야기 문제','도전 문제'];   /* 3~4학년이 알아듣는 이름(제미나이 제안) */
 
 
@@ -2794,6 +2798,8 @@ window.KT_STAGE_NAME=['만져 보기','기본 익히기','이야기 문제','도
 .kt-stg span{transition:background-color .2s ease,color .2s ease}.kt-stg span[style*="color:#fff"]{animation:ktPulse .5s ease-out .2s 1}
 .kt-star{position:fixed;z-index:9998;pointer-events:none;font-size:20px;animation:ktStar .9s ease-out forwards}
 .next{transition:transform .08s ease}.next:active{transform:translateY(2px)}
+.stage .visual svg,.stage #manip svg{overflow:visible}
+.bubble .q{overflow-wrap:anywhere}
 @media (prefers-reduced-motion:reduce){.stage .talker,.stage .visual,.stage .opts,.stage #wpad,#fb .fb,.kt-star,.kt-stg span{animation:none!important}}`; document.head.appendChild(st);
   /* 맞혔을 때 작은 별·도토리가 튀어 오름(0.9초 뒤 스스로 사라짐, 누름을 막지 않음) */
   const burst=el=>{ try{ if(window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches) return; const r=el.getBoundingClientRect(), cx=r.left+Math.min(r.width/2,160), cy=r.top+10, E=['⭐','✨','🌰','⭐','✨','🍂','⭐','✨']; for(let i=0;i<8;i++){ const s=document.createElement('span'); s.className='kt-star'; s.textContent=E[i]; const a=(-150+i*17+Math.random()*10)*Math.PI/180, d=60+Math.random()*50; s.style.left=cx+'px'; s.style.top=cy+'px'; s.style.setProperty('--dx',(Math.cos(a)*d).toFixed(0)+'px'); s.style.setProperty('--dy',(Math.sin(a)*d).toFixed(0)+'px'); s.style.setProperty('--rot',(Math.random()*240-120).toFixed(0)+'deg'); s.style.animationDelay=(i*25)+'ms'; document.body.appendChild(s); setTimeout(()=>{ try{ s.remove(); }catch(e){} },1300); } }catch(e){} };

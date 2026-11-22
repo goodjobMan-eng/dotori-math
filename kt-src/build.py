@@ -395,6 +395,22 @@ h=h[:_i]+_seg+h[_j:]
 # 조작 문제: [다 했어요]를 누른 때의 상태로 오개념을 판정(q.manip.wrong()이 보기 이름을 돌려주면 그 이름으로 기록)
 _a="answer({dataset:{v:ok?q.ans:'__no'},classList:{add(){}},disabled:false},q);"
 assert h.count(_a)==1; h=h.replace(_a,"let _wv='__no'; try{ if(!ok&&q.manip.wrong){ const w=q.manip.wrong(); if(w) _wv=w; } }catch(e){} if(!ok) (q._mw=q._mw||[]).push(_wv); answer({dataset:{v:ok?q.ans:_wv},classList:{add(){}},disabled:false},q); try{ if(!ok&&S.tries>=2&&window.__manipFail) window.__manipFail(q); }catch(e){}")
+
+# 11/23 교수님: ① '색깔별로 세고 더해 보세요'는 색깔별 수와 모두를 차례로 쓰게 ② 연필 길이 비교 그림에서 이름표가 화면 밖으로 잘림 → 이름표를 막대 앞으로
+_a="()=>{ const it=mkItems(rnd(9,12)); return WN('모두 몇 개일까요? 색깔별로 세고 더해 보세요.',itemsVis(it),it.length,'','개'); },"
+assert h.count(_a)==1
+h=h.replace(_a,"()=>{ const it=mkItems(rnd(9,12)); const C=['빨간','파란','노란'], n=C.map(c=>cntBy(it,'c',c)); if(n.some(x=>x===0)) return G36['S4-02'][1](); return W36(WHO(),'색깔별로 세어 쓰고, 모두 몇 개인지도 써 보세요.',' ',itemsVis(it)+C.map((c,i)=>row(c+'색',slotsN(n[i]),'개')).join('')+row('모두',slotsN(it.length),'개'),n.join('')+String(it.length),{ansText:`${C.map((c,i)=>c+'색 '+n[i]+'개').join(', ')} → 모두 ${it.length}개`,hint:'색깔마다 하나씩 짚어 가며 세고, 세 수를 더해요.'}); },")
+_a="""<rect x="10" y="15" width="${a*26}" height="18" rx="6" fill="#F2A65A" stroke="#7A4A1E" stroke-width="2"/><text x="${a*26+18}" y="29" font-size="13">도토</text><rect x="10" y="55" width="${b*26}" height="18" rx="6" fill="#8CC7E8" stroke="#3A6E8F" stroke-width="2"/><text x="${b*26+18}" y="69" font-size="13">람이</text>`)"""
+assert h.count(_a)==1
+h=h.replace(_a,"""<text x="4" y="29" font-size="13" font-weight="700">도토</text><rect x="40" y="15" width="${a*23}" height="18" rx="6" fill="#F2A65A" stroke="#7A4A1E" stroke-width="2"/><text x="4" y="69" font-size="13" font-weight="700">람이</text><rect x="40" y="55" width="${b*23}" height="18" rx="6" fill="#8CC7E8" stroke="#3A6E8F" stroke-width="2"/>`)""")
+
+# 11/23 교수님 화면(휴대폰 어두운 모드): 브라우저가 색을 멋대로 어둡게 바꿔 그림 속 글자가 안 보임 → 이 앱은 밝은 화면만 쓴다고 알림
+_a='<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">'
+assert h.count(_a)==1
+h=h.replace(_a,_a+'\n<meta name="color-scheme" content="only light">\n<meta name="supported-color-schemes" content="light">\n<style>:root{color-scheme:only light}</style>')
+# 만든 사람 표시(교수님 11/23): 눈에 띄지 않게 코드 안에만
+h = h.replace('<head>', '<head>\n<!-- 도토리 숲 수학 퀴즈 · made by 굳잡맨(goodjobMan) · CC BY-NC 4.0 · 비영리·교육 목적, 출처를 밝히고 고쳐 써도 됩니다 -->\n<meta name="author" content="굳잡맨 (goodjobMan)">', 1)
+h = h.replace('</body>', '<script>/* gjm */(function(){try{Object.defineProperty(window,"__dotori",{value:Object.freeze({by:decodeURIComponent("%EA%B5%B3%EC%9E%A1%EB%A7%A8"),id:"goodjobMan",license:"CC BY-NC 4.0"}),enumerable:false});}catch(e){}})();</script>\n</body>', 1)
 open('out/index.html', 'w', encoding='utf-8').write(h)
 print('built', len(out))
 
