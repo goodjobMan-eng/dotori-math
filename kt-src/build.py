@@ -305,6 +305,23 @@ h = h.replace(_g, _g+"\nconst praiseChip=(who,mood)=>who==='halmi'?chip0('halmi'
 for _g in ["const [who,pr]=pick(PRAISE); document.getElementById('gdone').innerHTML=`<div class=\"gdone\">${chip(who,'happy')}", "const [who,msg]=pick(PRAISE);\n    fb.innerHTML=`<div class=\"fb ok\">${chip(who,'happy')}"]:
     assert h.count(_g)==1, _g
     h = h.replace(_g, _g.replace("${chip(who,'happy')}","${praiseChip(who,'happy')}"))
+# --- 교수님 11/22: 규칙(반복 무늬)은 순서·위치가 중요 → 가운데 정렬로 두 줄이 되면 헷갈림. 한 줄로, 왼쪽에서 오른쪽으로, 끝에 ? 칸 ---
+_g="const itemsVis=items=>`<div class=\"items\">${items.map(i=>shp(i.s,COLORS[i.c])).join('')}</div>`;"; assert h.count(_g)==1
+h = h.replace(_g, _g+"\nconst seqVis=items=>`<div class=\"seqrow\" style=\"--n:${items.length+1}\">${items.map(i=>`<span class=\"seqit\">${shp(i.s,COLORS[i.c])}</span>`).join('')}<span class=\"seqit seqq\">?</span></div>`;")
+for _k in ["return CF('모양의 규칙을 보고 다음", "return CF('색깔 규칙을 보고 다음 색은?',itemsVis(seq)", "return CF('다음에 올 것은?',itemsVis(seq)"]:
+    assert h.count(_k)==1, _k
+_i=h.index("const seq=Array.from({length:len},(_,i)=>({s:sh[i%p],c:cl[0]}));"); _j=h.index("\n",_i); h=h[:_i]+h[_i:_j].replace("itemsVis(seq)","seqVis(seq)")+h[_j:]
+h = h.replace("return CF('색깔 규칙을 보고 다음 색은?',itemsVis(seq)","return CF('색깔 규칙을 보고 다음 색은?',seqVis(seq)").replace("return CF('다음에 올 것은?',itemsVis(seq)","return CF('다음에 올 것은?',seqVis(seq)")
+_g=".withadult{"; assert h.count(_g)==1
+h = h.replace(_g, ".nw{white-space:nowrap}.seqrow{display:flex;flex-wrap:nowrap;justify-content:center;align-items:center;gap:3px;margin:10px auto;width:100%;max-width:100%}.seqrow .seqit{flex:0 1 calc((100% - 3px*(var(--n) - 1))/var(--n));max-width:40px;aspect-ratio:1;display:flex;align-items:center;justify-content:center}.seqrow .seqit svg{width:100%;height:100%}.seqrow .seqq{border:2.5px dashed #E8963C;border-radius:9px;font-family:Jua,sans-serif;font-size:1.3rem;color:#E8963C;box-sizing:border-box}\n"+_g)
+# '어른과 함께 읽어요' 문구 자체를 없앤다(꺼 둔 코드도 남기지 않음)
+h = h.replace("if(false) vz.insertAdjacentHTML('afterbegin','<div class=\"withadult sm\">👨‍👩‍👧 어른과 함께 읽어요</div>');","")
+h = h.replace("${false?'<div class=\"withadult\">👨‍👩‍👧 글이 어려우면 어른과 함께 읽어요</div>':''}","")
+# --- 교수님 11/22: 휴대폰 다크 모드에서 브라우저가 화면 색을 제멋대로 뒤집으면(강제 다크) 그림·표·색 규칙 문제의 색이 바뀌어 문제 자체가 달라진다.
+#     '밝은 화면만'을 밝혀 강제 다크를 끄고, 어느 모드에서든 설계한 색 그대로 보이게 한다. ---
+_g='<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">'; assert h.count(_g)==1
+h = h.replace(_g, _g+'<meta name="color-scheme" content="only light"><meta name="darkreader-lock">')
+h = h.replace('</head>', '<style id="kt-light">:root{color-scheme:only light}html,body{background-color:#FFF7EC}</style></head>',1)
 open('out/index.html', 'w', encoding='utf-8').write(h)
 print('built', len(out))
 

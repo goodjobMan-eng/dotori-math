@@ -1369,3 +1369,11 @@ function tableVis(q){ if(!q||(q.visual&&String(q.visual).trim())) return q; cons
   const cols=op==='+'?[1,2,3,4,5]:[1,2,3,4,5,6];
   q.visual=opTable(op,rows,cols,d||(op==='+'?null:null)); return q; }
 { const _t=tagQ; tagQ=function(ep,i,q){ q=_t(ep,i,q); try{ q=tableVis(q); }catch(e){} return q; }; }
+
+
+// ===== 3-43. 말풍선 속 식은 한 덩어리로 (교수님 11/22: 의미 단위 줄바꿈) =====
+// '2 × 8 = 4 × □ 의 □는?'이 '2 × 8 = 4 / × □ 의 □는?'으로 꺾이지 않게, 식(수·□·?와 연산 기호가 이어진 부분)을 줄바꿈 없는 덩어리로 감싼다.
+const EXPR_RE=/((?:\d[\d,.]*|□|\?)(?:\s*[+\-−×÷=<>:]\s*(?:\d[\d,.]*|□|\?))+)/g;
+function nowrapExpr(q){ if(!q||typeof q.q!=='string'||q.q.indexOf('class="nw"')>=0) return q;
+  q.q=q.q.split(/(<[^>]+>)/).map(seg=>seg.startsWith('<')?seg:seg.replace(EXPR_RE,m=>/[+\-−×÷=<>:]/.test(m)&&m.length>4?`<span class="nw">${m}</span>`:m)).join(''); return q; }
+{ const _t=tagQ; tagQ=function(ep,i,q){ q=_t(ep,i,q); try{ q=nowrapExpr(q); }catch(e){} return q; }; }

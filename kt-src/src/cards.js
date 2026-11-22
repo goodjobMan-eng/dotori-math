@@ -300,9 +300,9 @@ KCARDS.GC19=()=>{ const Q=[['밑면이 2개인 입체도형','원기둥'],['밑�
   {h:kcEq(Q[k][0]), s:'무엇일까요?', ans:Q[k][1], opts:['원기둥','원뿔','구'], why:'밑면의 수와 꼭짓점이 있는지 떠올려 봐요.'}]}; };
 KCARDS.RC01=()=>{ const E=['🔴','🔵','🟡'], pat=[[0,1],[0,1,1],[0,0,1],[0,1,2]][kcR(0,3)], L=pat.length, seq=Array.from({length:L*2+kcR(0,L-1)},(_,i)=>pat[i%L]), nx=pat[seq.length%L];
   return {t:'반복되는 규칙', p:[
-  {h:`<span class="kc-ac" style="grid-template-columns:repeat(8,1.5em)">${seq.map(i=>`<span>${E[i]}</span>`).join('')}</span>`, s:'구슬이 어떤 순서로 놓였는지 보세요.'},
-  {h:`<span class="kc-ac" style="grid-template-columns:repeat(8,1.5em)">${pat.map(i=>`<span>${E[i]}</span>`).join('')}</span>`, s:`<b>되풀이되는 묶음</b>을 찾아요. 이 묶음이 계속 반복돼요. 바로 앞의 것만 보면 틀리기 쉬워요.`},
-  {h:`<span class="kc-ac" style="grid-template-columns:repeat(8,1.5em)">${seq.map(i=>`<span>${E[i]}</span>`).join('')}<span>❓</span></span>`, s:'다음에 올 구슬은?', ans:E[nx], opts:E.slice(), why:'되풀이 묶음을 손으로 하나씩 끊어 봐요.'}]}; };
+  {h:`<div class="seqrow" style="--n:${seq.length}">${seq.map(i=>`<span class="seqit" style="font-size:1.4rem">${E[i]}</span>`).join('')}</div>`, s:'구슬이 어떤 순서로 놓였는지 보세요.'},
+  {h:`<div class="seqrow" style="--n:${seq.length}">${seq.map((i,k)=>`<span class="seqit" style="font-size:1.4rem;${k%L===0&&k?'margin-left:10px;':''}${k<L?'background:#FFE3B0;border-radius:8px':''}">${E[i]}</span>`).join('')}</div>`, s:`<b>되풀이되는 묶음</b>을 찾아요. 이 묶음이 계속 반복돼요. 바로 앞의 것만 보면 틀리기 쉬워요.`},
+  {h:`<div class="seqrow" style="--n:${seq.length+1}">${seq.map(i=>`<span class="seqit" style="font-size:1.4rem">${E[i]}</span>`).join('')}<span class="seqit seqq">?</span></div>`, s:'다음에 올 구슬은?', ans:E[nx], opts:E.slice(), why:'되풀이 묶음을 손으로 하나씩 끊어 봐요.'}]}; };
 KCARDS.RC02=()=>{ const a=kcR(5,15), b=kcR(2,9), c=kcR(2,a-1), a2=kcR(10,20), b2=kcR(3,9), c2=kcR(2,a2-1), x2=a2+b2-c2; return {t:'등호의 양쪽은 같아요', p:[
   {h:kcEq(`${a} + ${b} = ${c} + □`), s:'=는 <b>양쪽이 같다</b>는 뜻이에요. 왼쪽을 다 계산한 값을 □에 쓰면 안 돼요.'},
   {h:kcEq(`${a+b} = ${c} + ${a+b-c}`), s:`왼쪽은 ${a+b}. 오른쪽도 ${a+b}이 되려면 □는 ${a+b-c}이에요.`.replace(/(\d+)이 되려면/,(m0,n)=>n+([0,1,3,6,7,8].includes(n%10)?'이':'가')+' 되려면')},
