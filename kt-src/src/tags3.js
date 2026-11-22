@@ -1692,3 +1692,48 @@ try{ const fix=(ep,from,to)=>{ const a=G36[ep]; if(!a) return; const i=a.indexOf
   if(a64){ const i=a64.findIndex(g=>{ try{ return /^위, 앞, 옆에서 본 모양이 되도록 쌓기나무를 쌓아/.test(g().q); }catch(e){ return false; } }); if(i>=0) a64[i]=SKQ[0]; }
   if(a65){ const i=a65.findIndex(g=>{ try{ return /^그림과 똑같은 모양으로 쌓아 보세요\. 위에서 본 모양도/.test(g().q); }catch(e){ return false; } }); if(i>=0) a65[i]=SKQ[2]; a65.splice(1,0,skCountOnly); }
 }catch(e){}
+
+
+// ===== 3-50. 띠그래프·원그래프를 실제 그래프로 (교수님 11/22: 문제에 실물 그래프가 안 나옴) =====
+// 띠그래프: 긴 띠 + 아래 눈금자(0~100%, 10%마다). 칸이 좁으면 이름을 띠 위에 빼서 적는다.
+// 원그래프: 12시에서 시작해 시계 방향, 바깥 눈금 5%마다(25%마다 길게·수). 좁은 조각은 이름을 밖에.
+// ① 기존 .band(글자만 든 상자) → S4-19는 띠그래프, S4-20은 원그래프, S4-21은 번갈아.  ② 글로만 있던 문제에 맞는 그래프를 그린다.
+const GR_COL=['#F2A65A','#8CC7E8','#A6D98C','#F2D06B','#D9A6E0','#F4A6A6'];
+const grEsc=s=>String(s).replace(/</g,'&lt;');
+function bandSvg(items,{ruler=true,cap=''}={}){ const W=320, x0=10, L=300, y0=44, h=42; let g='', x=x0, lastX=-99, lv=0;
+  items.forEach((it,k)=>{ const w=L*it.p/100; g+=`<rect x="${x.toFixed(1)}" y="${y0}" width="${w.toFixed(1)}" height="${h}" fill="${it.hi?'#FFE08A':GR_COL[k%GR_COL.length]}" stroke="#6B3E1C" stroke-width="1.5"/>`;
+    const lab=it.lab!=null?it.lab:`${it.p}%`, cx=x+w/2;
+    if(w>=38){ g+=`<text x="${cx.toFixed(1)}" y="${y0+18}" font-size="12" text-anchor="middle" fill="#3A2410" font-weight="700">${grEsc(it.n)}</text><text x="${cx.toFixed(1)}" y="${y0+34}" font-size="12" text-anchor="middle" fill="#3A2410">${grEsc(lab)}</text>`; }
+    else { lv=(cx-lastX<56)?1-lv:0; lastX=cx; const ty=y0-11-lv*14; g+=`<line x1="${cx.toFixed(1)}" y1="${y0}" x2="${cx.toFixed(1)}" y2="${ty+3}" stroke="#6B3E1C"/><text x="${cx.toFixed(1)}" y="${ty}" font-size="11" text-anchor="middle" fill="#3A2410">${grEsc(it.n)} ${grEsc(lab)}</text>`; }
+    x+=w; });
+  if(ruler){ for(let p=0;p<=100;p+=5){ const xx=x0+L*p/100; g+=`<line x1="${xx}" y1="${y0+h}" x2="${xx}" y2="${y0+h+(p%10?4:8)}" stroke="#6B3E1C"/>`; if(p%10===0) g+=`<text x="${xx}" y="${y0+h+19}" font-size="9.5" text-anchor="middle" fill="#6B3E1C">${p}</text>`; } g+=`<text x="${W-2}" y="${y0+h+30}" font-size="9" text-anchor="end" fill="#8A6A4A">(%)</text>`; }
+  return `<div style="display:flex;flex-direction:column;align-items:center"><svg viewBox="0 0 ${W} ${ruler?128:94}" width="${W}" style="max-width:100%;background:#fff;border-radius:10px">${g}</svg>${cap?`<div style="font-size:.85rem;color:#6B4A2A">${cap}</div>`:''}</div>`; }
+function pieSvg(items,{cap='',angleQ=-1}={}){ const cx=110, cy=108, r=78; let g='', a=-90; const pt=(ang,rr)=>[cx+rr*Math.cos(ang*Math.PI/180), cy+rr*Math.sin(ang*Math.PI/180)];
+  items.forEach((it,k)=>{ const da=360*it.p/100, a1=a+da, p0=pt(a,r), p1=pt(a1,r); const col=it.hi?'#FFE08A':GR_COL[k%GR_COL.length];
+    g+= it.p>=100?`<circle cx="${cx}" cy="${cy}" r="${r}" fill="${col}" stroke="#6B3E1C" stroke-width="1.5"/>`:`<path d="M${cx},${cy} L${p0[0].toFixed(1)},${p0[1].toFixed(1)} A${r},${r} 0 ${da>180?1:0} 1 ${p1[0].toFixed(1)},${p1[1].toFixed(1)} Z" fill="${col}" stroke="#6B3E1C" stroke-width="1.5"/>`;
+    if(k===angleQ){ const q0=pt(a,22), q1=pt(a1,22); g+=`<path d="M${q0[0].toFixed(1)},${q0[1].toFixed(1)} A22,22 0 ${da>180?1:0} 1 ${q1[0].toFixed(1)},${q1[1].toFixed(1)}" fill="none" stroke="#D45F16" stroke-width="2.2"/>`; const m=pt(a+da/2,34); g+=`<text x="${m[0].toFixed(1)}" y="${(m[1]+4).toFixed(1)}" font-size="12" text-anchor="middle" fill="#D45F16" font-weight="700">?°</text>`; }
+    const lab=it.lab!=null?it.lab:`${it.p}%`, mid=a+da/2;
+    if(it.n||lab){ if(it.p>=12){ const m=pt(mid,r*0.62); g+=`<text x="${m[0].toFixed(1)}" y="${(m[1]-(k===angleQ?-10:2)).toFixed(1)}" font-size="12" text-anchor="middle" fill="#3A2410" font-weight="700">${grEsc(it.n)}</text><text x="${m[0].toFixed(1)}" y="${(m[1]+(k===angleQ?24:13)).toFixed(1)}" font-size="11.5" text-anchor="middle" fill="#3A2410">${grEsc(lab)}</text>`; }
+      else { const m=pt(mid,r+6), o=pt(mid,r+22); g+=`<line x1="${m[0].toFixed(1)}" y1="${m[1].toFixed(1)}" x2="${o[0].toFixed(1)}" y2="${o[1].toFixed(1)}" stroke="#6B3E1C"/><text x="${o[0].toFixed(1)}" y="${(o[1]+(o[1]>cy?10:-3)).toFixed(1)}" font-size="10.5" text-anchor="middle" fill="#3A2410">${grEsc(it.n)} ${grEsc(lab)}</text>`; } }
+    a=a1; });
+  for(let p=0;p<100;p+=5){ const ang=-90+3.6*p, i0=pt(ang,r), o=pt(ang,r+(p%25?4:8)); g+=`<line x1="${i0[0].toFixed(1)}" y1="${i0[1].toFixed(1)}" x2="${o[0].toFixed(1)}" y2="${o[1].toFixed(1)}" stroke="#6B3E1C"/>`; if(p%25===0){ const t=pt(ang,r+16); g+=`<text x="${t[0].toFixed(1)}" y="${(t[1]+4).toFixed(1)}" font-size="9.5" text-anchor="middle" fill="#6B3E1C">${p}</text>`; } }
+  return `<div style="display:flex;flex-direction:column;align-items:center"><svg viewBox="0 0 220 216" width="220" style="max-width:100%;background:#fff;border-radius:10px">${g}</svg>${cap?`<div style="font-size:.85rem;color:#6B4A2A">${cap}</div>`:''}</div>`; }
+const grFill=(p,names)=>{ /* 나머지 100-p를 5의 배수 2~3조각으로 */ let rest=100-p; const out=[]; const n=rest>=60?3:rest>=30?2:1; for(let k=0;k<n-1;k++){ const v=5*Math.max(1,Math.round((rest/(n-k))*(0.6+Math.random()*0.8)/5)); const vv=Math.min(v,rest-5*(n-k-1)); out.push({n:names[k],p:vv}); rest-=vv; } if(rest>0) out.push({n:names[n-1],p:rest}); return out; };
+function grParseBand(v){ const m=[...String(v).matchAll(/<span style="flex:(\d+);background:[^"]*">([^<]*)<br>([^<]*)<\/span>/g)]; return m.length?m.map(x=>({n:x[2],p:+x[1],lab:x[3]})):null; }
+function grVis(ep,i,q){ if(!/^S4-(19|20|21)$/.test(ep)||!q||q.manip||q.onMount) return q; const V=String(q.visual||''), t=_pl(String(q.q)); let m;
+  if(/class="band"/.test(V)){ const it=grParseBand(V); if(it){ const pie=ep==='S4-20'||(ep==='S4-21'&&i%2===1); const html=pie?pieSvg(it):bandSvg(it); q.visual=V.replace(/<div class="band">[\s\S]*?<\/div>/,html); } return q; }
+  if(/<svg|<img/.test(V)) return q; let pic='';
+  if((m=t.match(/띠그래프에서 (\S+)[은는] 눈금 (\d+)%부터 (\d+)%까지/))){ const a=+m[2], b=+m[3], nm=m[1]; const before=a?grFill(100-a,['치킨','김밥','라면']):[]; const after=100-b?grFill(b,['떡볶이','과일','국수']):[]; pic=bandSvg([...before.map(x=>({...x,lab:''})),{n:nm,p:b-a,lab:'?%',hi:1},...after.map(x=>({...x,lab:''}))]); }
+  else if((m=t.match(/(\d+)명 중 (\d+)명이 (\S+?)[을를] 좋아해요\. 띠그래프에서/))){ const N=+m[1], k=+m[2], nm=m[3], p=Math.round(100*k/N); pic=bandSvg([{n:nm,p,lab:'?%',hi:1},...grFill(p,['야구','농구','피구']).map(x=>({...x,lab:''}))],{ruler:false,cap:`전체 ${N}명 · ${nm} ${k}명`}); }
+  else if((m=t.match(/원그래프에서 (\d+)%인 부분의 중심각/))){ const p=+m[1]; pic=pieSvg([{n:'',p,lab:`${p}%`,hi:1},...grFill(p,['','','']).map(x=>({...x,lab:''}))],{angleQ:0}); }
+  else if(/원그래프에서 1%는 몇 도/.test(t)){ pic=pieSvg([{n:'',p:100,lab:''}],{cap:'원 한 바퀴 = 360°, 눈금 한 칸 = 5%'}); }
+  else if((m=t.match(/(\d+)명을 조사한 원그래프에서 (\S+?)[가이] (\d+)명이에요/))){ const N=+m[1], k=+m[3], nm=m[2], p=Math.round(100*k/N); pic=pieSvg([{n:nm,p,lab:`${k}명`,hi:1},...grFill(p,['운동','게임','음악']).map(x=>({...x,lab:''}))],{angleQ:0,cap:`전체 ${N}명`}); }
+  else if((m=t.match(/전체 (\d+)명 중 (\d+)%는 몇 명/))){ const N=+m[1], p=+m[2]; pic=(ep==='S4-19'?bandSvg:pieSvg)([{n:'?명',p,lab:`${p}%`,hi:1},...grFill(p,['','','']).map(x=>({...x,lab:''}))],{cap:`전체 ${N}명`}); }
+  else if((m=t.match(/가 학교 (\d+)명 중 (\d+)%, 나 학교 (\d+)명 중 (\d+)%가 걸어서/))){ const row=(N,p,s)=>bandSvg([{n:'걸어서',p,hi:1},...grFill(p,['버스','자전거','차']).map(x=>({...x}))],{ruler:false,cap:`${s} 학교 (전체 ${N}명)`}); pic=row(+m[1],+m[2],'가')+row(+m[3],+m[4],'나'); }
+  else if((m=t.match(/(\d+)명을 조사한 띠그래프에서 (\S+?)[가이] 눈금 (\d+)에서 (\d+)까지/))){ const N=+m[1], nm=m[2], a=+m[3], b=+m[4]; const before=a?grFill(100-a,['독서','게임','음악']):[]; const after=100-b?grFill(b,['그림','요리','춤']):[]; pic=bandSvg([...before.map(x=>({...x,lab:''})),{n:nm,p:b-a,lab:'?명',hi:1},...after.map(x=>({...x,lab:''}))],{cap:`전체 ${N}명`}); }
+  else if(/띠그래프의 눈금 \d+~\d+%는/.test(t)){ const segs=[...t.matchAll(/(\d+)~(\d+)%는 (\S+?)[,예]/g)].map(x=>({a:+x[1],b:+x[2],n:x[3]})); if(segs.length){ const it=[]; let cur=0; segs.forEach((g,j)=>{ if(g.a>cur) it.push({n:'',p:g.a-cur,lab:''}); it.push({n:g.n,p:g.b-g.a,lab:j===segs.length-1?'?%':'',hi:j===segs.length-1}); cur=g.b; }); if(cur<100) it.push(...grFill(cur,['기타','','']).map(x=>({...x,lab:''}))); pic=bandSvg(it); } }
+  else if((m=t.match(/원그래프에서 (\d+)%인 항목이 있어요\. 전체가 (\d+)명/))){ const p=+m[1], N=+m[2]; pic=pieSvg([{n:'?명',p,lab:`${p}%`,hi:1},...grFill(p,['','','']).map(x=>({...x,lab:''}))],{cap:`전체 ${N}명`}); }
+  else if((m=t.match(/가 반 (\d+)명의 (\d+)%와 나 반 (\d+)명의 (\d+)%/))){ const row=(N,p,s)=>bandSvg([{n:'',p,hi:1},...grFill(p,['','','']).map(x=>({...x,lab:''}))],{ruler:false,cap:`${s} 반 (전체 ${N}명)`}); pic=row(+m[1],+m[2],'가')+row(+m[3],+m[4],'나'); }
+  if(pic) q.visual=pic+V; return q; }
+{ const _t=tagQ; tagQ=function(ep,i,q){ q=_t(ep,i,q); try{ q=grVis(ep,i,q); }catch(e){} return q; }; }
+window._bandSvg=bandSvg; window._pieSvg=pieSvg;
