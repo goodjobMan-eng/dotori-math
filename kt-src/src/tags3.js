@@ -1880,3 +1880,171 @@ function cpaVis(ep,q){ if(!/^S[2-6]-/.test(ep)||!q||q.manip||q.onMount||q._cpaPi
 try{ const _ra=runAct; runAct=function(){ try{ const a=S&&S.acts&&S.acts[S.i]; const q=a&&a.kind==='q'&&a.q; if(q&&q._svEp){ if(q._cpaPic==null&&q._svShown&&q._svBase==null){ /* 3-49 입체: 처음 붙인 그림을 기억 */ } const show=(svFadeGet()[q._svEp]||0)<2;
       if(q._cpaPic!=null){ q.visual=show?q._cpaPic+q._cpaBase:q._cpaBase; q._svShown=show?1:0; } } }catch(e){} return _ra.apply(this,arguments); }; }catch(e){}
 window._cpPic=cpPic; window._cpaVis=cpaVis;
+
+
+// ===== 3-52. 구체 → 그림 → 글 2차: 도형·측정(S6), 규칙·비(S5), 자료(S4) =====
+// 3-51의 cpPic 앞에 끼워, 글만 있는 문제에 맞는 그림을 그린다. 답이 되는 값은 '?'로 두고, 그림이 답을 바로 알려 주는 뜻·이름 묻기 문제는 건너뛴다.
+const GX_S='#7A4A1E', GX_F='#FFE3B0', gxT=(x,y,s,sz=12,col='#4A2E14',anc='middle',w=700)=>`<text x="${(+x).toFixed(1)}" y="${(+y).toFixed(1)}" font-size="${sz}" text-anchor="${anc}" fill="${col}" font-weight="${w}">${s}</text>`;
+const gxQ='#D45F16';
+/* 단위 띠: 큰 단위 n개(칸마다 '1 m = 100 cm') + 나머지 */
+function gxUnits(n,rest,big,small,per,{ask=''}={}){ if(n>9) return ''; const bw=n>6?30:n>4?44:54, h=40; let g='', x=6; for(let k=0;k<n;k++){ g+=`<rect x="${x}" y="6" width="${bw}" height="${h}" fill="${GX_F}" stroke="${GX_S}" stroke-width="1.5"/>`+gxT(x+bw/2,23,`1 ${big}`,bw<40?9:11)+gxT(x+bw/2,38,`${per} ${small}`,bw<40?7.5:9.5,'#8A6A4A','middle',400); x+=bw; }
+  if(rest){ const rw=Math.max(38,bw*0.75); g+=`<rect x="${x}" y="6" width="${rw}" height="${h}" fill="#CFE6F5" stroke="${GX_S}" stroke-width="1.5"/>`+gxT(x+rw/2,31,`${rest} ${small}`,rest>999?8:10); x+=rw; } return cpSvg(g,x+6,h+12,330); }
+const GX_U=[['km','m',1000],['m','cm',100],['cm','mm',10],['kg','g',1000],['t','kg',1000],['L','mL',1000],['시간','분',60],['분','초',60],['주일','일',7],['년','개월',12],['일','시간',24]];
+/* 시계 */
+function gxClock(h,m){ try{ return `<svg viewBox="0 0 120 120" width="120" style="background:#fff;border-radius:10px">${clockSvg(h,m)}</svg>`; }catch(e){ return ''; } }
+/* 삼각형: 밑각 A(왼쪽), B(오른쪽) */
+function gxTri(A,B,labs){ const C=180-A-B; if(A<=0||B<=0||C<=0) return ''; const L=150, ra=A*Math.PI/180, rb=B*Math.PI/180, h=L/(1/Math.tan(ra)+1/Math.tan(rb)), px=h/Math.tan(ra); if(!(h>8)) return '';
+  const sc=Math.min(1,110/h,1), W=L*sc, P=[[30,140],[30+W,140],[30+px*sc,140-h*sc]]; let minx=Math.min(...P.map(p=>p[0])), maxx=Math.max(...P.map(p=>p[0])); const dx=minx<14?14-minx:0;
+  P.forEach(p=>p[0]+=dx); maxx+=dx; let g=`<polygon points="${P.map(p=>p.map(v=>v.toFixed(1)).join(',')).join(' ')}" fill="${GX_F}" stroke="${GX_S}" stroke-width="2" stroke-linejoin="round"/>`;
+  const cx=(P[0][0]+P[1][0]+P[2][0])/3, cy=(P[0][1]+P[1][1]+P[2][1])/3; (labs||[]).forEach((s,i)=>{ if(s==null) return; const p=P[i], d=Math.hypot(cx-p[0],cy-p[1]), k=Math.min(0.42,26/d); g+=gxT(p[0]+(cx-p[0])*k,p[1]+(cy-p[1])*k+4,s,11,/\?/.test(s)?gxQ:'#4A2E14'); });
+  return cpSvg(g,Math.max(maxx+16,200),156,260); }
+/* 세 변으로 삼각형 */
+function gxTriSides(a,b,c){ if(a+b<=c||a+c<=b||b+c<=a) return ''; const A=Math.acos((b*b+c*c-a*a)/(2*b*c))*180/Math.PI, B=Math.acos((a*a+c*c-b*b)/(2*a*c))*180/Math.PI; const pic=gxTri(A,B,[]); return pic; }
+/* 직사각형·정사각형 */
+function gxRect(w,h,{wl='',hl='',inl='',sq=false}={}){ const r=sq?1:Math.max(0.35,Math.min(2.4,w/h)), H=r>1?150/r:110, W=H*r, x=60, y=14; let g=`<rect x="${x}" y="${y}" width="${W}" height="${H}" fill="${GX_F}" stroke="${GX_S}" stroke-width="2"/>`+gxT(x+W/2,y+H+16,wl,12,/\?/.test(wl)?gxQ:'#4A2E14')+gxT(x-6,y+H/2+4,hl,12,/\?/.test(hl)?gxQ:'#4A2E14','end')+(inl?gxT(x+W/2,y+H/2+4,inl,12,'#8A6A4A'):''); return cpSvg(g,x+W+20,y+H+24,280); }
+/* 원 */
+function gxCircle({r='',d='',cap=''}={}){ let g=`<circle cx="80" cy="76" r="60" fill="${GX_F}" stroke="${GX_S}" stroke-width="2"/><circle cx="80" cy="76" r="2.5" fill="${GX_S}"/>`;
+  if(d) g+=`<line x1="20" y1="76" x2="140" y2="76" stroke="${GX_S}" stroke-width="1.6"/>`+gxT(80,70,d,11,/\?/.test(d)?gxQ:'#4A2E14'); if(r) g+=`<line x1="80" y1="76" x2="${80+60*0.7}" y2="${76+60*0.714}" stroke="#2F6FA8" stroke-width="1.8"/>`+gxT(118,104,r,11,/\?/.test(r)?gxQ:'#2F6FA8','start'); return cpSvg(g,d||r?190:160,150,200); }
+/* 평행사변형·삼각형·사다리꼴·마름모 (넓이) */
+function gxPara(b,h){ const g=`<polygon points="50,20 200,20 170,100 20,100" fill="${GX_F}" stroke="${GX_S}" stroke-width="2"/><line x1="50" y1="20" x2="50" y2="100" stroke="#2F6FA8" stroke-width="1.6" stroke-dasharray="4 3"/><path d="M50,92 h8 v8" fill="none" stroke="#2F6FA8"/>`+gxT(95,116,b,12,/\?/.test(b)?gxQ:'#4A2E14')+gxT(58,64,h,12,/\?/.test(h)?gxQ:'#2F6FA8','start'); return cpSvg(g,215,122,260); }
+function gxTriArea(b,h){ const g=`<polygon points="20,110 190,110 130,20" fill="${GX_F}" stroke="${GX_S}" stroke-width="2"/><line x1="130" y1="20" x2="130" y2="110" stroke="#2F6FA8" stroke-width="1.6" stroke-dasharray="4 3"/><path d="M130,102 h8 v8" fill="none" stroke="#2F6FA8"/>`+gxT(105,126,b,12,/\?/.test(b)?gxQ:'#4A2E14')+gxT(137,70,h,12,/\?/.test(h)?gxQ:'#2F6FA8','start'); return cpSvg(g,215,132,260); }
+function gxTrap(a,b,h){ const g=`<polygon points="70,20 150,20 200,100 20,100" fill="${GX_F}" stroke="${GX_S}" stroke-width="2"/><line x1="70" y1="20" x2="70" y2="100" stroke="#2F6FA8" stroke-width="1.6" stroke-dasharray="4 3"/><path d="M70,92 h8 v8" fill="none" stroke="#2F6FA8"/>`+gxT(110,14,a,12)+gxT(110,116,b,12)+gxT(77,64,h,12,/\?/.test(h)?gxQ:'#2F6FA8','start'); return cpSvg(g,215,122,260); }
+function gxRhom(d1,d2){ const g=`<polygon points="110,10 200,65 110,120 20,65" fill="${GX_F}" stroke="${GX_S}" stroke-width="2"/><line x1="20" y1="65" x2="200" y2="65" stroke="#2F6FA8" stroke-width="1.5" stroke-dasharray="4 3"/><line x1="110" y1="10" x2="110" y2="120" stroke="#3F8F3F" stroke-width="1.5" stroke-dasharray="4 3"/>`+gxT(160,60,d1,11,/\?/.test(d1)?gxQ:'#2F6FA8')+gxT(116,36,d2,11,/\?/.test(d2)?gxQ:'#3F8F3F','start'); return cpSvg(g,220,130,260); }
+/* 직육면체 겨냥도 + 치수 */
+function gxBox(a,b,c,cube){ const w=cube?90:120, h=cube?90:70, d=cube?40:46, x0=40, y0=28, P=(x,y,z)=>[x0+x+z*0.9, y0+h-y+d*0.7-z*0.7], v=[[0,0,0],[w,0,0],[w,h,0],[0,h,0],[0,0,d],[w,0,d],[w,h,d],[0,h,d]].map(q=>P(...q)), pp=a=>a.map(p=>p.map(t=>t.toFixed(1)).join(',')).join(' ');
+  let g=`<polygon points="${pp([v[0],v[1],v[2],v[3]])}" fill="${GX_F}" stroke="${GX_S}" stroke-width="2"/><polygon points="${pp([v[3],v[2],v[6],v[7]])}" fill="#FFF0D2" stroke="${GX_S}" stroke-width="2"/><polygon points="${pp([v[1],v[5],v[6],v[2]])}" fill="#F6CF95" stroke="${GX_S}" stroke-width="2"/>`;
+  g+=gxT((v[0][0]+v[1][0])/2,v[0][1]+15,a,11)+gxT(v[1][0]+d*0.45+14,(v[1][1]+v[5][1])/2+12,b,11,'#4A2E14','start')+gxT(v[0][0]-5,(v[0][1]+v[3][1])/2+4,c,11,'#4A2E14','end'); return cpSvg(g,x0+w+d+60,y0+h+d*0.7+22,270); }
+/* 각 그림 */
+function gxAngle(deg,lab){ const r=64, a=deg*Math.PI/180, ox=deg>90?86:22, oy=84, x2=ox+r*Math.cos(a), y2=oy-r*Math.sin(a), ar=20; const g=`<line x1="${ox}" y1="${oy}" x2="${ox+r}" y2="${oy}" stroke="${GX_S}" stroke-width="2.2"/><line x1="${ox}" y1="${oy}" x2="${x2.toFixed(1)}" y2="${y2.toFixed(1)}" stroke="${GX_S}" stroke-width="2.2"/><path d="M${ox+ar},${oy} A${ar},${ar} 0 0 0 ${(ox+ar*Math.cos(a)).toFixed(1)},${(oy-ar*Math.sin(a)).toFixed(1)}" fill="none" stroke="${gxQ}" stroke-width="1.8"/>`+gxT(ox+34*Math.cos(a/2)+4,oy-34*Math.sin(a/2)+4,lab,11,gxQ); return cpSvg(g,ox+r+14,96,150); }
+/* 사각형(네 각) */
+function gxQuad(labs){ const P=[[30,110],[190,110],[160,24],[60,40]]; let g=`<polygon points="${P.map(p=>p.join(',')).join(' ')}" fill="${GX_F}" stroke="${GX_S}" stroke-width="2"/>`; const cx=110, cy=72; labs.forEach((s,i)=>{ const p=P[i]; g+=gxT(p[0]+(cx-p[0])*0.3,p[1]+(cy-p[1])*0.3+4,s,11,/\?/.test(s)?gxQ:'#4A2E14'); }); return cpSvg(g,215,124,250); }
+/* 정다각형 */
+function gxPoly(n,{diagFrom=-1,r=46}={}){ const P=Array.from({length:n},(_,i)=>{ const a=-Math.PI/2+2*Math.PI*i/n+(n%2?0:Math.PI/n); return [56+r*Math.cos(a),54+r*Math.sin(a)]; }); let g=`<polygon points="${P.map(p=>p.map(v=>v.toFixed(1)).join(',')).join(' ')}" fill="${GX_F}" stroke="${GX_S}" stroke-width="2"/>`; if(diagFrom>=0) g+=`<circle cx="${P[0][0].toFixed(1)}" cy="${P[0][1].toFixed(1)}" r="5" fill="${gxQ}"/>`; return `<svg viewBox="0 0 112 108" width="100" style="background:#fff;border-radius:8px">${g}</svg>`; }
+/* 하루 띠(0~24시) */
+function gxDay(a,b){ const x0=10, L=290, X=h=>x0+L*h/24; let g=`<rect x="${x0}" y="14" width="${L}" height="18" fill="#fff" stroke="${GX_S}"/><rect x="${X(a)}" y="14" width="${X(b)-X(a)}" height="18" fill="#F6C77E" stroke="${GX_S}"/>`; for(let h=0;h<=24;h++){ g+=`<line x1="${X(h)}" y1="32" x2="${X(h)}" y2="${h%6?36:41}" stroke="${GX_S}"/>`; }
+  [[0,'오전 0시'],[12,'낮 12시'],[24,'밤 12시']].forEach(([h,s])=>g+=gxT(X(h),53,s,9.5,'#6B4A2A',h===0?'start':h===24?'end':'middle',400)); const f=h=>`${h<12?'오전':'오후'} ${h%12||12}시`; g+=gxT(X(a),10,f(a),10,gxQ)+gxT(X(b),10,f(b),10,gxQ); return cpSvg(g,310,58); }
+/* 수 배열(규칙): 칸 + 뛰는 화살표 */
+function gxSeq(items){ const n=items.length; if(n>8) return ''; const w=Math.min(46,300/n), y=26; let g=''; items.forEach((s,i)=>{ const x=6+i*w; g+=`<rect x="${x+2}" y="${y}" width="${w-6}" height="28" rx="6" fill="${/□|\?/.test(s)?'#FFF3C4':'#fff'}" stroke="${GX_S}" stroke-width="1.4"/>`+gxT(x+w/2-1,y+19,s,String(s).length>3?10:13,/□|\?/.test(s)?gxQ:'#4A2E14'); if(i<n-1) g+=`<path d="M${x+w/2},${y-2} Q${x+w},${y-20} ${x+w*1.5-2},${y-2}" fill="none" stroke="${gxQ}" stroke-width="1.4"/>`; }); return cpSvg(g,n*w+12,60); }
+/* 양팔 저울(등호): 왼쪽·오른쪽에 놓인 수 카드 */
+function gxBalance(Ls,Rs){ const card=(x,y,s)=>`<rect x="${x-16}" y="${y-22}" width="32" height="22" rx="5" fill="${/□/.test(s)?'#FFF3C4':'#fff'}" stroke="${GX_S}" stroke-width="1.4"/>`+gxT(x,y-6,s,12,/□/.test(s)?gxQ:'#4A2E14');
+  let g=`<polygon points="150,96 138,120 162,120" fill="#C98742" stroke="${GX_S}" stroke-width="1.5"/><line x1="30" y1="96" x2="270" y2="96" stroke="${GX_S}" stroke-width="4"/><rect x="30" y="92" width="100" height="5" fill="#E3A866" stroke="${GX_S}"/><rect x="170" y="92" width="100" height="5" fill="#E3A866" stroke="${GX_S}"/>`; Ls.forEach((s,i)=>g+=card(58+i*42,90,s)); Rs.forEach((s,i)=>g+=card(198+i*42,90,s)); g+=gxT(150,84,'=',16,gxQ); return cpSvg(g,300,124); }
+/* 막대(평균·자료): 값만큼 칸 쌓기 */
+function gxTowers(vals,names){ const mx=Math.max(...vals); if(mx>20||vals.length>7) return gxBars(vals,names); const u=Math.min(13,110/Math.max(mx,1)), w=30; let g=''; vals.forEach((v,i)=>{ const x=14+i*(w+10); for(let k=0;k<v;k++) g+=`<rect x="${x}" y="${128-(k+1)*u}" width="${w}" height="${u}" fill="${GX_F}" stroke="${GX_S}" stroke-width="1"/>`; g+=gxT(x+w/2,142,names?names[i]:v,10.5,'#4A2E14','middle',400); }); g+=`<line x1="6" y1="128" x2="${18+vals.length*(w+10)}" y2="128" stroke="${GX_S}" stroke-width="1.6"/>`; return cpSvg(g,24+vals.length*(w+10),148,300); }
+function gxBars(vals,names){ const mx=Math.max(...vals), w=30; let g=''; vals.forEach((v,i)=>{ const x=14+i*(w+12), h=110*v/mx; g+=`<rect x="${x}" y="${128-h}" width="${w}" height="${h}" fill="${GX_F}" stroke="${GX_S}" stroke-width="1.3"/>`+gxT(x+w/2,124-h,v,10.5)+gxT(x+w/2,142,names?names[i]:'',10.5,'#4A2E14','middle',400); }); g+=`<line x1="6" y1="128" x2="${18+vals.length*(w+12)}" y2="128" stroke="${GX_S}" stroke-width="1.6"/>`; return cpSvg(g,24+vals.length*(w+12),148,300); }
+/* 막대그래프 한 줄(눈금 칸): 값은 적지 않고 칸만 */
+function gxBarGrid(cells,unitLab,names){ const mx=Math.max(...cells)+1, u=Math.min(13,100/mx), w=30; let g=''; for(let k=0;k<=mx;k++) g+=`<line x1="30" y1="${130-k*u}" x2="${40+cells.length*(w+12)}" y2="${130-k*u}" stroke="#E5D3B5"/>`; cells.forEach((c,i)=>{ const x=40+i*(w+12); g+=`<rect x="${x}" y="${130-c*u}" width="${w}" height="${c*u}" fill="#F2A65A" stroke="${GX_S}" stroke-width="1.3"/>`+gxT(x+w/2,144,names?names[i]:'',10.5,'#4A2E14','middle',400); }); g+=gxT(28,133,'0',9.5,'#6B4A2A','end',400)+`<path d="M22,${130-u} v${u}" stroke="${gxQ}" stroke-width="2"/>`+gxT(4,11,unitLab,10,gxQ,'start'); return cpSvg(g,Math.max(110,50+cells.length*(w+12)),150,300); }
+/* 꺾은선 */
+function gxLine(vals,names){ const mx=Math.max(...vals), mn=0, W=280, x0=30, y0=120, sx=(W-x0-14)/(vals.length-1), sy=96/mx; let g=`<line x1="${x0}" y1="${y0}" x2="${W-6}" y2="${y0}" stroke="${GX_S}"/><line x1="${x0}" y1="14" x2="${x0}" y2="${y0}" stroke="${GX_S}"/>`, d=''; vals.forEach((v,i)=>{ const x=x0+i*sx, y=y0-v*sy; d+=(i?'L':'M')+x.toFixed(1)+','+y.toFixed(1); g+=`<circle cx="${x}" cy="${y}" r="3.5" fill="${gxQ}"/>`+gxT(x,y-7,v,10)+gxT(x,y0+14,names[i],10,'#4A2E14','middle',400); }); g+=`<path d="${d}" fill="none" stroke="${gxQ}" stroke-width="2"/>`; return cpSvg(g,W,140); }
+/* 공·구슬 */
+function gxBalls(groups){ let g='', k=0; const col={'빨간':'#E8574A','파란':'#4A90D9','노란':'#F2C230','흰':'#fff','검은':'#444','초록':'#5FB85F'}; const tot=groups.reduce((s,x)=>s+x[1],0); if(tot>20) return ''; const per=Math.min(tot,7); groups.forEach(([c,n])=>{ for(let i=0;i<n;i++,k++) g+=`<circle cx="${30+(k%per)*24}" cy="${32+Math.floor(k/per)*24}" r="10" fill="${col[c]||'#ccc'}" stroke="#4A2E14" stroke-width="1.4"/>`; }); const W=60+per*24, H=26+Math.ceil(tot/per)*24+14; return cpSvg(`<path d="M12,14 Q${W/2},-4 ${W-12},14 L${W-6},${H-8} Q${W/2},${H+6} 6,${H-8} Z" fill="#FFF8EC" stroke="${GX_S}" stroke-width="1.6"/>`+g,W,H,240); }
+/* 그림그래프 큰·작은 그림 */
+function gxPicto(big,small,bv,sv){ let g=''; for(let i=0;i<big;i++) g+=`<circle cx="${20+i*30}" cy="22" r="12" fill="#C98742" stroke="${GX_S}" stroke-width="1.5"/>`; for(let i=0;i<small;i++) g+=`<circle cx="${14+big*30+i*17}" cy="27" r="6.5" fill="#E9B373" stroke="${GX_S}" stroke-width="1.3"/>`; return cpSvg(g,Math.max(28+big*30+small*17,120),42,300); }
+/* 이중 수직선 / 비례 표 */
+function gxRatioTab(h1,r1,h2,r2){ return cpTable(r1,r2,h1,h2); }
+/* 모눈 위 점 */
+function gxDotGrid(cx,cy,n=6){ const u=22; let g=''; for(let i=0;i<=n;i++) g+=`<line x1="${6+i*u}" y1="6" x2="${6+i*u}" y2="${6+n*u}" stroke="#E5D3B5"/><line x1="6" y1="${6+i*u}" x2="${6+n*u}" y2="${6+i*u}" stroke="#E5D3B5"/>`; g+=`<circle cx="${6+(cx-0.5)*u}" cy="${6+(n-cy+0.5)*u}" r="7" fill="${gxQ}"/>`; return cpSvg(g,12+n*u,12+n*u,170); }
+/* 시간·길이는 이어진 양이라 상자(블록)가 아니라 띠(시간 띠·줄자)에 나타낸다 (교수님 11/22, 시간 지도는 시계와 시간 띠가 기본).
+   segs: [[작은 단위 값, 방향(+1 앞으로/-1 되돌아), 글자]] — 0에서 시작해 차례로 뛴다. 큰 단위마다 굵은 눈금과 이름. */
+function gxTimeline(segs,big,small,per,{mark=null}={}){ let pos=0, mx=0; segs.forEach(([v,d])=>{ pos+=v*d; mx=Math.max(mx,pos); }); if(mark!=null) mx=Math.max(mx,mark); const nb=Math.max(1,Math.ceil(mx/per-1e-9)+(mx%per===0?0:0)); if(nb>9) return '';
+  const hi=nb*per, W=320, x0=16, L=288, X=v=>x0+L*v/hi, y=58; const sub=[60].includes(per)?(nb<=4?6:2):per===24?(nb<=3?4:2):per===100||per===1000||per===10?(nb<=3?10:nb<=6?5:2):1;
+  let g=`<line x1="${x0}" y1="${y}" x2="${x0+L}" y2="${y}" stroke="${GX_S}" stroke-width="2.2"/>`; for(let k=0;k<=nb*sub;k++){ const v=k*per/sub, maj=k%sub===0; g+=`<line x1="${X(v)}" y1="${y-(maj?9:5)}" x2="${X(v)}" y2="${y+(maj?9:5)}" stroke="${GX_S}" stroke-width="${maj?2:1}"/>`; if(maj) g+=gxT(X(v),y+23,k/sub===0?'0':`${k/sub}${big}`,nb>6?9:10.5); }
+  pos=0; const cols=[gxQ,'#2F6FA8','#3F8F3F']; segs.forEach(([v,d,lab],i)=>{ const a=pos, b=pos+v*d, fw=d>0, h=Math.min(fw?34:16,Math.abs(X(b)-X(a))*0.5+8), col=cols[i%3];
+    g+=`<path d="M${X(a)},${y-10} Q${(X(a)+X(b))/2},${y-10-h*2+ (fw?h:h)} ${X(b)},${y-10}" fill="none" stroke="${col}" stroke-width="2" ${fw?'':'stroke-dasharray="5 3"'}/>`+(fw?'':`<path d="M${X(b)},${y-10} l8,-6 l0,8 z" fill="${col}"/>`)+gxT((X(a)+X(b))/2,fw?y-14-h/2-2:y-16-h/2,lab+(fw?'':' 되돌아오기'),10,col); pos=b; });
+  if(mark!=null) g+=`<circle cx="${X(mark)}" cy="${y}" r="5" fill="${gxQ}"/>`+gxT(X(mark),y-14,`${mark}${small}`,10.5,gxQ);
+  return cpSvg(g,W,y+30); }
+/* 달력 줄: 1주일 = 7칸, 1년 = 12칸 */
+function gxCalRows(n,rest,per,big,small){ if(n>6) return ''; const u=per===7?24:20, heads=per===7?['일','월','화','수','목','금','토']:Array.from({length:12},(_,i)=>`${i+1}`); let g=''; heads.forEach((h,j)=>g+=gxT(40+j*u+u/2,12,h,9,j===0&&per===7?'#D2477A':'#6B4A2A','middle',400));
+  for(let r=0;r<n+(rest?1:0);r++){ const cnt=r<n?per:rest; for(let j=0;j<cnt;j++) g+=`<rect x="${40+j*u}" y="${18+r*(u+3)}" width="${u}" height="${u}" fill="${r<n?GX_F:'#CFE6F5'}" stroke="${GX_S}" stroke-width="1"/>`; g+=gxT(36,18+r*(u+3)+u/2+4,r<n?`${big==='주일'?'1주':'1년'}`:'',9.5,'#6B4A2A','end',400); } return cpSvg(g,46+per*u,22+(n+(rest?1:0))*(u+3),300); }
+function gxPic(ep,t){ let m; const S=ep.slice(0,2), J=(n,x,y)=>/[136780]$/.test(String(n))?x:y;
+  if(S==='S6'){
+    /* 단위: 시간·길이는 띠, 주일·년은 달력 줄, 무게·들이는 1 kg 추·1 L 컵 상자 */ for(const [B,s,per] of GX_U){ const eb=B, es=s, ask=`(?:몇 ${es}|며칠)`, line=['시간','분','일','m','km','cm'].includes(B), cal=B==='주일'||B==='년'; let r;
+      const comp=(n,rest)=>line?gxTimeline([...Array.from({length:n},()=>[per,1,`${per}${es}`]),...(rest?[[rest,1,`${rest}${es}`]]:[])],B,s,per):cal?gxCalRows(n,rest,per,B,s):gxUnits(n,rest,B,s,per);
+      if((r=t.match(new RegExp(`^(\\d+) ?${eb} (\\d+) ?${es}[은는] (?:모두 )?${ask}`)))){ const u=comp(+r[1],+r[2]); if(u) return cpWrap(u,`1${B} = ${per}${s}`); }
+      if((r=t.match(new RegExp(`^(\\d+) ?${eb}[은는] (?:모두 )?${ask}`)))){ const u=comp(+r[1],0); if(u) return cpWrap(u,`1${B} = ${per}${s}`); }
+      if((r=t.match(new RegExp(`^(\\d+) ?${es}[은는] 몇 ?${eb}`)))&&+r[1]/per<=9&&+r[1]>=per){ const u=line?gxTimeline([],B,s,per,{mark:+r[1]}):''; if(u) return cpWrap(u,`1${B} = ${per}${s}`);
+        const n=Math.floor(+r[1]/per), hi=(n+1)*per, tp=[12,7].includes(per)?(per===7?7:4):(n<3?10:n<7?5:2), ln=cpLine(0,hi,per/tp,[[+r[1],`${r[1]} ${s}`]]); if(ln) return cpWrap(ln.replace(/<text[^>]*font-size="11"[^>]*fill="#4A2E14">(\d+)<\/text>/g,(a,v)=>+v%per===0?a:''),`1 ${B} = ${per} ${s}`); }
+      if((r=t.match(new RegExp(`^(\\d+) ?${eb} (\\d+) ?${es} ([+−]) (\\d+) ?${eb} (\\d+) ?${es}`)))){ if(line){ const a=+r[1]*per+ +r[2], b=+r[4]*per+ +r[5], u=gxTimeline([[a,1,`${r[1]}${B} ${r[2]}${s}`],[b,r[3]==='+'?1:-1,`${r[4]}${B} ${r[5]}${s}`]],B,s,per); if(u) return cpWrap(u,r[3]==='+'?'이어서 더 가요':'간 만큼에서 되돌아와요'); } else { const u1=gxUnits(+r[1],+r[2],B,s,per), u2=gxUnits(+r[4],+r[5],B,s,per); if(u1&&u2) return cpWrap(cpCol(u1,cpOp(r[3]),u2)); } }
+      if((r=t.match(new RegExp(`^(\\d+) ?${eb} (\\d+) ?${es} − (\\d+) ?${es}`)))){ if(line){ const u=gxTimeline([[+r[1]*per+ +r[2],1,`${r[1]}${B} ${r[2]}${s}`],[+r[3],-1,`${r[3]}${s}`]],B,s,per); if(u) return cpWrap(u,'간 만큼에서 되돌아와요'); } else { const u1=gxUnits(+r[1],+r[2],B,s,per); if(u1) return cpWrap(cpCol(u1,`<span>${cpOp('−')} ${r[3]} ${s}</span>`)); } } }
+    /* 시각에서 몇 분 뒤·전: 시계 + 시간 띠 */ if((m=t.match(/(\d+)시 (\d+)분에서 (\d+)분 (뒤|전)/))){ const h=+m[1], mi=+m[2], d=+m[3], fw=m[4]==='뒤', h0=fw?h:(mi-d<0?h-1:h), x0=16, L=288, X=v=>x0+L*v/120, y=52; let g=`<line x1="${x0}" y1="${y}" x2="${x0+L}" y2="${y}" stroke="${GX_S}" stroke-width="2.2"/>`;
+      for(let k=0;k<=12;k++){ const maj=k%6===0; g+=`<line x1="${X(k*10)}" y1="${y-(maj?9:5)}" x2="${X(k*10)}" y2="${y+(maj?9:5)}" stroke="${GX_S}" stroke-width="${maj?2:1}"/>`; if(maj) g+=gxT(X(k*10),y+23,`${h0+k/6}시`,10.5); }
+      const a=(h-h0)*60+mi, b=a+(fw?d:-d); g+=`<circle cx="${X(a)}" cy="${y}" r="5" fill="${gxQ}"/>`+gxT(X(a),y+23+13,`${h}시 ${mi}분`,10,gxQ)+`<path d="M${X(a)},${y-10} Q${(X(a)+X(b))/2},${y-40} ${X(b)},${y-10}" fill="none" stroke="#2F6FA8" stroke-width="2"/><path d="M${X(b)},${y-10} l${fw?-7:7},-2 l${fw?3:-3},7 z" fill="#2F6FA8"/>`+gxT((X(a)+X(b))/2,y-30,`${d}분 ${m[4]}`,10.5,'#2F6FA8');
+      return cpWrap(cpRow(gxClock(h,mi))+cpSvg(g,320,y+42),`작은 눈금 한 칸 = 10분`); }
+    if(/^직사각형에는 직각이 몇 개|^정사각형에서 평행한 변은 몇 쌍|^직사각형에서 서로 수직인 변은 몇 쌍/.test(t)) return cpWrap(gxRect(/정사각형/.test(t)?1:1.6,1,{sq:/정사각형/.test(t)}));
+    if(/^직각삼각형에는 직각이 몇 개/.test(t)) return cpWrap(gxTri(90,35,[]));
+    if(/^사다리꼴에서 평행한 변은 몇 쌍/.test(t)) return cpWrap(gxTrap('','',''));
+    if(/한 원에서 지름은 반지름의 몇 배/.test(t)) return cpWrap(gxCircle({d:'지름',r:'반지름'}));
+    if((m=t.match(/오전 (\d+)시부터 오후 (\d+)시까지/))) return cpWrap(gxDay(+m[1],+m[2]+12),'하루 24시간');
+    /* 각도 */ if((m=t.match(/^(\d+)° ([+−]) (\d+)°/))) return cpWrap(cpRow(gxAngle(+m[1],m[1]+'°'),cpOp(m[2]),gxAngle(+m[3],m[3]+'°')));
+    if((m=t.match(/삼각형의 두 각이 (\d+)°, (\d+)°/))||(m=t.match(/두 각이 (\d+)°, (\d+)°인 삼각형/))) return cpWrap(gxTri(+m[1],+m[2],[m[1]+'°',m[2]+'°','?']));
+    if((m=t.match(/세 각이 (\d+)°, (\d+)°, (\d+)°인 삼각형/))) return cpWrap(gxTri(+m[2],+m[3],[m[2]+'°',m[3]+'°',m[1]+'°']));
+    if((m=t.match(/직각삼각형의 한 각이 (\d+)°/))) return cpWrap(gxTri(90,+m[1],['90°',m[1]+'°','?']));
+    if((m=t.match(/두 밑각이 각각 (\d+)°/))) return cpWrap(gxTri(+m[1],+m[1],[m[1]+'°',m[1]+'°','?']));
+    if((m=t.match(/꼭지각이 (\d+)°/))){ const b=(180-+m[1])/2; return cpWrap(gxTri(b,b,['?','?',m[1]+'°']),'이등변삼각형'); }
+    if((m=t.match(/사각형의 세 각이 (\d+)°, (\d+)°, (\d+)°/))) return cpWrap(gxQuad([m[1]+'°',m[2]+'°',m[3]+'°','?']));
+    if(!/삼각형 가와/.test(t)&&(m=t.match(/세 변이 (\d+) cm, (\d+) cm, (\d+) cm인 삼각형/))){ const a=+m[1], b=+m[2], c=+m[3]; const pic=gxTriSides(b,c,a); return pic?cpWrap(pic,`세 변: ${a} cm, ${b} cm, ${c} cm`):''; }
+    if((m=t.match(/한 변이 (\d+) cm인 정삼각형/))) return cpWrap(gxTri(60,60,[]),`정삼각형, 한 변 ${m[1]} cm`);
+    /* 원 */ if((m=t.match(/지름이 (\d+) cm인 원의 반지름/))) return cpWrap(gxCircle({d:m[1]+' cm',r:'?'}));
+    if((m=t.match(/지름이 (\d+) cm인 원을 그리려면 컴퍼스/))) return cpWrap(gxCircle({d:m[1]+' cm',r:'?'}),'컴퍼스를 벌린 길이 = 반지름');
+    if((m=t.match(/선분이 (\d+) cm예요\. 원/))) return cpWrap(gxCircle({r:m[1]+' cm',d:'?'}));
+    if((m=t.match(/원주가 ([\d.]+) cm인 원의 지름/))) return cpWrap(gxCircle({d:'?'}),`원주(둘레) ${m[1]} cm`);
+    if((m=t.match(/반지름이 (\d+) cm인 원의 넓이/))) return cpWrap(gxCircle({r:m[1]+' cm'}));
+    if((m=t.match(/반지름 (\d+) cm인 원 (\d)개를 한 줄로 맞닿게/))){ const n=+m[2]; let g=''; for(let i=0;i<n;i++) g+=`<circle cx="${40+i*68}" cy="42" r="34" fill="${GX_F}" stroke="${GX_S}" stroke-width="2"/><circle cx="${40+i*68}" cy="42" r="2" fill="${GX_S}"/><line x1="${40+i*68}" y1="42" x2="${74+i*68}" y2="42" stroke="#2F6FA8" stroke-width="1.6"/>`; return cpWrap(cpSvg(g+gxT(57,37,m[1]+' cm',10,'#2F6FA8'),12+n*68+2,86)); }
+    /* 직사각형·정사각형 */ if((m=t.match(/한 변이 (\d+) cm인 정사각형의 네 변/))) return cpWrap(gxRect(1,1,{sq:true,wl:m[1]+' cm',hl:m[1]+' cm'}));
+    if((m=t.match(/넓이가 (\d+) cm², 가로가 (\d+) cm인 직사각형의 세로/))) return cpWrap(gxRect(+m[2],+m[1]/+m[2],{wl:m[2]+' cm',hl:'?',inl:`넓이 ${m[1]} cm²`}));
+    if((m=t.match(/^가로 (\d+) (m|cm), 세로 (\d+) (?:m|cm)인 (?:땅|거실 바닥|직사각형 돗자리)/))) return cpWrap(gxRect(+m[1],+m[3],{wl:`${m[1]} ${m[2]}`,hl:`${m[3]} ${m[2]}`}));
+    if((m=t.match(/^(\d+) m²[는은] 몇 cm²/))||/한 변이 1 m인 정사각형 안에 한 변이 1 cm인/.test(t)) return cpWrap(gxRect(1,1,{sq:true,wl:'1 m = 100 cm',hl:'100 cm',inl:'1 m²'}),m?`이런 정사각형이 ${m[1]}개`:'');
+    if((m=t.match(/넓이가 (\d+) cm²이고 밑변이 (\d+) cm인 평행사변형/))) return cpWrap(gxPara(m[2]+' cm','?'),`넓이 ${m[1]} cm²`);
+    if((m=t.match(/넓이가 (\d+) cm²이고 밑변이 (\d+) cm인 삼각형/))) return cpWrap(gxTriArea(m[2]+' cm','?'),`넓이 ${m[1]} cm²`);
+    if((m=t.match(/밑변이 (\d+) cm, 높이가 (\d+) cm이고 나머지 두 변/))) return cpWrap(gxTriArea(m[1]+' cm',m[2]+' cm'));
+    if((m=t.match(/밑변이 (\d+) cm, 옆의 변이 (\d+) cm이고 높이가 (\d+) cm인 평행사변형/))) return cpWrap(gxPara(m[1]+' cm',m[3]+' cm'),`옆의 변 ${m[2]} cm`);
+    if((m=t.match(/넓이가 (\d+) cm²이고 한 대각선이 (\d+) cm인 마름모/))) return cpWrap(gxRhom(m[2]+' cm','?'),`넓이 ${m[1]} cm²`);
+    if((m=t.match(/두 대각선이 (\d+) cm, (\d+) cm인 마름모/))) return cpWrap(gxRhom(m[2]+' cm',m[1]+' cm'));
+    if((m=t.match(/윗변 (\d+) cm, 아랫변 (\d+) cm, 높이 (\d+) cm인 사다리꼴/))) return cpWrap(gxTrap(m[1]+' cm',m[2]+' cm',m[3]+' cm'));
+    if((m=t.match(/윗변 (\d+) cm, 아랫변 (\d+) cm인 사다리꼴의 넓이가 (\d+)/))) return cpWrap(gxTrap(m[1]+' cm',m[2]+' cm','?'),`넓이 ${m[3]} cm²`);
+    /* 입체 */ if((m=t.match(/한 모서리가 (\d+) cm인 정육면체의 (겉넓이|부피)/))) return cpWrap(gxBox(m[1]+' cm',m[1]+' cm',m[1]+' cm',true));
+    if((m=t.match(/가로 (\d+) (c?m), 세로 (\d+) c?m, 높이 (\d+) c?m인 직육면체/))) return cpWrap(gxBox(`${m[1]} ${m[2]}`,`${m[3]} ${m[2]}`,`${m[4]} ${m[2]}`,false));
+    if((m=t.match(/^(\d+) m³[는은] 몇 cm³/))) return cpWrap(gxBox('1 m = 100 cm','100 cm','100 cm',true),`1 m³ 상자가 ${m[1]}개`);
+    if((m=t.match(/가로 (\d+)개, 세로 (\d+)개, (\d+)층 쌓았/))&&+m[1]<=3&&+m[2]<=3&&+m[3]<=4){ try{ const H=Array.from({length:3},(_,r)=>Array.from({length:3},(_,c)=>r>=3-+m[2]&&c<+m[1]?+m[3]:0)); return cpWrap(`<div style="width:170px">${skIsoSvg(H,{s:20,front:false})}</div>`); }catch(e){} }
+    /* 다각형 */ if((m=t.match(/(삼각형|사각형|오각형|육각형)[과와] (삼각형|사각형|오각형|육각형)의 변은 모두/))){ const N={삼각형:3,사각형:4,오각형:5,육각형:6}; return cpWrap(cpRow(gxPoly(N[m[1]]),gxPoly(N[m[2]]))); }
+    if((m=t.match(/삼각형 (\d)개, 사각형 (\d)개/))&&+m[1]+ +m[2]<=5) return cpWrap(cpRow(...Array.from({length:+m[1]},()=>gxPoly(3,{r:34})),...Array.from({length:+m[2]},()=>gxPoly(4,{r:34}))));
+    if((m=t.match(/(오|육|칠|팔)각형의 한 꼭짓점에서 그을 수 있는 대각선/))) return cpWrap(gxPoly({오:5,육:6,칠:7,팔:8}[m[1]],{diagFrom:0}),'주황 점에서 그을 수 있는 대각선');
+    /* 점의 이동 */ if((m=t.match(/점이 왼쪽에서 (\d)번째, 아래에서 (\d)번째 칸/))) return cpWrap(gxDotGrid(+m[1],+m[2],Math.max(6,+m[1]+3)));
+    if((m=t.match(/직선 가와 나 사이 (\d+) cm, 나와 다 사이 (\d+) cm/))){ const a=+m[1], b=+m[2], u=60/Math.max(a,b), y1=16, y2=y1+a*u, y3=y2+b*u; return cpWrap(cpSvg([['가',y1],['나',y2],['다',y3]].map(([n,y])=>`<line x1="24" y1="${y}" x2="230" y2="${y}" stroke="${GX_S}" stroke-width="2"/>`+gxT(12,y+4,n,12)).join('')+`<line x1="120" y1="${y1}" x2="120" y2="${y2}" stroke="#2F6FA8" stroke-dasharray="4 3"/>`+gxT(128,(y1+y2)/2+4,a+' cm',10.5,'#2F6FA8','start')+`<line x1="170" y1="${y2}" x2="170" y2="${y3}" stroke="#3F8F3F" stroke-dasharray="4 3"/>`+gxT(178,(y2+y3)/2+4,b+' cm',10.5,'#3F8F3F','start'),240,y3+16)); }
+    if((m=t.match(/대칭축에서 (\d+) cm 떨어져/))) return cpWrap(cpSvg(`<line x1="120" y1="8" x2="120" y2="92" stroke="${gxQ}" stroke-width="2" stroke-dasharray="6 4"/>`+gxT(120,104,'대칭축',10,gxQ)+`<circle cx="50" cy="50" r="5" fill="${GX_S}"/>`+gxT(50,40,'ㄱ',12)+`<line x1="50" y1="50" x2="120" y2="50" stroke="#2F6FA8" stroke-dasharray="4 3"/>`+gxT(85,64,m[1]+' cm',10.5,'#2F6FA8')+`<circle cx="190" cy="50" r="5" fill="#fff" stroke="${GX_S}" stroke-width="2"/>`+gxT(190,40,'대응점',10)+`<line x1="120" y1="50" x2="190" y2="50" stroke="#2F6FA8" stroke-dasharray="4 3"/>`+gxT(155,64,'?',12,gxQ),240,110));
+    if((m=t.match(/대칭의 중심에서 (\d+) cm 떨어져/))) return cpWrap(cpSvg(`<circle cx="120" cy="50" r="4" fill="${gxQ}"/>`+gxT(120,38,'대칭의 중심',10,gxQ)+`<circle cx="50" cy="70" r="5" fill="${GX_S}"/>`+gxT(42,62,'ㄱ',12)+`<line x1="50" y1="70" x2="190" y2="30" stroke="#2F6FA8" stroke-dasharray="4 3"/>`+gxT(82,76,m[1]+' cm',10.5,'#2F6FA8')+`<circle cx="190" cy="30" r="5" fill="#fff" stroke="${GX_S}" stroke-width="2"/>`+gxT(196,22,'대응점',10)+gxT(158,54,'?',12,gxQ),240,92));
+    return ''; }
+  if(S==='S5'){
+    if((m=t.match(/((?:\d+|□)(?:, (?:\d+|□)){3,6})/))&&!/평균|가 모둠/.test(t)&&/^S5-0[35678]$/.test(ep)){ const it=m[1].split(', '); if(/다음(?:에 올)? 수/.test(t)) it.push('?'); return cpWrap(gxSeq(it)); }
+    if((m=t.match(/^(\d+) ([+−×]) (\d+) = (□|\d+) ([+−×]) (□|\d+)/))&&/[+]/.test(m[2])&&m[5]==='+') return cpWrap(gxBalance([m[1],m[3]],[m[4],m[6]]),'양쪽이 같아야 저울이 수평이에요');
+    if((m=t.match(/(\d+)시간에 (\d+) km를 갔어요/))||(m=t.match(/(\d+) km를 (\d+)시간 동안/))){ const h=/시간에/.test(m[0])?+m[1]:+m[2], km=/시간에/.test(m[0])?+m[2]:+m[1]; return cpWrap(cpTable(['1',String(h)],['?',String(km)],'시간','km')); }
+    if((m=t.match(/넓이 (\d+) km²에 (\d+)명/))) return cpWrap(cpTable(['1',m[1]],['?',m[2]],'km²','명'));
+    if((m=t.match(/털실 (\d+) m가 (\d+)원이면 (\d+) m/))) return cpWrap(cpTable([m[1],m[3]],[m[2],'?'],'m','원'));
+    if((m=t.match(/(\d+)분에 (\d+) L가 나오는 수도에서 (\d+)분/))) return cpWrap(cpTable([m[1],m[3]],[m[2],'?'],'분','L'));
+    if((m=t.match(/페인트 (\d+) L로 벽 (\d+) m²를 칠해요\. 같은 비율로 벽 (\d+) m²/))) return cpWrap(cpTable([m[1],'?'],[m[2],m[3]],'L','m²'));
+    if((m=t.match(/^(\d+|□) : (\d+|□) = (\d+|□) : (\d+|□)/))) return cpWrap(cpTable([m[1],m[3]],[m[2],m[4]],'전항','후항'),'비율이 같은 두 비');
+    if((m=t.match(/(\d+)원짜리(?: 물건| 장난감)?[을를] (\d+)% 할인/))){ const p=+m[2]; return cpWrap(bandSvg([{n:'할인',p,lab:`${p}%`,hi:1},{n:'내는 돈',p:100-p,lab:'?원'}],{cap:`처음 값 ${m[1]}원 = 100%`})); }
+    if((m=t.match(/(소금|설탕) (\d+) g을 물 (\d+) g에/))){ const a=+m[2], b=+m[3], p=Math.round(100*a/(a+b)); return cpWrap(bandSvg([{n:m[1],p,lab:`${a} g`,hi:1},{n:'물',p:100-p,lab:`${b} g`}],{ruler:false,cap:`${m[1]}물 전체 = ${m[1]} + 물`})); }
+    if((m=t.match(/(\d+)명 (?:중|가운데) (\d+)명/))&&+m[1]<=50&&[10,20,25,50].includes(+m[1])){ const N=+m[1], k=+m[2]; let g=''; const per=N<=25?5:10; for(let i=0;i<N;i++) g+=`<circle cx="${12+(i%per)*20}" cy="${12+Math.floor(i/per)*20}" r="8" fill="${i<k?'#F2A65A':'#fff'}" stroke="${GX_S}" stroke-width="1.3"/>`; return cpWrap(cpSvg(g,per*20+6,Math.ceil(N/per)*20+6,220),`${N}명 중 색칠한 ${k}명`); }
+    if((m=t.match(/남학생 (\d+)명, 여학생 (\d+)명/))) return cpWrap(gxBars([+m[1],+m[2]],['남학생','여학생']));
+    if((m=t.match(/빨간 구슬 (\d+)개, 파란 구슬 (\d+)개/))) return cpWrap(gxBalls([['빨간',+m[1]],['파란',+m[2]]]));
+    if((m=t.match(/동생이 (\d+)살일 때 형은 (\d+)살, 동생이 (\d+)살일 때 형은 (\d+)살/))) return cpWrap(cpTable([m[1],m[3],'…'],[m[2],m[4],'…'],'동생','형'));
+    if((m=t.match(/□ = (\d+) → △ = (\d+), □ = (\d+) → △ = (\d+), □ = (\d+) → △ = (\d+)/))) return cpWrap(cpTable([m[1],m[3],m[5],'…'],[m[2],m[4],m[6],'…']),'대응표');
+    return ''; }
+  if(S==='S4'){
+    if(/평균|고르게/.test(t)&&(m=t.match(/(\d+(?:[개층쪽권회점송이]*)?(?:, \d+[개층쪽권회점송이]*){1,5})/))&&!/모둠/.test(t)){ const v=m[1].split(', ').map(x=>parseInt(x)); return cpWrap(gxTowers(v),/고르게/.test(t)?'높은 곳에서 낮은 곳으로 옮겨 고르게':'자료를 막대로 나타냈어요'); }
+    if((m=t.match(/가 모둠 ([\d, ]+) \/ 나 모둠 ([\d, ]+)\./))){ const a=m[1].split(', ').map(Number), b=m[2].split(', ').map(Number); return cpWrap(cpRow(cpCol(gxBars(a),'<span style="font-size:.85rem">가 모둠</span>'),cpCol(gxBars(b),'<span style="font-size:.85rem">나 모둠</span>'))); }
+    if((m=t.match(/(빨간|파란|노란|흰|검은) (?:공|구슬|바둑돌) (\d+)개, (빨간|파란|노란|흰|검은) (?:공|구슬|바둑돌) (\d+)개/))) return cpWrap(gxBalls([[m[1],+m[2]],[m[3],+m[4]]]));
+    if((m=t.match(/(빨간|파란|노란|흰|검은) (?:공|구슬|바둑돌)만 (\d+)개/))) return cpWrap(gxBalls([[m[1],+m[2]]]));
+    if((m=t.match(/(빨간|파란|노란|흰|검은) (?:공|구슬|바둑돌)만 든/))) return cpWrap(gxBalls([[m[1],6]]));
+    if((m=t.match(/당첨 (\d+)장, 꽝 (\d+)장/))){ let g=''; const n=+m[1]+ +m[2]; for(let i=0;i<n;i++) g+=`<rect x="${6+i*27}" y="6" width="23" height="32" rx="4" fill="${i<+m[1]?'#FFE08A':'#eee'}" stroke="${GX_S}"/>`+gxT(17.5+i*27,27,i<+m[1]?'당첨':'꽝',8.5); return cpWrap(cpSvg(g,12+n*27,44,300)); }
+    if((m=t.match(/큰 (?:그림|동그라미)[은는] (\d+)[개명], 작은 (?:그림|동그라미)[은는] (\d+)[개명][^.]*\. 큰 (?:그림|동그라미) (\d+)개와 작은 (?:그림|동그라미) (\d+)개/))) return cpWrap(gxPicto(+m[3],+m[4]),`큰 것 = ${m[1]}, 작은 것 = ${m[2]}`);
+    if((m=t.match(/눈금 한 칸이 (\d+)(명|권)[^.]*막대가 (\d+)칸/))) return cpWrap(gxBarGrid([+m[3]],`한 칸 ${m[1]}${m[2]}`));
+    if((m=t.match(/작은 눈금 (\d+)칸이 (\d+)명이에요\. 작은 눈금 (\d+)칸/))) return cpWrap(gxBarGrid([+m[3]],`${m[1]}칸 = ${m[2]}명`));
+    if((m=t.match(/눈금 한 칸이 (\d+)권인 막대그래프에서 (\S+)[은는] (\d+)칸, (\S+)[은는] (\d+)칸, (\S+)[은는] (\d+)칸/))) return cpWrap(gxBarGrid([+m[3],+m[5],+m[7]],`한 칸 ${m[1]}권`,[m[2],m[4],m[6]]));
+    if((m=t.match(/((?:\d+[일월] \d+ ?(?:도|cm)(?:, )?){3,6})/))){ const it=[...m[1].matchAll(/(\d+[일월]) (\d+)/g)]; return cpWrap(gxLine(it.map(x=>+x[2]),it.map(x=>x[1]))); }
+    if((m=t.match(/([가-힣]+) (\d+)명, ([가-힣]+) (\d+)명, ([가-힣]+) (\d+)명/))) return cpWrap(cpTable([m[1],m[3],m[5]],[m[2],m[4],m[6]],'과일','학생 수'),'표');
+    if((m=t.match(/(\d+)명 중 (\d+)명은 몇 %/))&&[10,20,25,50].includes(+m[1])){ const N=+m[1], k=+m[2], per=N<=25?5:10; let g=''; for(let i=0;i<N;i++) g+=`<circle cx="${12+(i%per)*20}" cy="${12+Math.floor(i/per)*20}" r="8" fill="${i<k?'#F2A65A':'#fff'}" stroke="${GX_S}" stroke-width="1.3"/>`; return cpWrap(cpSvg(g,per*20+6,Math.ceil(N/per)*20+6,220),`${N}명 중 색칠한 ${k}명`); }
+    return ''; }
+  return ''; }
+{ const _cp=cpPic; cpPic=function(ep,t){ if(/^S[456]-/.test(ep)){ if(/어떤 그래프|알맞은 그래프|까닭|뜻은|읽을까요|무엇이라|어떤 선분|이름|옳은|알맞은 말/.test(t)) return ''; let r=''; try{ r=gxPic(ep,t); }catch(e){ r=''; } if(r&&!/<div class="cpa"[^>]*><\/div>|<div class="cpa"[^>]*><div style="font-size/.test(r)) return r; } return _cp(ep,t); }; }
+window._gxPic=gxPic;
