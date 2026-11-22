@@ -40,7 +40,7 @@ const J=(k,d)=>{ try{ const v=localStorage.getItem(k); const x=v?JSON.parse(v):n
 const W=(k,v)=>{ try{ localStorage.setItem(k,JSON.stringify(v)); }catch(e){} };
 const today=()=>{ const d=new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; };
 const BKT={L0:.3,T:.15,S:.1};
-const state=()=>Object.assign({kc:{},kn:{},mis:{},est:{},lvl:null,diagAt:null},J(SK,{}));
+const state=()=>Object.assign({kc:{},kn:{},kw:{},em:{},ec:{},ew:{},mis:{},est:{},lvl:null,diagAt:null},J(SK,{}));
 function did(){ let v=J(DK,null); if(!v||!/^[0-9a-f-]{36}$/.test(v)){ v=(crypto.randomUUID?crypto.randomUUID():'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g,c=>{ const r=crypto.getRandomValues(new Uint8Array(1))[0]&15; return (c==='x'?r:(r&3|8)).toString(16); })); W(DK,v); } return v; }
 const clean=s=>String(s==null?'':s).replace(/[^0-9A-Za-z가-힣ㄱ-ㅎ .:,/%°²³+×÷=−\-~()←→↑↓]/g,'').slice(0,24);
 const plain=s=>String(s||'').replace(/<[^>]*>/g,' ').replace(/\s+/g,' ').trim();
@@ -115,7 +115,8 @@ function rec(q, given, ok){
   // 보기마다 무게가 다르다: 오개념 보기를 골랐으면 원인은 그 오개념이 가리키는 개념 조각에 있으므로 단원 숙달은 약하게, 조각은 세게 깎는다.
   const shield=!ok&&ctxShield(st,m,fk);
   const wk=ok?1:shield?.7:(m&&MISC[m])?.4*pieceL(st,MISC[m][0][0])+.1:(q.fx&&(q.fx[String(given)]||q.fx[gk]))?.3:.7;   // 선수 조각이 이미 비어 있으면 이 단원 숙달은 덜 깎는다
-  if(kc){ st.kc[kc]=bktW(st.kc[kc]==null?BKT.L0:st.kc[kc],ok,G,wk); st.kn[kc]=(st.kn[kc]||0)+1; if(ok&&!nOpt){ st.kw=st.kw||{}; st.kw[kc]=(st.kw[kc]||0)+1; } }
+  if(kc){ st.kc[kc]=bktW(st.kc[kc]==null?BKT.L0:st.kc[kc],ok,G,wk); st.kn[kc]=(st.kn[kc]||0)+1; if(ok&&!nOpt){ st.kw=st.kw||{}; st.kw[kc]=(st.kw[kc]||0)+1; }
+    /* 편(학습 요소)마다 따로 추적: 단원 숙달도만 보면 쉬운 편만 맞혀도 단원이 숙달이 된다 */ st.em=st.em||{}; st.ec=st.ec||{}; st.em[ep]=bktW(st.em[ep]==null?BKT.L0:st.em[ep],ok,G,wk); if(ok){ st.ec[ep]=(st.ec[ep]||0)+1; if(!nOpt){ st.ew=st.ew||{}; st.ew[ep]=(st.ew[ep]||0)+1; } } }
   touchSlot(); if(!shield) pieceUpdate(st,q,m,ok,G,ms,fk); pieceCheck(st,q,ok,m,ms);
   if(q.mis){ for(const c of new Set(Object.values(q.mis))){ const e=st.mis[c]||(st.mis[c]={h:[],n:0,ep:[]}); e.h.push([fk,c===m?1:0,ok?1:0,nOpt||20]); e.h=e.h.slice(-8);
     if(c===m){ e.n++; if(!e.ep.includes(ep)) e.ep.push(ep); e.ep=e.ep.slice(-5); } } }
@@ -137,7 +138,17 @@ function status(code,st){ const e=(st||state()).mis[code]; if(!e||!e.h||!e.h.len
   if(K>=3&&(z1>=4*V1||(acc>=.4&&wrong.length>=3&&z2>=4*Math.max(V2,.01)))) return '확인';
   return z1>=V1?'의심':null; }
 // 문제 3개 미만으로는 숙달·미숙달을 단정하지 않는다.
-function kcStatus(k,st){ const p=st.kc[k], n=(st.kn||{})[k]||0; if(p==null) return st.est[k]?'추정':'모름'; if(n<3) return p>=.4&&st.est[k]?'추정':'연습'; /* 고르기 문제만 연달아 맞혀서는 숙달로 보지 않는다(3지선다 3번 찍어 맞히면 0.94): 직접 쓰거나 조작해 맞힌 적이 있거나, 6문제 이상 풀었을 때만 숙달 */ const solid=((st.kw||{})[k]||0)>=1||n>=6; return p>=.85?(solid?'숙달':'연습'):p>=.4?'연습':'미숙달'; }
+function kcStatus(k,st){ const p=st.kc[k], n=(st.kn||{})[k]||0; if(p==null) return st.est[k]?'추정':'모름'; if(n<3) return p>=.4&&st.est[k]?'추정':'연습'; /* 숙달 판정(11/22, 카본과 맞춤): 단원 숙달도(단원 BKT)만으로는 쉬운 편만 맞혀도 숙달이 되고, 3지선다 3번이면 0.94가 된다.
+     편 통과 = 그 편에서 2번 이상 정답(그중 한 번은 직접 쓰거나 조작한 답; 고르기 문제뿐인 편은 3번) + 편 숙달도 0.65 이상
+     단원 숙달 = 모든 편 통과 + 편 숙달도 평균 0.8 이상 */
+  if(n>=3&&epHoles(k,st).length===0&&kcMean(k,st)>=.8) return '숙달'; return p>=.4?'연습':'미숙달'; }
+let _EPW=null; function epHasWrite(ep){ if(!_EPW) _EPW={}; if(_EPW[ep]==null){ let w=0; for(const g of (G36[ep]||[])){ try{ const q=g(); if(q&&(q.manip||q.onMount||!(q.opts&&q.opts.length))){ w=1; break; } }catch(e){} } _EPW[ep]=w; } return _EPW[ep]; }
+function epPass(e,st){ const c=(st.ec||{})[e]||0, w=(st.ew||{})[e]||0, m=(st.em||{})[e]; return m!=null&&m>=.65&&(epHasWrite(e)?(c>=2&&w>=1):c>=3); }
+function kcMean(k,st){ const eps=epsOf(k).filter(e=>(G36[e]||[]).length); if(!eps.length) return 0; return eps.reduce((a,e)=>a+((st.em||{})[e]??.3),0)/eps.length; }
+/* 단원 안에서 아직 통과하지 못한 편 */
+function epHoles(k,st){ return epsOf(k).filter(e=>(G36[e]||[]).length&&!epPass(e,st)); }
+/* 단원에서 다음에 낼 편: 구멍인 편 먼저(앞 편부터), 없으면 편 숙달도가 낮은 쪽 */
+function nextEp(k,st){ const eps=epsOf(k).filter(e=>(G36[e]||[]).length); if(!eps.length) return null; const h=epHoles(k,st); if(h.length) return h[Math.random()<.75?0:Math.floor(Math.random()*h.length)]; const em=st.em||{}; return eps.slice().sort((a,b)=>(em[a]??.3)-(em[b]??.3))[Math.floor(Math.random()*Math.min(3,eps.length))]; }
 function report(){ const st=state(); const mis=Object.keys(st.mis).map(c=>({c,s:status(c,st),n:st.mis[c].n,ep:st.mis[c].ep||[]})).filter(x=>x.s&&MIS[x.c]).sort((a,b)=>(a.s==='확인'?0:1)-(b.s==='확인'?0:1)||b.n-a.n);
   return {mis, kc:Object.keys(KCN).map(k=>({k,s:kcStatus(k,st),p:st.kc[k]}))}; }
 
@@ -400,7 +411,7 @@ function slotPage(ask,pickA){ hush(); app.className='wrap'; const cur=curSlot(),
 function exportAll(){ const o={}; try{ Object.keys(localStorage).filter(k=>k.startsWith('dotori-')).forEach(k=>o[k]=localStorage.getItem(k)); }catch(e){} return JSON.stringify(o); }
 function importAll(txt){ let o; try{ o=JSON.parse(txt); }catch(e){ return false; } if(!o||typeof o!=='object') return false; const ks=Object.keys(o).filter(k=>k.startsWith('dotori-')&&typeof o[k]==='string'); if(!ks.length) return false;
   try{ Object.keys(localStorage).filter(k=>k.startsWith('dotori-')).forEach(k=>localStorage.removeItem(k)); ks.forEach(k=>localStorage.setItem(k,o[k])); }catch(e){ return false; } return true; }
-window.KT={probePool,probeTops,qInfo,bestQ,slotPage,switchSlot,curSlot,slotName,knownSlots,exportAll,importAll,checkPieces,pieceStage,CPL,CPC,MISC,weakPieces,state,gradePage:g=>gradePage(g),startQuick,startDaily,pref,setPref,rec:(q,g,ok)=>(q&&q._e!=null?recEP:rec)(q,g,ok),factKey,dueFacts,startReview,report,status,epKC,MIS,LADDER,regen,formsOf,startDiag,startFocus,teacherPage,course};
+window.KT={epHoles,nextEp,epPass,kcMean,probePool,probeTops,qInfo,bestQ,slotPage,switchSlot,curSlot,slotName,knownSlots,exportAll,importAll,checkPieces,pieceStage,CPL,CPC,MISC,weakPieces,state,gradePage:g=>gradePage(g),startQuick,startDaily,pref,setPref,rec:(q,g,ok)=>(q&&q._e!=null?recEP:rec)(q,g,ok),factKey,dueFacts,startReview,report,status,epKC,MIS,LADDER,regen,formsOf,startDiag,startFocus,teacherPage,course};
 function myBadge(){ try{ let b=document.getElementById('kt-me'); const id=curSlot();
   if(id==='0'){ if(b) b.remove(); _meEl=null; return; }
   if(!b) b=_meEl; if(!b){ b=document.createElement('button'); b.id='kt-me'; b.type='button'; document.body.appendChild(b); b.onclick=()=>slotPage(false); } _meEl=b;

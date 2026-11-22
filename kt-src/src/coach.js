@@ -11,9 +11,14 @@ function sameFormQ(q,code){ for(let t=0;t<8;t++){ let n=null;
   /* 같은 꼴이 늘 같은 문제를 내면 같은 편의 다른 꼴에서 고른다 */
   try{ const ep=q._ep, F=ep&&G36[ep]; if(F) for(const i of shuffle(F.map((_,k)=>k))){ if(i===(q._ti!=null?q._ti:q._ei)) continue; const n=F[i](); if(!n||n.manip||n.onMount||n.write!==q.write) continue; if(code&&!(n.mis&&Object.values(n.mis).includes(code))) continue; n._ep=ep; n._ti=i; n._scaf=1; return n; } }catch(e){}
   return null; }
-function ladderAfter(q,ok,m){ if(!S||!S.acts||S.diag||q.diag||q._probe||q._scaf||q._chk) return; if(S._ld==null){ S._ld={n:0,pc:{},run:0,done:{}}; }
+function ladderAfter(q,ok,m){ if(!S||!S.acts||S.diag||S.diagRun||q._probe||q._scaf||q._chk) return;   /* q.diag는 MC·WM으로 만든 문제마다 붙는 표시라 여기서 거르면 사다리가 거의 안 뜬다 → 수준 찾기 중(S.diagRun)만 거름 */ if(S._ld==null){ S._ld={n:0,pc:{},run:0,done:{}}; }
   const L=S._ld; if(q._firstSeen) return; q._firstSeen=1;
-  if(ok){ L.run=0; return; } L.run++;
+  if(ok){ L.run=0; return; } L.run++; L.wr=(L.wr||0)+1;
+  /* 갇힌 학생 넘기기(11/22): 한 세트에서 첫 시도 오답이 4번이면, 남은 '새 내용' 문제를 같은 영역의 앞 단원(선수 내용) 문제로 바꿔 끝까지 풀고 나가게 한다. 덧붙이는 문제도 더 넣지 않는다. */
+  if(L.wr>=4&&!L.eased){ L.eased=1; L.n=9; try{ const st=state(); for(let j=S.i+1;j<S.acts.length;j++){ const a=S.acts[j]; if(a.kind!=='q'||!a.q||!a.q._new||!a.q._ep) continue; const k=epKC(a.q._ep), s0=Object.keys(LADDER).find(x=>LADDER[x].includes(k)); if(!s0) continue; const i0=LADDER[s0].indexOf(k), pk=i0>0?LADDER[s0][i0-1]:k, eps=epsOf(pk).filter(e=>e!==a.q._ep&&(G36[e]||[]).length); if(!eps.length) continue; const done=eps.filter(e=>((st.ec||{})[e]||0)>=1), pool=done.length?done:eps.slice(0,2); const nq=bestQ([pool[Math.floor(Math.random()*pool.length)]]); if(nq){ nq._eased=1; a.q=nq; } }
+      /* 세트를 줄임: 선수 내용 2문제만 더 풀고 끝(성공 경험으로 마무리) */ let keep=0; for(let j=S.i+1;j<S.acts.length;j++){ const a=S.acts[j]; if(a.kind==='q'&&a.q&&a.q._eased){ keep++; if(keep>=2){ S.acts.length=j+1; break; } } }
+      S._eased=1; }catch(e){} return; }
+  /* 선수 내용에서도 두 번 더 틀리면 남은 문제를 접고 결과로 */ if(L.eased&&q._eased){ L.ew=(L.ew||0)+1; if(L.ew>=2){ try{ S.acts.length=S.i+1; }catch(e){} } return; }
   const c=m&&typeof MISC!=='undefined'&&MISC[m]?MISC[m][0][0]:null; if(c){ L.pc[c]=(L.pc[c]||0)+1; L.last=c; }
   if(L.n>=2) return; let why=null, pc=null;
   if(c&&L.pc[c]>=2&&!L.done[c]&&KCARDS[c]){ why='ladder'; pc=c; }
@@ -128,17 +133,19 @@ function passPage(g0){ if(typeof S!=='undefined'&&S) S.idle=true; try{ hush(); }
   const gOf=k=>+((k.match(/^K[A-Z](\d)/)||[])[1]||0), all=Object.keys(LADDER).flatMap(s=>LADDER[s].map(k=>[s,k])), grades=[1,...new Set(all.map(x=>gOf(x[1])))].filter(Boolean).sort();
   let g=+g0||pref().band||grades[0]; if(!grades.includes(g)) g=grades[0];
   if(g===1){ /* 1~2학년 내용은 편마다 8점 이상이면 익힌 것으로 */ let best={}; try{ best=load(); }catch(e){} const n=EPO.filter(e=>(best['EP'+e]??-1)>=8).length; return passDraw(g,grades,n,EPO.length,'',st); }
-  const mine=all.filter(x=>gOf(x[1])===g), ok=mine.filter(x=>kcStatus(x[1],st)==='숙달'), pass=mine.length>0&&ok.length===mine.length;
+  const mine=all.filter(x=>gOf(x[1])===g), ok=mine.filter(x=>kcStatus(x[1],st)==='숙달');
   const secs=Object.keys(LADDER).map(s=>{ const ks=mine.filter(x=>x[0]===s); if(!ks.length) return ''; return `<div class="kt-sec">${SNAME[s]}</div><div>${ks.map(([_,k])=>{ const m=kcStatus(k,st)==='숙달'; return `<span class="kt-kc ${m?'kt-m':'kt-u'}">${m?'✔':'○'} ${KCN[k]}</span>`; }).join('')}</div>`; }).join('');
-  return passDraw(g,grades,ok.length,mine.length,secs,st); }
-function passDraw(g,grades,nOk,nAll,secs,st){ const pass=nAll>0&&nOk===nAll, gn=x=>x===1?'1~2학년':x+'학년';
+  /* 학년 통과(카본과 맞춤): 한 단원에 막혀 학년 전체가 묶이지 않게 — 단원의 85% 이상 숙달 + 남은 단원도 편 숙달도 평균 0.6 이상 */
+  const need=Math.ceil(mine.length*.85), rest=mine.filter(x=>kcStatus(x[1],st)!=='숙달'), pass=mine.length>0&&ok.length>=need&&rest.every(x=>kcMean(x[1],st)>=.6);
+  return passDraw(g,grades,ok.length,mine.length,secs,st,pass,need); }
+function passDraw(g,grades,nOk,nAll,secs,st,pass0,need){ const pass=pass0==null?(nAll>0&&nOk===nAll):pass0, gn=x=>x===1?'1~2학년':x+'학년';
   const d=new Date(), today=`${d.getFullYear()}.${d.getMonth()+1}.${d.getDate()}.`;
   app.innerHTML=`<div class="top"><button class="back" id="back">← 처음</button><div class="crumb">통과 확인</div><span style="width:70px"></span></div>
     <div class="stage" style="text-align:center">
       <div style="display:flex;gap:6px;justify-content:center;flex-wrap:wrap;margin-bottom:12px">${grades.map(x=>`<button class="kt-opt${x===g?' on':''}" data-pg="${x}">${gn(x)}</button>`).join('')}</div>
       <div id="kt-pass" class="${pass?'ok':''}" style="margin:6px auto 4px;width:210px;height:210px;border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;border:9px ${pass?'solid #D0443A':'dashed #CDBBA0'};color:${pass?'#D0443A':'#9A8468'};font-family:Jua,sans-serif;${pass?'transform:rotate(-8deg);':''}background:#fff">
         <div style="font-size:1.25rem">${gn(g)}</div><div style="font-size:${pass?'3.4rem':'2rem'};line-height:1.15">${pass?'통과':'도전 중'}</div><div style="font-size:1.05rem">${nOk} / ${nAll}</div></div>
-      <p style="font-size:.95rem;color:var(--ink-soft);margin:8px 0 12px">${today}${slotName(curSlot())?' · '+slotName(curSlot()):''} · ${pass?'이 학년 내용을 모두 익혔어요.':'✔ 표시가 모두 채워지면 통과예요.'}</p>
+      <p style="font-size:.95rem;color:var(--ink-soft);margin:8px 0 12px">${today}${slotName(curSlot())?' · '+slotName(curSlot()):''} · ${pass?'이 학년 내용을 익혔어요.':(need&&need<nAll?`✔ 표시가 ${need}개 이상이고 남은 것도 어느 정도 익히면 통과예요.`:'✔ 표시가 모두 채워지면 통과예요.')}</p>
       <div style="text-align:left">${secs}</div>
       <p style="font-size:.82rem;color:var(--ink-soft);margin-top:14px;text-align:left">기록은 이 기기 안에만 있어요. 이름이나 번호를 받지 않고, 어디로도 보내지 않아요.</p>
     </div>`;

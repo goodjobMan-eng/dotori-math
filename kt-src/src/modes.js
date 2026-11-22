@@ -72,7 +72,7 @@ function startDaily(opt){ const P=pref(); if(!P.band) return bandPage(startDaily
   else { const st=state(); const ck=checkPieces(st)[0]; if(ck) checkActs(B,ck.c); W(SK,st); const wp=weakPieces(st)[0]; if(wp){ const L=lecPlan(st,wp.c), n0=B.acts.length; video=pieceVideo(wp.c,L); pieceActs(B,Math.max(n0+2,Math.ceil(N*RV)),wp.c); if(L.mr.length<2&&!L.m){ B.acts.slice(n0,n0+2).forEach(a=>{ a.q._arm=L.arm; a.q._lec=wp.c; }); L.m=1; } W(SK,st); } misActs(B,Math.max(B.acts.length,Math.ceil(N*RV)));
     if(!cont){ const room=Math.min((st.probeN||0)<3?3:2,Math.floor(N/2)-B.acts.length); let k=0; for(const c of probeTops(st)){ if(k>=room) break; const q=probeQ(st,c); if(q){ B.push(q); k++; } } if(k){ st.probeN=(st.probeN||0)+1; W(SK,st); } }
     const fr=frontier(st);
-    while(B.acts.length<N&&g++<N*10){ const eps=epsOf(fr[g%fr.length]); if(eps.length) B.push(qFromEp36(eps[rnd(0,eps.length-1)]),'_new'); } }
+    while(B.acts.length<N&&g++<N*10){ const ep=nextEp(fr[g%fr.length],st); if(ep) B.push(qFromEp36(ep),'_new'); } }
   runSet(P.band===1?B.acts:shuffle(B.acts),cont?'계속 풀기':'오늘의 문제',{kt:'daily'},video); }
 function finishDaily(S0){ const st=state(), t=dstr(Date.now());
   if(!st.daily||st.daily.d!==t){ st.streak=(st.daily&&st.daily.d===dstr(Date.now()-864e5))?(st.streak||0)+1:1; st.daily={d:t}; W(SK,st); }
@@ -86,7 +86,10 @@ function ktResult(S0){ const box=document.querySelector('.result'); if(!box) ret
     box.querySelector('#nextbtn')?.remove(); const ag=document.getElementById('again'), li=document.getElementById('list');
     if(S0.kt==='daily') finishDaily(S0);
     if(ag){ ag.textContent=S0.kt==='quick'?'5문제 더':S0.kt==='hard'?'도전 문장제 더 풀기':'더 풀기'; ag.onclick=S0.kt==='quick'?startQuick:S0.kt==='hard'?hardPage:()=>startDaily({cont:true}); if(S0.kt==='daily') ag.textContent='계속 풀기'; }
-    if(li){ li.textContent='그만하기'; li.onclick=home; } }
+    if(li){ li.textContent='그만하기'; li.onclick=home; }
+    try{ /* 갇혀서 선수 내용으로 바꿔 준 세트: 점수보다 다진 것을 말해 준다. 거의 다 맞힌 세트: 도전 문장제로 잇는 단추 */
+      if(S0._eased) box.insertAdjacentHTML('afterbegin','<p class="kt-ease" style="font-family:Jua,sans-serif;color:#B5541A;margin:0 0 8px">끝까지 푼 것만으로도 오늘 수학 힘이 자랐어요. 앞에서 배운 내용을 다시 다졌으니, 다음에 이어서 도전해요!</p>');
+      const okN=(S0.results||[]).filter(x=>x===true).length; if(S0.kt==='daily'&&!S0._eased&&okN>=Math.ceil(n*.9)&&ag&&!document.getElementById('kt-chal')&&pref().band>=3){ ag.insertAdjacentHTML('afterend',' <button class="next" id="kt-chal" style="margin-left:6px">도전 문장제</button>'); document.getElementById('kt-chal').onclick=hardPage; } }catch(e){} }
   const w=S0._wrong||[];
   if(pref().why&&w.length){ box.insertAdjacentHTML('beforeend',`<div style="text-align:left;margin-top:16px"><div class="kt-sec">틀린 문제 돌아보기</div><ul class="recent kt-list">${w.slice(0,10).map(x=>`<li><b>${esc(x.q)}</b><div class="kt-ex">내 답 <b>${esc(x.g||'?')}</b> → 정답 <b>${esc(x.a)}</b></div>${x.tip?`<div class="kt-tip">${x.tip}</div>`:''}</li>`).join('')}</ul></div>`); } }
 
