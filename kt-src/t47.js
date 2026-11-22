@@ -1,0 +1,16 @@
+const { chromium } = require('playwright');
+// 1학년 길이 비교 조작: 처음에는 짧은 막대의 오른쪽 끝이 더 멀리(함정), 오른쪽 끝만 보고 고르면 G1-05, 끌어서 맞출 수 있는지
+(async()=>{ const b=await chromium.launch(); const p=await b.newPage({viewport:{width:390,height:820}}); const errs=[]; p.on('pageerror',e=>errs.push(e.message)); await p.goto('file://'+process.cwd()+'/out/index.html'); await p.waitForTimeout(1500);
+ let trap=0, n=0; for(let k=0;k<40;k++){ const r=await p.evaluate(()=>{ const F=G36['S6-07']; const g=F[F.length-1-(Math.random()<.5?1:0)]; const q=g(); const M=q.manip; const s=M.state().split('@')[1].split(',').map(Number); const L=M._L, lon=M._lon; const R=s.map((v,k)=>v+L[k]); const md=/짧은/.test(q.q)?'s':'l'; const far=md==='l'?R.indexOf(Math.max(...R)):R.indexOf(Math.min(...R)); return {far,lon}; }); n++; if(r.far!==r.lon) trap++; }
+ console.log('함정 배치', trap+'/'+n); if(trap!==n) errs.push('함정이 아닌 배치');
+ await p.evaluate(()=>{ localStorage.clear(); KT.setPref({band:1}); const ep='S6-07'; const qq=G36[ep][G36[ep].length-(window.__multi?1:2)](); S={mode:'ep36',ep,ui:UNITS36.findIndex(u=>u.eps.includes(ep)),acts:[{kind:'q',q:qq},{kind:'q',q:qq}],i:0,results:[],tries:0,steps:[{kind:'acts'}],si:0,title:'t'}; runAct(); window.__q=qq; });
+ await p.screenshot({path:'/tmp/t47a.png'});
+ const r1=await p.evaluate(()=>{ const M=window.__q.manip; const wrong=1-M._lon; document.querySelector(`button[data-p="${wrong}"]`).click(); return M.mcode(); }); console.log('오른쪽 끝만 보고 →', r1); if(r1!=='G1-05') errs.push('G1-05 아님');
+ const svg=await p.$('svg.malign'); const bb=await svg.boundingBox(); const s0=await p.evaluate(()=>window.__q.manip.state()); const sc=bb.width/370;
+ const lon=await p.evaluate(()=>window.__q.manip._lon); const y=bb.y+(lon===0?30:72)*sc; const st=await p.evaluate(()=>window.__q.manip.state().split('@')[1].split(',').map(Number)); const sx=bb.x+(10+st[1-lon]*24+30)*sc;
+ const yy=bb.y+((1-lon)===0?30:72)*sc; await p.mouse.move(sx,yy); await p.mouse.down(); await p.mouse.move(sx-st[1-lon]*24*sc+24*sc,yy,{steps:8}); await p.mouse.up();
+ const s1=await p.evaluate(()=>window.__q.manip.state()); console.log('끌기', s0,'→',s1); if(s0===s1) errs.push('막대가 안 움직임'); await p.screenshot({path:'/tmp/t47b.png'});
+ const ok=await p.evaluate(()=>{ const M=window.__q.manip; document.querySelector(`button[data-p="${M._lon}"]`).click(); return M.check(); }); if(!ok) errs.push('정답 안 됨');
+ await p.evaluate(()=>{ window.__multi=1; localStorage.clear(); const ep='S6-07'; const qq=G36[ep][G36[ep].length-1](); S={mode:'ep36',ep,ui:UNITS36.findIndex(u=>u.eps.includes(ep)),acts:[{kind:'q',q:qq},{kind:'q',q:qq}],i:0,results:[],tries:0,steps:[{kind:'acts'}],si:0,title:'t'}; runAct(); window.__q=qq; }); await p.screenshot({path:'/tmp/t47c.png'});
+ const r3=await p.evaluate(()=>{ const M=window.__q.manip; const s=M.state().split('@')[1].split(',').map(Number), L=M._L, R=s.map((v,k)=>v+L[k]); const md=/짧은/.test(window.__q.q)?'s':'l'; const far=md==='l'?R.indexOf(Math.max(...R)):R.indexOf(Math.min(...R)); document.querySelector(`button[data-p="${far}"]`).click(); return {n:L.length,code:M.mcode(),btn:document.querySelectorAll('button[data-p]').length}; }); console.log('여러 막대', JSON.stringify(r3)); if(r3.code!=='G1-05'||r3.btn!==r3.n) errs.push('여러 막대 G1-05');
+ console.log('errors',errs); await b.close(); })();

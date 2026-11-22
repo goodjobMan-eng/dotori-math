@@ -313,7 +313,7 @@ for _k in ["return CF('모양의 규칙을 보고 다음", "return CF('색깔 �
 _i=h.index("const seq=Array.from({length:len},(_,i)=>({s:sh[i%p],c:cl[0]}));"); _j=h.index("\n",_i); h=h[:_i]+h[_i:_j].replace("itemsVis(seq)","seqVis(seq)")+h[_j:]
 h = h.replace("return CF('색깔 규칙을 보고 다음 색은?',itemsVis(seq)","return CF('색깔 규칙을 보고 다음 색은?',seqVis(seq)").replace("return CF('다음에 올 것은?',itemsVis(seq)","return CF('다음에 올 것은?',seqVis(seq)")
 _g=".withadult{"; assert h.count(_g)==1
-h = h.replace(_g, ".nw{white-space:nowrap}.seqrow{display:flex;flex-wrap:nowrap;justify-content:center;align-items:center;gap:3px;margin:10px auto;width:100%;max-width:100%}.seqrow .seqit{flex:0 1 calc((100% - 3px*(var(--n) - 1))/var(--n));max-width:40px;aspect-ratio:1;display:flex;align-items:center;justify-content:center}.seqrow .seqit svg{width:100%;height:100%}.seqrow .seqq{border:2.5px dashed #E8963C;border-radius:9px;font-family:Jua,sans-serif;font-size:1.3rem;color:#E8963C;box-sizing:border-box}\n"+_g)
+h = h.replace(_g, ".nw{white-space:nowrap}.objrow{display:flex;justify-content:center;align-items:flex-end;gap:14px;flex-wrap:wrap;margin:8px auto}.objrow figure{margin:0;display:flex;flex-direction:column;align-items:center;gap:4px}.objrow figcaption{font-family:Jua,sans-serif;font-size:.95rem;color:#4A2E14}.objimg{height:auto;display:block}.objtag{position:absolute;width:26px;height:26px;border-radius:50%;background:#FFF3C4;border:2px solid #B5701F;font-family:Jua,sans-serif;font-size:1rem;line-height:22px;text-align:center;color:#4A2E14}table.hund td{padding:4px 5px;font-size:.85rem;min-width:24px}.seqrow{display:flex;flex-wrap:nowrap;justify-content:center;align-items:center;gap:3px;margin:10px auto;width:100%;max-width:100%}.seqrow .seqit{flex:0 1 calc((100% - 3px*(var(--n) - 1))/var(--n));max-width:40px;aspect-ratio:1;display:flex;align-items:center;justify-content:center}.seqrow .seqit svg{width:100%;height:100%}.seqrow .seqq{border:2.5px dashed #E8963C;border-radius:9px;font-family:Jua,sans-serif;font-size:1.3rem;color:#E8963C;box-sizing:border-box}\n"+_g)
 # '어른과 함께 읽어요' 문구 자체를 없앤다(꺼 둔 코드도 남기지 않음)
 h = h.replace("if(false) vz.insertAdjacentHTML('afterbegin','<div class=\"withadult sm\">👨‍👩‍👧 어른과 함께 읽어요</div>');","")
 h = h.replace("${false?'<div class=\"withadult\">👨‍👩‍👧 글이 어려우면 어른과 함께 읽어요</div>':''}","")
@@ -322,6 +322,26 @@ h = h.replace("${false?'<div class=\"withadult\">👨‍👩‍👧 글이 어�
 _g='<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">'; assert h.count(_g)==1
 h = h.replace(_g, _g+'<meta name="color-scheme" content="only light"><meta name="darkreader-lock">')
 h = h.replace('</head>', '<style id="kt-light">:root{color-scheme:only light}html,body{background-color:#FFF7EC}</style></head>',1)
+# --- 교수님 11/22: 1~2학년 화면의 도토·람이·할머니(·청이)도 시즌1 그림 대신 시즌3 그림(JU)으로 ---
+import json as _json
+_i=h.index('const JU={'); _d=0
+for _k in range(_i+9,len(h)):
+    if h[_k]=='{': _d+=1
+    elif h[_k]=='}':
+        _d-=1
+        if _d==0: _j=_k; break
+_JU=_json.loads(h[_i+9:_j+1])
+_ai=h.index('const A={'); _aj=h.index('};',_ai); _A=_json.loads(h[_ai+8:_aj+1])
+for _n in ['도토','람이','할머니','청이']:
+    for _m,_p in [('기본','기본'),('기쁨','자세_박수'),('놀람','자세_시무룩'),('가리키기','자세_가리키기_오른쪽')]:
+        _k=_n+'_'+_m
+        if _k in _A and _p in _JU.get(_n,{}): _A[_k]=_JU[_n][_p]
+h=h[:_ai+8]+_json.dumps(_A,ensure_ascii=False)[:-1]+'}'+h[_aj+1:]
 open('out/index.html', 'w', encoding='utf-8').write(h)
 print('built', len(out))
 
+
+# 물건 그림(Flow로 그림, img/obj) — 문서와 함께 out/img로
+import shutil as _sh, os as _os
+if _os.path.isdir('img'):
+    _sh.rmtree('out/img',ignore_errors=True); _sh.copytree('img','out/img')

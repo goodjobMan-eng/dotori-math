@@ -1377,3 +1377,100 @@ const EXPR_RE=/((?:\d[\d,.]*|□|\?)(?:\s*[+\-−×÷=<>:]\s*(?:\d[\d,.]*|□|\?
 function nowrapExpr(q){ if(!q||typeof q.q!=='string'||q.q.indexOf('class="nw"')>=0) return q;
   q.q=q.q.split(/(<[^>]+>)/).map(seg=>seg.startsWith('<')?seg:seg.replace(EXPR_RE,m=>/[+\-−×÷=<>:]/.test(m)&&m.length>4?`<span class="nw">${m}</span>`:m)).join(''); return q; }
 { const _t=tagQ; tagQ=function(ep,i,q){ q=_t(ep,i,q); try{ q=nowrapExpr(q); }catch(e){} return q; }; }
+
+
+// ===== 3-44. 그림 없이 글로만 상황을 묻던 문제에 그림 붙이기 (교수님 11/22) =====
+// 원칙(교수님): 에셋에 그 수업 그림이 있으면 쓰고, 없으면 Flow로 그린다. 그림 때문에 오개념이 생기지 않게 구성한다.
+//  - 물건 그림(Flow, img/obj/*.webp): 실제 크기 순서를 지킨다(기차 > 자전거, 코끼리 > 고양이 > 토끼). 같은 크기 칸에 넣으면 '그림 크기 = 실제 크기'로 잘못 읽을 수 있어서.
+//  - 저울의 두 공은 크기를 같게(크기가 아니라 무게를 보게), 물 높이를 견주는 두 컵은 똑같은 컵.
+//  - 값이 바뀌는 그림(자 눈금, 시계, 수 배열표, 표·그래프, 모양 늘어놓기)은 코드로 정확히 그린다.
+const OBJ=(n,w)=>`<img class="objimg" src="img/obj/${n}.webp" alt="" style="width:${w||72}px">`;
+const OBJN={'축구공':'soccer','구슬':'marble','수박':'watermelon','주사위':'dice','휴지 상자':'tissuebox','책':'book','풀통':'gluestick','음료수 캔':'can','휴지심':'tube','북':'drum','시계':'clock','삼각김밥':'gimbap','공책':'notebook','우산':'umbrella','지우개':'eraser','자전거':'bicycle','기차':'train','욕조':'bathtub','숟가락':'spoon','컵':'cup','코끼리':'elephant','고양이':'cat','토끼':'rabbit','손수건':'handkerchief','이불':'blanket','주전자':'kettle','물병':'bottle'};
+// 실제 크기 순서를 지키는 너비(px)
+const OBJW={train:230,bicycle:80,umbrella:150,eraser:30,bathtub:170,cup:42,spoon:40,elephant:170,cat:58,rabbit:44,blanket:180,handkerchief:44};
+const objRow=(names)=>`<div class="objrow">${names.map(n=>{ const k=OBJN[n]; return k?`<figure style="width:96px"><div style="height:78px;display:flex;align-items:center;justify-content:center"><img class="objimg" src="img/obj/${k}.webp" alt="" style="max-width:84px;max-height:74px;width:auto;height:auto"></div><figcaption>${n}</figcaption></figure>`:''; }).join('')}</div>`;   /* 같은 크기 칸에 맞춰 넣어, 그림 크기가 아니라 실제 물건을 떠올려 견주게 */
+const sh3=()=>`<div class="objrow">${[['상자 모양','tissuebox'],['둥근기둥 모양','can'],['공 모양','soccer']].map(([t,k])=>`<figure>${OBJ(k,64)}<figcaption>${t}</figcaption></figure>`).join('')}</div>`;
+const flat3=()=>`<div class="objrow">${[['동그라미','<circle cx="30" cy="30" r="24"/>'],['세모','<polygon points="30,6 55,52 5,52"/>'],['네모','<rect x="7" y="7" width="46" height="46"/>']].map(([t,g])=>`<figure><svg width="60" height="60" viewBox="0 0 60 60" fill="#FFE3B0" stroke="#B5701F" stroke-width="3">${g}</svg><figcaption>${t}</figcaption></figure>`).join('')}</div>`;
+function rulerSvg(a,b,name){ const u=26, W=12*u+30; let g=`<rect x="10" y="40" width="${11*u+10}" height="34" rx="4" fill="#FFF3C4" stroke="#B5701F" stroke-width="2"/>`;
+  for(let i=0;i<=11;i++){ g+=`<line x1="${15+i*u}" y1="40" x2="${15+i*u}" y2="${i%5===0?58:54}" stroke="#4A2E14" stroke-width="1.5"/><text x="${15+i*u}" y="70" font-size="12" text-anchor="middle" fill="#4A2E14">${i}</text>`; for(let j=1;j<10&&i<11;j++) g+=`<line x1="${15+i*u+j*u/10}" y1="40" x2="${15+i*u+j*u/10}" y2="${j===5?50:46}" stroke="#4A2E14" stroke-width=".7"/>`; }
+  g+=`<rect x="${15+a*u}" y="10" width="${(b-a)*u}" height="24" rx="5" fill="${name==='못'?'#B9BEC6':'#F7B6C2'}" stroke="#6B3E1C" stroke-width="2"/><line x1="${15+a*u}" y1="34" x2="${15+a*u}" y2="40" stroke="#D45F16" stroke-dasharray="2 2"/><line x1="${15+b*u}" y1="34" x2="${15+b*u}" y2="40" stroke="#D45F16" stroke-dasharray="2 2"/>`;
+  return `<svg viewBox="0 0 ${W} 80" width="${W}" style="max-width:100%">${g}</svg>`; }
+function clockSvg(h,m){ const P=(deg,r)=>[60+r*Math.sin(deg*Math.PI/180),60-r*Math.cos(deg*Math.PI/180)]; let g=`<circle cx="60" cy="60" r="54" fill="#fff" stroke="#6B3E1C" stroke-width="5"/>`;
+  for(let k=1;k<=12;k++){ const [x,y]=P(k*30,42); g+=`<text x="${x}" y="${y+5}" font-size="14" text-anchor="middle" fill="#4A2E14">${k}</text>`; } for(let k=0;k<60;k++){ const [x1,y1]=P(k*6,52), [x2,y2]=P(k*6,k%5?49:46); g+=`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="#4A2E14" stroke-width="${k%5?1:2}"/>`; }
+  const [hx,hy]=P(((h%12)+m/60)*30,26), [mx,my]=P(m*6,40); return `<svg viewBox="0 0 120 120" width="140">${g}<line x1="60" y1="60" x2="${hx}" y2="${hy}" stroke="#4A2E14" stroke-width="6" stroke-linecap="round"/><line x1="60" y1="60" x2="${mx}" y2="${my}" stroke="#D45F16" stroke-width="3.5" stroke-linecap="round"/><circle cx="60" cy="60" r="4" fill="#4A2E14"/></svg>`; }
+function hundredTable(r0,r1,mark,hi,upto){ let t='<table class="dt num hund">'; for(let r=r0;r<=r1;r++){ t+='<tr>'; for(let c=1;c<=10;c++){ const n=r*10+c; const shown=mark&&mark[n]!=null?mark[n]:(upto&&n>upto?'':n); t+=`<td${hi&&hi.includes(n)?' style="background:#FFD08A"':''}>${shown}</td>`; } t+='</tr>'; } return t+'</table>'; }
+const symRow=(arr)=>`<div class="seqrow" style="--n:${arr.length}">${arr.map(x=>`<span class="seqit${x==='□'||x==='?'?' seqq':''}" style="font-size:1.5rem">${x==='□'?'?':x}</span>`).join('')}</div>`;
+function sitVis(q){ if(!q||(q.visual&&String(q.visual).trim())||q.manip||q.onMount) return q; const t=_pl(String(q.q)); let m; let v='';
+  if(/양팔저울/.test(t)&&/빨간 공 쪽이 내려/.test(t)) v=OBJ('balance',200);
+  else if(/가득 찬 가 컵의 물을 빈 나 컵에 부었더니 넘쳤/.test(t)) v=`<div class="objrow" style="gap:30px">${['가','나'].map(n=>`<figure>${OBJ('cup',62)}<figcaption>${n} 컵</figcaption></figure>`).join('')}</div>`;   /* 넘치는 장면을 그리면 그림만 보고 답한다 → 컵 두 개만, 크기도 같게 */
+  else if(/같은 컵에 물을 부었더니 높이가/.test(t)) v=OBJ('twocups',190);
+  else if((m=t.match(/주전자는 (\d+)컵, 물병은 (\d+)컵/))){ const cups=n=>Array.from({length:n},()=>OBJ('cup',24)).join(''); const hImg=(k)=>`<img class="objimg" src="img/obj/${k}.webp" alt="" style="height:90px;width:auto">`; v=`<div class="objrow" style="align-items:flex-start;gap:26px">${[['kettle','주전자',+m[1]],['bottle','물병',+m[2]]].map(([k,n,c])=>`<figure style="width:120px">${hImg(k)}<figcaption>${n}</figcaption><div style="display:flex;flex-wrap:wrap;justify-content:center;gap:2px;width:112px">${cups(c)}</div></figure>`).join('')}</div>`;   /* 두 그릇은 같은 높이로(그림 크기가 아니라 컵 수로 견주게) */ }
+  else if(/(어떤 모양|모양은\?)/.test(t)&&/(축구공|구슬|수박|주사위|휴지 상자|책|풀통|음료수 캔|휴지심|북)은|는 어떤 모양/.test(t)){ const o=(t.match(/^(.+?)(은|는) 어떤 모양/)||[])[1]; if(o&&OBJN[o]) v=`<div class="objrow"><figure>${OBJ(OBJN[o],96)}</figure></div>`; }
+  else if(/(굴러가|쌓을 수|평평한 면|뾰족한 부분)/.test(t)&&/모양은\?/.test(t)) v=sh3();
+  else if(/비슷한 모양은\?/.test(t)){ const o=(t.match(/^(시계|삼각김밥|공책)/)||[])[1]; if(o) v=`<div class="objrow"><figure>${OBJ(OBJN[o],96)}</figure></div>`; }
+  else if(/뾰족한 곳이/.test(t)||/○, △, □ 모양에 대해/.test(t)) v=flat3();
+  else if((m=t.match(/^더 (긴|짧은|좁은|넓은) 것은\?/))||/가장 (무거운|가벼운) 것은|가장 많이 담을 수 있는 것은/.test(t)) v=objRow(q.opts||[]);
+  else if((m=t.match(/(지우개|못|연필|크레파스|색연필|클립)(이|가) 자의 눈금 (\d+)에서 시작해 눈금 (\d+)에서 끝나/))) v=rulerSvg(+m[3],+m[4],m[1]);
+  else if((m=t.match(/짧은바늘이 (\d+)[와과] (\d+) 사이에 있고 긴바늘이 (\d+)/))) v=clockSvg(+m[1],(+m[3]%12)*5);
+  else if((m=t.match(/수 배열표에서 (\d+), (\d+), (\d+)…로 색칠/))){ const a=+m[1]; v=hundredTable(0,4,null,[a,a+10,a+20,a+30,a+40].filter(x=>x<=50)); }
+  else if((m=t.match(/수 배열표에서 (\d+)의 바로 (아래|위|오른쪽|왼쪽) 칸/))){ const n=+m[1], r=Math.floor((n-1)/10); const mk={}; const tgt=m[2]==='아래'?n+10:m[2]==='위'?n-10:m[2]==='오른쪽'?n+1:n-1; mk[tgt]='?'; v=hundredTable(Math.max(0,r-1),Math.min(9,r+1),mk,[n],n); }   /* 기준 수 뒤로는 비워 둔다 */
+  else if(/수 배열표에서 (오른쪽으로|아래로) 한 칸/.test(t)) v=hundredTable(0,2,null,null);
+  else if((m=t.match(/^([●▲■★○△□☆◆ ,]+) (에서 □에|다음에)/))){ const arr=m[1].split(/[ ,]+/).filter(x=>x); if(m[2]==='다음에') arr.push('?'); v=symRow(arr); }
+  else if((m=t.match(/^([○△★□☆, ]+)를 모양에 따라/))) v=symRow(m[1].split(/[ ,]+/).filter(x=>x));
+  else if((m=t.match(/큰 ○ (\d+)개, 작은 ○ (\d+)개, 큰 △ (\d+)개/))){ const c=(r,n)=>Array.from({length:n},()=>`<svg width="${r*2+4}" height="${r*2+4}"><circle cx="${r+2}" cy="${r+2}" r="${r}" fill="#FFE3B0" stroke="#B5701F" stroke-width="2"/></svg>`).join(''), tr=n=>Array.from({length:n},()=>`<svg width="44" height="40"><polygon points="22,2 42,38 2,38" fill="#CFE6F7" stroke="#3F7FB0" stroke-width="2"/></svg>`).join(''); v=`<div class="objrow" style="flex-wrap:wrap;gap:6px">${c(19,+m[1])}${c(10,+m[2])}${tr(+m[3])}</div>`; }
+  else if((m=t.match(/(노란|빨간|파란|초록) (동그라미|세모|네모) (\d+)개, (노란|빨간|파란|초록) (동그라미|세모|네모) (\d+)개, (노란|빨간|파란|초록) (동그라미|세모|네모) (\d+)개/))){ const CL={빨간:'#E85D4A',파란:'#4A8FE8',노란:'#F2C230',초록:'#5DB85D'}, SH={동그라미:'동그라미',세모:'세모',네모:'네모'}; let it=[]; for(let k=0;k<3;k++) for(let j=0;j<+m[3+k*3];j++) it.push([m[2+k*3],m[1+k*3]]); it=shuffle(it); v=`<div class="items">${it.map(([s,c])=>shp(SH[s],CL[c])).join('')}</div>`; }
+  else if((m=t.match(/강아지가 (\d+)명, 합계가 (\d+)명/))) v=`<table class="dt"><tr><th>동물</th><th>강아지</th><th>고양이</th><th>합계</th></tr><tr><th>사람 수(명)</th><td>${m[1]}</td><td>?</td><td>${m[2]}</td></tr></table>`;
+  else if((m=t.match(/우유 (○+), 주스 (○+)/))) v=`<table class="dt"><tr><th>우유</th><td style="text-align:left;letter-spacing:4px">${m[1]}</td></tr><tr><th>주스</th><td style="text-align:left;letter-spacing:4px">${m[2]}</td></tr></table>`;
+  else if(/원은 어떤 선으로|삼각형과 사각형의 공통점|원에는 꼭짓점이/.test(t)) v=`<div class="objrow">${[['원','<circle cx="30" cy="30" r="24"/>'],['삼각형','<polygon points="30,6 55,52 5,52"/>'],['사각형','<rect x="7" y="7" width="46" height="46"/>']].map(([n,g])=>`<figure><svg width="60" height="60" viewBox="0 0 60 60" fill="#FFF3DE" stroke="#B5701F" stroke-width="3">${g}</svg><figcaption>${n}</figcaption></figure>`).join('')}</div>`;
+  else if(/길이를 비교할 때 먼저 할 일/.test(t)) v=`<svg viewBox="0 0 240 80" width="240"><line x1="20" y1="8" x2="20" y2="72" stroke="#D45F16" stroke-width="2" stroke-dasharray="4 3"/><rect x="20" y="16" width="170" height="16" rx="7" fill="#F2C230" stroke="#6B3E1C" stroke-width="2"/><rect x="20" y="48" width="120" height="16" rx="7" fill="#7FB8E6" stroke="#6B3E1C" stroke-width="2"/></svg>`;
+  if(v){ q.visual=v; } return q; }
+{ const _t=tagQ; tagQ=function(ep,i,q){ q=_t(ep,i,q); try{ q=sitVis(q); }catch(e){} return q; }; }
+
+
+// ===== 3-45. 자로 실제로 재기 (교수님 11/22: 2학년 cm·m는 실제로 재는 활동이 있어야) =====
+// ① 자 옮겨 재기(조작): 연필이 자의 0에 맞춰져 있지 않다. 아이가 자를 끌어 0을 연필 끝에 맞춘 뒤 길이를 센다.
+//    - 오개념이 생기지 않게: 연필은 늘 0이 아닌 곳에서 시작(0에 맞추는 단계를 건너뛰지 못하게), 길이는 cm 단위로 딱 떨어지게, 자의 1 cm 칸을 굵게.
+//    - 첫 제출 코드: 자를 0에 맞추지 않고 끝 눈금을 읽음 G2-08, 눈금 줄 수를 셈(+1) G2-09.
+// ② 줄자 읽기(쓰기): 1 m가 넘는 물건을 줄자에 대고 '몇 m 몇 cm'로. 0에서 시작하는 줄자, 10 cm마다 수.
+function pencilSvg(x,len,u,y){ const L=len*u; return `<g><rect x="${x}" y="${y}" width="${L-14}" height="16" fill="#F2C230" stroke="#6B3E1C" stroke-width="1.5"/><rect x="${x}" y="${y}" width="10" height="16" fill="#F7B6C2" stroke="#6B3E1C" stroke-width="1.5"/><polygon points="${x+L-14},${y} ${x+L},${y+8} ${x+L-14},${y+16}" fill="#F3D9B1" stroke="#6B3E1C" stroke-width="1.5"/><polygon points="${x+L-5},${y+5.5} ${x+L},${y+8} ${x+L-5},${y+10.5}" fill="#4A2E14"/></g>`; }
+function measureManip(L,start){ const u=26, N=12, W=u*(N+3); let rx=0.5, ans=0, moved=false;
+  const draw=()=>{ let g=pencilSvg(10+start*u,L,u,14); const R=10+rx*u; g+=`<g class="rul" style="cursor:grab"><rect x="${R-8}" y="44" width="${N*u+16}" height="40" rx="4" fill="#FFF3C4" stroke="#B5701F" stroke-width="2"/>`;
+    for(let i=0;i<=N;i++){ g+=`<line x1="${R+i*u}" y1="44" x2="${R+i*u}" y2="${i%5===0?64:60}" stroke="#4A2E14" stroke-width="${i===0?3:1.8}"/><text x="${R+i*u}" y="78" font-size="12" font-weight="700" text-anchor="middle" fill="${i===0?'#D45F16':'#4A2E14'}">${i}</text>`; if(i<N) for(let j=1;j<10;j++) g+=`<line x1="${R+i*u+j*u/10}" y1="44" x2="${R+i*u+j*u/10}" y2="${j===5?54:50}" stroke="#4A2E14" stroke-width=".6"/>`; }
+    g+=`</g><text x="${W/2}" y="100" font-size="12" text-anchor="middle" fill="#8A6A4A">↔ 자를 끌어서 옮겨요</text>`; return g; };
+  const upd=root=>{ root.querySelector('svg.mmeas').innerHTML=draw(); root.querySelector('#mval').textContent=ans; };
+  return { html:`<svg class="mmeas" viewBox="0 0 ${W} 104" style="width:100%;max-width:380px;touch-action:none">${draw()}</svg><div class="mrow" style="display:flex;align-items:center;justify-content:center;gap:10px;margin-top:6px;font-family:Jua,sans-serif;font-size:1.3rem"><span>연필의 길이:</span><button class="ghost" id="mminus" style="width:44px;height:44px;font-size:1.4rem">−</button><b id="mval" style="min-width:36px;text-align:center;font-size:1.6rem">0</b><button class="ghost" id="mplus" style="width:44px;height:44px;font-size:1.4rem">+</button><span>cm</span></div>`,
+    mount(root){ const svg=root.querySelector('svg.mmeas'); let grab=null;
+      dragOn(svg,pt=>{ const x=(pt.x-10)/u; if(grab==null) grab=x-rx; rx=Math.max(-1,Math.min(N+2-N,Math.round((x-grab)*2)/2)); rx=Math.max(-0.5,Math.min(3,rx)); moved=true; upd(root); },()=>{ grab=null; });
+      root.querySelector('#mminus').onclick=()=>{ ans=Math.max(0,ans-1); upd(root); }; root.querySelector('#mplus').onclick=()=>{ ans=Math.min(N,ans+1); upd(root); }; },
+    check:()=>ans===L, state:()=>`${ans}@${rx}`,
+    mcode:()=>{ const endRead=start+L-rx; if(ans!==L&&ans===Math.round(endRead)&&Math.abs(rx-start)>0.01) return 'G2-08'; if(ans===L+1) return 'G2-09'; return null; },
+    reveal(){ rx=start; ans=L; const r=document.getElementById('manip'); if(r) upd(r); } }; }
+ADD('S6-14', ()=>{ const L=rnd(3,8), start=rndPick(1,1.5,2,2.5,3); return MQ('자를 옮겨서 연필의 길이를 재어 보세요.','자의 0을 연필의 한쪽 끝에 맞추고, 다른 쪽 끝의 눈금을 읽어요.',measureManip(L,start),`${L} cm`); });
+ADD('S6-15', ()=>{ const L=rnd(3,8), start=rndPick(1,2,2.5); return MQ('자를 옮겨서 연필의 길이를 재어 보세요.','자의 0을 연필의 한쪽 끝에 맞추고, 다른 쪽 끝의 눈금을 읽어요.',measureManip(L,start),`${L} cm`); });
+function tapeSvg(totalCm,name){ const maxCm=Math.ceil((totalCm+20)/50)*50, sc=300/maxCm, W=330; let g=`<rect x="12" y="52" width="${maxCm*sc+6}" height="30" rx="3" fill="#FFE9A8" stroke="#B5701F" stroke-width="2"/>`;
+  for(let c=0;c<=maxCm;c+=5){ const x=15+c*sc; g+=`<line x1="${x}" y1="52" x2="${x}" y2="${c%10===0?66:60}" stroke="#4A2E14" stroke-width="${c%100===0?2.2:1}"/>`; if(c%50===0) g+=`<text x="${x}" y="78" font-size="10" text-anchor="middle" fill="${c%100===0?'#D45F16':'#4A2E14'}" font-weight="${c%100===0?700:400}">${c}</text>`; }
+  g+=`<rect x="15" y="20" width="${totalCm*sc}" height="24" rx="3" fill="#C98B54" stroke="#6B3E1C" stroke-width="2"/><text x="${15+totalCm*sc/2}" y="37" font-size="12" text-anchor="middle" fill="#fff">${name}</text><line x1="${15+totalCm*sc}" y1="44" x2="${15+totalCm*sc}" y2="52" stroke="#D45F16" stroke-width="2" stroke-dasharray="2 2"/>`;
+  return `<svg viewBox="0 0 ${W} 90" width="${W}" style="max-width:100%">${g}</svg><div style="font-size:.85rem;color:#8A6A4A">줄자의 눈금 단위는 cm예요. 100 cm = 1 m</div>`; }
+ADD('S6-15', ()=>{ const name=rndPick('책상','칠판','소파','침대'), c=rndPick(110,120,130,140,150,160,170,180,190,105,115,125,135,145); return WN2(`줄자로 ${name}의 길이를 재었어요. 몇 m 몇 cm일까요?`,tapeSvg(c,name),Math.floor(c/100),'m',c%100,'cm'); });
+
+
+// ===== 3-46. 1학년 길이 비교: 막대를 끌어 한쪽 끝을 맞춘 뒤 비교 (교수님 11/22) =====
+// 처음부터 끝을 맞춰 주면 너무 쉽다. 두 막대의 시작이 다르고, 긴 막대가 더 왼쪽에서 시작해서 오른쪽 끝만 보면 짧은 막대가 길어 보이게 놓는다(함정).
+// 아이가 막대를 끌어 왼쪽 끝을 출발선에 맞추면 바로 보인다. 첫 제출에서 오른쪽 끝만 보고 고르면 G1-05(한쪽 끝을 맞추지 않음).
+function alignManip(n=2,mode='long'){ const u=24, W=330, H=18+n*42;
+  const NM=['노란','파란','분홍','초록'], C=[['#F2C230','#B08A14'],['#7FB8E6','#2F6FA8'],['#F4A6C0','#B5527A'],['#8FD18F','#3F8F3F']];
+  let L,st; for(let t=0;t<500;t++){ const pool=shuffle([4,5,6,7,8,9,10,11]).slice(0,n); L=pool; st=L.map(()=>rndPick(0.5,1,1.5,2,2.5,3,3.5,4)); const R=L.map((l,k)=>st[k]+l); if(Math.max(...R)>13.5) continue;
+    const tgt=mode==='long'?L.indexOf(Math.max(...L)):L.indexOf(Math.min(...L)), farR=mode==='long'?R.indexOf(Math.max(...R)):R.indexOf(Math.min(...R)); if(farR!==tgt&&new Set(R).size===n) break; }   /* 오른쪽 끝만 보면 틀리게(함정) */
+  const tgt=mode==='long'?L.indexOf(Math.max(...L)):L.indexOf(Math.min(...L)); let x=st.map(v=>1+v), pickd=null;
+  const draw=()=>{ let g=`<line x1="${10+u}" y1="6" x2="${10+u}" y2="${H-8}" stroke="#D45F16" stroke-width="2" stroke-dasharray="5 4"/><text x="${10+u}" y="${H+1}" font-size="12" text-anchor="middle" fill="#D45F16">출발선</text>`;
+    for(let k=0;k<n;k++) g+=`<g data-k="${k}" style="cursor:grab"><rect x="${10+x[k]*u}" y="${14+k*42}" width="${L[k]*u}" height="26" rx="11" fill="${C[k][0]}" stroke="${C[k][1]}" stroke-width="2.5"/><circle cx="${10+x[k]*u+13}" cy="${27+k*42}" r="4" fill="${C[k][1]}"/></g>`; return g; };
+  const upd=root=>{ root.querySelector('svg.malign').innerHTML=draw(); };
+  return { html:`<svg class="malign" viewBox="0 0 ${W+40} ${H+6}" style="width:100%;max-width:400px;touch-action:none">${draw()}</svg><div style="font-size:.9rem;color:#8A6A4A;margin:4px 0">막대를 끌어서 옮길 수 있어요</div><div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap">${L.map((_,k)=>`<button class="ghost" data-p="${k}" style="border-color:${C[k][1]}">${NM[k]} 막대</button>`).join('')}</div>`,
+    mount(root){ const svg=root.querySelector('svg.malign'); let which=null, grab=null;
+      dragOn(svg,pt=>{ const cx=(pt.x-10)/u; if(which==null){ which=Math.max(0,Math.min(n-1,Math.floor((pt.y-8)/42))); grab=cx-x[which]; } x[which]=Math.max(0,Math.min(13.5-L[which],Math.round((cx-grab)*2)/2)); upd(root); },()=>{ which=null; grab=null; });
+      root.querySelectorAll('button[data-p]').forEach(b=>b.onclick=()=>{ pickd=+b.dataset.p; root.querySelectorAll('button[data-p]').forEach(z=>z.style.background=z===b?'#FFE3B0':''); }); },
+    check:()=>pickd===tgt, state:()=>`${pickd}@${x.join(',')}`,
+    mcode:()=>{ if(pickd==null||pickd===tgt) return null; const R=x.map((v,k)=>v+L[k]); const far=mode==='long'?R.indexOf(Math.max(...R)):R.indexOf(Math.min(...R)); return pickd===far&&new Set(x).size>1?'G1-05':null; },
+    reveal(){ x=L.map(()=>1); pickd=tgt; const r=document.getElementById('manip'); if(r){ upd(r); r.querySelectorAll('button[data-p]').forEach((z,k)=>z.style.background=k===tgt?'#FFE3B0':''); } }, _lon:tgt, _L:L }; }
+ADD('S6-07', ()=>MQ('두 막대 중 어느 것이 더 길까요? 막대를 옮겨서 비교해 보세요.','두 막대의 한쪽 끝을 출발선에 맞추어 봐요.',alignManip(),'더 긴 막대를 찾았어요'));
+ADD('S6-07', ()=>{ const n=rndPick(3,4), md=rndPick('long','short'); return MQ(`막대 ${n}개 중 가장 ${md==='long'?'긴':'짧은'} 막대는 무엇일까요? 막대를 옮겨서 비교해 보세요.`,'모든 막대의 한쪽 끝을 출발선에 맞추어 봐요.',alignManip(n,md),`가장 ${md==='long'?'긴':'짧은'} 막대를 찾았어요`); });
