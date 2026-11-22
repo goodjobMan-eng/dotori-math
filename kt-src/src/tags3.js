@@ -1509,12 +1509,12 @@ function skIsoSvg(H,{s=24,rot=0,click=false,front=true,cls=''}={}){ const k=s*0.
   const W=2*n*k+s*1.2, top=-(SK_MAXH)*s-6, Hh=n*s+SK_MAXH*s+s*1.1;
   return `<svg class="${cls}" viewBox="${(-n*k-s*0.6).toFixed(1)} ${top.toFixed(1)} ${W.toFixed(1)} ${Hh.toFixed(1)}" style="width:100%;max-width:${Math.round(W*1.25)}px">${g}</svg>`; }
 /* 교과서식 본 모양(모눈): 위 = 판 그대로(앞이 아래), 앞·옆 = 아래에서부터 층 */
-function skViewSvg(kind,H,u=24){ const n=SK_N, lab={top:['위','#6BA34A'],front:['앞','#D2477A'],side:['옆','#D2477A']}[kind]; let rows, cols, fill;
+function skViewSvg(kind,H,u=24,nolab){ const n=SK_N, lab={top:['위','#6BA34A'],front:['앞','#D2477A'],side:['옆','#D2477A']}[kind]; let rows, cols, fill;
   if(kind==='top'){ const T=skTop(H); rows=n; cols=n; fill=(r,c)=>T[r][c]; }
   else { const h=kind==='front'?skFront(H):skSide(H); rows=3; cols=n; fill=(r,c)=>h[c]>=rows-r; }
   let g=''; for(let r=0;r<rows;r++) for(let c=0;c<cols;c++){ const f=fill(r,c); g+=`<rect x="${c*u}" y="${22+r*u}" width="${u}" height="${u}" fill="${f?'#E9B373':'#fff'}" stroke="${f?'#7A4A1E':'#C9BBA6'}" stroke-width="${f?1.4:1}" ${f?'':'stroke-dasharray="2 2"'}/>`; }
-  g=`<circle cx="${cols*u/2}" cy="9" r="9" fill="${lab[1]}"/><text x="${cols*u/2}" y="13" font-size="11" text-anchor="middle" fill="#fff" font-weight="700">${lab[0]}</text>`+g;
-  return `<svg viewBox="-2 -1 ${cols*u+4} ${rows*u+25}" width="${cols*u+4}" style="background:transparent">${g}</svg>`; }
+  if(!nolab) g=`<circle cx="${cols*u/2}" cy="9" r="9" fill="${lab[1]}"/><text x="${cols*u/2}" y="13" font-size="11" text-anchor="middle" fill="#fff" font-weight="700">${lab[0]}</text>`+g;
+  return `<svg viewBox="-2 ${nolab?19:-1} ${cols*u+4} ${rows*u+(nolab?5:25)}" width="${cols*u+4}" style="background:transparent">${g}</svg>`; }
 function skNumSvg(H,u=24){ let g=`<circle cx="${SK_N*u/2}" cy="9" r="9" fill="#6BA34A"/><text x="${SK_N*u/2}" y="13" font-size="11" text-anchor="middle" fill="#fff" font-weight="700">위</text>`;
   for(let r=0;r<SK_N;r++) for(let c=0;c<SK_N;c++){ const v=H[r][c]; g+=`<rect x="${c*u}" y="${22+r*u}" width="${u}" height="${u}" fill="${v?'#E9B373':'#fff'}" stroke="${v?'#7A4A1E':'#C9BBA6'}" ${v?'':'stroke-dasharray="2 2"'}/>`+(v?`<text x="${c*u+u/2}" y="${22+r*u+u/2+5}" font-size="14" text-anchor="middle" font-weight="700" fill="#4A2E14">${v}</text>`:''); }
   return `<svg viewBox="-2 -1 ${SK_N*u+4} ${SK_N*u+25}" width="${SK_N*u+4}" style="background:transparent">${g}<text x="${SK_N*u/2}" y="${SK_N*u+36}" font-size="10" text-anchor="middle" fill="#8A6A4A">↓앞</text></svg>`; }
@@ -1583,10 +1583,11 @@ SKQ.push(()=>{ const H=skRand(5,10);
   return MQ('위에서 본 모양의 각 칸에 쓴 수만큼 쌓기나무를 쌓아 보세요.','칸에 쓴 수는 그 자리에 쌓은 층수예요. 앞이 아래쪽이에요.',
     stack3D({cond:skCond(skNumSvg(H)), check:B=>skSame(B,H), reveal:H}),`모두 ${skSum(H)}개`); });
 try{
-  const dropM=(ep,re)=>{ if(G36[ep]) G36[ep]=G36[ep].filter(g=>{ try{ const q=g(); return !(q&&re.test(String(q.q))); }catch(e){ return true; } }); };
+  /* 틀 번호(편#번호)가 밀리면 틀별 태그·통계가 어긋난다: 지우지 않고 같은 자리에서 새 유형으로 바꿔 끼우고, 새 틀은 맨 끝에 붙인다 */
+  const dropM=(ep,re)=>{ if(G36[ep]) G36[ep]=G36[ep].map(g=>{ let hit=false; try{ const q=g(); hit=!!(q&&re.test(String(q.q))); }catch(e){} return hit?(()=>{ const X=window._SKX; return X?rndPick(X.count,X.layer,X.numTop)():SKQ[4](); }):g; }); };
   dropM('S6-65',/1층 \d+개, 2층 \d+개.*되도록 쌓아|층별로 1층 \d+개, 2층|각 칸에 쓰인 수가 [\d, ]+\. 쌓기나무는 모두|네 자리에 쌓은 수가 2, 3, 1, 2/);
-  if(G36['S6-64']) G36['S6-64'].unshift(SKQ[0],SKQ[1]);
-  if(G36['S6-65']) G36['S6-65'].unshift(SKQ[2],SKQ[4],SKQ[3]);
+  if(G36['S6-64']) G36['S6-64'].push(()=>SKQ[0](),()=>SKQ[1]());
+  if(G36['S6-65']) G36['S6-65'].push(()=>SKQ[2](),()=>SKQ[4](),()=>SKQ[3]());
   if(G36['S6-02']){ const i=G36['S6-02'].findIndex(g=>{ try{ return /개로 모양을 만들어 보세요/.test(g().q); }catch(e){ return false; } });
     if(i>=0) G36['S6-02'][i]=()=>{ const n=rnd(4,8); const R=[[0,0,0],[0,0,0],[0,0,0]]; for(let j=0;j<n;j++) R[2-Math.floor((j%6)/3)][j%3]++; return MQ(`쌓기나무 ${n}개로 내 마음대로 모양을 만들어 보세요.`,'바닥을 누르면 놓이고, 쌓기나무를 누르면 그 위에 얹혀요. 길게 누르면 하나 빠져요.',stack3D({check:B=>skSum(B)===n,reveal:R}),`${n}개`); }; }
 }catch(e){}
@@ -1700,8 +1701,8 @@ SKQ.push(skCountOnly);
 try{ const fix=(ep,from,to)=>{ const a=G36[ep]; if(!a) return; const i=a.indexOf(from); if(i>=0) a[i]=to; };
   /* 위에서 이미 넣은 ①·③을 새 판으로 바꾸고, ⑥을 S6-65 둘째에 */
   const a64=G36['S6-64'], a65=G36['S6-65'];
-  if(a64){ const i=a64.findIndex(g=>{ try{ return /^위, 앞, 옆에서 본 모양이 되도록 쌓기나무를 쌓아/.test(g().q); }catch(e){ return false; } }); if(i>=0) a64[i]=SKQ[0]; }
-  if(a65){ const i=a65.findIndex(g=>{ try{ return /^그림과 똑같은 모양으로 쌓아 보세요\. 위에서 본 모양도/.test(g().q); }catch(e){ return false; } }); if(i>=0) a65[i]=SKQ[2]; a65.splice(1,0,skCountOnly); }
+  
+  if(a65){ a65.push(skCountOnly); }
 }catch(e){}
 
 
@@ -2208,3 +2209,51 @@ const SK_TEXT=[
   [/^위에서 본 모양 각 칸에 쌓은 개수가 ([\d, ]+?)(이에요|예요)\. 앞에서 보면 가장 높은 곳은 몇 층\?/,'쌓기나무를 한 줄로 쌓고, 위에서 본 모양의 각 칸에 쌓은 개수를 왼쪽부터 썼더니 $1$2. 앞에서 보면 가장 높은 곳은 몇 층일까요?'] ];
 function skText(ep,q){ if(!/^S6-6[45]$/.test(ep)||!q||typeof q.q!=='string') return q; for(const [re,to] of SK_TEXT){ const plain=_pl(q.q).trim(); if(re.test(plain)){ const nt=plain.replace(re,to); for(const k of ['q','say','tts','read']) if(typeof q[k]==='string'&&_pl(q[k]).trim()===plain) q[k]=nt; q.q=nt; break; } } return q; }
 { const _t=tagQ; tagQ=function(ep,i,q){ q=_t(ep,i,q); try{ q=skText(ep,q); }catch(e){} return q; }; }
+
+
+
+// ===== 3-59. 쌓기나무 문제 유형 넓히기 (교수님 11/22: "설명만 있다, 다양한 유형을" — 보여 주신 문제집 유형을 참고) =====
+// ㉠ 쌓은 모양 보고 본 모양 그리기(모눈 칸 누르기)  ㉡ 본 모양 고르기  ㉢ 본 모양에 맞는 쌓은 모양 고르기
+// ㉣ 개수 세기  ㉤ 위에서 본 모양에 수 쓰기  ㉥ 층별 개수  ㉦ 가장 많이 쌓은 모양 고르기  ㉧ 정육면체가 되려면 몇 개 더
+const skTf=(inner,label)=>`<div class="tf">${inner}${label?`<b>${label}</b>`:''}</div>`;
+const skIsoBox=(H,w=150)=>`<div style="width:${w}px">${skIsoSvg(H,{s:20})}</div>`;
+function skClear(lo,hi,need){ for(let t=0;t<400;t++){ const H=skRand(lo,hi), v=skVisible(H); if(!v.topOk) continue; if(need==='hidden'&&v.vis>=skSum(H)) continue; if(need==='nohidden'&&v.vis<skSum(H)) continue; H._vis=v.vis; return H; } const H=[[0,0,0],[0,2,1],[1,1,0]]; H._vis=skVisible(H).vis; return H; }
+const skMat=(kind,H)=>{ if(kind==='top') return skTop(H); const h=kind==='front'?skFront(H):skSide(H); return [0,1,2].map(r=>[0,1,2].map(c=>h[c]>=3-r?1:0)); };
+/* 본 모양 그리기 판: 모눈 칸을 누르면 칠해지고 다시 누르면 지워진다 */
+function viewDraw(H,kinds){ const names={top:'위',front:'앞',side:'옆'}, cols={top:'#6BA34A',front:'#D2477A',side:'#D2477A'}, u=34; let st=kinds.map(()=>[0,1,2].map(()=>[0,0,0]));
+  const grid=k=>{ let g=''; for(let r=0;r<3;r++) for(let c=0;c<3;c++) g+=`<rect data-k="${k}" data-r="${r}" data-c="${c}" x="${c*u+2}" y="${r*u+2}" width="${u}" height="${u}" fill="${st[k][r][c]?'#E9B373':'#fff'}" stroke="${st[k][r][c]?'#7A4A1E':'#C9BBA6'}" stroke-width="1.4" style="cursor:pointer"/>`; return `<div style="display:flex;flex-direction:column;align-items:center;gap:2px"><span style="background:${cols[kinds[k]]};color:#fff;border-radius:99px;padding:1px 10px;font-size:.9rem">${names[kinds[k]]}</span><svg viewBox="0 0 ${3*u+4} ${3*u+4}" width="${3*u+4}" style="background:#fff;border-radius:6px">${g}</svg>${kinds[k]==='top'?'<span style="font-size:.75rem;color:#8A6A4A">↓ 앞</span>':''}</div>`; };
+  const html=`${skCond(skBox(skIsoBox(H,170),'쌓은 모양'))}<div class="vdwrap" style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;touch-action:manipulation">${kinds.map((_,k)=>grid(k)).join('')}</div><div style="font-size:.9rem;color:#7B5632">칸을 누르면 칠해져요. 다시 누르면 지워져요.</div>`;
+  const draw=root=>{ root.querySelector('.vdwrap').innerHTML=kinds.map((_,k)=>grid(k)).join(''); };
+  return { html, mount(root){ root.querySelector('.vdwrap').addEventListener('click',e=>{ const el=e.target.closest&&e.target.closest('rect[data-k]'); if(!el) return; const k=+el.dataset.k, r=+el.dataset.r, c=+el.dataset.c; st[k][r][c]=st[k][r][c]?0:1; try{ sfx('pop'); }catch(_){} draw(root); }); },
+    check:()=>kinds.every((kd,k)=>skSame(st[k],skMat(kd,H))), state:()=>st.map(m=>m.flat().join('')).join('/'),
+    mcode:()=>{ /* 앞과 옆을 바꿔 그림, 또는 좌우를 뒤집어 그림 → 보는 방향 혼동 */ for(let k=0;k<kinds.length;k++){ const kd=kinds[k]; if(skSame(st[k],skMat(kd,H))) continue; if(kd!=='top'){ const other=skMat(kd==='front'?'side':'front',H), mir=skMat(kd,H).map(r=>r.slice().reverse()); if(skSame(st[k],other)||skSame(st[k],mir)) return 'G6-16'; } } return null; },
+    reveal(){ st=kinds.map(kd=>skMat(kd,H)); const r=document.getElementById('manip'); if(r) draw(r); } }; }
+/* 위에서 본 모양에 수 쓰기 판: 칸을 누를 때마다 1 → 2 → 3 → 빈칸 */
+function numDraw(H){ const u=44; let st=[0,1,2].map(()=>[0,0,0]); const T=skTop(H);
+  const grid=()=>{ let g=''; for(let r=0;r<3;r++) for(let c=0;c<3;c++){ const on=T[r][c]; g+=`<rect ${on?`data-r="${r}" data-c="${c}"`:''} x="${c*u+2}" y="${r*u+2}" width="${u}" height="${u}" fill="${on?'#FBE3BC':'#fff'}" stroke="${on?'#7A4A1E':'#D9CDBB'}" stroke-width="1.4" ${on?'style="cursor:pointer"':'stroke-dasharray="3 3"'}/>`+(st[r][c]?`<text x="${c*u+2+u/2}" y="${r*u+2+u/2+8}" font-size="22" font-weight="700" text-anchor="middle" fill="#4A2E14" pointer-events="none">${st[r][c]}</text>`:''); } return `<svg viewBox="0 0 ${3*u+4} ${3*u+4}" width="${3*u+4}" style="background:#fff;border-radius:6px">${g}</svg>`; };
+  const html=`${skCond(skBox(skIsoBox(H,170),'쌓은 모양'))}<div style="display:flex;flex-direction:column;align-items:center;gap:2px"><span style="background:#6BA34A;color:#fff;border-radius:99px;padding:1px 10px;font-size:.9rem">위에서 본 모양</span><div class="ndwrap" style="touch-action:manipulation">${grid()}</div><span style="font-size:.75rem;color:#8A6A4A">↓ 앞</span></div><div style="font-size:.9rem;color:#7B5632">칸을 누를 때마다 수가 1씩 커져요 (3 다음은 빈칸).</div>`;
+  return { html, mount(root){ root.querySelector('.ndwrap').addEventListener('click',e=>{ const el=e.target.closest&&e.target.closest('rect[data-r]'); if(!el) return; const r=+el.dataset.r, c=+el.dataset.c; st[r][c]=(st[r][c]+1)%4; try{ sfx('pop'); }catch(_){} root.querySelector('.ndwrap').innerHTML=grid(); }); },
+    check:()=>skSame(st,H.map(r=>r.slice())), state:()=>st.flat().join(''), mcode:()=>{ const n=st.flat().reduce((a,b)=>a+b,0); return n===H._vis&&n<skSum(H)?'G6-09':null; },
+    reveal(){ st=H.map(r=>r.slice()); const r=document.getElementById('manip'); if(r) r.querySelector('.ndwrap').innerHTML=grid(); } }; }
+const SKX={};
+SKX.drawOne=()=>{ const H=skClear(5,9), kd=rndPick('front','side','top'), nm={top:'위',front:'앞',side:'옆(오른쪽)'}[kd]; return MQ(`쌓기나무로 쌓은 모양을 ${nm}에서 본 모양을 그려 보세요.`,kd==='top'?'위에서 보면 쌓기나무가 놓인 자리만 보여요.':'그 방향에서 보면 줄마다 가장 높은 층까지 보여요.',viewDraw(H,[kd]),`${nm}에서 본 모양`); };
+SKX.drawAll=()=>{ const H=skClear(5,9); return MQ('쌓기나무로 쌓은 모양을 위, 앞, 옆(오른쪽)에서 본 모양을 각각 그려 보세요.','위는 놓인 자리, 앞과 옆은 줄마다 가장 높은 층까지 칠해요.',viewDraw(H,['top','front','side']),'세 방향에서 본 모양'); };
+SKX.pickView=()=>{ for(let t=0;t<200;t++){ const H=skClear(5,9), kd=rndPick('front','side'), nm={front:'앞',side:'옆(오른쪽)'}[kd]; const h=kd==='front'?skFront(H):skSide(H), o=kd==='front'?skSide(H):skFront(H), mir=h.slice().reverse(), top=skTop(H);
+    const colsSvg=a=>skViewSvg('front',[[0,0,0],[0,0,0],a],22,1), cands=[[h.join(''),lab=>skTf(colsSvg(h),lab)],[o.join(''),lab=>skTf(colsSvg(o),lab),'G6-16'],[mir.join(''),lab=>skTf(colsSvg(mir),lab),'G6-16'],['T'+top.flat().join(''),lab=>skTf(skViewSvg('top',H,22,1),lab),'G6-16']];
+    if(new Set(cands.map(c=>c[0])).size<3||cands.slice(1).some(c=>c[0]===cands[0][0])) continue; return mvPickQ(`쌓기나무로 쌓은 모양을 ${nm}에서 본 모양은 어느 것일까요?`,skIsoBox(H,170),cands); } return SKX.drawOne(); };
+SKX.pickStack=()=>{ for(let t=0;t<100;t++){ const H=skClear(5,9), cands=[[H.flat().join(''),lab=>skTf(skIsoBox(H,112),lab)]]; for(let k=0;k<60&&cands.length<4;k++){ const D=skClear(Math.max(4,skSum(H)-1),skSum(H)+1); if(skViewsEq(D,H)||cands.some(c=>c[0]===D.flat().join(''))) continue; cands.push([D.flat().join(''),lab=>skTf(skIsoBox(D,112),lab),'G6-16']); } if(cands.length<3) continue;
+    return mvPickQ('위, 앞, 옆에서 본 모양이 다음과 같은 쌓기나무 모양은 어느 것일까요?',`<div style="display:flex;gap:8px;align-items:flex-end">${skViewSvg('top',H,20)}${skViewSvg('front',H,20)}${skViewSvg('side',H,20)}</div>`,cands); } return SKX.drawAll(); };
+SKX.count=()=>{ const H=skClear(6,11,'hidden'), N=skSum(H), mh=Math.max(...H.flat()); return WM('쌓기나무로 쌓은 모양이에요. 쌓기나무는 모두 몇 개일까요? (보이지 않는 곳에도 위층을 받치는 쌓기나무가 있어요.)',skCond(skBox(skIsoBox(H,180),'쌓은 모양')+skBox(skViewSvg('top',H),'위에서 본 모양')),N,[[H._vis,'G6-09'],[mh,'G6-20'],[H.flat().filter(x=>x).length,'G6-20']],'','개'); };
+SKX.countEasy=()=>{ const H=skClear(4,8,'nohidden'), N=skSum(H); return WM('쌓기나무로 쌓은 모양이에요. 쌓기나무는 모두 몇 개일까요?',skCond(skBox(skIsoBox(H,180),'쌓은 모양')),N,[[Math.max(...H.flat()),'G6-20'],[H.flat().filter(x=>x).length,'G6-20'],[N+1,null]],'','개'); };
+SKX.numTop=()=>{ const H=skClear(5,10); return MQ('쌓기나무로 쌓은 모양을 보고, 위에서 본 모양의 각 칸에 쌓인 쌓기나무의 수를 써 보세요.','칸마다 그 자리에 몇 층까지 쌓였는지 세어요.',numDraw(H),`모두 ${skSum(H)}개`); };
+SKX.layer=()=>{ for(let t=0;t<200;t++){ const H=skClear(6,11), z=rndPick(1,2), n=H.flat().filter(x=>x>=z).length, n1=H.flat().filter(x=>x>=1).length, N=skSum(H); if(z===2&&n===0) continue; if(new Set([n,N,z===1?H.flat().filter(x=>x>=2).length:n1]).size<3) continue;
+    return WM(`쌓기나무로 쌓은 모양이에요. ${z}층에 쌓인 쌓기나무는 몇 개일까요?`,skCond(skBox(skIsoBox(H,180),'쌓은 모양')+skBox(skViewSvg('top',H),'위에서 본 모양')),n,[[N,'G6-20'],[z===1?H.flat().filter(x=>x>=2).length:n1,null]],'','개'); } return SKX.count(); };
+SKX.most=()=>{ for(let t=0;t<100;t++){ const Hs=[]; for(let k=0;k<60&&Hs.length<4;k++){ const D=skClear(4,10); if(Hs.some(x=>skSum(x)===skSum(D))) continue; Hs.push(D); } if(Hs.length<4) continue; Hs.sort((a,b)=>skSum(b)-skSum(a)); const tall=Hs.slice(1).reduce((b,x)=>Math.max(...x.flat())>Math.max(...b.flat())?x:b,Hs[1]), tallCode=Math.max(...tall.flat())>Math.max(...Hs[0].flat())?tall:null;
+    return mvPickQ('쌓기나무를 가장 많이 써서 쌓은 모양은 어느 것일까요?','<span style="font-size:.9rem;color:#7B5632">보이지 않는 쌓기나무도 세어요</span>',Hs.map((D,i)=>[D.flat().join(''),lab=>skTf(skIsoBox(D,112),lab),i===0?undefined:(D===tallCode?'G6-20':(D._vis>=Hs[0]._vis?'G6-09':null))])); } return SKX.count(); };
+SKX.cube=()=>{ for(let t=0;t<200;t++){ const H=[[0,0,0],[rnd(0,2),rnd(0,2),0],[rnd(1,2),rnd(0,2),0]]; const N=skSum(H); if(N<3||N>7||!skVisible(H).topOk) continue; if(H[1][0]===0&&H[1][1]===0&&H[2][1]===0) continue; return WM('쌓기나무로 쌓은 모양이에요. 여기에 쌓기나무를 더 쌓아 가로 2개, 세로 2개, 높이 2층인 정육면체 모양을 만들려면 몇 개가 더 필요할까요?',skCond(skBox(skIsoBox(H,170),'지금 쌓은 모양')),8-N,[[N,'N1-08'],[8,'N1-12'],[8-skVisible(H).vis,'G6-09']],'','개'); } return SKX.countEasy(); };
+try{ const a64=G36['S6-64'], a65=G36['S6-65'], a02=G36['S6-02'];
+  if(a64) a64.push(SKX.drawOne,SKX.pickView,SKX.drawAll,SKX.pickStack);
+  if(a65) a65.push(SKX.count,SKX.numTop,SKX.layer,SKX.most,SKX.cube);
+  if(a02) a02.push(SKX.countEasy);
+}catch(e){}
+window._SKX=SKX;
