@@ -2780,3 +2780,21 @@ window.ktStage=q=>{ try{ if(!q) return 1; if(q.manip||q.onMount) return 0; const
     if(q._hard||/ — /.test(a)||/까닭|바르게 (말|고쳐|구한|계산한)|누구일까요|이 말에 대한/.test(t)) return 3; const nums=(t.match(/\d+/g)||[]).length;
     if(t.length>=60&&nums>=3) return 3; if(q.word||(t.length>=26&&nums>=1&&/어요|았어요|였어요|려고|습니다|있어요/.test(t))) return 2; return 1; }catch(e){ return 1; } };
 window.KT_STAGE_NAME=['만져 보기','기본 익히기','이야기 문제','도전 문제'];   /* 3~4학년이 알아듣는 이름(제미나이 제안) */
+
+
+// ===== 3-71. 화면 다듬기(교수님 11/23: "코딩에 문제가 없으면 디자인·구동·효과 디테일을 높여 줘") — 움직임 줄이기 설정을 따르고, 누름·판정에는 손대지 않음 =====
+(()=>{ try{ const st=document.createElement('style'); st.id='ktpolish'; st.textContent=`
+@keyframes ktIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+@keyframes ktFb{from{opacity:0;transform:translateY(10px) scale(.98)}to{opacity:1;transform:none}}
+@keyframes ktStar{0%{transform:translate(0,0) scale(.4) rotate(0);opacity:0}15%{opacity:1}100%{transform:translate(var(--dx),var(--dy)) scale(1.1) rotate(var(--rot));opacity:0}}
+@keyframes ktPulse{0%{transform:scale(1)}50%{transform:scale(1.08)}100%{transform:scale(1)}}
+.stage .talker{animation:ktIn .28s ease-out both}.stage .visual{animation:ktIn .32s ease-out .04s both}.stage .opts,.stage #wpad{animation:ktIn .32s ease-out .08s both}
+#fb .fb{animation:ktFb .24s ease-out both}
+.opts .opt{transition:transform .08s ease,box-shadow .12s ease,background-color .15s ease}.opts .opt:active{transform:translateY(2px) scale(.98)}
+.kt-stg span{transition:background-color .2s ease,color .2s ease}.kt-stg span[style*="color:#fff"]{animation:ktPulse .5s ease-out .2s 1}
+.kt-star{position:fixed;z-index:9998;pointer-events:none;font-size:20px;animation:ktStar .9s ease-out forwards}
+.next{transition:transform .08s ease}.next:active{transform:translateY(2px)}
+@media (prefers-reduced-motion:reduce){.stage .talker,.stage .visual,.stage .opts,.stage #wpad,#fb .fb,.kt-star,.kt-stg span{animation:none!important}}`; document.head.appendChild(st);
+  /* 맞혔을 때 작은 별·도토리가 튀어 오름(0.9초 뒤 스스로 사라짐, 누름을 막지 않음) */
+  const burst=el=>{ try{ if(window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches) return; const r=el.getBoundingClientRect(), cx=r.left+Math.min(r.width/2,160), cy=r.top+10, E=['⭐','✨','🌰','⭐','✨','🍂','⭐','✨']; for(let i=0;i<8;i++){ const s=document.createElement('span'); s.className='kt-star'; s.textContent=E[i]; const a=(-150+i*17+Math.random()*10)*Math.PI/180, d=60+Math.random()*50; s.style.left=cx+'px'; s.style.top=cy+'px'; s.style.setProperty('--dx',(Math.cos(a)*d).toFixed(0)+'px'); s.style.setProperty('--dy',(Math.sin(a)*d).toFixed(0)+'px'); s.style.setProperty('--rot',(Math.random()*240-120).toFixed(0)+'deg'); s.style.animationDelay=(i*25)+'ms'; document.body.appendChild(s); setTimeout(()=>{ try{ s.remove(); }catch(e){} },1300); } }catch(e){} };
+  new MutationObserver(ms=>{ for(const m of ms) for(const n of m.addedNodes){ if(n.nodeType===1&&n.classList&&n.classList.contains('fb')&&n.classList.contains('ok')&&!n._brst){ n._brst=1; burst(n); } } }).observe(document.body,{childList:true,subtree:true}); }catch(e){} })();
