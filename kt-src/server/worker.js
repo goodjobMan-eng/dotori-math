@@ -5,6 +5,18 @@
 const ALLOWED_ORIGINS = ['https://goodjobman-eng.github.io'];
 const MAX_BODY = 200 * 1024;          // 200KB
 const MAX_RECS = 2000;
+// 그럴듯함 검사: 한 아이가 하루에 2시간 넘게 공부하지는 않는다(교수님 11/22). 여유를 두어 하루 3시간·600문제를 넘는 날이 하나라도 있으면 가짜로 보고 묶음을 받지 않는다.
+const DAY_MS_MAX = 3 * 3600 * 1000, DAY_RECS_MAX = 600, DAYS_BACK = 45;
+function plausible(body) {
+  const by = {}; const t0 = Date.parse(body.day + 'T00:00:00Z');
+  for (const r of body.recs) {
+    const t = Date.parse(r[0] + 'T00:00:00Z'); if (Number.isNaN(t) || t > t0 + 864e5 || t < t0 - DAYS_BACK * 864e5) return false;   // 보낸 날보다 뒤이거나 너무 오래된 줄
+    const d = by[r[0]] || (by[r[0]] = { n: 0, ms: 0 }); d.n++; d.ms += r[8];
+    if (d.n > DAY_RECS_MAX || d.ms > DAY_MS_MAX) return false;
+  }
+  const fast = body.recs.filter(r => r[8] > 0 && r[8] < 300).length;           // 0.3초 안에 답한 줄이 대부분이면 사람이 푼 것이 아님
+  return !(body.recs.length >= 30 && fast > body.recs.length * 0.8);
+}
 const RE = {
   did:  /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/,
   day:  /^\d{4}-\d{2}-\d{2}$/,
@@ -68,6 +80,7 @@ export default {
     if (keys !== 'day,did,recs,v') return reply(400, origin);           // 정해진 칸 외에는 받지 않음(이름 등 끼워 넣기 방지)
     if (body.v !== 2 || !RE.did.test(body.did) || !RE.day.test(body.day) || !dayOk(body.day)) return reply(400, origin);
     if (!Array.isArray(body.recs) || body.recs.length < 1 || body.recs.length > MAX_RECS || !body.recs.every(recOk)) return reply(400, origin);
+    if (!plausible(body)) return reply(422, origin);
 
     // 한 기기는 하루 한 묶음만. 같은 날 두 번째는 거절(서버 폭주·도배 방지).
     const key = `raw/${body.day}/${body.did}.json`;
@@ -78,7 +91,7 @@ export default {
       await env.BUCKET.put(key, data, { httpMetadata: { contentType: 'application/json' } });
     } else if (env.KV) {
       if (await env.KV.get(key) !== null) return reply(409, origin);
-      await env.KV.put(key, data);
+      try { await env.KV.put(key, data); } catch { return reply(503, origin); }   // 무료 한도(하루 쓰기 1,000번)를 넘으면 그날은 더 받지 않음 = 하루 총량 상한. 요금은 나가지 않는다.
     } else return reply(500, origin);
     return reply(204, origin);
   },

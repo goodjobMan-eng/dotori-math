@@ -123,7 +123,7 @@ function rec(q, given, ok){
     if(c===m){ e.n++; if(!e.ep.includes(ep)) e.ep.push(ep); e.ep=e.ep.slice(-5); } } }
   W(SK,st);
   afterRec(q,given,ok,m);
-  if(cfg().share&&KT_ENDPOINT){ const qu=J(QK,[]); qu.push([r.d,ep,ti,v,r.sd,maskG(q,r.g),r.ok,m,ms,r.dg,...recExtra(q)]); W(QK,qu.slice(-3000)); }
+  if(cfg().share&&KT_ENDPOINT&&dayRoom(ms)){ const qu=J(QK,[]); qu.push([r.d,ep,ti,v,r.sd,maskG(q,r.g),r.ok,m,ms,r.dg,...recExtra(q)]); W(QK,qu.slice(-3000)); }
 }
 // 최근 8번의 기회(그 오개념의 오답이 보기에 있던 문제) 안에서 판정한다. 기록 한 칸 = [문항, 그 오답을 골랐나, 맞혔나].
 // 확인: 서로 다른 문항 2종 이상에서 3번 이상 골랐고, 그 횟수가 찍어서 나올 횟수보다 뚜렷이 많을 때(기댓값 + 표준편차의 2배 이상). 대체로 맞히는 아이는 틀린 문제만 놓고 같은 방식으로 본다.
@@ -365,6 +365,8 @@ const _sp0=statsPage; statsPage=function(){ const r=_sp0.apply(this,arguments);
 // 주소 끝에 #kt-share-on / #kt-share-off / #kt-reset(기기 번호 새로 만들기) / #teacher(선생님용 화면)
 function cfg(){ return J(CK,{share:true,last:0,after:0}); }   /* 11/22 교수님: 무작위 기기 번호는 식별 정보로 보지 않는다 → 익명 전송 기본 켬(서버 주소가 비어 있으면 아무것도 보내지 않음). 끄기: 주소 끝 #kt-share-off */
 function setCfg(c){ W(CK,c); }
+/* 하루에 보낼 양의 상한: 한 아이가 하루 2시간 넘게 공부하지는 않는다 → 그날 푼 시간이 2시간, 문제가 500개를 넘으면 그날은 더 보낼 줄에 넣지 않는다(서버는 3시간·600문제를 넘는 묶음을 받지 않음) */
+function dayRoom(ms){ try{ const c=cfg(), t=today(); if(!c.dn||c.dn.d!==t) c.dn={d:t,n:0,ms:0}; if(c.dn.n>=500||c.dn.ms>=2*3600e3) return false; c.dn.n++; c.dn.ms+=Math.max(0,ms|0); setCfg(c); return true; }catch(e){ return true; } }
 const DAY=864e5;
 function maybeSend(){ if(!KT_ENDPOINT||!navigator.sendBeacon) return; const c=cfg(); if(!c.share) return; const qu=J(QK,[]), now=Date.now();
   if(qu.length<50||now-c.last<DAY) return;
