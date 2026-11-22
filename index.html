@@ -7536,7 +7536,7 @@ function mvSq(red,blue,label,big){ const W=big?110:86, a=14, b=W-14, S={위:[a,a
   const g=`<rect x="${a}" y="${a}" width="${b-a}" height="${b-a}" fill="#FFF6E2" stroke="#7A4A1E" stroke-width="2"/>`+L(red,'#D8402F')+L(blue,'#2F6FD0')+tx(red,'빨강','#B32A1C')+tx(blue,'파랑','#1F56AE');
   return `<div class="tf"><svg viewBox="0 0 ${W} ${W}" width="${W}" style="background:#fff;border-radius:8px">${g}</svg>${label?`<b>${label}</b>`:''}</div>`; }
 function mvPickQ(q,orig,cands){ const seen=new Set(), use=[]; for(const c of cands){ if(seen.has(c[0])) continue; seen.add(c[0]); use.push(c); } const order=shuffle(use.map((_,i)=>i)), labs=['가','나','다','라'].slice(0,use.length).map(x=>x), names=['①','②','③','④'].slice(0,use.length), ans=names[order.indexOf(0)];
-  const vis=`<div class="tfrow">${orig}<span class="tarrow">→ ?</span></div><div class="tfrow" style="flex-wrap:wrap;gap:8px">${order.map((k,j)=>use[k][1](names[j])).join('')}</div>`;
+  const vis=`${orig?`<div class="tfrow">${orig}<span class="tarrow">→ ?</span></div>`:''}<div class="tfrow" style="flex-wrap:wrap;gap:8px">${order.map((k,j)=>use[k][1](names[j])).join('')}</div>`;
   const r=C36(WHO(),q,q,vis,ans,names.slice()); r.mis={}; order.forEach((k,j)=>{ if(k>0&&use[k][2]) r.mis[names[j]]=use[k][2]; }); return r; }
 function mvWordQ(ep,q){ if(!q||q.manip||q.onMount) return q; const t=_pl(String(q.q));
   if(ep==='S6-23'&&/위에 꼭짓점 가, 왼쪽 아래에 나, 오른쪽 아래에 다가 있는 삼각형/.test(t)){ const ud=Math.random()<0.6, dir=ud?rndPick('아래쪽','위쪽'):rndPick('오른쪽','왼쪽');
@@ -7775,6 +7775,71 @@ try{ const add=(ep,...gs)=>{ if(G36[ep]) for(const g of gs){ (window._NTW=window
   add('S5-01',NT.shapeNth); add('S5-06',NT.growDots); add('S5-12',NT.corrBack); add('S5-13',NT.ratioWrite);
   add('S6-19',NT.countRect); add('S6-68',NT.ropeSquare); add('S6-43',NT.balanceChain); add('S6-32',NT.polyName); add('S6-39',NT.longest);
   add('S4-03',NT.tabSum); add('S4-07',NT.pictoMake); add('S4-10',NT.twoBars); add('S4-19',NT.bandLen); add('S4-20',NT.pieTimes);
+}catch(e){}
+
+// ===== 3-62. 1학년 모양 예시 넓히기 (교수님 11/22: 예시가 다양할수록 좋다) =====
+// 입체(상자·둥근기둥·공)는 물건 10가지, 평면(세모·네모·동그라미)은 3가지뿐이었다 → 그림으로 그린 물건을 더해 입체 25가지·평면 19가지. 유형도 '어떤 모양?' 말고 '다른 하나 찾기', '○ 모양인 것 고르기'를 더함.
+const SHP=(()=>{ const S='#6B3E1C', sv=g=>`<svg viewBox="0 0 100 100" width="84" height="84" stroke="${S}" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round">${g}</svg>`;
+  const box=(x,y,w,h,d,c1,c2,c3,ex='')=>`<polygon points="${x},${y} ${x+d},${y-d*0.6} ${x+w+d},${y-d*0.6} ${x+w},${y}" fill="${c2}"/><polygon points="${x+w},${y} ${x+w+d},${y-d*0.6} ${x+w+d},${y+h-d*0.6} ${x+w},${y+h}" fill="${c3}"/><rect x="${x}" y="${y}" width="${w}" height="${h}" fill="${c1}"/>${ex}`;
+  const cyl=(cx,y,rx,ry,h,c1,c2,ex='')=>`<path d="M${cx-rx},${y} v${h} a${rx},${ry} 0 0 0 ${2*rx},0 v${-h} z" fill="${c1}"/><ellipse cx="${cx}" cy="${y}" rx="${rx}" ry="${ry}" fill="${c2}"/>${ex}`;
+  const lcyl=(x,cy,w,rx,ry,c1,c2,ex='')=>`<path d="M${x},${cy-ry} h${w} a${rx},${ry} 0 0 1 0,${2*ry} h${-w} z" fill="${c1}"/><ellipse cx="${x}" cy="${cy}" rx="${rx}" ry="${ry}" fill="${c2}"/>${ex}`;
+  const ball=(r,c,ex='')=>`<circle cx="50" cy="52" r="${r}" fill="${c}"/>${ex}`;
+  const D3={ '상자 모양':{
+      '선물 상자':sv(box(16,40,52,44,22,'#F28B82','#F6AFA9','#D96C63',`<rect x="36" y="40" width="12" height="44" fill="#FFE082"/><polygon points="36,40 58,26.8 70,26.8 48,40" fill="#FFE082"/>`)),
+      '택배 상자':sv(box(12,44,58,38,24,'#D9A46A','#E8BF8F','#B98448',`<line x1="41" y1="44" x2="65" y2="29.6" stroke-width="5" stroke="#F3E3C3"/><line x1="41" y1="44" x2="41" y2="58" stroke-width="5" stroke="#F3E3C3"/>`)),
+      '벽돌':sv(box(10,52,62,24,22,'#C8634B','#DB8670','#A54B36')),
+      '냉장고':sv(box(26,22,40,66,14,'#DCE6EE','#EEF3F7','#B9C7D3',`<line x1="26" y1="46" x2="66" y2="46"/><line x1="33" y1="32" x2="33" y2="40"/><line x1="33" y1="54" x2="33" y2="66"/>`)),
+      '두부':sv(box(14,48,54,30,22,'#FFF8E7','#FFFDF5','#EADFC4')),
+      '서랍장':sv(box(18,30,50,56,18,'#C79A62','#DDB98A','#A67B45',`<line x1="18" y1="49" x2="68" y2="49"/><line x1="18" y1="68" x2="68" y2="68"/><circle cx="43" cy="40" r="2" fill="${S}"/><circle cx="43" cy="59" r="2" fill="${S}"/><circle cx="43" cy="77" r="2" fill="${S}"/>`)) },
+    '둥근기둥 모양':{
+      '통조림':sv(cyl(50,30,28,9,46,'#C9D3DA','#E3E9ED',`<path d="M22,44 v20 a28,9 0 0 0 56,0 v-20 a28,9 0 0 1 -56,0 z" fill="#F2A65A"/>`)),
+      '분필':sv(cyl(50,14,9,3.5,68,'#FFFFFF','#F1F1F1')),
+      '통나무':sv(lcyl(24,54,52,9,20,'#B98448','#E8C99A',`<ellipse cx="24" cy="54" rx="5" ry="11" fill="none" stroke-width="1.5"/>`)),
+      '김밥 한 줄':sv(lcyl(20,54,58,7,15,'#2E3B2F','#FFFFFF',`<circle cx="20" cy="54" r="3.5" fill="#F2A65A" stroke-width="1"/>`)),
+      '연필꽂이':sv(cyl(50,34,24,8,46,'#8CC7E8','#5D9EC2')),
+      '건전지':sv(cyl(50,24,15,5,58,'#F2C14E','#D9D9D9',`<path d="M35,24 v14 a15,5 0 0 0 30,0 v-14 a15,5 0 0 1 -30,0 z" fill="#4A4A4A"/>`)),
+      '롤케이크':sv(lcyl(26,56,48,10,22,'#E9B373','#FFF3D6',`<path d="M26,56 m-5,0 a5,11 0 1 1 5,11" fill="none" stroke-width="1.5"/>`)) },
+    '공 모양':{
+      '농구공':ball(36,'#E8873A',''), '야구공':ball(30,'#FFFFFF',''), '탁구공':ball(20,'#FFB74D',''), '볼링공':ball(36,'#3F51B5',''), '비치볼':ball(36,'#FFFFFF',''), '눈덩이':ball(32,'#F3F8FC','') } };
+  D3['공 모양']['농구공']=sv(ball(36,'#E8873A',`<path d="M14,52 h72 M50,16 v72 M24,27 q22,25 0,50 M76,27 q-22,25 0,50" fill="none" stroke-width="2"/>`));
+  D3['공 모양']['야구공']=sv(ball(30,'#FFFFFF',`<path d="M32,29 q14,23 0,46 M68,29 q-14,23 0,46" fill="none" stroke="#D0443A" stroke-width="2" stroke-dasharray="3 3"/>`));
+  D3['공 모양']['탁구공']=sv(ball(20,'#FFB74D',`<path d="M38,44 q6,-8 14,-8" fill="none" stroke="#FFF3D6" stroke-width="3"/>`));
+  D3['공 모양']['볼링공']=sv(ball(36,'#3F51B5',`<circle cx="44" cy="38" r="3.5" fill="#1A237E"/><circle cx="56" cy="38" r="3.5" fill="#1A237E"/><circle cx="50" cy="48" r="3.5" fill="#1A237E"/>`));
+  D3['공 모양']['비치볼']=sv(ball(36,'#FFFFFF',`<path d="M50,16 q-30,36 0,72 q-12,-36 0,-72 z" fill="#F28B82"/><path d="M50,16 q30,36 0,72 q12,-36 0,-72 z" fill="#8CC7E8"/>`));
+  D3['공 모양']['눈덩이']=sv(ball(32,'#F3F8FC',`<path d="M34,40 q4,-8 12,-10" fill="none" stroke="#C9DCEA" stroke-width="2.5"/>`));
+  const D2={ '동그라미':{
+      '동전':sv(`<circle cx="50" cy="50" r="34" fill="#E3C46B"/><circle cx="50" cy="50" r="27" fill="none" stroke-width="1.5"/><text x="50" y="58" font-size="20" text-anchor="middle" fill="${S}" stroke="none" font-family="Jua">100</text>`),
+      '접시':sv(`<circle cx="50" cy="50" r="36" fill="#FFFFFF"/><circle cx="50" cy="50" r="23" fill="#F4F4F4" stroke-width="1.5"/>`),
+      '단추':sv(`<circle cx="50" cy="50" r="32" fill="#8CC7E8"/>${[[42,42],[58,42],[42,58],[58,58]].map(([x,y])=>`<circle cx="${x}" cy="${y}" r="3.5" fill="#fff" stroke-width="1.5"/>`).join('')}`),
+      '바퀴':sv(`<circle cx="50" cy="50" r="36" fill="#4A4A4A"/><circle cx="50" cy="50" r="24" fill="#E6E6E6"/><circle cx="50" cy="50" r="5" fill="#9E9E9E"/>${[0,60,120].map(a=>`<line x1="${50-24*Math.cos(a*Math.PI/180)}" y1="${50-24*Math.sin(a*Math.PI/180)}" x2="${50+24*Math.cos(a*Math.PI/180)}" y2="${50+24*Math.sin(a*Math.PI/180)}" stroke-width="1.5"/>`).join('')}`),
+      '피자 한 판':sv(`<circle cx="50" cy="50" r="36" fill="#E9B373"/><circle cx="50" cy="50" r="29" fill="#F6D06B" stroke-width="1.5"/>${[[40,40],[60,44],[46,60],[62,62],[34,54]].map(([x,y])=>`<circle cx="${x}" cy="${y}" r="4.5" fill="#D0443A" stroke-width="1"/>`).join('')}`),
+      '훌라후프':sv(`<circle cx="50" cy="50" r="34" fill="none" stroke="#F28B82" stroke-width="7"/><circle cx="50" cy="50" r="37.5" fill="none" stroke-width="1.5"/><circle cx="50" cy="50" r="30.5" fill="none" stroke-width="1.5"/>`) },
+    '세모':{
+      '삼각자':sv(`<polygon points="18,82 82,82 18,18" fill="#BDE3F5"/><polygon points="30,70 56,70 30,44" fill="#FFF8EC" stroke-width="1.5"/>`),
+      '교통 표지판':sv(`<polygon points="50,14 88,80 12,80" fill="#F6D06B" stroke="#D0443A" stroke-width="6"/><text x="50" y="70" font-size="34" text-anchor="middle" fill="${S}" stroke="none" font-family="Jua">!</text>`),
+      '샌드위치':sv(`<polygon points="14,80 86,80 14,22" fill="#F4E2B8"/><polygon points="22,74 72,74 22,34" fill="#A6D98C" stroke-width="1.5"/><polygon points="26,70 62,70 26,41" fill="#F6AFA9" stroke-width="1.5"/>`),
+      '트라이앵글':sv(`<polygon points="50,16 86,80 14,80" fill="none" stroke="#9E9E9E" stroke-width="7"/><polygon points="50,9 92,84 8,84" fill="none" stroke-width="1.5"/><polygon points="50,25 78,76 22,76" fill="none" stroke-width="1.5"/>`),
+      '수박 한 조각':sv(`<polygon points="50,16 88,82 12,82" fill="#F2686B"/><polygon points="12,82 88,82 84,74 16,74" fill="#7CC36A" stroke-width="1.5"/>${[[50,44],[42,60],[58,60],[50,66]].map(([x,y])=>`<ellipse cx="${x}" cy="${y}" rx="2" ry="3" fill="${S}" stroke="none"/>`).join('')}`),
+      '세모 깃발':sv(`<line x1="20" y1="12" x2="20" y2="90" stroke-width="4"/><polygon points="22,16 86,40 22,64" fill="#8CC7E8"/>`) },
+    '네모':{
+      '창문':sv(`<rect x="16" y="16" width="68" height="68" fill="#BDE3F5"/><line x1="50" y1="16" x2="50" y2="84"/><line x1="16" y1="50" x2="84" y2="50"/>`),
+      '액자':sv(`<rect x="12" y="22" width="76" height="56" fill="#C79A62"/><rect x="21" y="31" width="58" height="38" fill="#EAF6E4" stroke-width="1.5"/><polygon points="26,66 44,44 56,58 64,50 76,66" fill="#A6D98C" stroke-width="1.5"/>`),
+      '달력':sv(`<rect x="18" y="14" width="64" height="72" fill="#FFFFFF"/><rect x="18" y="14" width="64" height="16" fill="#F28B82"/>${[0,1,2].map(r=>[0,1,2,3].map(c=>`<rect x="${26+c*13}" y="${38+r*14}" width="8" height="8" fill="#E6E6E6" stroke="none"/>`).join('')).join('')}`),
+      '칠판':sv(`<rect x="8" y="24" width="84" height="52" fill="#3E7D5A" stroke="#C79A62" stroke-width="5"/><path d="M22,44 h26 M22,56 h40" stroke="#fff" stroke-width="2" fill="none"/>`),
+      '색종이':sv(`<rect x="18" y="18" width="64" height="64" fill="#FFD54F"/>`),
+      '스케치북':sv(`<rect x="16" y="20" width="68" height="64" fill="#FFF8EC"/>${[26,38,50,62,74].map(x=>`<circle cx="${x}" cy="20" r="3.5" fill="#fff" stroke-width="1.5"/>`).join('')}<path d="M30,62 q10,-22 20,-6 t20,-8" fill="none" stroke="#F2A65A" stroke-width="2.5"/>`) } };
+  /* 사진이 있는 물건도 함께 */ const IMG3={'상자 모양':['주사위','휴지 상자','책','지우개'],'둥근기둥 모양':['풀통','음료수 캔','휴지심','북'],'공 모양':['축구공','구슬','수박']}, IMG2={'동그라미':['시계'],'세모':['삼각김밥'],'네모':['공책']};
+  const pool=(D,I)=>{ const o={}; for(const k of Object.keys(D)){ o[k]=Object.entries(D[k]).map(([n,g])=>[n,g]); for(const n of (I[k]||[])) if(OBJN[n]) o[k].push([n,`<img class="objimg" src="img/obj/${OBJN[n]}.webp" alt="" style="width:84px;height:84px;object-fit:contain">`]); } return o; };
+  return {P3:pool(D3,IMG3),P2:pool(D2,IMG2)}; })();
+const shpFig=([n,g],w)=>`<figure style="margin:0;display:flex;flex-direction:column;align-items:center">${g}<figcaption style="font-size:.9rem;color:#4A2E14">${n}</figcaption></figure>`;
+const eunneun=o=>((o.charCodeAt(o.length-1)-0xAC00)%28)?'은':'는';
+function shpQs(P,code,isFlat){ const kinds=Object.keys(P), nm=k=>isFlat?k+' 모양':k;
+  const what=()=>{ const k=rndPick(...kinds), it=rndPick(...P[k]); const r=C36(WHO(),`${it[0]}${eunneun(it[0])} 어떤 모양일까요?`,`${it[0]}${eunneun(it[0])} 어떤 모양일까요?`,`<div class="objrow">${shpFig(it)}</div>`,k,kinds.slice()); r.mis={}; kinds.filter(x=>x!==k).forEach(x=>r.mis[x]=code); return r; };
+  const odd=()=>{ const [a,b]=shuffle(kinds.slice()), same=shuffle(P[a].slice()).slice(0,3), other=rndPick(...P[b]); const cands=[[other[0],lab=>`<div class="tf">${shpFig(other)}<b>${lab}</b></div>`],...same.map(it=>[it[0],lab=>`<div class="tf">${shpFig(it)}<b>${lab}</b></div>`,code])]; return mvPickQ('모양이 같은 것끼리 모았어요. 모양이 다른 하나는 어느 것일까요?','',cands); };
+  const pick=()=>{ const k=rndPick(...kinds), right=rndPick(...P[k]), others=kinds.filter(x=>x!==k).map(x=>rndPick(...P[x])); const cands=[[right[0],lab=>`<div class="tf">${shpFig(right)}<b>${lab}</b></div>`],...others.map(it=>[it[0],lab=>`<div class="tf">${shpFig(it)}<b>${lab}</b></div>`,code])]; return mvPickQ(`${nm(k)}인 것은 어느 것일까요?`,'',cands); };
+  return [what,odd,pick]; }
+try{ const A=shpQs(SHP.P3,'G1-01',false), B=shpQs(SHP.P2,'G1-02',true); window._SHPQ={A,B,P3:SHP.P3,P2:SHP.P2};
+  if(G36['S6-01']) G36['S6-01'].push(...A); if(G36['S6-03']) G36['S6-03'].push(...B);
 }catch(e){}
 
 /* ---------- 3-12. 개념 조각과 보기별 무게 (오개념 코드 → 모르는 개념 조각) ---------- */
