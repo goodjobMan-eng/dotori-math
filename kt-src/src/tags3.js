@@ -2773,3 +2773,10 @@ window._GT=GT;
   try{ const y0=say; say=function(text,who,cb){ if(!on()){ try{ hush(); }catch(e){} if(cb) cb(); return; } return y0.apply(this,arguments); }; }catch(e){}
   try{ const n0=sayNum; sayNum=function(){ if(!on()) return; return n0.apply(this,arguments); }; }catch(e){}
   document.addEventListener('pointerdown',e=>{ const t=e.target&&e.target.closest?e.target.closest('#speak,.speak'):null; if(t) window.__sndOnce=Date.now()+15000; },true); })();
+
+// ===== 3-70. 문제의 단계(교수님 11/22 밤: 수업 → 구체적 조작 → 기본(암기·계산) → 문장제 → 여러 개념) =====
+// 0 조작, 1 기본, 2 문장제, 3 여러 개념·까닭. 틀마다 손으로 붙이지 않고 문제의 꼴로 가른다(편 연습의 순서, 오늘의 문제의 새 내용 순서에 씀).
+window.ktStage=q=>{ try{ if(!q) return 1; if(q.manip||q.onMount) return 0; const t=String(q.q||'').replace(/<[^>]+>/g,' ').replace(/\s+/g,' ').trim(), a=String(q.ans==null?'':q.ans);
+    if(q._hard||/ — /.test(a)||/까닭|바르게 (말|고쳐|구한|계산한)|누구일까요|이 말에 대한/.test(t)) return 3; const nums=(t.match(/\d+/g)||[]).length;
+    if(t.length>=60&&nums>=3) return 3; if(q.word||(t.length>=26&&nums>=1&&/어요|았어요|였어요|려고|습니다|있어요/.test(t))) return 2; return 1; }catch(e){ return 1; } };
+window.KT_STAGE_NAME=['직접 해 보기','기본','문장제','생각 넓히기'];

@@ -61,7 +61,7 @@ function startQuick(){ const P=pref(); if(!P.band) return bandPage(startQuick); 
 
 // 오늘의 문제: 복습 + 틀린 이유 다시 다지기 + 지금 수준의 새 내용. 잘하면 앞으로, 어려우면 뒤로.
 // 3~6학년: 확인 문제·약한 조각·다시 다지기를 합쳐 40%까지만 넣고, 나머지는 지금 배우는 단원에서 낸다.
-function startDaily(opt){ const P=pref(); if(!P.band) return bandPage(startDaily); const N=P.pace||10, B=bag(); let g=0, video=null;
+function startDaily(opt){ const P=pref(); if(!P.band) return bandPage(startDaily); const N=P.pace||10, B=bag(); let g=0, video=null, n0=0;
   /* 계속 풀기(11/22): 이어서 풀 때는 복습 몫을 40%→20%로 줄이고 탐색 문제를 빼서, 통과한 아이는 다음 개념으로 빨리 넘어간다 */
   const cont=!!(opt&&opt.cont===true), RV=cont?.2:.4;
   if(P.band===1&&!P.cap){ try{ const best=load(); if(EPO.every(e=>(best['EP'+e]??-1)>=8)){ setPref({band:3}); return startDaily(opt); } }catch(e){} }   /* 1~2학년 내용을 모두 마쳤으면 3~4학년 내용으로 올라감 */
@@ -72,9 +72,18 @@ function startDaily(opt){ const P=pref(); if(!P.band) return bandPage(startDaily
     if(!P.seen[cur]){ video={kind:'video',key:epLabel(cur),label:`${epLabel(cur)} ${EPS[cur][0]}`}; const seen=P.seen; seen[cur]=1; setPref({seen}); } }
   else { const st=state(); const ck=checkPieces(st)[0]; if(ck) checkActs(B,ck.c); W(SK,st); const wp=weakPieces(st)[0]; if(wp){ const L=lecPlan(st,wp.c), n0=B.acts.length; video=pieceVideo(wp.c,L); pieceActs(B,Math.max(n0+2,Math.ceil(N*RV)),wp.c); if(L.mr.length<2&&!L.m){ B.acts.slice(n0,n0+2).forEach(a=>{ a.q._arm=L.arm; a.q._lec=wp.c; }); L.m=1; } W(SK,st); } misActs(B,Math.max(B.acts.length,Math.ceil(N*RV)));
     if(!cont){ const room=Math.min((st.probeN||0)<3?3:2,Math.floor(N/2)-B.acts.length); let k=0; for(const c of probeTops(st)){ if(k>=room) break; const q=probeQ(st,c); if(q){ B.push(q); k++; } } if(k){ st.probeN=(st.probeN||0)+1; W(SK,st); } }
-    const fr=frontier(st);
-    while(B.acts.length<N&&g++<N*10){ const ep=nextEp(fr[g%fr.length],st); if(ep) B.push(qFromEp36(ep),'_new'); } }
-  runSet(P.band===1?B.acts:shuffle(B.acts),cont?'계속 풀기':'오늘의 문제',{kt:'daily'},video); }
+    const fr=frontier(st); n0=B.acts.length; const usedEp=new Set();
+    /* 새 내용은 한 편을 '직접 해 보기 → 기본 → 문장제 → 생각 넓히기' 차례로 낸다(11/22 밤). 그 편에 없는 단계는 건너뛰고, 자리가 남으면 다음 편으로 */
+    while(B.acts.length<N&&g++<N*10){ const ep=nextEp(fr[g%fr.length],st); if(!ep) continue; if(!usedEp.has(ep)){ usedEp.add(ep); flowActs(B,ep,N-B.acts.length,st); } else { const q=qFromEp36(ep); if(q){ q._stg=window.ktStage(q); B.push(q,'_new'); } } } }
+  let acts=B.acts; if(P.band!==1){ const head=shuffle(acts.slice(0,n0)), tail=acts.slice(n0).map((a,k)=>[a,k]).sort((x,y)=>((x[0].q._stg??1)-(y[0].q._stg??1))||(x[1]-y[1])).map(x=>x[0]); acts=head.concat(tail); }
+  runSet(acts,cont?'계속 풀기':'오늘의 문제',{kt:'daily'},video); }
+// 한 편의 문제를 단계 차례로 담는다: 조작 1 → 기본(자리의 40%쯤) → 문장제 → 여러 개념 1. 단계 안에서는 지금 가장 많이 알려 줄 문제(bestQ).
+function flowActs(B,ep,room,st){ if(room<=0) return; const F=G36[ep]||[]; const by={0:[],1:[],2:[],3:[]}; F.forEach((g,i)=>{ try{ const q=g(); if(q) by[window.ktStage(q)].push(i); }catch(e){} });
+  /* 자리가 10이면 조작 2 · 기본 3 · 문장제 3 · 생각 넓히기 2 (제미나이와 맞춘 배분). 자리가 적으면 줄이고, 그 편에 없는 단계의 몫은 기본으로 */
+  const want={0:Math.min(by[0].length,room>=8?2:room>=3?1:0),3:Math.min(by[3].length?2:0,room>=8?2:room>=4?1:0)}; want[2]=by[2].length?Math.min(3,Math.max(1,Math.round(room*.3))):0; want[1]=Math.max(room>=6?2:1,room-want[0]-want[2]-want[3]); while(want[0]+want[1]+want[2]+want[3]>room){ if(want[2]>1) want[2]--; else if(want[3]>1) want[3]--; else if(want[0]>1) want[0]--; else if(want[1]>1) want[1]--; else break; }
+  let left=room; const put=(q,s)=>{ if(!q||left<=0) return false; q._ep=ep; q._stg=s; if(B.push(q,'_new')){ left--; return true; } return false; };
+  for(const i of shuffle(by[0].slice()).slice(0,want[0])){ for(let t=0;t<4;t++){ try{ const q=F[i](); if(q){ q._ti=i; if(put(q,0)) break; } }catch(e){ break; } } }
+  for(const s of [1,2,3]){ let n=0, guard=0; while(n<want[s]&&guard++<want[s]*6){ const q=bestQ([ep],x=>window.ktStage(x)===s,st); if(!q) break; if(put(q,s)) n++; } } }
 function finishDaily(S0){ const st=state(), t=dstr(Date.now());
   if(!st.daily||st.daily.d!==t){ st.streak=(st.daily&&st.daily.d===dstr(Date.now()-864e5))?(st.streak||0)+1:1; st.daily={d:t}; W(SK,st); }
   if(pref().band===1){ const idx=S0.acts.map((a,k)=>a.q&&a.q._new?k:-1).filter(k=>k>=0); if(idx.length>=3){ const acc=idx.filter(k=>S0.results[k]).length/idx.length; const i=ptr(); setPref({d12:Math.max(0,Math.min(EPO.length-1,i+(acc>=.8?1:acc<.5?-1:0)))});

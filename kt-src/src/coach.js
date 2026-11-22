@@ -13,6 +13,13 @@ function sameFormQ(q,code){ for(let t=0;t<8;t++){ let n=null;
   return null; }
 function ladderAfter(q,ok,m){ if(!S||!S.acts||S.diag||S.diagRun||q._probe||q._scaf||q._chk) return;   /* q.diag는 MC·WM으로 만든 문제마다 붙는 표시라 여기서 거르면 사다리가 거의 안 뜬다 → 수준 찾기 중(S.diagRun)만 거름 */ if(S._ld==null){ S._ld={n:0,pc:{},run:0,done:{}}; }
   const L=S._ld; if(q._firstSeen) return; q._firstSeen=1;
+  /* 단계 흐름의 갈림(11/22 밤, 제미나이와 검토): 새 내용의 '기본' 단계에서 첫 시도 오답이 2번이면, 계산이 아직 서지 않은 것이므로 남은 문장제·생각 넓히기를 접고
+     같은 편의 '직접 해 보기' 1문제 + 기본 2문제로 바꿔 세트를 마친다(가장 적은 문제로 원리 → 계산을 다시 잡음). 조작 단계에서 틀린 것만으로는 막지 않는다(다음 기본 문제로 확인). */
+  try{ if(q._new&&q._stg===1&&!ok&&!S._flowCut){ S._flw=(S._flw||0)+1; if(S._flw>=2){ const rest=S.acts.slice(S.i+1), hi=rest.filter(a=>a.kind==='q'&&a.q&&a.q._new&&a.q._stg>=2); if(hi.length){ S._flowCut=1; const ep=q._ep, F=G36[ep]||[], keep=rest.filter(a=>!(a.kind==='q'&&a.q&&a.q._new&&a.q._stg>=1)), add=[];
+          const used=new Set(S.acts.map(a=>a.q&&a.q._ti!=null&&a.q._ep===ep?a.q._ti:-1)); const mi=F.map((g,i)=>i).filter(i=>{ try{ const x=F[i](); return x&&(x.manip||x.onMount); }catch(e){ return false; } }); const pickM=mi.filter(i=>!used.has(i)).concat(mi)[0];
+          if(pickM!=null){ try{ const x=F[pickM](); x._ep=ep; x._ti=pickM; x._stg=0; x._new=1; x._flowFix=1; add.push({kind:'q',q:x}); }catch(e){} }
+          for(let t=0;t<8&&add.length<3;t++){ const x=bestQ([ep],y=>window.ktStage(y)===1); if(x&&!add.some(a=>String(a.q.q)===String(x.q))&&String(x.q)!==String(q.q)){ x._stg=1; x._new=1; x._flowFix=1; add.push({kind:'q',q:x}); } }
+          if(add.length){ S.acts.length=S.i+1; S.acts.push(...keep,...add); } } } } }catch(e){}
   if(ok){ L.run=0; return; } L.run++; L.wr=(L.wr||0)+1;
   /* 갇힌 학생 넘기기(11/22): 한 세트에서 첫 시도 오답이 4번이면, 남은 '새 내용' 문제를 같은 영역의 앞 단원(선수 내용) 문제로 바꿔 끝까지 풀고 나가게 한다. 덧붙이는 문제도 더 넣지 않는다. */
   if(L.wr>=4&&!L.eased){ L.eased=1; L.n=9; try{ const st=state(); for(let j=S.i+1;j<S.acts.length;j++){ const a=S.acts[j]; if(a.kind!=='q'||!a.q||!a.q._new||!a.q._ep) continue; const k=epKC(a.q._ep), s0=Object.keys(LADDER).find(x=>LADDER[x].includes(k)); if(!s0) continue; const i0=LADDER[s0].indexOf(k), pk=i0>0?LADDER[s0][i0-1]:k, eps=epsOf(pk).filter(e=>e!==a.q._ep&&(G36[e]||[]).length); if(!eps.length) continue; const done=eps.filter(e=>((st.ec||{})[e]||0)>=1), pool=done.length?done:eps.slice(0,2); const nq=bestQ([pool[Math.floor(Math.random()*pool.length)]]); if(nq){ nq._eased=1; a.q=nq; } }
@@ -27,6 +34,7 @@ function ladderAfter(q,ok,m){ if(!S||!S.acts||S.diag||S.diagRun||q._probe||q._sc
   const add=[{kind:'card',c:pc,why}], sib=sameFormQ(q,m); if(sib) add.push({kind:'q',q:sib});
   S.acts.splice(S.i+1,0,...add); }
 { const _ar=afterRec; afterRec=function(q,given,ok,m){ _ar(q,given,ok,m); try{ ladderAfter(q,ok,m); }catch(e){} }; }
+try{ window.__ladderAfter=(q,ok,m)=>ladderAfter(q,ok,m); }catch(e){}
 { const _rx=recExtra; recExtra=function(q){ const r=_rx(q); try{ if(q._scaf) r[1]='s'; }catch(e){} return r; }; }
 
 /* ===== 보호자에게 보여 줄 한 장 (로드맵 2단계-⑤) =====

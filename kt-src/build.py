@@ -112,7 +112,7 @@ sub("[`${a}%`,'D6-03']]); });", "[`${a}%`,'D6-03']], [`${100-b}%`]); });", 1)
 sub("[[`${2*(a+b)} cm²`,'G5-01'],[`${a+b} cm²`,'G5-01']]); },", "[[`${2*(a+b)} cm²`,'G5-01'],[`${a+b} cm²`,'G5-01']], [`${a*b+a} cm²`]); },", 1)
 
 
-out = '\n'.join(lines) + open('src/bank2.js', encoding='utf-8').read() + open('src/mis.js', encoding='utf-8').read() + open('src/tags3.js', encoding='utf-8').read() + open('src/cpiece.js', encoding='utf-8').read() + open('src/assets2.js', encoding='utf-8').read() + open('src/core2.js', encoding='utf-8').read().replace('/*__FACTS__*/', open('src/facts.js', encoding='utf-8').read()).replace('/*__MODES__*/', open('src/modes.js', encoding='utf-8').read() + open('src/coach.js', encoding='utf-8').read()) + open('src/cards.js', encoding='utf-8').read()
+out = '\n'.join(lines) + open('src/bank2.js', encoding='utf-8').read() + open('src/mis.js', encoding='utf-8').read() + open('src/tags3.js', encoding='utf-8').read() + open('src/manip2.js', encoding='utf-8').read() + open('src/cpiece.js', encoding='utf-8').read() + open('src/assets2.js', encoding='utf-8').read() + open('src/core2.js', encoding='utf-8').read().replace('/*__FACTS__*/', open('src/facts.js', encoding='utf-8').read()).replace('/*__MODES__*/', open('src/modes.js', encoding='utf-8').read() + open('src/coach.js', encoding='utf-8').read()) + open('src/cards.js', encoding='utf-8').read()
 open('kt.js', 'w', encoding='utf-8').write(out)
 
 h = open('/tmp/dotori-math/index.html', encoding='utf-8').read()
@@ -384,6 +384,17 @@ for _k in list(_P):
     _n,_pose,_mo=_k.split('_')
     if _n in _JU and _PM.get(_pose) in _JU[_n]: _P[_k]=_JU[_n][_PM[_pose]]
 h=h[:_pi]+_json.dumps(_P,ensure_ascii=False)+h[_pj+1:]
+
+# 단계 4개(조작 → 기본 → 문장제 → 여러 개념): 편 연습의 순서에 '여러 개념'을 맨 뒤 단계로 더함
+_a="const STAGE=q=>(q.manip||q.onMount)?0:q.word?2:1;"
+assert h.count(_a)==1; h=h.replace(_a,"const STAGE=q=>window.ktStage?window.ktStage(q):((q.manip||q.onMount)?0:q.word?2:1);")
+_i=h.index("const STAGE=q=>window.ktStage"); _j=h.index("return res.map(x=>x.q); }",_i); _seg=h[_i:_j]
+for _x,_y in [("const want={0:1,2:2};","const want={0:1,2:2,3:1};"),("[0,2].forEach(","[0,2,3].forEach("),("const cap={0:2,2:2}, cnt={0:0,1:0,2:0};","const cap={0:2,2:2,3:2}, cnt={0:0,1:0,2:0,3:0};"),("for(const s of [0,1,2]){","for(const s of [0,1,2,3]){")]:
+    assert _seg.count(_x)==1,_x; _seg=_seg.replace(_x,_y)
+h=h[:_i]+_seg+h[_j:]
+# 조작 문제: [다 했어요]를 누른 때의 상태로 오개념을 판정(q.manip.wrong()이 보기 이름을 돌려주면 그 이름으로 기록)
+_a="answer({dataset:{v:ok?q.ans:'__no'},classList:{add(){}},disabled:false},q);"
+assert h.count(_a)==1; h=h.replace(_a,"let _wv='__no'; try{ if(!ok&&q.manip.wrong){ const w=q.manip.wrong(); if(w) _wv=w; } }catch(e){} answer({dataset:{v:ok?q.ans:_wv},classList:{add(){}},disabled:false},q);")
 open('out/index.html', 'w', encoding='utf-8').write(h)
 print('built', len(out))
 
