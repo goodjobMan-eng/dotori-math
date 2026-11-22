@@ -2116,3 +2116,17 @@ function hqMake(h){ for(let t=0;t<30;t++){ let q=null; try{ q=h.gen(); }catch(e)
 window._HQ=HQ; window._hqMake=hqMake;
 window._hqPick=(dom,band,n=5)=>{ const gs=band>=5?[5,6]:band>=3?[3,4]:[1,2]; const pool=shuffle(HQ.filter(h=>h.dom===dom&&h.grades.some(g=>gs.includes(g)))); const out=[], seen=new Set(); for(let r=0;r<3&&out.length<n;r++) for(const h of pool){ if(out.length>=n) break; const q=hqMake(h); if(!q) continue; const k=String(q.q); if(seen.has(k)) continue; seen.add(k); out.push(q); } return out; };
 window._hqRec=(q,ok)=>{ try{ if(!q||!q._hq||q._hqDone) return; q._hqDone=1; const o=JSON.parse(localStorage.getItem('kt_hq')||'{}'), r=o[q._hq]=o[q._hq]||{n:0,ok:0}; r.n++; if(ok) r.ok++; localStorage.setItem('kt_hq',JSON.stringify(o)); }catch(e){} };
+
+
+// ===== 3-54. 주머니 공 가능성 비교: '같다' 보기 (교수님 11/22: 보기가 둘뿐이라 '같다'를 고를 수 없음) =====
+// 보기는 늘 빨간 공·파란 공·같다 셋. 세 번에 한 번쯤은 두 색의 개수를 같게 내어 '같다'가 정답이 되게 한다.
+// 오답 코드: 개수가 다른데 '같다' = D5-05(무엇이든 반반), 적은 쪽 = D5-07 대신 방향 혼동이라 코드 없이 F.
+try{ const a17=G36['S4-17']; if(a17){ const i=a17.findIndex(g=>{ try{ return /꺼낼 가능성이 더 큰 것은/.test(String(g().q)); }catch(e){ return false; } });
+    const gen=()=>{ const same=Math.random()<0.34, r=rnd(1,4), b=same?r:(()=>{ let x; do{ x=rnd(1,4); }while(x===r); return x; })(); const ans=r===b?'같다':r>b?'빨간 공':'파란 공';
+      const q=C36(WHO(),`빨간 공 ${r}개, 파란 공 ${b}개가 든 주머니에서 공 하나를 꺼낼 때, 꺼낼 가능성이 더 큰 것은?`,' ','',ans,shuffle(['빨간 공','파란 공']).concat('같다')); q.mis={}; if(r!==b) q.mis['같다']='D5-05'; return q; };
+    if(i>=0) a17[i]=gen; else a17.push(gen); } }catch(e){}
+/* 비교 문제의 보기 둘(크다/작다)에 '같다'를 더한다: >·< → >·=·<, '더 큰/높은/긴/많이 들어가는 것은?' → 같다 */
+function eqOpt(q){ if(!q||q.manip||q.onMount||!Array.isArray(q.opts)||q.opts.length!==2) return q; const o=q.opts.map(String), t=_pl(String(q.q));
+  if(o.includes('>')&&o.includes('<')){ q.opts=['>','=','<']; return q; }
+  if(/더 큰 것은\?|평균이 더 높은 모둠은|누구 연필이 더 길까요|더 많이 들어가는 것은|더 긴 것은\?|더 무거운 것은\?/.test(t)&&!o.includes('같다')&&(/\d/.test(t)||/누구 연필/.test(t))){ q.opts=o.concat(/누구/.test(t)?'길이가 같아요':'같다'); } return q; }
+{ const _t=tagQ; tagQ=function(ep,i,q){ q=_t(ep,i,q); try{ q=eqOpt(q); }catch(e){} return q; }; }
