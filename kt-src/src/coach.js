@@ -127,3 +127,15 @@ try{ window._sameFormQ=sameFormQ; window._jRago=jRago; window._parentPage=parent
 
 /* 도전 문장제 통계(임시 난이도 → 나중에 정답률로 가림) */
 { const _ar4=afterRec; afterRec=function(q,given,ok,m){ _ar4(q,given,ok,m); try{ window._hqRec&&window._hqRec(q,ok); }catch(e){} }; }
+
+/* 둘 중 고르기는 한 문제로 판단하지 않는다 (교수님 11/22): 찍어도 반은 맞으므로, 같은 꼴 문제를 수만 바꿔 한 번 더 낸다. 두 번의 결과가 엇갈리면 한 번 더(모두 3문제까지).
+   같은 꼴이 늘 같은 문제만 내면 같은 편의 다른 둘 중 고르기에서 고른다. 각 문제는 따로 기록되어 지식추적에 그대로 쌓인다. */
+function pairMore(q){ const ep=q._ep||(typeof S!=='undefined'&&S&&S.ep)||null, F=ep&&typeof G36!=='undefined'&&G36[ep]; if(!F) return null; const two=n=>n&&!n.manip&&!n.onMount&&Array.isArray(n.opts)&&n.opts.length===2, same=n=>String(n.q)===String(q.q)&&String(n.ans)===String(q.ans), seenQ=(q._pairSeenQ||[]).concat(String(q.q)+'|'+String(q.ans));
+  const fresh=n=>two(n)&&!seenQ.includes(String(n.q)+'|'+String(n.ans));
+  if(q._ti!=null&&q._ti>=0&&F[q._ti]) for(let t=0;t<10;t++){ let n=null; try{ n=F[q._ti](); }catch(e){} if(fresh(n)){ n._pairSeenQ=seenQ; n._ep=ep; n._ti=q._ti; return n; } }
+  for(const i of shuffle(F.map((_,k)=>k))){ if(i===q._ti) continue; for(let t=0;t<4;t++){ let n=null; try{ n=F[i](); }catch(e){} if(fresh(n)){ n._pairSeenQ=seenQ; n._ep=ep; n._ti=i; return n; } } } return null; }
+function pairAfter(q,ok){ if(!S||!S.acts||S.diag||S.diagRun||!q||q.diag||q._probe||q._chk||q._follow||q._scaf||q.manip||q.onMount||!Array.isArray(q.opts)||q.opts.length!==2||q._pairDone) return; q._pairDone=1;
+  const hist=(q._pairHist||[]).concat(ok?1:0); if(hist.length>=3) return; if(hist.length===2&&hist[0]===hist[1]) return;
+  const n=pairMore(q); if(!n) return; n._pairHist=hist; n._pair=hist.length+1; S.acts.splice(S.i+1,0,{kind:'q',q:n}); }
+{ const _ar5=afterRec; afterRec=function(q,given,ok,m){ _ar5(q,given,ok,m); try{ pairAfter(q,ok); }catch(e){} }; }
+try{ window._pairMore=pairMore; }catch(e){}

@@ -1522,18 +1522,23 @@ function skLayerSvg(H,z,u=22){ let g=''; for(let r=0;r<SK_N;r++) for(let c=0;c<S
   return `<div style="text-align:center;font-size:.85rem"><svg viewBox="-1 -1 ${SK_N*u+2} ${SK_N*u+2}" width="${SK_N*u+2}" style="background:transparent">${g}</svg><br>${z}층</div>`; }
 const skCond=inner=>`<div class="skcond" style="display:flex;gap:10px;justify-content:center;align-items:flex-end;flex-wrap:wrap;background:#FFF8EC;border:2px solid #EBD9BC;border-radius:12px;padding:8px 10px;color:#4A2E14">${inner}</div>`;
 /* 쌓기 판(조작) */
-function stack3D({cond='',check,reveal,mcode}={}){ let H=Array.from({length:SK_N},()=>Array(SK_N).fill(0)), rot=0, mode='add';
+function stack3D({cond='',check,reveal,mcode}={}){ let H=Array.from({length:SK_N},()=>Array(SK_N).fill(0)), rot=0;
+  /* 조작(교수님 11/22): 누르면 쌓이고, 길게 누르거나 마우스 오른쪽 단추를 누르면 하나 빠진다. 쌓기/빼기 모드를 바꾸는 단추는 없앴다(모드를 잊고 누르는 실수가 생김). */
   const btn=(id,t)=>`<button class="ghost" id="${id}" style="padding:7px 12px;font-size:1rem">${t}</button>`;
-  const html=`${cond}<div class="skwrap" style="width:100%;max-width:340px;background:#fff;border-radius:12px">${skIsoSvg(H,{s:30,click:true,cls:'sk3d'})}</div>
-    <div style="display:flex;gap:6px;justify-content:center;flex-wrap:wrap">${btn('skAdd','➕ 쌓기')}${btn('skDel','➖ 빼기')}${btn('skRot','⟳ 돌려 보기')}${btn('skClr','처음부터')}</div>
+  const html=`${cond}<div class="skwrap" style="width:100%;max-width:340px;background:#fff;border-radius:12px;touch-action:manipulation;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none">${skIsoSvg(H,{s:30,click:true,cls:'sk3d'})}</div>
+    <div style="font-size:.9rem;color:#7B5632;text-align:center">누르면 쌓여요 · <b>길게 누르면</b> 하나 빠져요</div>
+    <div style="display:flex;gap:6px;justify-content:center;flex-wrap:wrap">${btn('skRot','⟳ 돌려 보기')}${btn('skClr','처음부터')}</div>
     <div id="skCnt" style="font-family:Jua,sans-serif;font-size:1.1rem;color:#4A2E14">쌓은 쌓기나무 0개</div>`;
-  const upd=root=>{ const w=root.querySelector('.skwrap'); w.innerHTML=skIsoSvg(H,{s:30,rot,click:true,cls:'sk3d'}); root.querySelector('#skCnt').textContent=`쌓은 쌓기나무 ${skSum(H)}개`;
-    root.querySelector('#skAdd').style.background=mode==='add'?'#FFE3B0':''; root.querySelector('#skDel').style.background=mode==='del'?'#FFE3B0':''; };
+  const upd=root=>{ const w=root.querySelector('.skwrap'); w.innerHTML=skIsoSvg(H,{s:30,rot,click:true,cls:'sk3d'}); root.querySelector('#skCnt').textContent=`쌓은 쌓기나무 ${skSum(H)}개`; };
+  const add=(r,c)=>{ if(H[r][c]<SK_MAXH){ H[r][c]++; try{ sfx('pop'); }catch(_){} return true; } return false; }, del=(r,c)=>{ if(H[r][c]>0){ H[r][c]--; try{ sfx('nibble'); }catch(_){} return true; } return false; };
   return { html,
-    mount(root){ const w=root.querySelector('.skwrap');
-      w.addEventListener('click',e=>{ const el=e.target.closest('[data-r]'); if(!el) return; const r=+el.dataset.r, c=+el.dataset.c;
-        if(mode==='add'){ if(H[r][c]<SK_MAXH){ H[r][c]++; try{ sfx('pop'); }catch(_){} } } else if(H[r][c]>0){ H[r][c]--; try{ sfx('nibble'); }catch(_){} } upd(root); });
-      root.querySelector('#skAdd').onclick=()=>{ mode='add'; upd(root); }; root.querySelector('#skDel').onclick=()=>{ mode='del'; upd(root); };
+    mount(root){ const w=root.querySelector('.skwrap'); let timer=0, held=false, sx=0, sy=0; const cell=e=>{ const el=e.target&&e.target.closest&&e.target.closest('[data-r]'); return el?[+el.dataset.r,+el.dataset.c]:null; };
+      const cancel=()=>{ if(timer){ clearTimeout(timer); timer=0; } };
+      w.addEventListener('pointerdown',e=>{ if(e.button===2) return; const rc=cell(e); held=false; cancel(); if(!rc) return; sx=e.clientX; sy=e.clientY; timer=setTimeout(()=>{ timer=0; held=true; if(del(rc[0],rc[1])) upd(root); },450); });
+      w.addEventListener('pointermove',e=>{ if(timer&&Math.hypot(e.clientX-sx,e.clientY-sy)>12) cancel(); });
+      ['pointerup','pointercancel','pointerleave'].forEach(n=>w.addEventListener(n,cancel));
+      w.addEventListener('click',e=>{ if(held){ held=false; e.preventDefault(); return; } const rc=cell(e); if(!rc) return; if(add(rc[0],rc[1])) upd(root); });
+      w.addEventListener('contextmenu',e=>{ e.preventDefault(); cancel(); if(held){ return; } const rc=cell(e); if(rc&&del(rc[0],rc[1])) upd(root); });
       root.querySelector('#skRot').onclick=()=>{ rot=(rot+1)%4; upd(root); }; root.querySelector('#skClr').onclick=()=>{ H=H.map(r=>r.map(()=>0)); upd(root); }; upd(root); },
     check:()=>!!check(H), state:()=>H.flat().join(''), mcode:()=>mcode?mcode(H):null,
     reveal(){ H=skClone(reveal); rot=0; const r=document.getElementById('manip'); if(r) upd(r); }, _H:()=>H, _set(h){ H=skClone(h); } }; }
@@ -1583,7 +1588,7 @@ try{
   if(G36['S6-64']) G36['S6-64'].unshift(SKQ[0],SKQ[1]);
   if(G36['S6-65']) G36['S6-65'].unshift(SKQ[2],SKQ[4],SKQ[3]);
   if(G36['S6-02']){ const i=G36['S6-02'].findIndex(g=>{ try{ return /개로 모양을 만들어 보세요/.test(g().q); }catch(e){ return false; } });
-    if(i>=0) G36['S6-02'][i]=()=>{ const n=rnd(4,8); const R=[[0,0,0],[0,0,0],[0,0,0]]; for(let j=0;j<n;j++) R[2-Math.floor((j%6)/3)][j%3]++; return MQ(`쌓기나무 ${n}개로 내 마음대로 모양을 만들어 보세요.`,'바닥을 누르면 놓이고, 쌓기나무를 누르면 그 위에 얹혀요.',stack3D({check:B=>skSum(B)===n,reveal:R}),`${n}개`); }; }
+    if(i>=0) G36['S6-02'][i]=()=>{ const n=rnd(4,8); const R=[[0,0,0],[0,0,0],[0,0,0]]; for(let j=0;j<n;j++) R[2-Math.floor((j%6)/3)][j%3]++; return MQ(`쌓기나무 ${n}개로 내 마음대로 모양을 만들어 보세요.`,'바닥을 누르면 놓이고, 쌓기나무를 누르면 그 위에 얹혀요. 길게 누르면 하나 빠져요.',stack3D({check:B=>skSum(B)===n,reveal:R}),`${n}개`); }; }
 }catch(e){}
   /* 2학년 쌓기나무 모양: 그림과 똑같이 쌓기(모두 보이는 모양), '몇 층에 몇 개, 모두 몇 개' 덧셈 문제 대신 */
   const copyQ=()=>{ let H, v; for(let t=0;t<300;t++){ H=skRand(4,6,2); v=skVisible(H); if(v.topOk&&v.vis===skSum(H)) break; }
