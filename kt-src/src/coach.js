@@ -16,7 +16,7 @@ function ladderAfter(q,ok,m){ if(!S||!S.acts||S.diag||S.diagRun||q._probe||q._sc
   if(ok){ L.run=0; return; } L.run++; L.wr=(L.wr||0)+1;
   /* 갇힌 학생 넘기기(11/22): 한 세트에서 첫 시도 오답이 4번이면, 남은 '새 내용' 문제를 같은 영역의 앞 단원(선수 내용) 문제로 바꿔 끝까지 풀고 나가게 한다. 덧붙이는 문제도 더 넣지 않는다. */
   if(L.wr>=4&&!L.eased){ L.eased=1; L.n=9; try{ const st=state(); for(let j=S.i+1;j<S.acts.length;j++){ const a=S.acts[j]; if(a.kind!=='q'||!a.q||!a.q._new||!a.q._ep) continue; const k=epKC(a.q._ep), s0=Object.keys(LADDER).find(x=>LADDER[x].includes(k)); if(!s0) continue; const i0=LADDER[s0].indexOf(k), pk=i0>0?LADDER[s0][i0-1]:k, eps=epsOf(pk).filter(e=>e!==a.q._ep&&(G36[e]||[]).length); if(!eps.length) continue; const done=eps.filter(e=>((st.ec||{})[e]||0)>=1), pool=done.length?done:eps.slice(0,2); const nq=bestQ([pool[Math.floor(Math.random()*pool.length)]]); if(nq){ nq._eased=1; a.q=nq; } }
-      /* 세트를 줄임: 선수 내용 2문제만 더 풀고 끝(성공 경험으로 마무리) */ let keep=0; for(let j=S.i+1;j<S.acts.length;j++){ const a=S.acts[j]; if(a.kind==='q'&&a.q&&a.q._eased){ keep++; if(keep>=2){ S.acts.length=j+1; break; } } }
+      /* 세트를 줄임: 선수 내용 2문제만 더 풀고 끝(성공 경험으로 마무리) */ { const rest=S.acts.slice(S.i+1).filter(a=>a.kind==='q'&&a.q), es=rest.filter(a=>a.q._eased).slice(0,2), ot=rest.filter(a=>!a.q._eased).slice(0,2-es.length); S.acts.length=S.i+1; S.acts.push(...es,...ot); }
       S._eased=1; }catch(e){} return; }
   /* 선수 내용에서도 두 번 더 틀리면 남은 문제를 접고 결과로 */ if(L.eased&&q._eased){ L.ew=(L.ew||0)+1; if(L.ew>=2){ try{ S.acts.length=S.i+1; }catch(e){} } return; }
   const c=m&&typeof MISC!=='undefined'&&MISC[m]?MISC[m][0][0]:null; if(c){ L.pc[c]=(L.pc[c]||0)+1; L.last=c; }
