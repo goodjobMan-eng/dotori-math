@@ -124,3 +124,6 @@ try{ window._sameFormQ=sameFormQ; window._jRago=jRago; window._parentPage=parent
 
 /* 입체도형 그림 발판: 그림으로 2번 맞히면 글로만, 글로만 틀리면 다시 그림 (tags3 3-49) */
 { const _ar3=afterRec; afterRec=function(q,given,ok,m){ _ar3(q,given,ok,m); try{ window._svFade&&window._svFade(q,ok); }catch(e){} }; }
+
+/* 도전 문장제 통계(임시 난이도 → 나중에 정답률로 가림) */
+{ const _ar4=afterRec; afterRec=function(q,given,ok,m){ _ar4(q,given,ok,m); try{ window._hqRec&&window._hqRec(q,ok); }catch(e){} }; }

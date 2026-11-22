@@ -7396,6 +7396,74 @@ function gxPic(ep,t){ let m; const S=ep.slice(0,2), J=(n,x,y)=>/[136780]$/.test(
 { const _cp=cpPic; cpPic=function(ep,t){ if(/^S[456]-/.test(ep)){ if(/어떤 그래프|알맞은 그래프|까닭|뜻은|읽을까요|무엇이라|어떤 선분|이름|옳은|알맞은 말/.test(t)) return ''; let r=''; try{ r=gxPic(ep,t); }catch(e){ r=''; } if(r&&!/<div class="cpa"[^>]*><\/div>|<div class="cpa"[^>]*><div style="font-size/.test(r)) return r; } return _cp(ep,t); }; }
 window._gxPic=gxPic;
 
+
+// ===== 3-53. 도전 문장제: 영역별 복합 개념 문장제 (교수님 11/22) =====
+// 난이도 '상'은 임시 표시다. 나중에는 통계(자주 틀리는 문제, 여러 개념이 겹친 문제)로 어려운 문제를 가린다.
+// 그래서 문제마다 겹친 개념(kcs)을 적어 두고, 푼 횟수·첫 시도 정답 수를 따로 모은다(localStorage kt_hq → 교사용에서 볼 수 있게).
+// 정규 편(G36)에는 넣지 않고 '도전 문장제' 모드에서만 낸다. 1~2학년 수와 연산은 지식추적 대상(S편)이 아니라 기록에서 뺀다(_kt).
+const HQ=[];
+const hq=(id,grades,dom,ep,kcs,gen,nokt)=>HQ.push({id,grades,dom,ep,kcs,nokt,gen});
+const hqR=(a,b)=>rnd(a,b), hqP=(...a)=>rndPick(...a);
+/* ---- 1~2학년 ---- */
+hq('H1N1',[1,2],'수와 연산','S5-03',['덧셈','뺄셈','세 수 계산'],()=>{ const a=hqR(11,18), b=hqR(3,8), c=hqR(2,7); return WM(`버스에 ${a}명이 타고 있었어요. 이번 정류장에서 ${b}명이 내리고 ${c}명이 탔어요. 지금 버스에 탄 사람은 몇 명일까요?`,'',a-b+c,[[a-b,'N1-12'],[a-b-c,null],[a+b+c,null]],'','명'); },1);
+hq('H1N2',[1,2],'수와 연산','S5-03',['뺄셈(비교)','덧셈'],()=>{ const a=hqR(6,9), d=hqR(2,5); return WM(`도토는 도토리를 ${a}개 주웠어요. 람이는 도토보다 ${d}개 더 많이 주웠어요. 두 친구가 주운 도토리는 모두 몇 개일까요?`,'',a+a+d,[[a+d,'N1-12'],[a+a-d,'N1-13'],[a+d+d,null]],'','개'); },1);
+hq('H1N3',[2],'수와 연산','S5-03',['곱셈구구','덧셈'],()=>{ const a=hqR(2,5), b=hqR(3,6), c=hqR(2,9); return WM(`한 봉지에 ${a}개씩 든 사탕이 ${b}봉지 있고, 낱개로 ${c}개가 더 있어요. 사탕은 모두 몇 개일까요?`,'',a*b+c,[[a*b,'N1-12'],[a+b+c,'N2-10'],[a*(b+1)+c,'N2-09']],'','개'); },1);
+hq('H1N4',[2],'수와 연산','S5-03',['두 자리 수 뺄셈','모르는 수'],()=>{ const t=hqR(42,60), a=hqR(13,19), b=hqR(11,17); return WM(`색종이가 ${t}장 있었어요. 종이학을 접는 데 ${a}장, 비행기를 접는 데 ${b}장을 썼어요. 남은 색종이는 몇 장일까요?`,'',t-a-b,[[t-a,'N1-12'],[a+b,'N1-08'],[t-a+b,null]],'','장'); },1);
+hq('H1R1',[1,2],'변화와 관계','S5-05',['규칙 찾기','덧셈'],()=>{ const s=hqR(2,6), d=hqR(3,5); return WM(`도토리를 첫째 날 ${s}개, 둘째 날 ${s+d}개, 셋째 날 ${s+2*d}개 주웠어요. 이 규칙대로라면 다섯째 날에는 몇 개를 주울까요?`,'',s+4*d,[[s+3*d,'N1-07'],[s+2*d+1,'R1-04'],[s+5*d,'N1-07']],'','개'); });
+hq('H1R2',[2],'변화와 관계','S5-05',['규칙 찾기','반복'],()=>{ const n=hqP(11,14,17,20); const pat=['빨강','파랑','파랑']; return MC(`구슬을 빨강, 파랑, 파랑, 빨강, 파랑, 파랑… 순서로 꿰고 있어요. ${n}번째 구슬은 무슨 색일까요?`,'',pat[(n-1)%3],[[pat[n%3]===pat[(n-1)%3]?'노랑':pat[n%3],'R1-02'],['노랑',null]]); });
+hq('H1R3',[2],'변화와 관계','S5-03',['수 배열표','규칙'],()=>{ const a=hqR(12,36), k=hqR(2,4); return WM(`1부터 100까지 적힌 수 배열표에서 ${a}에서 아래로 ${k}칸, 오른쪽으로 2칸 간 곳의 수는 무엇일까요?`,'',a+10*k+2,[[a+k+2,'R1-03'],[a+10*k,null],[a+k+20,'R1-03']]); });
+hq('H1G1',[1,2],'도형과 측정','S6-11',['시각','시간'],()=>{ const h=hqR(1,3), m=hqP(30,40), d=hqP(40,50); const tot=m+d; return MC(`${h}시 ${m}분에 놀이터에 가서 ${d}분 동안 놀았어요. 놀이를 마친 시각은?`,'',`${h+Math.floor(tot/60)}시 ${tot%60?tot%60+'분':''}`.trim(),[[`${h}시 ${tot}분`,'G2-17'],[`${h+1}시 ${tot-50}분`,'G2-03'],[`${h+2}시 ${tot%60}분`,null]]); });
+hq('H1G2',[2],'도형과 측정','S6-15',['길이의 합','m와 cm'],()=>{ const a=hqR(1,2), b=hqP(60,70,80), c=hqP(50,60,70,90); const tot=a*100+b+c; return MC(`리본을 ${a} m ${b} cm 쓰고, 이어서 ${c} cm를 더 썼어요. 쓴 리본은 모두 몇 m 몇 cm일까요?`,'',`${Math.floor(tot/100)} m ${tot%100} cm`,[[`${a} m ${b+c} cm`,'G2-17'],[`${Math.floor(tot/100)+1} m ${tot%100} cm`,null],[`${Math.floor(tot/100)} m ${tot%100+10} cm`,null]]); });
+hq('H1G3',[1,2],'도형과 측정','S6-04',['도형의 변','덧셈'],()=>{ const a=hqR(2,4), b=hqR(2,3); return WM(`삼각형 ${a}개와 사각형 ${b}개를 그렸어요. 변은 모두 몇 개일까요?`,'',3*a+4*b,[[a+b,'N1-12'],[3*a+3*b,'G1-02'],[4*a+3*b,'G1-02']],'','개'); });
+hq('H1D1',[2],'자료와 가능성','S4-06',['표','합계','뺄셈'],()=>{ const a=hqR(5,9), b=hqR(3,7), c=hqR(4,8), t=a+b+c; return WM(`좋아하는 과일을 조사했더니 사과 ${a}명, 포도 ${b}명, 나머지는 모두 귤이에요. 조사한 학생이 ${t}명이라면 귤을 좋아하는 학생은 몇 명일까요?`,'',c,[[t,'D1-02'],[t-a,'N1-12'],[a+b,'N1-08']],'','명'); });
+hq('H1D2',[2],'자료와 가능성','S4-05',['그래프 읽기','차'],()=>{ const v=shuffle([hqR(2,4),hqR(5,7),hqR(8,9)]); const mx=Math.max(...v), mn=Math.min(...v); return WM(`○ 하나가 1명인 그래프에 사과 ○ ${v[0]}개, 포도 ○ ${v[1]}개, 귤 ○ ${v[2]}개가 그려져 있어요. 가장 많은 것과 가장 적은 것의 차이는 몇 명일까요?`,'',mx-mn,[[mx,'N1-08'],[mx+mn,null],[v[0]+v[1]+v[2],'D1-02']],'','명'); });
+/* ---- 3~4학년 ---- */
+hq('H3N1',[3],'수와 연산','S2-05',['세 자리 수 뺄셈','덧셈','두 단계'],()=>{ const a=hqR(520,880), b=hqR(135,290), c=hqR(108,190); return WM(`도서관에 책이 ${a}권 있었어요. 오전에 ${b}권을 빌려 갔고, 오후에 ${c}권이 돌아왔어요. 지금 도서관에 있는 책은 몇 권일까요?`,'',a-b+c,[[a-b,'N1-12'],[a-b-c,null],[a+b+c,null]],'','권'); });
+hq('H3N2',[3],'수와 연산','S2-11',['나눗셈','곱셈','두 단계'],()=>{ const per=hqR(3,6), k=hqR(4,8), boxes=hqR(2,4)*per; return WM(`쿠키를 한 판에 ${k}개씩 ${boxes}판 구웠어요. 이 쿠키를 ${per}명이 똑같이 나누어 가지면 한 명이 몇 개씩 가질까요?`,'',k*boxes/per,[[k*boxes,'N1-12'],[boxes/per,null],[k*boxes-per,null]],'','개'); });
+hq('H3N3',[3,4],'수와 연산','S3-29',['나머지의 해석','나눗셈'],()=>{ const b=hqR(6,9), q=hqR(4,8), r=hqR(1,b-1), n=b*q+r; return WM(`학생 ${n}명이 한 번에 ${b}명씩 탈 수 있는 보트를 타요. 모두 타려면 보트는 적어도 몇 번 운행해야 할까요?`,'',q+1,[[q,'N4-12'],[r,'N4-16'],[q+2,null]],'','번'); });
+hq('H3N4',[3],'수와 연산','S3-35',['전체의 분수','뺄셈'],()=>{ const d=hqP(3,4,5,6), n=hqR(1,d-2), N=d*hqR(3,6); return WM(`사탕 ${N}개 가운데 ${d}분의 ${n}을 동생에게 주었어요. 남은 사탕은 몇 개일까요?`,'',N-N/d*n,[[N/d*n,'N1-08'],[N/d,'N3-39'],[N-n,'N3-26']],'','개'); });
+hq('H3N5',[4],'수와 연산','S3-45',['곱셈','뺄셈','두 단계'],()=>{ const p=hqP(350,450,650,850), n=hqR(12,24), pay=Math.ceil(p*n/10000)*10000; return WM(`한 개에 ${p}원인 지우개를 ${n}개 사고 ${pay}원을 냈어요. 거스름돈은 얼마일까요?`,'',pay-p*n,[[p*n,'N1-08'],[pay-p,'N1-12']],'','원'); });
+hq('H3N6',[4],'수와 연산','S3-48',['나눗셈','나머지','곱셈'],()=>{ const b=hqP(12,15,16,24), q=hqR(11,19), r=hqR(1,b-1), n=b*q+r; return WM(`공책 ${n}권을 한 상자에 ${b}권씩 담아 팔려고 해요. 상자에 담아 팔 수 있는 공책은 모두 몇 권일까요?`,'',b*q,[[q,'N4-12'],[r,'N4-16'],[n,null]],'','권'); });
+hq('H3N7',[4],'수와 연산','S3-61',['소수의 덧셈','소수의 뺄셈'],()=>{ const a=hqR(31,48)/10, b=hqR(12,19)/10, c=hqR(105,145)/100, ans=+(a-b-c).toFixed(2); return MC(`길이가 ${a} m인 끈에서 ${b} m를 잘라 쓰고, 다시 ${c} m를 잘라 썼어요. 남은 끈은 몇 m일까요?`,'',`${ans} m`,[[`${+(a-b).toFixed(2)} m`,'N1-12'],[`${+(a-b-c*10>0?a-b-c*10:a-b+c).toFixed(2)} m`,'N4-03'],[`${+(b+c).toFixed(2)} m`,'N1-08']]); });
+hq('H3R1',[4],'변화와 관계','S5-06',['규칙 찾기','곱셈'],()=>{ const k=hqR(8,12); return WM(`성냥개비로 정사각형을 한 줄로 이어 붙여요. 정사각형 1개는 4개, 2개는 7개, 3개는 10개가 필요해요. 정사각형 ${k}개를 만들려면 성냥개비가 몇 개 필요할까요?`,'',3*k+1,[[4*k,'R5-03'],[3*k,null],[3*k+4,null]],'','개'); });
+hq('H3R2',[4],'변화와 관계','S5-10',['등호','덧셈과 뺄셈'],()=>{ const a=hqR(34,58), b=hqR(17,29); let c=hqR(12,25); if(c===b) c+=3; return WM(`${a} + ${b} = □ + ${c} 가 되도록 하려고 해요. □에 알맞은 수는 얼마일까요?`,'',a+b-c,[[a+b,'R4-02'],[a+b+c,'R4-02'],[a-c,null]]); });
+hq('H3R3',[3,4],'변화와 관계','S5-07',['규칙을 식으로','곱셈'],()=>{ const a=hqR(3,6), b=hqR(2,5), n=hqR(12,20); return WM(`어떤 규칙으로 수를 늘어놓았어요: ${a+b}, ${2*a+b}, ${3*a+b}, ${4*a+b}, … 이 규칙에서 ${n}번째 수는 얼마일까요?`,'',a*n+b,[[a*n,'R5-03'],[a*(n-1)+b,'N1-07'],[(a+b)*n,'R5-02']]); });
+hq('H3G1',[3],'도형과 측정','S6-35',['시간의 덧셈','분과 시간'],()=>{ const h=hqR(1,2), m=hqP(35,45,50), h2=1, m2=hqP(25,40,45), tot=(h+h2)*60+m+m2; return MC(`영화를 ${h}시간 ${m}분 동안 보고, 이어서 책을 ${h2}시간 ${m2}분 동안 읽었어요. 모두 몇 시간 몇 분일까요?`,'',`${Math.floor(tot/60)}시간 ${tot%60}분`,[[`${h+h2}시간 ${m+m2}분`,'G2-17'],[`${Math.floor(tot/60)+1}시간 ${tot%60}분`,null],[`${Math.floor(tot/60)}시간 ${tot%60+10}분`,null]]); });
+hq('H3G2',[3],'도형과 측정','S6-19',['정사각형','직사각형','둘레'],()=>{ const a=hqR(4,9), k=hqP(2,3); return WM(`한 변이 ${a} cm인 정사각형 ${k}개를 옆으로 겹치지 않게 이어 붙여 직사각형을 만들었어요. 이 직사각형의 네 변의 길이의 합은 몇 cm일까요?`,'',2*(a*k+a),[[4*a*k,'G5-07'],[a*k+a,null],[a*k*a,'G5-01']],'','cm'); });
+hq('H3G3',[3],'도형과 측정','S6-27',['원의 반지름과 지름','길이'],()=>{ const r=hqR(3,7), n=hqR(3,5); return WM(`반지름이 ${r} cm인 원 ${n}개를 서로 맞닿게 한 줄로 그렸어요. 맨 왼쪽 끝에서 맨 오른쪽 끝까지의 길이는 몇 cm일까요?`,'',2*r*n,[[r*n,'G3-04'],[2*r*(n-1),'G3-10'],[r*(n+1),null]],'','cm'); });
+hq('H3G4',[4],'도형과 측정','S6-50',['삼각형 세 각의 합','이등변삼각형'],()=>{ const top=hqP(40,50,70,80,100); return WM(`이등변삼각형의 꼭지각이 ${top}°예요. 한 밑각의 바깥쪽에 생기는 각(밑각과 합해 180°가 되는 각)은 몇 도일까요?`,'',180-(180-top)/2,[[(180-top)/2,'N1-12'],[180-top,'G4-18'],[top,null]],'','°'); });
+hq('H3G5',[4],'도형과 측정','S6-51',['사각형 네 각의 합','평행사변형'],()=>{ const a=hqP(55,65,70,75,110,125); return WM(`평행사변형의 한 각이 ${a}°예요. 이 각과 이웃한 각의 크기는 몇 도일까요?`,'',180-a,[[a,null],[360-a,'G4-12'],[90,null]],'','°'); });
+hq('H3D1',[3],'자료와 가능성','S4-08',['그림그래프','합계'],()=>{ const b1=hqR(2,4), s1=hqR(1,5), b2=hqR(1,3), s2=hqR(4,8); return WM(`그림그래프에서 큰 그림은 10개, 작은 그림은 1개를 나타내요. 가 마을은 큰 그림 ${b1}개와 작은 그림 ${s1}개, 나 마을은 큰 그림 ${b2}개와 작은 그림 ${s2}개예요. 두 마을의 도토리는 모두 몇 개일까요?`,'',10*(b1+b2)+s1+s2,[[b1+b2+s1+s2,'D3-01'],[10*b1+s1,'N1-12'],[10*(b1+b2+s1+s2),'D3-01']],'','개'); });
+hq('H3D2',[4],'자료와 가능성','S4-10',['막대그래프 눈금','차'],()=>{ const u=hqP(2,5), a=hqR(6,9), b=hqR(2,5); return WM(`세로 눈금 한 칸이 ${u}명인 막대그래프에서 축구는 ${a}칸, 농구는 ${b}칸이에요. 축구를 좋아하는 학생은 농구를 좋아하는 학생보다 몇 명 더 많을까요?`,'',u*(a-b),[[a-b,'D4-01'],[u*a,'N1-08'],[u*(a+b),null]],'','명'); });
+hq('H3D3',[4],'자료와 가능성','S4-11',['꺾은선그래프','변화량'],()=>{ const v=[hqR(8,11)]; [hqR(2,3),hqR(5,7),-hqR(1,2),hqR(1,3)].forEach(d=>v.push(v[v.length-1]+d)); const ds=v.slice(1).map((x,i)=>x-v[i]); const mi=ds.indexOf(Math.max(...ds)); const lab=i=>`${i+1}일과 ${i+2}일 사이`; return MC(`낮 기온이 1일 ${v[0]}도, 2일 ${v[1]}도, 3일 ${v[2]}도, 4일 ${v[3]}도, 5일 ${v[4]}도였어요. 기온이 가장 많이 오른 때는 언제일까요?`,'',lab(mi),[[lab(v.indexOf(Math.max(...v))-1===mi?(mi+1)%4:Math.max(0,v.indexOf(Math.max(...v))-1)),'D4-03'],[lab(ds.indexOf(Math.min(...ds))),'D4-04']]); });
+/* ---- 5~6학년 ---- */
+hq('H5N1',[5],'수와 연산','S3-67',['혼합 계산','문장을 식으로'],()=>{ const p=hqP(700,800,900), n=hqR(3,5), q=hqP(1200,1500), pay=10000; return WM(`${p}원짜리 공책 ${n}권과 ${q}원짜리 필통 2개를 사고 ${pay}원을 냈어요. 거스름돈은 얼마일까요?`,'',pay-(p*n+q*2),[[pay-p*n+q*2,'N5-09'],[p*n+q*2,'N1-08'],[pay-(p*n+q),'N1-12']],'','원'); });
+hq('H5N2',[5],'수와 연산','S3-73',['최소공배수','시각'],()=>{ const a=hqP(6,8,9), b=hqP(10,12,15), l=(x,y)=>{ let g=x,h=y; while(h){ [g,h]=[h,g%h]; } return x*y/g; }, L=l(a,b); return WM(`가 버스는 ${a}분마다, 나 버스는 ${b}분마다 출발해요. 두 버스가 오전 9시에 함께 출발했다면, 다음에 함께 출발하는 것은 몇 분 뒤일까요?`,'',L,[[a*b===L?a+b:a*b,'N5-12'],[(()=>{ let g=a,h=b; while(h){ [g,h]=[h,g%h]; } return g; })(),'N5-02'],[a+b,null]],'','분'); });
+hq('H5N3',[5],'수와 연산','S3-80',['분모가 다른 분수의 덧셈','뺄셈'],()=>{ const [d1,n1,d2,n2]=hqP([2,1,3,1],[3,1,4,1],[2,1,5,1],[4,1,6,1],[3,1,6,1]); const L=d1*d2/((x,y)=>{ while(y){ [x,y]=[y,x%y]; } return x; })(d1,d2), rest=L-(n1*L/d1+n2*L/d2), g=((x,y)=>{ while(y){ [x,y]=[y,x%y]; } return x; })(rest,L); return MC(`물통의 물 가운데 ${d1}분의 ${n1}은 화분에 주고, ${d2}분의 ${n2}은 세수하는 데 썼어요. 남은 물은 처음의 몇 분의 몇일까요?`,'',`${L/g}분의 ${rest/g}`,[[`${L/g===L?L+1:L}분의 ${n1*L/d1+n2*L/d2}`,'N1-08'],[`${d1+d2}분의 ${n1+n2}`,'N5-04'],[`${d1+d2}분의 ${d1+d2-n1-n2}`,'N5-04']]); });
+hq('H5N4',[5],'수와 연산','S3-91',['분수의 곱셈','전체의 분수','남은 양'],()=>{ const N=hqP(24,30,36,40,48), [d1,d2]=hqP([2,3],[3,2],[4,3],[3,4],[2,4]); if(N%d1||((N-N/d1)%d2)) return null; return WM(`책 ${N}쪽 가운데 어제 전체의 ${d1}분의 1을 읽고, 오늘은 남은 쪽수의 ${d2}분의 1을 읽었어요. 아직 읽지 않은 쪽수는 몇 쪽일까요?`,'',N-N/d1-(N-N/d1)/d2,[[N-N/d1-N/d2>0?N-N/d1-N/d2:null,'N5-18'],[(N-N/d1)/d2,'N1-08'],[N-N/d1,'N1-12']],'','쪽'); });
+hq('H5N5',[6],'수와 연산','S3-107',['분수의 나눗셈','단위량'],()=>{ const [n,d,k]=hqP([3,4,6],[2,3,8],[3,5,9],[4,5,12]); return WM(`철사 ${d}분의 ${n} m의 무게가 ${k} g이에요. 이 철사 1 m의 무게는 몇 g일까요?`,'',k*d/n,[[k*n/d===Math.floor(k*n/d)?k*n/d:null,'N6-12'],[k*d,'N6-11'],[k,null]],'','g'); });
+hq('H5N6',[6],'수와 연산','S3-112',['소수의 나눗셈','나머지','올림'],()=>{ const b=hqP(0.6,0.7,0.8), q=hqR(5,9), r=hqP(0.2,0.3,0.4,0.5), tot=+(b*q+r).toFixed(1); return WM(`주스 ${tot} L를 한 병에 ${b} L씩 모두 담으려고 해요. 병은 적어도 몇 개 필요할까요?`,'',q+1,[[q,'N6-10'],[Math.round(r*10),'N6-09'],[q+2,null]],'','개'); });
+hq('H5R1',[5],'변화와 관계','S5-12',['대응 관계','식으로 나타내기'],()=>{ const a=hqR(3,6), b=hqR(2,5), x=hqR(12,20); return WM(`□가 1, 2, 3일 때 △는 ${a+b}, ${2*a+b}, ${3*a+b}이에요. □가 ${x}일 때 △는 얼마일까요?`,'',a*x+b,[[a*x,'R5-03'],[x+a+b-1,'R5-02'],[(a+b)*x,'R5-03']]); });
+hq('H5R2',[6],'변화와 관계','S5-16',['백분율','할인','두 단계'],()=>{ const p=hqP(8000,12000,15000,20000), r=hqP(10,20,25), n=2; return WM(`한 개에 ${p}원인 장난감을 ${r}% 할인해서 팔아요. 이 장난감 ${n}개를 사려면 얼마를 내야 할까요?`,'',p*(100-r)/100*n,[[p*r/100*n,'R6-07'],[p*(100-r)/100,'N1-12'],[p*n-p*r/100,null]],'','원'); });
+hq('H5R3',[6],'변화와 관계','S5-16',['진하기','백분율','기준량'],()=>{ const [s,w]=hqP([20,80],[30,120],[25,100],[40,160],[10,40]); const add=s+w, ans=Math.round(100*s/(add*2)); return WM(`소금 ${s} g을 물 ${w} g에 녹인 소금물에 물 ${add} g을 더 넣었어요. 새로 만든 소금물의 진하기는 몇 %일까요?`,'',ans,[[Math.round(100*s/(s+w)),'R6-06'],[Math.round(100*s/(w+add)),'R6-08'],[Math.round(100*s/(s+w))/2===ans?null:Math.round(100*s/w),'R6-08']],'','%'); });
+hq('H5R4',[6],'변화와 관계','S5-21',['비례배분','차'],()=>{ const [a,b]=hqP([2,3],[3,5],[3,4],[2,5],[4,5]), u=hqR(4,9), N=(a+b)*u; return WM(`구슬 ${N}개를 형과 동생이 ${b} : ${a}로 나누어 가졌어요. 형은 동생보다 몇 개 더 많이 가졌을까요?`,'',(b-a)*u,[[b*u,'N1-08'],[N/b===Math.floor(N/b)?N/b:null,'R6-13'],[b-a,'R6-16']],'','개'); });
+hq('H5R5',[6],'변화와 관계','S5-20',['비례식','속력'],()=>{ const v=hqP(60,70,80,90), t1=hqP(2,3), t2=hqP(5,6,7); return WM(`같은 빠르기로 달리는 자동차가 ${t1}시간 동안 ${v*t1} km를 갔어요. 이 빠르기로 ${t2}시간 30분 동안 달리면 몇 km를 갈까요?`,'',v*t2+v/2,[[v*t2,'N1-12'],[v*(t2+0.3)===Math.floor(v*(t2+0.3))?v*(t2+0.3):null,'G2-03'],[v*t1*t2,'R6-14']],'','km'); });
+hq('H5G1',[5],'도형과 측정','S6-68',['직사각형의 둘레','넓이'],()=>{ const w=hqR(7,12), h=hqR(3,6); return WM(`둘레가 ${2*(w+h)} cm이고 가로가 ${w} cm인 직사각형이 있어요. 이 직사각형의 넓이는 몇 cm²일까요?`,'',w*h,[[2*(w+h),'G5-01'],[h,'N1-12'],[w*(w+2*h),null]],'','cm²'); });
+hq('H5G2',[5],'도형과 측정','S6-71',['삼각형의 넓이','높이 구하기'],()=>{ const b=hqP(8,10,12), h=hqR(5,9), b2=hqP(4,5,6,b/2); return WM(`밑변이 ${b} cm, 높이가 ${h} cm인 삼각형과 넓이가 같은 직사각형이 있어요. 이 직사각형의 가로가 ${b/2} cm라면 세로는 몇 cm일까요?`,'',h,[[2*h,'G5-03'],[b*h/2,'N1-12'],[h/2===Math.floor(h/2)?h/2:null,'G5-16']],'','cm'); });
+hq('H5G3',[5],'도형과 측정','S6-56',['직육면체의 모서리','길이의 합'],()=>{ const a=hqR(5,9), b=hqR(3,6), c=hqR(2,4), rb=hqR(15,25); return WM(`가로 ${a} cm, 세로 ${b} cm, 높이 ${c} cm인 직육면체 모양 상자의 모든 모서리에 색 테이프를 붙이려고 해요. 필요한 색 테이프는 모두 몇 cm일까요?`,'',4*(a+b+c),[[a+b+c,'G5-13'],[2*(a+b+c),'G5-11'],[a*b*c,'G6-05']],'','cm'); });
+hq('H5G4',[6],'도형과 측정','S6-78',['직육면체의 부피','높이 구하기'],()=>{ const a=hqP(5,6,8,10), b=hqP(4,5,6), h=hqR(3,7), up=hqR(2,4); return WM(`가로 ${a} cm, 세로 ${b} cm인 직육면체 모양 물통에 물이 ${h} cm 높이로 들어 있어요. 여기에 돌을 넣었더니 물의 높이가 ${h+up} cm가 되었어요. 돌의 부피는 몇 cm³일까요?`,'',a*b*up,[[a*b*(h+up),'N1-08'],[a*b*h,null],[2*(a*b+a*up+b*up),'G6-05']],'','cm³'); });
+hq('H5G5',[6],'도형과 측정','S6-75',['원의 넓이','반지름과 지름'],()=>{ const d=hqP(8,12,20), r=d/2; return WM(`한 변이 ${d} cm인 정사각형 안에 꼭 맞게 원을 그렸어요. 정사각형에서 원을 뺀 나머지 부분의 넓이는 몇 cm²일까요? (원주율 3)`,'',d*d-3*r*r,[[d*d-3*d*d<0?3*r*r:3*r*r,'N1-08'],[d*d-3*d,'G6-12'],[d*d-3*2*r,'G6-18']],'','cm²'); });
+hq('H5D1',[5],'자료와 가능성','S4-16',['평균','합계','모르는 값'],()=>{ const n=4, avg=hqR(82,90), v=[avg+hqR(-6,-2),avg+hqR(1,4),avg+hqR(-3,3)], last=avg*n-v.reduce((s,x)=>s+x,0); return WM(`네 번 본 시험의 평균이 ${avg}점이에요. 세 번의 점수가 ${v[0]}점, ${v[1]}점, ${v[2]}점이라면 나머지 한 번의 점수는 몇 점일까요?`,'',last,[[avg,'D5-01'],[Math.round(v.reduce((s,x)=>s+x,0)/3),'D5-04'],[avg*n,'D5-04']],'','점'); });
+hq('H5D2',[5],'자료와 가능성','S4-16',['평균','인원이 다른 두 모둠'],()=>{ const a=hqR(4,6), b=hqR(2,3), T=hqR(10,14), d=hqP(-1,1), ma=T+d*b, mb=T-d*a; return WM(`가 모둠 ${a}명은 책을 평균 ${ma}권, 나 모둠 ${b}명은 평균 ${mb}권 읽었어요. 두 모둠 학생 전체의 평균은 몇 권일까요?`,'',(a*ma+b*mb)/(a+b),[[Math.round((ma+mb)/2)!==(a*ma+b*mb)/(a+b)?Math.round((ma+mb)/2):null,'D5-02'],[a*ma+b*mb,'D5-04'],[ma+mb,null]],'','권'); });
+hq('H5D3',[6],'자료와 가능성','S4-21',['비율그래프','전체 수','백분율'],()=>{ const N=hqP(200,300,400,500), p1=hqP(30,35,40), p2=hqP(15,20,25); return WM(`${N}명을 조사한 띠그래프에서 축구는 ${p1}%, 농구는 ${p2}%예요. 축구를 고른 학생은 농구를 고른 학생보다 몇 명 더 많을까요?`,'',N*(p1-p2)/100,[[p1-p2,'D6-01'],[N*p1/100,'N1-08'],[N*(p1+p2)/100,null]],'','명'); });
+hq('H5D4',[6],'자료와 가능성','S4-21',['비율그래프 비교','전체가 다른 두 집단'],()=>{ const [N1,p1,N2,p2]=hqP([500,20,200,40],[400,25,150,60],[600,15,200,40],[300,30,100,70]); const a=N1*p1/100, b=N2*p2/100; return MC(`가 학교 ${N1}명 중 ${p1}%, 나 학교 ${N2}명 중 ${p2}%가 자전거로 등교해요. 자전거로 등교하는 학생은 어느 학교가 몇 명 더 많을까요?`,'',`${a>b?'가':'나'} 학교가 ${Math.abs(a-b)}명 더 많다`,[[`${a>b?'나':'가'} 학교가 ${Math.abs(a-b)+10}명 더 많다`,'D6-02'],[`${a>b?'가':'나'} 학교가 ${Math.abs(p1-p2)+1}명 더 많다`,'D6-01'],[`두 학교가 같다`,null]]); });
+/* 문제 뽑기 */
+function hqMake(h){ for(let t=0;t<30;t++){ let q=null; try{ q=h.gen(); }catch(e){ q=null; } if(!q||typeof q!=='object') continue; const A=String(q.ans); if(q.opts&&q.opts.length&&new Set(q.opts.map(String)).size!==q.opts.length) continue;
+    q._hq=h.id; q._kcs=h.kcs; q._ep=h.ep; q._ti=-1; q._lvl='상(임시)'; if(h.nokt) q._kt=1; try{ nowrapExpr(q); }catch(e){} try{ if(h.grades[0]>=3||h.dom!=='수와 연산') cpaVis(h.ep,q); }catch(e){} q._cpaPic=null; delete q._svEp; return q; } return null; }
+window._HQ=HQ; window._hqMake=hqMake;
+window._hqPick=(dom,band,n=5)=>{ const gs=band>=5?[5,6]:band>=3?[3,4]:[1,2]; const pool=shuffle(HQ.filter(h=>h.dom===dom&&h.grades.some(g=>gs.includes(g)))); const out=[], seen=new Set(); for(let r=0;r<3&&out.length<n;r++) for(const h of pool){ if(out.length>=n) break; const q=hqMake(h); if(!q) continue; const k=String(q.q); if(seen.has(k)) continue; seen.add(k); out.push(q); } return out; };
+window._hqRec=(q,ok)=>{ try{ if(!q||!q._hq||q._hqDone) return; q._hqDone=1; const o=JSON.parse(localStorage.getItem('kt_hq')||'{}'), r=o[q._hq]=o[q._hq]||{n:0,ok:0}; r.n++; if(ok) r.ok++; localStorage.setItem('kt_hq',JSON.stringify(o)); }catch(e){} };
+
 /* ---------- 3-12. 개념 조각과 보기별 무게 (오개념 코드 → 모르는 개념 조각) ---------- */
 // 교수님 지적(2026-11-20): 오답에 코드만 붙일 게 아니라 "이 보기를 고른 아이는 어떤 개념을 모른다"는 가정과 무게가 있어야 한다.
 // CPC: 조각 → [이름, 처음 배우는 학년-학기, 선수 조각들]. MISC: 오개념 코드 → [[주 조각, 무게], [부 조각, 무게]].
@@ -8142,7 +8210,7 @@ function ktResult(S0){ const box=document.querySelector('.result'); if(!box) ret
   if(S0.kt){ const n=S0.acts.length, b=box.querySelector('.big'); if(b) b.textContent=b.textContent.replace('/ 10','/ '+n);
     box.querySelector('#nextbtn')?.remove(); const ag=document.getElementById('again'), li=document.getElementById('list');
     if(S0.kt==='daily') finishDaily(S0);
-    if(ag){ ag.textContent=S0.kt==='quick'?'5문제 더':'더 풀기'; ag.onclick=S0.kt==='quick'?startQuick:startDaily; }
+    if(ag){ ag.textContent=S0.kt==='quick'?'5문제 더':S0.kt==='hard'?'도전 문장제 더 풀기':'더 풀기'; ag.onclick=S0.kt==='quick'?startQuick:S0.kt==='hard'?hardPage:startDaily; }
     if(li){ li.textContent='그만하기'; li.onclick=home; } }
   const w=S0._wrong||[];
   if(pref().why&&w.length){ box.insertAdjacentHTML('beforeend',`<div style="text-align:left;margin-top:16px"><div class="kt-sec">틀린 문제 돌아보기</div><ul class="recent kt-list">${w.slice(0,10).map(x=>`<li><b>${esc(x.q)}</b><div class="kt-ex">내 답 <b>${esc(x.g||'?')}</b> → 정답 <b>${esc(x.a)}</b></div>${x.tip?`<div class="kt-tip">${x.tip}</div>`:''}</li>`).join('')}</ul></div>`); } }
@@ -8160,13 +8228,21 @@ function modesHTML(){ const P=pref(), st=state(), done=st.daily&&st.daily.d===ds
   const sub=done?`${st.streak||1}일째 이어서 풀고 있어요`:P.band?`내 수준에 맞춘 ${P.pace}문제`:'내 수준에 맞춰 매일 조금씩';
   return `<div class="kt-modes"><button class="kt-mode" id="kt-quick"><img class="who" src="${JU['청이']['자세_만세']}" alt=""><b>가볍게 풀기</b><span>5문제만 풀고 끝</span></button>
     <button class="kt-mode" id="kt-daily"><img class="who" src="${JU['부엉 박사님']['자세_손가락하나']}" alt=""><b>오늘의 문제</b><span>${sub}</span>${done?'<i class="stamp">다 풀었어요</i>':''}</button></div>
-    <div class="kt-chips"><button class="kt-chip${P.why?' on':''}" id="kt-why">틀린 이유 보기 ${P.why?'켜짐':'꺼짐'}</button><button class="kt-chip" id="kt-pace">하루 ${P.pace}문제</button><button class="kt-chip" id="kt-slot">${slotName(curSlot())?slotFace(curSlot(),'tiny')+slotName(curSlot()):'내 친구 고르기'}</button><button class="kt-chip" id="kt-band">${bandName(P.band)}</button>${P.band>=3&&!st.lvl?'<button class="kt-chip" id="kt-diag">내 수준 정확히 찾기</button>':''}</div>
+    <div class="kt-chips"><button class="kt-chip" id="kt-hard" style="border-color:#D45F16;color:#B4480C">도전 문장제</button><button class="kt-chip${P.why?' on':''}" id="kt-why">틀린 이유 보기 ${P.why?'켜짐':'꺼짐'}</button><button class="kt-chip" id="kt-pace">하루 ${P.pace}문제</button><button class="kt-chip" id="kt-slot">${slotName(curSlot())?slotFace(curSlot(),'tiny')+slotName(curSlot()):'내 친구 고르기'}</button><button class="kt-chip" id="kt-band">${bandName(P.band)}</button>${P.band>=3&&!st.lvl?'<button class="kt-chip" id="kt-diag">내 수준 정확히 찾기</button>':''}</div>
     <h2 class="sec">골라서 풀기</h2>`; }
 function bindModes(){ const on=(id,f)=>{ const b=document.getElementById(id); if(b) b.onclick=f; };
   on('kt-quick',startQuick); on('kt-daily',startDaily); on('kt-diag',startDiag);
   on('kt-why',()=>{ setPref({why:!pref().why}); home(); });
   on('kt-pace',()=>{ const p=pref().pace; setPref({pace:p===5?10:p===10?15:5}); home(); });
-  on('kt-band',()=>bandPage(home)); on('kt-slot',()=>slotPage(false)); }
+  on('kt-band',()=>bandPage(home)); on('kt-slot',()=>slotPage(false)); on('kt-hard',hardPage); }
+/* 도전 문장제: 영역을 골라 복합 개념 문장제 5문제 (난이도 '상'은 임시 표시, 나중에 통계로 다시 가린다) */
+function hardPage(){ if(!pref().band) return bandPage(hardPage); hush(); app.className='wrap'; const b=pref().band;
+  app.innerHTML=`<div class="top"><button class="back" id="back">← 처음</button><div class="crumb">도전 문장제</div><span style="width:70px"></span></div>
+    <div class="stage"><div style="font-family:Jua;font-size:1.25rem;margin-bottom:4px">어느 영역에 도전할까요?</div><div style="font-size:.95rem;color:#7B5632;margin-bottom:12px">${bandName(b)} · 여러 개념을 함께 쓰는 문장제 5문제</div>
+    <div class="kt-modes" style="grid-template-columns:1fr">${DOMS.map((d,i)=>`<button class="kt-mode kt-band" data-dom="${i}"><b>${d}</b></button>`).join('')}</div></div>`;
+  document.getElementById('back').onclick=home;
+  app.querySelectorAll('[data-dom]').forEach(x=>x.onclick=()=>{ const d=DOMS[+x.dataset.dom]; let qs=[]; try{ qs=window._hqPick(d,b,5); }catch(e){} if(!qs.length) return home(); runSet(qs.map(q=>({kind:'q',q})),'도전 문장제 · '+d,{kt:'hard',hard:1}); }); }
+window._hardPage=()=>hardPage();
 
 /* ---------- 10-3. 골라서 풀기: 영상이 있든 없든 학년 → 영역 → 단원 순서(계열)로 한 줄에 ---------- */
 const DOMS=['수와 연산','변화와 관계','도형과 측정','자료와 가능성'];
@@ -8360,6 +8436,9 @@ try{ window._sameFormQ=sameFormQ; window._jRago=jRago; window._parentPage=parent
 
 /* 입체도형 그림 발판: 그림으로 2번 맞히면 글로만, 글로만 틀리면 다시 그림 (tags3 3-49) */
 { const _ar3=afterRec; afterRec=function(q,given,ok,m){ _ar3(q,given,ok,m); try{ window._svFade&&window._svFade(q,ok); }catch(e){} }; }
+
+/* 도전 문장제 통계(임시 난이도 → 나중에 정답률로 가림) */
+{ const _ar4=afterRec; afterRec=function(q,given,ok,m){ _ar4(q,given,ok,m); try{ window._hqRec&&window._hqRec(q,ok); }catch(e){} }; }
 
 /* ---------- 11. 기존 화면에 연결 ---------- */
 const css=document.createElement('style'); css.textContent=`.kt-kc{display:inline-block;margin:3px;padding:4px 10px;border-radius:999px;font-size:.85rem;border:2px solid #d9c7a8;background:#fff}

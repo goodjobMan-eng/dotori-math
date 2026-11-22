@@ -78,7 +78,7 @@ function ktResult(S0){ const box=document.querySelector('.result'); if(!box) ret
   if(S0.kt){ const n=S0.acts.length, b=box.querySelector('.big'); if(b) b.textContent=b.textContent.replace('/ 10','/ '+n);
     box.querySelector('#nextbtn')?.remove(); const ag=document.getElementById('again'), li=document.getElementById('list');
     if(S0.kt==='daily') finishDaily(S0);
-    if(ag){ ag.textContent=S0.kt==='quick'?'5문제 더':'더 풀기'; ag.onclick=S0.kt==='quick'?startQuick:startDaily; }
+    if(ag){ ag.textContent=S0.kt==='quick'?'5문제 더':S0.kt==='hard'?'도전 문장제 더 풀기':'더 풀기'; ag.onclick=S0.kt==='quick'?startQuick:S0.kt==='hard'?hardPage:startDaily; }
     if(li){ li.textContent='그만하기'; li.onclick=home; } }
   const w=S0._wrong||[];
   if(pref().why&&w.length){ box.insertAdjacentHTML('beforeend',`<div style="text-align:left;margin-top:16px"><div class="kt-sec">틀린 문제 돌아보기</div><ul class="recent kt-list">${w.slice(0,10).map(x=>`<li><b>${esc(x.q)}</b><div class="kt-ex">내 답 <b>${esc(x.g||'?')}</b> → 정답 <b>${esc(x.a)}</b></div>${x.tip?`<div class="kt-tip">${x.tip}</div>`:''}</li>`).join('')}</ul></div>`); } }
@@ -96,13 +96,21 @@ function modesHTML(){ const P=pref(), st=state(), done=st.daily&&st.daily.d===ds
   const sub=done?`${st.streak||1}일째 이어서 풀고 있어요`:P.band?`내 수준에 맞춘 ${P.pace}문제`:'내 수준에 맞춰 매일 조금씩';
   return `<div class="kt-modes"><button class="kt-mode" id="kt-quick"><img class="who" src="${JU['청이']['자세_만세']}" alt=""><b>가볍게 풀기</b><span>5문제만 풀고 끝</span></button>
     <button class="kt-mode" id="kt-daily"><img class="who" src="${JU['부엉 박사님']['자세_손가락하나']}" alt=""><b>오늘의 문제</b><span>${sub}</span>${done?'<i class="stamp">다 풀었어요</i>':''}</button></div>
-    <div class="kt-chips"><button class="kt-chip${P.why?' on':''}" id="kt-why">틀린 이유 보기 ${P.why?'켜짐':'꺼짐'}</button><button class="kt-chip" id="kt-pace">하루 ${P.pace}문제</button><button class="kt-chip" id="kt-slot">${slotName(curSlot())?slotFace(curSlot(),'tiny')+slotName(curSlot()):'내 친구 고르기'}</button><button class="kt-chip" id="kt-band">${bandName(P.band)}</button>${P.band>=3&&!st.lvl?'<button class="kt-chip" id="kt-diag">내 수준 정확히 찾기</button>':''}</div>
+    <div class="kt-chips"><button class="kt-chip" id="kt-hard" style="border-color:#D45F16;color:#B4480C">도전 문장제</button><button class="kt-chip${P.why?' on':''}" id="kt-why">틀린 이유 보기 ${P.why?'켜짐':'꺼짐'}</button><button class="kt-chip" id="kt-pace">하루 ${P.pace}문제</button><button class="kt-chip" id="kt-slot">${slotName(curSlot())?slotFace(curSlot(),'tiny')+slotName(curSlot()):'내 친구 고르기'}</button><button class="kt-chip" id="kt-band">${bandName(P.band)}</button>${P.band>=3&&!st.lvl?'<button class="kt-chip" id="kt-diag">내 수준 정확히 찾기</button>':''}</div>
     <h2 class="sec">골라서 풀기</h2>`; }
 function bindModes(){ const on=(id,f)=>{ const b=document.getElementById(id); if(b) b.onclick=f; };
   on('kt-quick',startQuick); on('kt-daily',startDaily); on('kt-diag',startDiag);
   on('kt-why',()=>{ setPref({why:!pref().why}); home(); });
   on('kt-pace',()=>{ const p=pref().pace; setPref({pace:p===5?10:p===10?15:5}); home(); });
-  on('kt-band',()=>bandPage(home)); on('kt-slot',()=>slotPage(false)); }
+  on('kt-band',()=>bandPage(home)); on('kt-slot',()=>slotPage(false)); on('kt-hard',hardPage); }
+/* 도전 문장제: 영역을 골라 복합 개념 문장제 5문제 (난이도 '상'은 임시 표시, 나중에 통계로 다시 가린다) */
+function hardPage(){ if(!pref().band) return bandPage(hardPage); hush(); app.className='wrap'; const b=pref().band;
+  app.innerHTML=`<div class="top"><button class="back" id="back">← 처음</button><div class="crumb">도전 문장제</div><span style="width:70px"></span></div>
+    <div class="stage"><div style="font-family:Jua;font-size:1.25rem;margin-bottom:4px">어느 영역에 도전할까요?</div><div style="font-size:.95rem;color:#7B5632;margin-bottom:12px">${bandName(b)} · 여러 개념을 함께 쓰는 문장제 5문제</div>
+    <div class="kt-modes" style="grid-template-columns:1fr">${DOMS.map((d,i)=>`<button class="kt-mode kt-band" data-dom="${i}"><b>${d}</b></button>`).join('')}</div></div>`;
+  document.getElementById('back').onclick=home;
+  app.querySelectorAll('[data-dom]').forEach(x=>x.onclick=()=>{ const d=DOMS[+x.dataset.dom]; let qs=[]; try{ qs=window._hqPick(d,b,5); }catch(e){} if(!qs.length) return home(); runSet(qs.map(q=>({kind:'q',q})),'도전 문장제 · '+d,{kt:'hard',hard:1}); }); }
+window._hardPage=()=>hardPage();
 
 /* ---------- 10-3. 골라서 풀기: 영상이 있든 없든 학년 → 영역 → 단원 순서(계열)로 한 줄에 ---------- */
 const DOMS=['수와 연산','변화와 관계','도형과 측정','자료와 가능성'];
