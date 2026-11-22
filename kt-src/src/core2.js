@@ -415,3 +415,11 @@ try{ new MutationObserver(()=>placeBadge()).observe(document.getElementById('app
   let ask=false; try{ const at=+(localStorage.getItem(SLOT_AT)||0); ask=at>0&&Date.now()-at>2*3600e3&&knownSlots().length>1; }catch(e){}
   if(h==='#teacher') teacherPage(); else if(ask) slotPage(true); else home(); })();
 })();
+
+/* 보기 한 칸 안에서 식·말이 줄바꿈되지 않게 (교수님 11/22: '□ = △ × / 4'처럼 끊기면 안 됨)
+   보기를 한 줄로 두고, 칸이 좁아 넘치면 3열 → 2열 → 1열로 넓힌다. 1열에서도 넘치는 긴 문장만 띄어쓰기에서 줄바꿈. */
+(function(){ const fit=el=>{ const bs=[...el.querySelectorAll(':scope > .opt')]; if(!bs.length||el.offsetWidth===0) return; const key=bs.map(b=>b.textContent).join('|')+el.offsetWidth; if(el._fitKey===key) return; el._fitKey=key;
+    el.style.gridTemplateColumns=''; bs.forEach(b=>{ b.style.whiteSpace='nowrap'; }); const over=()=>bs.some(b=>b.scrollWidth>b.clientWidth+1);
+    if(over()){ if(!el.classList.contains('wide')) el.style.gridTemplateColumns='repeat(2,1fr)'; if(over()) el.style.gridTemplateColumns='1fr'; if(over()) bs.forEach(b=>{ if(b.scrollWidth>b.clientWidth+1) b.style.whiteSpace=''; }); } };
+  let raf=0; const run=()=>{ raf=0; document.querySelectorAll('.opts').forEach(el=>{ try{ fit(el); }catch(e){} }); };
+  try{ new MutationObserver(()=>{ if(!raf) raf=requestAnimationFrame(run); }).observe(document.body,{childList:true,subtree:true}); addEventListener('resize',()=>{ if(!raf) raf=requestAnimationFrame(run); }); }catch(e){} })();
