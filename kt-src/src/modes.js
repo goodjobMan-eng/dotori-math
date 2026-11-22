@@ -205,3 +205,8 @@ function unifyHome(){ const root=document.getElementById('app'); if(!root) retur
   const h=[...root.querySelectorAll('h2.sec')].find(x=>/골라서 풀기/.test(x.textContent)); if(h){ h.insertAdjacentHTML('afterend',gradesHTML()); root.querySelectorAll('.kt-tree').forEach(b=>b.onclick=()=>gradePage(+b.dataset.g)); } }
 grade36=function(g){ return gradePage(LASTG||g); };
 const _ch0=chapter; chapter=function(ch){ const r=_ch0.apply(this,arguments); try{ const b=document.getElementById('back'); if(b){ b.textContent='← '+CH_GRADE[ch]+'학년'; b.onclick=()=>gradePage(CH_GRADE[ch]); } }catch(e){} return r; };
+
+/* 섞인 세트(오늘의 문제·가볍게 풀기·수준 찾기·다시 다지기)에서도 문제의 단원에 맞는 캐릭터가 말하게 한다(교수님 11/22: 시계 문제는 토끼).
+   전에는 세트 전체가 정해진 네 캐릭터(도토·대롱이·부엉 박사님·붕붕이)라 시계 문제를 꿀벌이 내기도 했다. */
+const CLOCK_EPS=new Set(['S6-09','S6-10','S6-11','S6-12','S6-13','S6-34','S6-35','S6-36']);   /* 시각·시간 편은 토끼(째깍이·똑딱이)만 */
+{ const _ra=runAct; runAct=function(){ try{ if(S&&S.mode==='ep36'&&S.acts){ const a=S.acts[S.i], ep=(a&&a.q&&a.q._ep)||S.ep; if(CLOCK_EPS.has(ep)){ const rb=['째깍이','똑딱이'].filter(n=>JU[n]); if(rb.length) S.chars=[rb[0],rb[rb.length-1],rb[0],rb[rb.length-1]]; } else if(S.kt||S.diagRun||S.focus||S.saveKey==='KTSET'||S.saveKey==='RETRY'){ if(ep){ const u=UNITS36.find(x=>x.eps.includes(ep)); if(u){ const cs=charsFor(Object.assign({},u,{eps:[ep]})); if(cs&&cs.length){ const out=cs.slice(); while(out.length<4) out.push(cs[out.length%cs.length]); S.chars=out; } } } } } }catch(e){} return _ra.apply(this,arguments); }; }
