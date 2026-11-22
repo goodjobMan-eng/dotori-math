@@ -217,7 +217,7 @@ function course(){ const st=state(), best=load(), out=[];
   const due=dueFacts().length; if(due) out.push({k:'review',n:'1~2학년',t:'다시 만나기',s:`${Math.min(10,due)}문제`});
   if(!st.lvl) out.push({k:'diag',n:'3~6학년 · 처음 한 번',t:'내 수준 찾기',s:'14문제쯤'});
   for(const x of report().mis.filter(x=>formsOf(x.c).length).slice(0,2)){ const ep=x.ep[x.ep.length-1]; out.push({k:'focus',code:x.c,n:'다시 다지기',t:(EPS36[ep]||[''])[0],s:'6문제'}); }
-  if(st.lvl) for(const s of Object.keys(LADDER)){ const kc=LADDER[s].find(k=>!['숙달','추정'].includes(kcStatus(k,st))); if(!kc) continue;
+  if(st.lvl) for(const s of Object.keys(LADDER)){ const cg=window._capG?window._capG():9, kc=LADDER[s].find(k=>+((k.match(/^K[A-Z](\d)/)||[])[1]||0)<=cg&&!['숙달','추정'].includes(kcStatus(k,st))); if(!kc) continue;
     const eps=epsOf(kc), ep=eps.find(e=>(best['EP'+e]??-1)<8)||eps[0]; if(ep) out.push({k:'ep',ep,n:SNAME[s],t:EPS36[ep][0],s:ep}); }
   return out.slice(0,6); }
 function courseHTML(){ CUR=course(); return `<div class="eps ktc">${CUR.map((x,i)=>`<button class="ep" data-kt="${i}"><span class="n">${x.n}</span><span class="t">${x.t}</span><span class="s">${x.s}</span></button>`).join('')}</div>`; }
@@ -346,7 +346,7 @@ const _h0=home; home=function(){ const r=_h0.apply(this,arguments);
   try{ const h=document.querySelector('#app h2.sec'); if(h){ h.insertAdjacentHTML('beforebegin',modesHTML()); bindModes(); unifyHome(); } }catch(e){}
   return r; };
 const _sp0=statsPage; statsPage=function(){ const r=_sp0.apply(this,arguments);
-  try{ const st=document.querySelector('#app .stage'); if(st){ st.insertAdjacentHTML('beforeend',`<div class="btns" style="margin-top:14px"><button class="ghost" id="kt-teacher">선생님용 보기</button></div>`); document.getElementById('kt-teacher').onclick=teacherPage; } }catch(e){}
+  try{ const st=document.querySelector('#app .stage'); if(st){ st.insertAdjacentHTML('beforeend',`<div class="btns" style="margin-top:14px"><button class="ghost" id="kt-teacher">통과 확인</button></div>`); document.getElementById('kt-teacher').onclick=()=>teacherPage(); } }catch(e){}
   return r; };
 
 /* ---------- 12. 익명 묶음 전송 (교사가 켠 기기만) ---------- */

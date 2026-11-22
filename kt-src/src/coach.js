@@ -78,9 +78,9 @@ function parentPage(){ if(typeof S!=='undefined'&&S) S.idle=true; try{ hush(); }
     <h2 class="sec">집에서 해 볼 것 한 가지</h2>
     <p class="kc-say">${tip?esc(tip):'오늘 푼 문제 가운데 하나를 아이가 어른에게 설명해 보게 해 주세요. 설명할 수 있으면 아는 것이에요.'}</p>
     <p class="kt-ex">이 기기에 쌓인 기록으로만 만든 내용이에요. 정답 비율보다 꾸준히 푸는 날 수가 더 중요해요.</p>
-    <div class="btns" style="margin-top:12px"><button class="ghost" id="pp-teacher">선생님용 자세히 보기</button></div>
+    <div class="btns" style="margin-top:12px"><button class="ghost" id="pp-teacher">통과 확인</button></div>
    </div>`;
-  document.getElementById('back').onclick=home; document.getElementById('pp-teacher').onclick=teacherPage; }
+  document.getElementById('back').onclick=home; document.getElementById('pp-teacher').onclick=()=>teacherPage(); }
 { const _sp=statsPage; statsPage=function(){ const r=_sp.apply(this,arguments);
   try{ const st=document.querySelector('#app .stage'); if(st&&!document.getElementById('kt-parent')){ st.insertAdjacentHTML('beforeend',`<div class="btns" style="margin-top:8px"><button class="ghost" id="kt-parent">보호자용 보기</button></div>`); document.getElementById('kt-parent').onclick=parentPage; } }catch(e){}
   return r; }; }
@@ -120,6 +120,31 @@ const CFK='dotori-kt-conf';
       if(c!=='확실해요'){ const sib=sameFormQ(Q._ep?Q:q,null); if(sib){ sib._conf=1; S.acts.push({kind:'q',q:sib}); } } }); }catch(e){}
   return r; }; }
 
+/* ---------- 통과 확인 (교수님 11/22) ----------
+   식별 정보도, 교사가 모아 보는 화면(대시보드)도 두지 않는다 — 담임이 그 정보를 수집하는 셈이 되기 때문. 기록은 학생 기기 안에만 있고,
+   담임은 학생 기기에서 이 화면의 '통과' 도장만 눈으로 확인한다. 오개념·오답 내용은 여기 보이지 않는다(그건 학생·보호자용 화면에만).
+   통과 = 그 학년의 모든 내용이 '숙달'(숙달도 0.85 이상 + 3문제 이상 + 직접 써서 맞힌 적이 있거나 6문제 이상). 예전 '선생님용' 화면은 이 화면으로 바뀜. */
+function passPage(g0){ if(typeof S!=='undefined'&&S) S.idle=true; try{ hush(); }catch(e){} app.className='wrap'; const st=state();
+  const gOf=k=>+((k.match(/^K[A-Z](\d)/)||[])[1]||0), all=Object.keys(LADDER).flatMap(s=>LADDER[s].map(k=>[s,k])), grades=[1,...new Set(all.map(x=>gOf(x[1])))].filter(Boolean).sort();
+  let g=+g0||pref().band||grades[0]; if(!grades.includes(g)) g=grades[0];
+  if(g===1){ /* 1~2학년 내용은 편마다 8점 이상이면 익힌 것으로 */ let best={}; try{ best=load(); }catch(e){} const n=EPO.filter(e=>(best['EP'+e]??-1)>=8).length; return passDraw(g,grades,n,EPO.length,'',st); }
+  const mine=all.filter(x=>gOf(x[1])===g), ok=mine.filter(x=>kcStatus(x[1],st)==='숙달'), pass=mine.length>0&&ok.length===mine.length;
+  const secs=Object.keys(LADDER).map(s=>{ const ks=mine.filter(x=>x[0]===s); if(!ks.length) return ''; return `<div class="kt-sec">${SNAME[s]}</div><div>${ks.map(([_,k])=>{ const m=kcStatus(k,st)==='숙달'; return `<span class="kt-kc ${m?'kt-m':'kt-u'}">${m?'✔':'○'} ${KCN[k]}</span>`; }).join('')}</div>`; }).join('');
+  return passDraw(g,grades,ok.length,mine.length,secs,st); }
+function passDraw(g,grades,nOk,nAll,secs,st){ const pass=nAll>0&&nOk===nAll, gn=x=>x===1?'1~2학년':x+'학년';
+  const d=new Date(), today=`${d.getFullYear()}.${d.getMonth()+1}.${d.getDate()}.`;
+  app.innerHTML=`<div class="top"><button class="back" id="back">← 처음</button><div class="crumb">통과 확인</div><span style="width:70px"></span></div>
+    <div class="stage" style="text-align:center">
+      <div style="display:flex;gap:6px;justify-content:center;flex-wrap:wrap;margin-bottom:12px">${grades.map(x=>`<button class="kt-opt${x===g?' on':''}" data-pg="${x}">${gn(x)}</button>`).join('')}</div>
+      <div id="kt-pass" class="${pass?'ok':''}" style="margin:6px auto 4px;width:210px;height:210px;border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;border:9px ${pass?'solid #D0443A':'dashed #CDBBA0'};color:${pass?'#D0443A':'#9A8468'};font-family:Jua,sans-serif;${pass?'transform:rotate(-8deg);':''}background:#fff">
+        <div style="font-size:1.25rem">${gn(g)}</div><div style="font-size:${pass?'3.4rem':'2rem'};line-height:1.15">${pass?'통과':'도전 중'}</div><div style="font-size:1.05rem">${nOk} / ${nAll}</div></div>
+      <p style="font-size:.95rem;color:var(--ink-soft);margin:8px 0 12px">${today}${slotName(curSlot())?' · '+slotName(curSlot()):''} · ${pass?'이 학년 내용을 모두 익혔어요.':'✔ 표시가 모두 채워지면 통과예요.'}</p>
+      <div style="text-align:left">${secs}</div>
+      <p style="font-size:.82rem;color:var(--ink-soft);margin-top:14px;text-align:left">기록은 이 기기 안에만 있어요. 이름이나 번호를 받지 않고, 어디로도 보내지 않아요.</p>
+    </div>`;
+  document.getElementById('back').onclick=home; app.querySelectorAll('[data-pg]').forEach(b=>b.onclick=()=>passPage(+b.dataset.pg)); }
+teacherPage=passPage; setTimeout(()=>{ try{ window.KT.teacherPage=passPage; window.KT.passPage=passPage; }catch(e){} },0);
+try{ if(/^#(teacher|pass)$/.test(location.hash)) setTimeout(()=>passPage(),0); }catch(e){}
 try{ window._sameFormQ=sameFormQ; window._jRago=jRago; window._parentPage=parentPage; window._ladderAfter=ladderAfter; window._MISC=MISC; }catch(e){}
 
 /* 입체도형 그림 발판: 그림으로 2번 맞히면 글로만, 글로만 틀리면 다시 그림 (tags3 3-49) */

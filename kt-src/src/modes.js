@@ -47,12 +47,14 @@ function pieceVideo(c,L){ const card=!L.k&&typeof KCARDS!=='undefined'&&!!KCARDS
   L.v=t; if(cfg().share&&KT_ENDPOINT){ const qu=J(QK,[]); qu.push([t,L.k||('card:'+c),-1,0,0,(card?'K ':'V ')+c,1,null,0,0,'',L.arm,0,0,'c']); W(QK,qu.slice(-3000)); }
   if(card) return {kind:'card',c,key:'card:'+c,label:'개념 카드'};
   return {kind:'video',key:L.k,label:`${L.k} ${lecName(L.k)}`}; }
-function frontier(st){ const fr=Object.keys(LADDER).map(s=>LADDER[s].find(k=>!['숙달','추정'].includes(kcStatus(k,st)))||LADDER[s][LADDER[s].length-1]); return fr; }
+/* 학년 막기(교수님 11/22): 기본은 수준에 따라 아래 학년으로도, 위 학년으로도 나아간다. 설정에서 '설정 학년보다 높은 내용 막기'를 켜면 푸는 학년 묶음(1~2 / 3~4 / 5~6)의 위 학년 내용은 내지 않는다. */
+const capG=()=>{ const P=pref(); return P.cap?((P.band||1)+1):9; }, kcG=k=>+((String(k).match(/^K[A-Z](\d)/)||[])[1]||0); try{ window._capG=capG; }catch(e){}
+function frontier(st){ const c=capG(); return Object.keys(LADDER).map(s=>{ const L=LADDER[s].filter(k=>kcG(k)<=c); if(!L.length) return null; return L.find(k=>!['숙달','추정'].includes(kcStatus(k,st)))||L[L.length-1]; }).filter(Boolean); }
 
 // 가볍게 풀기: 이미 아는 내용에서 5문제. 복습할 것이 있으면 먼저 넣는다.
 function startQuick(){ const P=pref(); if(!P.band) return bandPage(startQuick); const B=bag(), N=5; let g=0;
   if(P.band===1){ for(const [k,f] of dueFacts()){ if(B.acts.length>=2) break; B.push(regenFact(k,f)); } const hi=ptr(); while(B.acts.length<N&&g++<80) B.push(qFromEp(EPO[rnd(0,hi)])); }
-  else { const st=state(); misActs(B,1); const known=Object.values(LADDER).flat().filter(k=>['숙달','추정','연습'].includes(kcStatus(k,st))), pool=known.length?known:Object.values(LADDER).map(l=>l[0]);
+  else { const st=state(); misActs(B,1); const known=Object.values(LADDER).flat().filter(k=>kcG(k)<=capG()&&['숙달','추정','연습'].includes(kcStatus(k,st))), pool=known.length?known:Object.values(LADDER).map(l=>l[0]);
     while(B.acts.length<N&&g++<80){ const eps=epsOf(pool[rnd(0,pool.length-1)]); B.push(qFromEp36(eps[rnd(0,eps.length-1)])); } }
   runSet(shuffle(B.acts),'가볍게 풀기',{kt:'quick'}); }
 
@@ -61,6 +63,7 @@ function startQuick(){ const P=pref(); if(!P.band) return bandPage(startQuick); 
 function startDaily(opt){ const P=pref(); if(!P.band) return bandPage(startDaily); const N=P.pace||10, B=bag(); let g=0, video=null;
   /* 계속 풀기(11/22): 이어서 풀 때는 복습 몫을 40%→20%로 줄이고 탐색 문제를 빼서, 통과한 아이는 다음 개념으로 빨리 넘어간다 */
   const cont=!!(opt&&opt.cont===true), RV=cont?.2:.4;
+  if(P.band===1&&!P.cap){ try{ const best=load(); if(EPO.every(e=>(best['EP'+e]??-1)>=8)){ setPref({band:3}); return startDaily(opt); } }catch(e){} }   /* 1~2학년 내용을 모두 마쳤으면 3~4학년 내용으로 올라감 */
   if(P.band===1){ for(const [k,f] of dueFacts()){ if(B.acts.length>=Math.ceil(N*RV)) break; B.push(regenFact(k,f)); }
     const i=ptr(), cur=EPO[i], want=B.acts.length+Math.ceil((N-B.acts.length)*.7);
     while(B.acts.length<want&&g++<80) B.push(qFromEp(cur),'_new');
@@ -115,7 +118,11 @@ function setPage(){ hush(); app.className='wrap'; const P=pref();
     <div class="stage kt-set">${row('내 친구',`<button class="kt-opt on" id="s-slot">${slotName(curSlot())||'고르기'}</button>`)}
     ${row('푸는 학년',`<button class="kt-opt on" id="s-band">${bandName(P.band)}</button>`)}
     ${row('하루 문제 수',[5,10,15].map(n=>`<button class="kt-opt${P.pace===n?' on':''}" data-pace="${n}">${n}문제</button>`).join(''))}
-    ${row('틀린 이유 보기',`<button class="kt-opt${P.why?' on':''}" data-why="1">켜기</button><button class="kt-opt${P.why?'':' on'}" data-why="0">끄기</button>`)}</div>`;
+    ${row('틀린 이유 보기',`<button class="kt-opt${P.why?' on':''}" data-why="1">켜기</button><button class="kt-opt${P.why?'':' on'}" data-why="0">끄기</button>`)}
+    ${row('높은 학년 내용',`<button class="kt-opt${P.cap?'':' on'}" data-cap="0">풀 수 있음</button><button class="kt-opt${P.cap?' on':''}" data-cap="1">막기</button>`)}
+    ${row('통과 확인',`<button class="kt-opt on" id="s-pass">보기</button>`)}</div>`;
+  { const sp=document.getElementById('s-pass'); if(sp) sp.onclick=()=>teacherPage(); }
+  app.querySelectorAll('[data-cap]').forEach(b=>b.onclick=()=>{ setPref({cap:b.dataset.cap==='1'}); setPage(); });
   document.getElementById('back').onclick=home; document.getElementById('s-slot').onclick=()=>slotPage(false); document.getElementById('s-band').onclick=()=>bandPage(setPage);
   app.querySelectorAll('[data-pace]').forEach(b=>b.onclick=()=>{ setPref({pace:+b.dataset.pace}); setPage(); });
   app.querySelectorAll('[data-why]').forEach(b=>b.onclick=()=>{ setPref({why:b.dataset.why==='1'}); setPage(); }); }
@@ -169,7 +176,7 @@ function worldOf(x){ if(x.ch) return x.ch<3?'home':'store'; const t=x.t;
   if(/모양과 비교|직육면체|각기둥|공간과 입체/.test(t)) return 'quokka'; return 'owl'; }
 function sceneHTML(key){ const w=WORLD[key], img=A[w.bg], ns=w.who.map(x=>x[0]).filter(n=>JU[n]);
   return `<div class="kt-scene${w.who.length>2?' many':''}" style="background:#E9D2A6${img?` url(${img}) ${posOf(w.c,.2)}/cover`:''}"><span class="nm"><b>${w.place}</b><i>${w.nm||andName(ns)}</i></span>${w.who.map(([n,m])=>JU[n]?`<img src="${JU[n][m]||JU[n]['기본']}" alt="">`:'').join('')}</div>`; }
-function gradePage(g){ if(typeof S!=='undefined'&&S) S.idle=true; hush(); app.className='wrap'; LASTG=g; const raw=gradeItems(g), ord=[]; raw.forEach(x=>{ const k=x.dom+'|'+worldOf(x); if(!ord.includes(k)) ord.push(k); });
+function gradePage(g){ if(g>capG()){ home(); try{ const n=document.querySelector('#app .note')||document.querySelector('#app h2.sec'); if(n) n.insertAdjacentHTML('beforebegin',`<p class="kt-capmsg" style="text-align:center;color:#B5541A;font-family:Jua,sans-serif">${g}학년 내용은 잠겨 있어요. (설정에서 바꿀 수 있어요)</p>`); }catch(e){} return; } if(typeof S!=='undefined'&&S) S.idle=true; hush(); app.className='wrap'; LASTG=g; const raw=gradeItems(g), ord=[]; raw.forEach(x=>{ const k=x.dom+'|'+worldOf(x); if(!ord.includes(k)) ord.push(k); });
   const items=raw.map((x,i)=>[x,i]).sort((a,b)=>ord.indexOf(a[0].dom+'|'+worldOf(a[0]))-ord.indexOf(b[0].dom+'|'+worldOf(b[0]))||a[1]-b[1]).map(a=>a[0]); let last='', lastW='';   // 같은 장소의 단원끼리 모으고, 그 안에서는 배우는 순서대로
   const cards=items.map((x,i)=>{ const wk=worldOf(x), hd=(x.dom!==last?`<div class="kt-dom2">${x.dom}</div>`:'')+(x.dom!==last||wk!==lastW?sceneHTML(wk):''); last=x.dom; lastW=wk; const r=x.tot?x.ok/x.tot:0;
     return hd+`<button class="kt-row" data-gi="${i}"><img class="ac" src="${A['소품_도토리']}" alt="" style="opacity:${(.3+.7*r).toFixed(2)};filter:grayscale(${(1-r).toFixed(2)})"><span class="tt"><b>${x.t}</b><i>${x.m}</i></span><span class="pp">${x.ok}/${x.tot} 편</span></button>`; }).join('');
