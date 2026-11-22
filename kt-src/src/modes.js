@@ -123,9 +123,11 @@ function setPage(){ hush(); app.className='wrap'; const P=pref();
     ${row('푸는 학년',`<button class="kt-opt on" id="s-band">${bandName(P.band)}</button>`)}
     ${row('하루 문제 수',[5,10,15].map(n=>`<button class="kt-opt${P.pace===n?' on':''}" data-pace="${n}">${n}문제</button>`).join(''))}
     ${row('틀린 이유 보기',`<button class="kt-opt${P.why?' on':''}" data-why="1">켜기</button><button class="kt-opt${P.why?'':' on'}" data-why="0">끄기</button>`)}
+    ${row('소리',`<button class="kt-opt${P.snd?'':' on'}" data-snd="0">끔</button><button class="kt-opt${P.snd?' on':''}" data-snd="1">켬</button>`)}
     ${row('높은 학년 내용',`<button class="kt-opt${P.cap?'':' on'}" data-cap="0">풀 수 있음</button><button class="kt-opt${P.cap?' on':''}" data-cap="1">막기</button>`)}
     ${row('통과 확인',`<button class="kt-opt on" id="s-pass">보기</button>`)}</div>`;
   { const sp=document.getElementById('s-pass'); if(sp) sp.onclick=()=>teacherPage(); }
+  app.querySelectorAll('[data-snd]').forEach(b=>b.onclick=()=>{ setPref({snd:b.dataset.snd==='1'}); setPage(); });
   app.querySelectorAll('[data-cap]').forEach(b=>b.onclick=()=>{ setPref({cap:b.dataset.cap==='1'}); setPage(); });
   document.getElementById('back').onclick=home; document.getElementById('s-slot').onclick=()=>slotPage(false); document.getElementById('s-band').onclick=()=>bandPage(setPage);
   app.querySelectorAll('[data-pace]').forEach(b=>b.onclick=()=>{ setPref({pace:+b.dataset.pace}); setPage(); });
