@@ -629,3 +629,77 @@ M2.barDraw=(names,vals,u)=>{ const h=vals.map(()=>0), MAX=10;
 M2.qBarDraw=()=>{ const u=rndPick(1,2,2,5), names=shuffle(['축구','피구','수영','줄넘기','농구','배구']).slice(0,4), vals=names.map(()=>u*rnd(1,u===1?9:8)); if(new Set(vals).size<3) return M2.qBarDraw(); return m2q(`표를 보고 막대그래프를 완성해 보세요. 세로 눈금 한 칸이 몇 명인지 먼저 살펴보세요.`,`세로 눈금 5칸이 ${5*u}명이니까 한 칸은 ${u}명이에요. ${vals[0]}명은 ${vals[0]/u}칸이에요.`,M2.barDraw(names,vals,u),names.map((n,i)=>`${n} ${vals[i]/u}칸`).join(', '),{'눈금 한 칸을 1명으로 보고 그렸어요':'D4-01','그리지 않은 막대가 있어요':'D4-05','막대의 높이가 표와 달라요':'D4-01'}); };
 try{ const add=(ep,g)=>{ if(G36[ep]&&g){ (window._NTW=window._NTW||[]).push([ep,G36[ep].length,g]); G36[ep].push(g); } }; const byT=re=>Object.keys(G36).find(ep=>{ try{ return re.test((EPS36[ep]||[])[0]||''); }catch(e){ return false; } });
   add('S4-09',M2.qBarDraw); add('S3-17',M2.qSplit); /* S3-17 = '똑같아야 분수야' */ }catch(e){}
+
+/* ===== 3-79. 늘품이 통권(4~6학년 교사용 5권, 11/23)에서 자주 나오는데 앱에 없던 꼴: 선으로 잇기 · ○표 모두 하기 · 두 색으로 색칠하기 =====
+   통권 발문 179개 중 '써넣기' 71, '연결하시오/맞게' 27, '○ 표' 14, '색칠' 6 … → 잇기·○표·색칠을 누르기 조작 엔진으로 만든다. */
+const M2X={};
+/* 선으로 잇기: 왼쪽을 누르고 오른쪽을 누르면 이어짐(같은 색 번호). 다시 누르면 바꿀 수 있음. ans[i] = 왼쪽 i와 이어야 할 오른쪽 번호. wrongMap: 'i>j' → 오개념 이름 */
+M2.match=(L,R,ans,wrongMap)=>{ const link=L.map(()=>-1); let cur=-1; const COL=['#E8743B','#2F6FA8','#3C9A5F','#A24FB5','#C2962B','#D2486B'];
+  const cell=(act,html,col,sel)=>`<button type="button" data-ma="${act}" style="display:flex;align-items:center;gap:6px;width:100%;min-height:48px;padding:6px 10px;border-radius:12px;border:2.5px solid ${col||'#C9A56B'};background:${sel?'#FFF1D6':'#fff'};color:#4A2E14;font-family:'Gowun Dodum',Jua,sans-serif;font-weight:700;font-size:1.02rem;text-align:left;cursor:pointer;touch-action:manipulation">${html}</button>`;
+  const dot=c=>`<span style="flex:none;width:14px;height:14px;border-radius:50%;background:${c||'#fff'};border:2px solid ${c||'#C9A56B'}"></span>`;
+  const o={ draw(){ const rc=R.map((_,j)=>{ const i=link.indexOf(j); return i>=0?COL[i%COL.length]:null; });
+      return `<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px 18px;width:100%;max-width:440px">${[...Array(Math.max(L.length,R.length))].map((_,i)=>{ const t=L[i]; return t==null?`<div></div><div>${cell('r'+i,`${dot(rc[i])}<span style="flex:1">${R[i]}</span>`,rc[i])}</div>`:`<div>${cell('l'+i,`<span style="flex:1">${t}</span>${dot(link[i]>=0||cur===i?COL[i%COL.length]:null)}`,link[i]>=0||cur===i?COL[i%COL.length]:null,cur===i)}</div><div>${R[i]!=null?cell('r'+i,`${dot(rc[i])}<span style="flex:1">${R[i]}</span>`,rc[i]):''}</div>`; }).join('')}</div><div style="font-size:.88rem;color:#8A6A4A">왼쪽을 누르고, 알맞은 오른쪽을 누르면 이어져요. (이은 것 ${link.filter(v=>v>=0).length}/${L.length})</div>`; },
+    on(a){ const k=+a.slice(1); if(a[0]==='l'){ cur=cur===k?-1:k; return; } if(cur<0) return; const old=link.indexOf(k); if(old>=0) link[old]=-1; link[cur]=k; cur=-1; },
+    check(){ return link.every((v,i)=>v===ans[i]); },
+    wrong(){ if(link.some(v=>v<0)) return '아직 다 잇지 않았어요'; for(let i=0;i<L.length;i++){ if(link[i]!==ans[i]){ const k=i+'>'+link[i]; if(wrongMap&&wrongMap[k]) return wrongMap[k]; } } return '잘못 이은 것이 있어요'; },
+    reveal(){ ans.forEach((v,i)=>link[i]=v); cur=-1; },
+    goal(){ return {taps:ans.flatMap((v,i)=>['l'+i,'r'+v]),mis:null}; }, state:()=>({k:link.map(v=>v<0?'x':v).join('')}) };
+  const m=m2make(o); m._o=o; return m; };
+/* ○ 표 모두 하기: 그림·글 카드를 눌러 ○(다시 누르면 지움). 정답 집합과 같아야 함 */
+M2.pickAll=(items,good,extraWrong)=>{ const on=new Set();
+  const o={ draw(){ return `<div style="display:flex;flex-wrap:wrap;gap:10px;justify-content:center;max-width:460px">${items.map((h,i)=>`<button type="button" data-ma="p${i}" style="position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center;min-width:72px;min-height:64px;padding:6px 8px;border-radius:14px;border:2.5px solid ${on.has(i)?'#D45F16':'#C9A56B'};background:#fff;cursor:pointer;touch-action:manipulation;font-family:'Gowun Dodum',Jua,sans-serif;font-weight:700;font-size:1.05rem;color:#4A2E14">${h}${on.has(i)?'<span style="position:absolute;inset:4px;border:3px solid #D45F16;border-radius:50%;pointer-events:none"></span>':''}</button>`).join('')}</div><div style="font-size:.88rem;color:#8A6A4A">알맞은 것을 모두 눌러 ○표 하세요. 다시 누르면 지워져요. (○ ${on.size}개)</div>`; },
+    on(a){ const i=+a.slice(1); on.has(i)?on.delete(i):on.add(i); },
+    check(){ return on.size===good.length&&good.every(i=>on.has(i)); },
+    wrong(){ const miss=good.filter(i=>!on.has(i)).length, extra=[...on].filter(i=>!good.includes(i)); if(extra.length&&extraWrong){ for(const i of extra) if(extraWrong[i]) return extraWrong[i]; } return extra.length?'아닌 것에도 ○ 표 했어요':miss?'빠뜨린 것이 있어요':null; },
+    reveal(){ on.clear(); good.forEach(i=>on.add(i)); },
+    goal(){ return {taps:good.map(i=>'p'+i),mis:null}; }, state:()=>({s:items.map((_,i)=>on.has(i)?1:0).join('')}) };
+  const m=m2make(o); m._o=o; return m; };
+/* 두 색으로 색칠하기: 누를 때마다 빨강 → 파랑 → 지움. want[i] = 'r' | 'b' | '' */
+M2.color2=(items,want,names,wrongOf)=>{ const c=items.map(()=>''); const nx={'':'r','r':'b','b':''}, FILL={r:'#F6B3A8',b:'#A9CDEF','':'#fff'}, ST={r:'#C2412F',b:'#2F6FA8','':'#C9A56B'};
+  const o={ draw(){ return `<div style="display:flex;gap:12px;font-size:.92rem;justify-content:center"><span><span style="display:inline-block;width:14px;height:14px;background:${FILL.r};border:2px solid ${ST.r};border-radius:4px;vertical-align:-2px"></span> ${names[0]}</span><span><span style="display:inline-block;width:14px;height:14px;background:${FILL.b};border:2px solid ${ST.b};border-radius:4px;vertical-align:-2px"></span> ${names[1]}</span></div><div style="display:flex;flex-wrap:wrap;gap:10px;justify-content:center;max-width:460px">${items.map((h,i)=>`<button type="button" data-ma="c${i}" style="overflow:hidden;display:flex;align-items:center;justify-content:center;min-width:72px;min-height:60px;padding:6px 8px;border-radius:14px;border:2.5px solid ${ST[c[i]]};background:${FILL[c[i]]};cursor:pointer;touch-action:manipulation;font-family:'Gowun Dodum',Jua,sans-serif;font-weight:700;font-size:1.05rem;color:#4A2E14">${h}</button>`).join('')}</div><div style="font-size:.88rem;color:#8A6A4A">누를 때마다 빨강 → 파랑 → 지우기 차례로 바뀌어요.</div>`; },
+    on(a){ const i=+a.slice(1); c[i]=nx[c[i]]; },
+    check(){ return c.every((v,i)=>v===want[i]); },
+    wrong(){ for(let i=0;i<items.length;i++){ if(c[i]!==want[i]&&c[i]&&want[i]&&wrongOf) return wrongOf; } return c.some((v,i)=>v!==want[i])?'색칠이 맞지 않은 것이 있어요':null; },
+    reveal(){ want.forEach((v,i)=>c[i]=v); },
+    goal(){ return {taps:want.flatMap((v,i)=>v==='r'?['c'+i]:v==='b'?['c'+i,'c'+i]:[]),mis:null}; }, state:()=>({s:c.map(v=>v||'0').join('')}) };
+  const m=m2make(o); m._o=o; return m; };
+
+{ const pick=a=>a[rnd(0,a.length-1)], sh=a=>shuffle(a.slice());
+  const triSvg=(A,B,w)=>{ const C=180-A-B, L=120, ra=A*Math.PI/180, rb=B*Math.PI/180, h=L/(1/Math.tan(ra)+1/Math.tan(rb)), px=h/Math.tan(ra); const x0=10, y0=h+10; return `<svg viewBox="${Math.min(0,x0+px-5)} 0 ${L+20+Math.max(0,-px)} ${h+20}" width="${w||70}" style="display:block;box-shadow:none;background:none;border-radius:0"><polygon points="${x0},${y0} ${x0+L},${y0} ${(x0+px).toFixed(1)},${(y0-h).toFixed(1)}" fill="#FFE3B0" stroke="#7A4A1E" stroke-width="3"/></svg>`; };
+  const angSvg=d=>{ const r=34, x=6, y=40, a=d*Math.PI/180; return `<svg viewBox="0 0 ${d>90?80:50} 46" width="${d>90?64:44}" style="display:block;margin:auto"><line x1="${d>90?40:x}" y1="${y}" x2="${(d>90?40:x)+r}" y2="${y}" stroke="#7A4A1E" stroke-width="3"/><line x1="${d>90?40:x}" y1="${y}" x2="${((d>90?40:x)+r*Math.cos(a)).toFixed(1)}" y2="${(y-r*Math.sin(a)).toFixed(1)}" stroke="#7A4A1E" stroke-width="3"/></svg>`; };
+  /* 잇기 ① 나눗셈식 ↔ 몫과 나머지 (3학년) */
+  M2X.mDiv=()=>{ const xs=[]; const seen=new Set(); while(xs.length<4){ const d=rnd(3,8), q=rnd(4,9), r=rnd(1,d-1), n=d*q+r, k=q+'/'+r; if(seen.has(k)||seen.has('n'+n)) continue; seen.add(k); seen.add('n'+n); xs.push([n,d,q,r]); }
+    const ord=sh([0,1,2,3]); const R=ord.map(i=>`몫 ${xs[i][2]}, 나머지 ${xs[i][3]}`); const ans=xs.map((_,i)=>ord.indexOf(i));
+    return m2q('나눗셈식과 몫·나머지를 알맞게 이어 보세요.','나머지는 나누는 수보다 작아야 해요. 나누는 수 × 몫에 나머지를 더하면 나누어지는 수가 되는지 확인해요.',M2.match(xs.map(x=>`${x[0]} ÷ ${x[1]}`),R,ans),'바르게 이은 것',{'아직 다 잇지 않았어요':null,'잘못 이은 것이 있어요':'N3-15'}); };
+  /* 잇기 ② 큰 수 ↔ 읽기 (4학년) */
+  M2X.mRead=()=>{ const sino=n=>{ const D=['','일','이','삼','사','오','육','칠','팔','구'], U=['','십','백','천']; let s=''; const d=String(n).split('').reverse(); for(let i=d.length-1;i>=0;i--){ const v=+d[i]; if(!v) continue; s+=(v===1&&i>0?'':D[v])+U[i]; } return s; };
+    const rd=n=>{ const man=Math.floor(n/10000), r=n%10000; return (man?sino(man)+'만':'')+(r?' '+sino(r):''); };
+    const base=[rnd(1,9),rnd(0,9),rnd(1,9),rnd(0,9),rnd(1,9)]; const mk=p=>+p.join(''); const a=mk(base), b=mk([base[0],base[2],base[1],base[3],base[4]]), c=mk([base[0],base[1],base[2],base[4],base[3]]), d=a*10; const ns=[...new Set([a,b,c,d])]; if(ns.length<4) return M2X.mRead();
+    const ord=sh([0,1,2,3]); return m2q('수와 그 수를 읽은 것을 알맞게 이어 보세요.','만 단위로 끊어서, 만의 자리부터 차례로 읽어요. 0이 있는 자리는 읽지 않아요.',M2.match(ns.map(n=>n.toLocaleString('ko-KR')),ord.map(i=>rd(ns[i])),ns.map((_,i)=>ord.indexOf(i))),'바르게 이은 것',{'잘못 이은 것이 있어요':'N3-24'}); };
+  /* 잇기 ③ 정다각형 ↔ 이름 (4학년) */
+  M2X.mPoly=()=>{ const ks=sh([3,4,5,6,8]).slice(0,4), nm={3:'정삼각형',4:'정사각형',5:'정오각형',6:'정육각형',8:'정팔각형'}; const pg=k=>`<svg viewBox="-24 -24 48 48" width="42" style="display:block;box-shadow:none;background:none"><polygon points="${[...Array(k)].map((_,i)=>[20*Math.sin(2*Math.PI*i/k+(k===4?Math.PI/4:0)),-20*Math.cos(2*Math.PI*i/k+(k===4?Math.PI/4:0))].map(v=>v.toFixed(1)).join(',')).join(' ')}" fill="#FFE3B0" stroke="#7A4A1E" stroke-width="2.5"/></svg>`;
+    const ord=sh([0,1,2,3]); return m2q('정다각형과 이름을 알맞게 이어 보세요.','변의 수를 세어 보세요. 변이 ■개인 정다각형은 정■각형이에요.',M2.match(ks.map(pg),ord.map(i=>nm[ks[i]]),ks.map((_,i)=>ord.indexOf(i))),'바르게 이은 것',{'잘못 이은 것이 있어요':'G4-15'}); };
+  /* 잇기 ④ 소수의 덧셈식 ↔ 결과 (4학년): 받아올림 무시한 값이 보기에 섞여 있음 */
+  M2X.mDec=()=>{ const xs=[]; const res=new Set(); while(xs.length<3){ const a=rnd(11,59)/10, b=rnd(11,49)/10, s=+(a+b).toFixed(1); if(res.has(s)) continue; res.add(s); xs.push([a,b,s]); } const trap=xs.find(x=>Math.round(x[0]*10)%10+Math.round(x[1]*10)%10>=10); const R=xs.map(x=>x[2]); const tv=trap?+(trap[2]-1).toFixed(1):+(xs[0][2]+1).toFixed(1); if(R.includes(tv)) return M2X.mDec(); R.push(tv); const ord=sh([0,1,2,3]);
+    return m2q('계산식과 계산 결과를 알맞게 이어 보세요. (결과 하나는 남아요)','소수점끼리 맞추어 쓰고, 0.1이 10개 모이면 1로 받아올려요.',M2.match(xs.map(x=>`${x[0]} + ${x[1]}`),ord.map(i=>R[i]),xs.map((_,i)=>ord.indexOf(i))),'바르게 이은 것',{'잘못 이은 것이 있어요':'N2-01'}); };
+  /* ○표 ① 각을 모두 찾기 (3학년) — 꺾인 선·굽은 선·떨어진 두 선은 각이 아님 */
+  M2X.pAngle=()=>{ const S='#7A4A1E', it=[]; const good=[]; const kinds=sh(['ang','ang','ang','curve','gap','ray1','open']).slice(0,6);
+    kinds.forEach((k,i)=>{ let g=''; if(k==='ang'){ const d=pick([40,70,90,120]); const a=d*Math.PI/180, vx=d>90?24:8, r=d>90?24:32; g=`<line x1="${vx}" y1="40" x2="46" y2="40" stroke="${S}" stroke-width="3" stroke-linecap="round"/><line x1="${vx}" y1="40" x2="${(vx+r*Math.cos(a)).toFixed(1)}" y2="${(40-r*Math.sin(a)).toFixed(1)}" stroke="${S}" stroke-width="3" stroke-linecap="round"/>`; good.push(i); }
+      else if(k==='curve') g=`<path d="M8,40 L46,40 M8,40 Q12,10 40,8" fill="none" stroke="${S}" stroke-width="3"/>`; else if(k==='gap') g=`<line x1="14" y1="40" x2="46" y2="40" stroke="${S}" stroke-width="3"/><line x1="8" y1="34" x2="30" y2="8" stroke="${S}" stroke-width="3"/>`; else if(k==='ray1') g=`<line x1="8" y1="26" x2="46" y2="26" stroke="${S}" stroke-width="3"/>`; else g=`<path d="M8,40 Q27,4 46,40" fill="none" stroke="${S}" stroke-width="3"/>`;
+      it.push(`<svg viewBox="0 0 54 48" width="54" height="48" style="display:block;box-shadow:none;background:none;border-radius:0">${g}</svg>`); });
+    if(good.length<2) return M2X.pAngle(); const ex={}; kinds.forEach((k,i)=>{ if(k==='curve'||k==='open') ex[i]='굽은 선도 각이라고 봤어요'; if(k==='gap') ex[i]='떨어진 두 선도 각이라고 봤어요'; });
+    return m2q('각을 모두 찾아 ○표 하세요.','한 점에서 그은 두 반직선으로 이루어진 도형이 각이에요. 굽은 선이 있거나 두 선이 만나지 않으면 각이 아니에요.',M2.pickAll(it,good,ex),'각에만 ○ 표',{'굽은 선도 각이라고 봤어요':'G3-02','떨어진 두 선도 각이라고 봤어요':'G3-02','빠뜨린 것이 있어요':null}); };
+  /* ○표 ② 어떤 수의 배수 모두 (5학년) */
+  M2X.pMult=()=>{ const k=pick([3,4,6,7]); const ns=new Set(); while(ns.size<8) ns.add(rnd(10,60)); const arr=[...ns]; const good=arr.map((n,i)=>n%k===0?i:-1).filter(i=>i>=0); if(good.length<2||good.length>5) return M2X.pMult(); const ex={}; arr.forEach((n,i)=>{ if(n%k&&k%n===0) ex[i]='약수와 배수를 바꾸어 생각했어요'; if(n%k&&String(n).includes(String(k))) ex[i]='숫자에 들어 있으면 배수라고 봤어요'; });
+    return m2q(`${k}의 배수를 모두 찾아 ○표 하세요.`,`${k}의 배수는 ${k}에 1, 2, 3, …을 곱한 수예요. ${k}로 나누어떨어지는지 확인해요.`,M2.pickAll(arr.map(String),good,ex),'배수에만 ○ 표',{'숫자에 들어 있으면 배수라고 봤어요':'N5-11','약수와 배수를 바꾸어 생각했어요':'N5-02'}); };
+  /* 색칠 ① 예각삼각형 빨강, 둔각삼각형 파랑 (4학년) */
+  M2X.cTri=()=>{ const T=[[60,60],[50,70],[55,65],[70,45]], O=[[110,40],[120,30],[100,50],[130,25]], Rt=[[90,45],[90,35]]; const set=sh([pick(T),pick(T),pick(O),pick(O),pick(Rt)]); const want=set.map(([a,b])=>{ const c=180-a-b; return Math.max(a,b,c)<90?'r':Math.max(a,b,c)>90?'b':''; });
+    return m2q('예각삼각형은 빨간색, 둔각삼각형은 파란색으로 색칠하세요.','가장 큰 각을 보세요. 세 각이 모두 예각이면 예각삼각형, 한 각이 둔각이면 둔각삼각형이에요. 직각삼각형은 색칠하지 않아요.',M2.color2(set.map(([a,b])=>triSvg(a,b,64)),want,['예각삼각형','둔각삼각형'],'예각과 둔각을 바꾸어 칠했어요'),'바르게 색칠',{'예각과 둔각을 바꾸어 칠했어요':'G4-12','색칠이 맞지 않은 것이 있어요':'G4-12'}); };
+  /* 색칠 ② 가장 큰 소수 빨강, 가장 작은 소수 파랑 (4학년) — 자릿수가 많으면 크다는 오개념을 잡는 수 */
+  M2X.cDec=()=>{ const a=rnd(2,8); const vs=[`${a}.${rnd(1,9)}`,`${a}.${rnd(10,99)}`,`${a}.${rnd(101,999)}`,`${a}.0${rnd(1,9)}`]; const nums=vs.map(Number); if(new Set(nums).size<4) return M2X.cDec(); const mx=Math.max(...nums), mn=Math.min(...nums); const ord=sh(vs);
+    const want=ord.map(v=>+v===mx?'r':+v===mn?'b':''); const longest=ord.reduce((p,v)=>v.length>p.length?v:p,''); if(+longest===mx) return M2X.cDec();
+    return m2q('가장 큰 소수는 빨간색, 가장 작은 소수는 파란색으로 색칠하세요.','자연수 부분이 같으면 소수 첫째 자리부터 차례로 비교해요. 소수점 아래 숫자가 많다고 큰 수가 아니에요.',M2.color2(ord,want,['가장 큰 수','가장 작은 수'],'자릿수가 많으면 크다고 봤어요'),'바르게 색칠',{'자릿수가 많으면 크다고 봤어요':'N3-32','색칠이 맞지 않은 것이 있어요':'N3-32'}); };
+  window._M2X=M2X;
+  try{ const add=(ep,g)=>{ if(G36[ep]&&g){ (window._NTW=window._NTW||[]).push([ep,G36[ep].length,g]); G36[ep].push(g); } };
+    add('S3-29',M2X.mDiv); add('S3-41',M2X.mRead); add('S6-32',M2X.mPoly); add('S3-61',M2X.mDec); add('S6-18',M2X.pAngle); add('S3-70',M2X.pMult); add('S6-29',M2X.cTri); add('S3-58',M2X.cDec); }catch(e){}
+}
