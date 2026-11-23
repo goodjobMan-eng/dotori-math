@@ -126,18 +126,18 @@ function stuckArm(q){ clearTimeout(_stuckT); if(!q||!S||!S.acts||S.diag||q.diag|
     document.getElementById('kt-stuck').onclick=()=>{ q._helped=1; q._kt=1; S.acts.splice(S.i,0,{kind:'card',c,why:'stuck'}); runAct(); }; }catch(e){} },wait); }
 { const _qq=question; question=function(q){ const r=_qq.apply(this,arguments); try{ stuckArm(q); }catch(e){} return r; }; }
 
-/* ===== 자신 있었는지 묻기 (로드맵 2단계-⑧ 대신) =====
-   교사는 아이가 '찍어서 맞혔는지'를 표정으로 안다. 앱은 물어본다: 오개념 보기가 있는 객관식을 처음에 맞혔을 때, 세트에 두 번까지, 네 번에 한 번꼴로
-   '확실해요 / 헷갈렸어요 / 찍었어요'. 찍었다고 하면 같은 꼴 문제를 세트 끝에 한 번 더 내서 확인한다. 기록은 기기 안 dotori-kt-conf. */
+/* ===== 찍었을 수 있는 정답을 조용히 확인 (교수님 11/24: '자신 있었어?' 단추 없앰 — 아이에게 묻지 않는다) =====
+   오개념 보기가 있는 객관식을 첫 시도에 맞혔는데, 문제 글을 읽을 시간보다 빨리 눌렀으면 찍었을 수 있다고 본다.
+   읽을 시간 = 글자 수 × 0.12초 + 1.5초(최소 2.5초). 그러면 같은 꼴 문제를 세트 끝에 한 번 더 낸다(세트당 2번까지). 화면에는 아무것도 뜨지 않는다.
+   (응답 시간은 원래 기록·전송되고, 2~3초 안의 정답을 숙달 증거로 덜 세는 장치도 이미 있다.) 기록은 기기 안 dotori-kt-conf. */
 const CFK='dotori-kt-conf';
-{ const _an=answer; answer=function(btn,q){ const first=S&&S.tries===0; const r=_an.apply(this,arguments);
-  try{ if(!first||!q||q._scaf||q.diag||q._probe||!S||!S.acts||S.diag||!q.opts||q.opts.length<3||!q.mis||!Object.keys(q.mis).length) return r;
-    const v=btn&&btn.dataset?btn.dataset.v:null; if(String(v)!==String(q.ans)) return r; S._cf=S._cf||0; if(S._cf>=2||Math.random()>0.25) return r; S._cf++;
-    const m=document.querySelector('#fb .msg'); if(!m) return r; const Q=(S.acts[S.i]&&S.acts[S.i].q)||q;
-    m.insertAdjacentHTML('beforeend',`<div class="kt-conf" style="margin-top:10px;font-size:1rem">자신 있었어? <span style="display:inline-flex;gap:6px;flex-wrap:wrap;margin-top:6px">${['확실해요','헷갈렸어요','찍었어요'].map(x=>`<button class="ghost" data-c="${x}" style="padding:6px 10px;font-size:.95rem">${x}</button>`).join('')}</span></div>`);
-    m.querySelectorAll('.kt-conf button').forEach(b=>b.onclick=()=>{ const c=b.dataset.c; m.querySelector('.kt-conf').innerHTML=c==='찍었어요'?'솔직하게 말해 줘서 고마워! 비슷한 문제를 하나 더 풀어 보자.':c==='헷갈렸어요'?'헷갈려도 맞혔네! 비슷한 문제를 한 번 더 볼게.':'좋아요!';
-      try{ const L=JSON.parse(localStorage.getItem(CFK)||'[]'); L.push({t:Date.now(),ep:Q._ep||Q._e,c}); localStorage.setItem(CFK,JSON.stringify(L.slice(-300))); }catch(e){}
-      if(c!=='확실해요'){ const sib=sameFormQ(Q._ep?Q:q,null); if(sib){ sib._conf=1; S.acts.push({kind:'q',q:sib}); } } }); }catch(e){}
+{ const _an=answer; answer=function(btn,q){ const first=S&&S.tries===0; const t0=q&&q._t0; const r=_an.apply(this,arguments);
+  try{ if(!first||!q||q._scaf||q.diag||q._probe||q._conf||!S||!S.acts||S.diag||!q.opts||q.opts.length<3||!q.mis||!Object.keys(q.mis).length||!t0) return r;
+    const v=btn&&btn.dataset?btn.dataset.v:null; if(String(v)!==String(q.ans)) return r;
+    const chars=String(q.q||'').replace(/<[^>]+>/g,'').replace(/\s+/g,'').length, need=Math.max(2500,chars*120+1500), ms=Date.now()-t0;
+    if(ms>=need) return r; S._cf=S._cf||0; if(S._cf>=2) return r;
+    const Q=(S.acts[S.i]&&S.acts[S.i].q)||q; const sib=sameFormQ(Q._ep?Q:q,null); if(!sib) return r; S._cf++; sib._conf=1; S.acts.push({kind:'q',q:sib});
+    try{ const L=JSON.parse(localStorage.getItem(CFK)||'[]'); L.push({t:Date.now(),ep:Q._ep||Q._e,ms,need,c:'fast'}); localStorage.setItem(CFK,JSON.stringify(L.slice(-300))); }catch(e){} }catch(e){}
   return r; }; }
 
 /* ---------- 통과 확인 (교수님 11/22) ----------
