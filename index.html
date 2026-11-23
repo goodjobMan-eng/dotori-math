@@ -103,6 +103,11 @@ button:focus-visible{outline:4px solid var(--sky);outline-offset:2px}
 .qp-q{flex:1;font-family:"Gowun Dodum","Jua",sans-serif;font-weight:700;font-size:1.28rem;line-height:1.55;color:var(--ink);word-break:keep-all;text-wrap:pretty}
 .qp-who{flex:none;width:64px;height:64px;overflow:hidden}.qp-who img,.qp-who svg{width:64px!important;height:64px!important;object-fit:contain}
 .qp-q,.qp-opts .opt,.qp-sym .opt{font-variant-numeric:tabular-nums}
+/* 1~2학년도 같은 문제지 짜임(11/23 교수님: 다른 문제도 같은 글꼴·디자인으로). 어린 학년은 캐릭터를 크게, 보기 번호는 달지 않음(수와 헷갈림) */
+.qp-young .qp-who{width:84px;height:84px}.qp-young .qp-who img,.qp-young .qp-who svg{width:84px!important;height:84px!important}.qp-young .qp-q{font-size:1.4rem}
+/* 말풍선을 쓰는 다른 화면(놀이·목록·개념 카드)도 같은 글꼴로 */
+.bubble .q{font-family:"Gowun Dodum","Jua",sans-serif;font-weight:700}
+.bubble{background:#fff!important;border:2px solid var(--line)}.bubble:before{border-right-color:var(--line)!important}
 .opt.kt-arm{border-color:#E8743B!important;box-shadow:0 0 0 3px #FFD9A0!important;background:#FFF6E8!important}
 .qp-sub{display:block;font-size:.85rem;font-weight:400;color:var(--ink-soft)}
 /* 가로 2단은 쓰지 않음(교수님 11/23: 세로 숏츠·문제풀이 정체성 유지) */
@@ -2477,8 +2482,8 @@ function question(q){
       <button class="speak" id="speak" aria-label="다시 읽어 주기">🔊</button>
     </div>
     <div class="stage">
-      ${S.mode==='ep36'?`<div class="qp"><span class="qp-no">${S.i+1}</span><div class="qp-q">${window.qpNb(q.q)}</div><div class="qp-who">${talker(q.who)}</div></div>`:`<div class="talker">${talker(q.who)}<div class="bubble"><div class="who">${NAMES[q.who]}</div><div class="q">${q.q}</div><div class="hint">${q.hint}</div></div></div>`}
-      <div class="visual${S.mode==='ep36'?(String(q.visual||'').trim()?' qp-vis':' qp-novis'):''}" id="visual">${q.visual}</div>
+      ${true?`<div class="qp${S.mode==='ep36'?'':' qp-young'}"><span class="qp-no">${S.i+1}</span><div class="qp-q">${window.qpNb(q.q)}</div><div class="qp-who">${talker(q.who)}</div></div>`:`<div class="talker">${talker(q.who)}<div class="bubble"><div class="who">${NAMES[q.who]}</div><div class="q">${q.q}</div><div class="hint">${q.hint}</div></div></div>`}
+      <div class="visual${(String(q.visual||'').trim()?' qp-vis':' qp-novis')}" id="visual">${q.visual}</div>
       ${q.manip?'<div class="opts wide" id="opts"><button class="opt text mdone" id="mdone" data-v="__done">다 했어요! ✓</button></div>':q.write?'<div id="wpad"></div>':`<div class="opts${q.opts.some(o=>String(o).length>9)?" wide":""}${S.mode==='ep36'?(q.opts.every(o=>/^[①-⑳㉠-㉭]/.test(String(o)))?" qp-sym":q.opts.some(o=>String(o).length>14)?" qp-opts qp-list":" qp-opts"):""}" id="opts">${(q.opts.every(o=>/^[①-⑳㉠-㉭]/.test(String(o)))?q.opts.slice().sort():q.opts).map(o=>`<button class="opt${q.text?' text':''}" data-v="${o}">${o}</button>`).join('')}</div>`}
       <div id="fb"></div>
     </div>`;
