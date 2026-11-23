@@ -870,6 +870,10 @@ const FIXT=[
  [/^물병 하나의 들이에 알맞은 단위는\?$/, ()=>'작은 음료수 캔 하나의 들이에 알맞은 단위는?'],
  [/^(.+)([은는]) 약\?$/, (m,a,j)=>`${a}${j} 약 얼마일까요?`],
  [/^(\d+ m의 .+만큼은 몇 m일까요\?) 반반이가 리본을 잘라요\.$/, (m,a)=>`반반이가 리본을 잘라요. ${a}`], /* 윤문(11/24): 평가원 발문 꼴로 */
+ [/^도토리 (\d+)개를 (\d+)접시에 똑같이$/, (m,a,b)=>`도토리 ${a}개를 접시 ${b}개에 똑같이 나누면 한 접시에 몇 개일까요?`],
+ [/^(\d+) × (\d+) = (\d+)이면$/, (m,a,b,p)=>`${a} × ${b} = ${p}이면 ${p} ÷ ${a}는 얼마일까요?`],
+ [/^더 큰 수는\? (.+)$/, (m,a)=>`${a} 가운데 더 큰 수는?`],
+ [/^가장 큰 수는\? (.+)$/, (m,a)=>`${a} 가운데 가장 큰 수는?`],
  [/^(\d+)의 배수를 작은 수부터, (\d+)번째는\?$/, (m,a,b)=>`${a}의 배수를 작은 수부터 차례로 쓸 때, ${b}번째 수는 얼마일까요?`],
  [/^(\d+) 이하에 (\d+)[이가] 들어갈까\?$/, (m,a,b)=>`${a} 이하인 수에 ${b}도 들어갈까요?`],
  [/^(\d+) × (\d+), 영은 몇 개\?$/, (m,a,b)=>`${a} × ${b}의 곱은 끝에 0이 몇 개 있을까요?`],
@@ -1869,7 +1873,7 @@ function cpPic(ep,t){ let m; const S=ep.slice(0,2);
   if((m=t.match(/도토리가 (\d+)개 있었어요\. 람이가 (\d+)개를 더/))) return cpWrap(cpRow(cpCol(cpBlocks(+m[1])),cpOp('+'),cpCol(cpBlocks(+m[2]))),'수 모형');
   if((m=t.match(/도토리 (\d+)개를 준비했어요\. 그중 (\d+)개/))) return cpWrap(cpRow(cpCol(cpBlocks(+m[1])),cpOp('−'),`<span style="font-size:1.1rem">${m[2]}</span>`),'수 모형');
   /* 곱셈 */ let a,b; if((m=t.match(/(\d+) × (\d+)(?! *[×÷+−])/))){ a=+m[1]; b=+m[2]; } else if((m=t.match(/한 (?:봉지|대)에 (\d+)개씩 (?:담았어요|실었어요)\. (?:수레 )?(\d+)(?:봉지|대)/))){ a=+m[1]; b=+m[2]; }
-  if(a&&b&&!/[.÷]/.test(t)&&!/^\d+ × \d+ = \d+/.test(t)){ if(b<=6&&a<=60) return cpWrap(cpGroups(b,a),`${a}씩 ${b}묶음`); if(b<=5&&a<=999) return cpWrap(cpCol(...Array.from({length:b},()=>cpBlocks(a,{lab:false,u:2.2}))),`${a}씩 ${b}줄 (수 모형)`); if(a<=999&&b<=99) return cpWrap(cpArea(a,b),'넓이 모델: 나누어 곱해서 더해요'); }
+  if(a&&b&&!/[.÷]/.test(t)&&!/^\d+ × \d+ = \d+/.test(t)){ if(b<=6&&a<=60) return cpWrap(cpGroups(b,a),`${a}씩 ${b}묶음`); if(b<=5&&a<=999) return cpWrap(cpCol(...Array.from({length:b},()=>cpBlocks(a,{lab:false,u:2.2}))),`${a}씩 ${b}줄 (수 모형)`); if(a<=999&&b<=99) return cpWrap(cpArea(a,b),'직사각형으로 나누어 곱해서 더해요'); }
   /* 나눗셈: 등분제와 포함제를 구분 */ { let dm=t.match(/(?<![\d.])(\d+) ÷ (\d+)(?![\d.]| *[×÷+−])/), kind=null; a=b=0;
     if(dm){ a=+dm[1]; b=+dm[2]; } let wm;
     if((wm=t.match(/(\d+)개를 (?:바구니 |접시 )?(\d+)(?:명에게|개에|명이|곳에) 똑같이/))){ a=+wm[1]; b=+wm[2]; kind='part'; }

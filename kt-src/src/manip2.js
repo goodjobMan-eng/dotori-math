@@ -1137,9 +1137,9 @@ try{ if(G36['S6-37']){ G36['S6-37'].push(M2.qRulerMM); (window._NTW=window._NTW|
    5학년 평행사변형·삼각형 넓이(S6-70·71): 늘품이 5학년 놀이 '칠교야 놀자!'([6수03-05]·[6수03-06]) — 칠교 조각으로 만든 도형을
    같은 조각으로 직사각형으로 바꾸고 모눈 칸 수로 넓이를 센다(조각을 옮겨도 넓이는 그대로).
    그림자 안을 누르면 고른 조각이 그 자리에 맞을 때만 놓인다(돌리기는 자동). 크기·모양을 잘못 고른 것을 기록한다. */
-{ const U=34, PN={L:'큰 삼각형',M:'중간 삼각형',S:'작은 삼각형',Q:'정사각형',P:'평행사변형'}, COL={L:'#E06666',M:'#F6C343',S:'#7CC47F',Q:'#6FA8DC',P:'#B48AD6'};
+{ const U=34, PN0={L:'큰 삼각형',M:'중간 삼각형',S:'작은 삼각형',Q:'정사각형',P:'평행사변형'}, COL={L:'#E06666',M:'#F6C343',S:'#7CC47F',Q:'#6FA8DC',P:'#B48AD6'};
   const ICON={L:'0,18 36,18 18,0',M:'4,18 22,18 22,0',S:'5,18 23,18 14,9',Q:'18,1 27,10 18,19 9,10',P:'2,18 12,8 32,8 22,18'};
-  M2.tang=(slots,stock,o2)=>{ const put=slots.map(()=>false); let cur=Object.keys(stock)[0], val=0; const miss=[]; const left=t=>stock[t]-slots.filter((s,i)=>put[i]&&s.t===t).length;
+  M2.tang=(slots,stock,o2)=>{ const PN=o2.g2?{L:'큰 삼각형',M:'중간 삼각형',S:'작은 삼각형',Q:'사각형 가',P:'사각형 나'}:PN0; const put=slots.map(()=>false); let cur=Object.keys(stock)[0], val=0; const miss=[]; const left=t=>stock[t]-slots.filter((s,i)=>put[i]&&s.t===t).length;
     const xs=slots.flatMap(s=>s.p.map(v=>v[0])), ys=slots.flatMap(s=>s.p.map(v=>v[1])); const X0=Math.min(...xs), Y0=Math.min(...ys), X1=Math.max(...xs), Y1=Math.max(...ys); const FY=y=>Y0+Y1-y; /* 위쪽이 위로 오게(뾰족한 꼭짓점이 위) */
     const o={ draw(){ let g=''; if(o2.grid){ for(let x=X0-1;x<=X1+1;x++) g+=`<line x1="${x*U}" y1="${(Y0-1)*U}" x2="${x*U}" y2="${(Y1+1)*U}" stroke="#E6D6B8" stroke-width="1"/>`; for(let y=Y0-1;y<=Y1+1;y++) g+=`<line x1="${(X0-1)*U}" y1="${y*U}" x2="${(X1+1)*U}" y2="${y*U}" stroke="#E6D6B8" stroke-width="1"/>`; }
         slots.forEach((s,i)=>{ const P=s.p.map(([x,y])=>(x*U).toFixed(1)+','+(FY(y)*U).toFixed(1)).join(' '); g+=put[i]?`<polygon data-ma="s${i}" points="${P}" fill="${COL[s.t]}" stroke="#4A2E14" stroke-width="2" stroke-linejoin="round"/>`:`<polygon data-ma="s${i}" points="${P}" fill="#CDB58E" stroke="#CDB58E" stroke-width="1.2" stroke-linejoin="round" style="cursor:pointer"/>`; });
@@ -1154,7 +1154,7 @@ try{ if(G36['S6-37']){ G36['S6-37'].push(M2.qRulerMM); (window._NTW=window._NTW|
         if(slots[i].t!==cur){ miss.push(cur+slots[i].t); o._note=`${PN[cur]}${'MPQ'.includes(cur)?'은':'은'} 그 자리에 맞지 않아요.`; return; }
         put[i]=true; if(left(cur)<=0){ const nx=Object.keys(stock).find(k=>left(k)>0); if(nx) cur=nx; } },
       check(){ return put.every(Boolean)&&(!o2.askArea||val===o2.askArea); },
-      wrong(){ if(!put.every(Boolean)){ if(miss.some(x=>/^[LMS][LMS]$/.test(x))) return '크기가 다른 삼각형을 헷갈렸어요'; if(miss.some(x=>x==='QP'||x==='PQ')) return '정사각형과 평행사변형을 헷갈렸어요'; return '빈 곳이 남았어요'; }
+      wrong(){ if(!put.every(Boolean)){ if(miss.some(x=>/^[LMS][LMS]$/.test(x))) return '크기가 다른 삼각형을 헷갈렸어요'; if(miss.some(x=>x==='QP'||x==='PQ')) return o2.g2?'모양이 다른 사각형을 헷갈렸어요':'정사각형과 평행사변형을 헷갈렸어요'; return '빈 곳이 남았어요'; }
         if(o2.askArea&&val!==o2.askArea) return o2.perim&&val===o2.perim?'넓이 대신 둘레를 셌어요':'칸 수를 잘못 셌어요'; return null; },
       reveal(){ put.fill(true); if(o2.askArea) val=o2.askArea; },
       goal(){ return null; }, state:()=>({s:put.map(b=>b?1:0).join('')+(o2.askArea?'v'+val:'')}) };
@@ -1170,7 +1170,7 @@ try{ if(G36['S6-37']){ G36['S6-37'].push(M2.qRulerMM); (window._NTW=window._NTW|
     ['사각형',[T('P',[0,1],[1,0],[3,0],[2,1]),T('S',[2,1],[3,0],[4,1])]],
     ['삼각형',[T('L',[0,0],[4,0],[2,2]),T('L',[2,2],[4,0],[4,4])]] ];
   window._qTang2=()=>{ const [nm,sl]=G2[rnd(0,G2.length-1)];
-    return m2q(`칠교 조각 ${sl.length}개로 ${ob(nm)} 만들어요. 알맞은 조각을 골라 그림자를 채워 보세요.`,'어떤 조각이 들어갈지 크기와 모양을 비교해 보세요. 크기가 다른 삼각형이 세 가지 있어요.',M2.tang(sl,SET,{}),`그림자에 맞는 조각 ${sl.length}개`,{'크기가 다른 삼각형을 헷갈렸어요':null,'정사각형과 평행사변형을 헷갈렸어요':null,'빈 곳이 남았어요':null}); };
+    return m2q(`칠교 조각 ${sl.length}개로 ${ob(nm)} 만들어요. 알맞은 조각을 골라 그림자를 채워 보세요.`,'어떤 조각이 들어갈지 크기와 모양을 비교해 보세요. 크기가 다른 삼각형이 세 가지 있어요.',M2.tang(sl,SET,{g2:1}),`그림자에 맞는 조각 ${sl.length}개`,{'크기가 다른 삼각형을 헷갈렸어요':null,'모양이 다른 사각형을 헷갈렸어요':null,'빈 곳이 남았어요':null}); };
   /* 5학년: 평행사변형·삼각형(칠교 조각) → 같은 조각으로 직사각형 → 모눈 칸 수 */
   const RECT=[T('M',[0,0],[2,0],[0,2]),T('S',[2,0],[2,2],[1,1]),T('S',[0,2],[1,1],[2,2])];
   const SRC={ para:{n:'평행사변형',s:[T('M',[0,0],[2,0],[2,2]),T('S',[2,0],[3,1],[2,2]),T('S',[3,1],[4,2],[2,2])],box:`-6 -6 ${4*U+12} ${2*U+12}`},
@@ -1180,3 +1180,45 @@ try{ if(G36['S6-37']){ G36['S6-37'].push(M2.qRulerMM); (window._NTW=window._NTW|
   window._qTang5p=q5('para'); window._qTang5t=q5('tri');
   try{ if(G36['S6-06']) G36['S6-06'].push(window._qTang2,window._qTang2); if(G36['S6-70']) G36['S6-70'].push(window._qTang5p); if(G36['S6-71']) G36['S6-71'].push(window._qTang5t); (window._NTW=window._NTW||[]).push(['S6-06',0,window._qTang2]); }catch(e){}
 }
+
+/* ===== 3-98. 계열성 맞추기(교수님 11/24: "모든 문제가 단원·성취기준과 맞는지, 계열성") =====
+   단원 지도(UNITS36)에서 개념이 처음 나오는 단원보다 앞선 편에, 아직 안 배운 용어·표기가 보기·발문에 들어가지 않게 편별로 바로잡는다.
+   - dropQ: 이런 발문이 나오면 그 틀을 다시 만든다(최대 12번)  - mapOpt/mapText: 글자 바꾸기  - dropOpt: 보기에서 빼기(3개 미만이면 채움) */
+setTimeout(()=>{ try{
+  const R={
+    'S3-21':{dropOpt:/^\d*\.\d\d/,fill:['50','10','0.1','1']},
+    'S3-22':{dropOpt:/^\d*\.\d\d/},
+    'S3-17':{mapText:[[/정삼각형/g,'삼각형']]},
+    'S6-18':{mapOpt:{'둔각':'선분','예각':'반직선'},mapText:[[/그림의 (사다리꼴|평행사변형|마름모)에서/g,'그림의 사각형에서']]},
+    'S6-19':{mapOpt:{'마름모':'직각삼각형','사다리꼴':'원','예각삼각형':'사각형','정삼각형':'원'}},
+    'S6-26':{mapOpt:{'둘레':'원의 중심'}},
+    'S6-32':{dropQ:/둘레/},
+    'S6-50':{dropQ:/이등변|정삼각형/},
+    'S4-13':{mapOpt:{'원그래프':'막대그래프','띠그래프':'그림그래프'}},
+    /* 2차 점검(단원 지도 전체를 편별 발문으로 대조) */
+    'S2-13':{dropQ:/식을 하나로|하나의 식/},   /* 여러 연산을 한 식으로 = 5-1 혼합 계산 */
+    'S2-16':{dropQ:/식을 하나로|하나의 식/},
+    'S6-27':{mapText:[[/밑면의 반지름/g,'바닥 원의 반지름']]},   /* '밑면'은 5·6학년 용어 */
+    'S6-20':{mapText:[[/^평행사변형에서 평행한 변/,'직사각형에서 평행한 변']]},   /* 평행사변형은 같은 단원 뒤 차시 */
+    'S6-05':{dropQ:/칠각형|팔각형/},   /* 2학년은 육각형까지 */
+    'S5-20':{dropQ:/함께 하면 며칠/},   /* 반비례 = 중학교 */
+    'S4-20':{dropQ:/중심각|몇 도|인 부분은\?$/},   /* 원그래프 중심각 = 중학교 */
+    'S5-07':{dropQ:/□번째/},   /* □를 쓴 대응 식 = 5-1 규칙과 대응 */
+    /* 네온 2차 검토: '꼭지각·밑각'은 교과서에 없는 용어(중학교), 가능성은 0·1/2·1 밖의 분수를 보기로도 쓰지 않음 */
+    'S6-28':{mapText:[[/이등변삼각형의 꼭지각이 (\d+)°(이)?면 한 밑각은\?/g,'이등변삼각형에서 크기가 같은 두 각이 아닌 나머지 한 각이 $1°이면, 크기가 같은 두 각 중 한 각은 몇 도일까요?'],[/꼭지각이 (\d+)°인 이등변삼각형의 한 밑각은 몇 도일까요\?/g,'이등변삼각형에서 크기가 같은 두 각이 아닌 나머지 한 각이 $1°예요. 크기가 같은 두 각 중 한 각은 몇 도일까요?'],[/밑각/g,'크기가 같은 각'],[/꼭지각/g,'나머지 한 각']]},
+    'S4-18':{dropOpt:/^(?!2분의 1$)\d+분의 \d+$/,fill:['0','1','2분의 1']},
+    'S4-17':{dropOpt:/^(?!2분의 1$)\d+분의 \d+$/},
+  };
+  const mapS=(s,m)=>{ if(typeof s!=='string') return s; for(const [a,b] of m) s=s.replace(a,b); return s; };
+  for(const ep of Object.keys(R)){ if(!G36[ep]) continue; const r=R[ep];
+    const orig=G36[ep].slice();
+    G36[ep]=G36[ep].map((f,fi)=>{ const g=function(){ let q; for(let t=0;t<12;t++){ q=f.apply(this,arguments); if(!q||!r.dropQ||!r.dropQ.test(String(q.q||''))) break; }
+        if(q&&r.dropQ&&r.dropQ.test(String(q.q||''))){ /* 이 틀은 늘 그 발문 → 같은 편의 다른 틀로 */ const others=orig.filter((x,xi)=>xi!==fi); for(let t=0;t<20&&others.length;t++){ q=others[rnd(0,others.length-1)](); if(q&&!r.dropQ.test(String(q.q||''))) break; } }
+        if(!q) return q;
+        if(r.mapText){ q.q=mapS(q.q,r.mapText); for(const k of ['hint','hint1','speech']) if(typeof q[k]==='string') q[k]=mapS(q[k],r.mapText); }
+        if(Array.isArray(q.opts)&&q.opts.length>=2&&!q.manip){
+          if(r.mapOpt){ const mo=o=>typeof o==='string'&&r.mapOpt[o]!=null&&String(q.ans)!==o?r.mapOpt[o]:o; const nm={}; q.opts=q.opts.map(o=>{ const n=mo(o); if(q.mis&&o in q.mis) nm[n]=q.mis[o]; return n; }); if(q.mis){ for(const k of Object.keys(q.mis)) if(!(k in nm)&&q.opts.includes(k)) nm[k]=q.mis[k]; q.mis=nm; } q.opts=[...new Set(q.opts)]; }
+          if(r.dropOpt){ q.opts=q.opts.filter(o=>String(o)===String(q.ans)||!r.dropOpt.test(String(o))); if(q.mis) for(const k of Object.keys(q.mis)) if(!q.opts.map(String).includes(k)) delete q.mis[k]; (r.fill||[]).forEach(x=>{ if(q.opts.length<3&&!q.opts.includes(x)&&x!==String(q.ans)) q.opts.push(x); }); }
+        }
+        return q; }; g._seq=1; return g; });
+  } }catch(e){} },0);

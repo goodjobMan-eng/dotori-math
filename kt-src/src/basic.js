@@ -1,6 +1,6 @@
 /* 문제지형 발문: 수와 단위가 줄바꿈으로 떨어지지 않게 */
 window.nmJ=w=>{ const k=(String(w).charCodeAt(String(w).length-1)-0xAC00)%28; return k>0?w+'이는':w+'는'; };
-window.qpNb=t=>(/[가-힣]/.test(String(t||'').replace(/<[^>]+>/g,''))?String(t):`${t}<span class="qp-sub">계산해 보세요.</span>`).replace(/(\d[\d,.]*)\s(?=(cm|mm|km|m|kg|g|t|L|mL|°|%|초|분|시간|개|명|원|쪽|번|권|자루|마리|장|대|송이|배)(?![a-zA-Z]))/g,'$1&nbsp;');
+window.qpNb=t=>(/[가-힣]/.test(String(t||'').replace(/<[^>]+>/g,'').replace(/\d+\s*[과와]\s*\d+분의\s*\d+|\d+분의\s*\d+|\d+시간|\d+분|\d+초/g,''))?String(t):`${t}<span class="qp-sub">계산해 보세요.</span>`).replace(/(\d[\d,.]*)\s(?=(cm|mm|km|m|kg|g|t|L|mL|°|%|초|분|시간|개|명|원|쪽|번|권|자루|마리|장|대|송이|배)(?![a-zA-Z]))/g,'$1&nbsp;');
 
 /* ---------- 3-77. 국가 수리력 진단도구 꼴 문항(편에 섞어 냄) ----------
    국가기초학력지원포털의 「수리력 진단도구」(한국교육과정평가원, 1수준·2수준 × 수와 연산·도형과 측정)의

@@ -38,6 +38,9 @@
     t=t.replace(/^(.{2,40}?(?:을|를)\s(?:소수|분수|가분수|대분수|기약분수|백분율|숫자|수))로\??$/,'$1로 나타내면?');
     t=t.replace(/^(.{2,40}?)(?:을|를)\s(올림|버림|반올림)하여\s(.{2,6}자리)까지$/,(m,a,k,z)=>m+' 나타내면?');
     t=t.replace(/^(.{1,30}?(?:최대공약수|최소공배수|공약수|공배수|크기가 같은 분수))$/,'$1는?');
+    /* '…(대분수로)', '…의 몫을 분수로', '…를 분모가 3인 가분수로', '비율을 소수로?' → 끝맺음 */
+    t=t.replace(/^(.+?\d)\s?\((대분수|가분수|기약분수)로\)$/,(m,a,k)=>a+(DB[a.slice(-1)]?'을':'를')+' 계산하여 '+k+'로 나타내면?');
+    t=t.replace(/^(.{2,60}?(?:분수|가분수|대분수|기약분수|소수|백분율|자연수의 비))로\??$/,'$1로 나타내면?');
     return t;
   };
   const reTag=new RegExp('(\\d|[°%])((?:</[a-z]+>)+)\\s?('+JS+')'+END,'g');
@@ -58,6 +61,12 @@
       }
       if(Array.isArray(q.opts)) q.opts=q.opts.map(fixAny);
       if(typeof q.ans==='string') q.ans=fixAny(q.ans);
+      /* 그림 글자(span)가 섞인 발문의 끝맺음: 순수 글자로 보고 꼬리만 고친다 */
+      if(typeof q.q==='string'&&/<[a-z]/i.test(q.q)){ const plain=q.q.replace(/<[^>]+>/g,'').trim();
+        if(/(분수|가분수|대분수|기약분수|소수|백분율)로$/.test(plain)) q.q=q.q.replace(/\s*$/,'')+' 나타내면?';
+        const mm=plain.match(/(\d)\s?\((대분수|가분수|기약분수)로\)$/); if(mm) q.q=q.q.replace(/\s?\((대분수|가분수|기약분수)로\)\s*$/,(x,k)=>(DB[mm[1]]?'을':'를')+' 계산하여 '+k+'로 나타내면?'); }
+      /* 식만 있고 >·=·<를 고르는 문제 → 평가원 꼴 끝맺음 */
+      if(Array.isArray(q.opts)&&q.opts.length&&q.opts.every(o=>['>','<','=','＞','＜','＝'].includes(String(o).trim()))&&typeof q.q==='string'&&!/[?요]\s*$/.test(q.q.replace(/<[^>]+>/g,'').trim())) q.q=q.q+'<br><span style="font-size:.9em">크기를 비교하여 □ 안에 &gt;, =, &lt; 중 알맞은 것을 고르세요.</span>';
       for(const k of ['mis','fx']){ const m=q[k]; if(m&&typeof m==='object'&&!Array.isArray(m)){ const n={}; for(const key of Object.keys(m)) n[fixAny(key)]=m[key]; q[k]=n; } }
       if(q.manip&&typeof q.manip.html==='string') q.manip.html=fixHTML(q.manip.html);
       Object.defineProperty(q,'_kf',{value:1,enumerable:false});
