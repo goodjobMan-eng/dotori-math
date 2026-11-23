@@ -43,7 +43,7 @@ const today=()=>{ const d=new Date(); return `${d.getFullYear()}-${String(d.getM
 const BKT={L0:.3,T:.15,S:.1};
 const state=()=>Object.assign({kc:{},kn:{},kw:{},em:{},ec:{},ew:{},mis:{},est:{},lvl:null,diagAt:null},J(SK,{}));
 function did(){ let v=J(DK,null); if(!v||!/^[0-9a-f-]{36}$/.test(v)){ v=(crypto.randomUUID?crypto.randomUUID():'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g,c=>{ const r=crypto.getRandomValues(new Uint8Array(1))[0]&15; return (c==='x'?r:(r&3|8)).toString(16); })); W(DK,v); } return v; }
-const clean=s=>String(s==null?'':s).replace(/[^0-9A-Za-z가-힣ㄱ-ㅎ .:,/%°²³+×÷=−\-~()←→↑↓]/g,'').slice(0,24);
+const clean=s=>String(s==null?'':s).replace(/[①-⑳]/g,c=>String(c.charCodeAt(0)-0x245F)).replace(/[㉠-㉭]/g,c=>'ㄱㄴㄷㄹㅁㅂㅅㅇㅈㅊㅋㅌㅍㅎ'[c.charCodeAt(0)-0x3260]).replace(/[^0-9A-Za-z가-힣ㄱ-ㅎ .:,/%°²³+×÷=−\-~()←→↑↓]/g,'').slice(0,24);
 const plain=s=>String(s||'').replace(/<[^>]*>/g,' ').replace(/\s+/g,' ').trim();
 const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 
