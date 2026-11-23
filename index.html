@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="color-scheme" content="only light">
 <meta name="supported-color-schemes" content="light">
-<style>:root{color-scheme:only light}</style><meta name="color-scheme" content="only light"><meta name="darkreader-lock">
+<style>:root{color-scheme:only light}#wpad.g3 .wmode{display:none}</style><meta name="color-scheme" content="only light"><meta name="darkreader-lock">
 <title>도토리 숲 수학 퀴즈</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Jua&family=Gowun+Dodum&display=swap">
 <style>
@@ -4226,9 +4226,9 @@ function mountFree(q,host,ans,F){ const truth=F.p>=ans.length?ans:ans.slice(0,F.
   paint(); }
 function mountWriteQ36(q){ const host=document.getElementById('wpad'); const ans=String(q.ans); const slots=[...document.querySelectorAll('#visual .vslot')]; const g=(UNITS36[S.ui]||{}).grade||3;
   /* 소수 답: 칸마다 쓰는 대신 답을 통째로 쓴다(12.4처럼 소수점도 직접). 칸 사이 점 찍기는 헷갈려서 없앴다(교수님 11/21). */
-  let _m0; try{ _m0=localStorage.getItem('dotori-input'); }catch(e){} if(!_m0) _m0=g>=3?'pad':'hand';
+  let _m0; try{ _m0=localStorage.getItem('dotori-input'); }catch(e){} if(!_m0) _m0=g>=3?'pad':'hand'; if(g>=3) _m0='pad'; host.classList.toggle('g3',g>=3); /* 3학년 이상은 늘 숫자판, 자릿수 칸 없이 상자 하나(교수님 11/23) */
   const DP=null; const FREE=(()=>{ const ds=[...document.querySelectorAll('#visual em.dot')];
-    if(ds.length===0&&slots.length){ /* 소수 계산인데 답이 자연수로 떨어진 경우(0.5 × 6 = 3)도 같은 답 상자를 쓴다: 칸 모양으로 '소수가 아니다'를 알려 주지 않게 */ const grp=slots[0].parentElement, txt=String(q.q||'')+' '+document.getElementById('visual').textContent; if(!grp||!grp.classList.contains('vgrp')||slots.some(x=>x.parentElement!==grp)||!/^\d+$/.test(ans)) return null; const isDec=/\d\.\d/.test(txt); if(!isDec&&(_m0==='hand'||q.ub||q._step||/^0\d/.test(ans)||document.querySelectorAll('#visual .vgrp').length!==1)) return null;   /* 정수 답도 숫자판 모드에서는 상자 하나(자릿수 힌트 없음). 손글씨 모드는 숫자를 직접 쓰게 칸 그대로 */ slots.forEach(x=>x.remove()); const box=document.createElement('div'); box.className='freeans empty'; box.id='freeans'; grp.appendChild(box); grp.classList.add('hasfree'); return {p:ans.length,box,int:!isDec}; }
+    if(ds.length===0&&slots.length){ /* 소수 계산인데 답이 자연수로 떨어진 경우(0.5 × 6 = 3)도 같은 답 상자를 쓴다: 칸 모양으로 '소수가 아니다'를 알려 주지 않게 */ const grp=slots[0].parentElement, txt=String(q.q||'')+' '+document.getElementById('visual').textContent; if(!grp||!grp.classList.contains('vgrp')||slots.some(x=>x.parentElement!==grp)||!/^\d+$/.test(ans)) return null; const isDec=/\d\.\d/.test(txt); if(!isDec&&(_m0==='hand'||q.ub||q._step||/^0\d/.test(ans)||(g<3&&document.querySelectorAll('#visual .vgrp').length!==1))) return null;   /* 정수 답도 숫자판 모드에서는 상자 하나(자릿수 힌트 없음). 손글씨 모드는 숫자를 직접 쓰게 칸 그대로 */ slots.forEach(x=>x.remove()); const box=document.createElement('div'); box.className='freeans empty'; box.id='freeans'; grp.appendChild(box); grp.classList.add('hasfree'); return {p:ans.length,box,int:!isDec}; }
     if(ds.length!==1) return null; const grp=ds[0].parentElement, gs=[...grp.querySelectorAll('.vslot')]; if(gs.length<2||gs.length!==slots.length||!grp.classList.contains('vgrp')) return null; let p=0; for(const n of grp.children){ if(n===ds[0]) break; if(n.classList.contains('vslot')) p++; } if(p<1||p>=gs.length) return null;
     ds[0].remove(); gs.forEach(x=>x.remove()); const box=document.createElement('div'); box.className='freeans empty'; box.id='freeans'; grp.appendChild(box); grp.classList.add('hasfree'); return {p,box}; })();
   if(FREE) return mountFree(q,host,ans,FREE);
@@ -4237,7 +4237,7 @@ function mountWriteQ36(q){ const host=document.getElementById('wpad'); const ans
   if(_m0!=='hand'&&!q.ub&&!q._step&&slots.length&&slots.some(x=>x.closest('.frac'))){ const cs=[]; slots.forEach(x=>{ const c=x.parentElement; if(!cs.includes(c)) cs.push(c); });
     if(cs.every(c=>c.matches('.frac b.fs, .vgrp'))&&/^\d+$/.test(ans)){ const lens=cs.map(c=>c.querySelectorAll('.vslot').length); slots.forEach(x=>x.remove()); const boxes=cs.map((c,i)=>{ const d=document.createElement('div'); d.className='ubox pbox empty'; d.dataset.i=i; c.appendChild(d); c.classList.add('hasfree'); return d; }); return mountParts(q,host,ans,boxes,lens); } }
   if(q.ub&&_m0!=='hand'){ const gs=[...document.querySelectorAll('#visual .vgrp')]; if(gs.length===2&&slots.every(x=>gs.includes(x.parentElement))){ slots.forEach(x=>x.remove()); const boxes=gs.map((g,i)=>{ const d=document.createElement('div'); d.className='ubox empty'; d.dataset.i=i; g.appendChild(d); g.classList.add('hasfree'); return d; }); return mountUnit(q,host,ans,boxes); } }
-  let mode; try{ mode=localStorage.getItem('dotori-input'); }catch(e){} if(!mode) mode=g>=3?'pad':'hand';
+  let mode; try{ mode=localStorage.getItem('dotori-input'); }catch(e){} if(!mode) mode=g>=3?'pad':'hand'; if(g>=3) mode='pad';
   let pad=null, vals=[], sel=0;
   const paint=()=>slots.forEach((s,i)=>{ const c=s.querySelector('.npc'); if(c){ c.textContent=vals[i]||''; c.classList.toggle('sel',i===sel); } });
   const build=()=>{ host.innerHTML=''; slots.forEach(s=>s.innerHTML='');
