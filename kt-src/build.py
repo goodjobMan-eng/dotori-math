@@ -112,7 +112,7 @@ sub("[`${a}%`,'D6-03']]); });", "[`${a}%`,'D6-03']], [`${100-b}%`]); });", 1)
 sub("[[`${2*(a+b)} cm²`,'G5-01'],[`${a+b} cm²`,'G5-01']]); },", "[[`${2*(a+b)} cm²`,'G5-01'],[`${a+b} cm²`,'G5-01']], [`${a*b+a} cm²`]); },", 1)
 
 
-out = '\n'.join(lines) + open('src/bank2.js', encoding='utf-8').read() + open('src/mis.js', encoding='utf-8').read() + open('src/tags3.js', encoding='utf-8').read() + open('src/basic.js', encoding='utf-8').read() + open('src/manip2.js', encoding='utf-8').read() + open('src/cpiece.js', encoding='utf-8').read() + open('src/assets2.js', encoding='utf-8').read() + open('src/core2.js', encoding='utf-8').read().replace('/*__FACTS__*/', open('src/facts.js', encoding='utf-8').read()).replace('/*__MODES__*/', open('src/modes.js', encoding='utf-8').read() + open('src/coach.js', encoding='utf-8').read()) + open('src/cards.js', encoding='utf-8').read()
+out = '\n'.join(lines) + open('src/bank2.js', encoding='utf-8').read() + open('src/mis.js', encoding='utf-8').read() + open('src/tags3.js', encoding='utf-8').read() + open('src/basic.js', encoding='utf-8').read() + open('src/kfix.js', encoding='utf-8').read() + open('src/manip2.js', encoding='utf-8').read() + open('src/cpiece.js', encoding='utf-8').read() + open('src/assets2.js', encoding='utf-8').read() + open('src/core2.js', encoding='utf-8').read().replace('/*__FACTS__*/', open('src/facts.js', encoding='utf-8').read()).replace('/*__MODES__*/', open('src/modes.js', encoding='utf-8').read() + open('src/coach.js', encoding='utf-8').read()) + open('src/cards.js', encoding='utf-8').read()
 open('kt.js', 'w', encoding='utf-8').write(out)
 
 h = open('/tmp/dotori-math/index.html', encoding='utf-8').read()
@@ -431,6 +431,12 @@ h = h.replace(_nl[0], _vp['nolink'])
 _a = "()=>{ const g=rnd(3,6), k=rnd(2,4), part=rnd(1,g-1); return W36('rami',`${g*k}개를 ${k}개씩 묶으면 ${part*k}개는 전체의 얼마?`,"
 assert h.count(_a) == 1
 h = h.replace(_a, "()=>{ let g=rnd(3,6), k=rnd(2,4), part=rnd(1,g-1); const _gc=(x,y)=>y?_gc(y,x%y):x; for(let t=0;t<40&&_gc(part,g)!==1;t++){ g=rnd(3,6); part=rnd(1,g-1); } return W36('rami',`${g*k}개를 ${k}개씩 묶었어요. ${part*k}개는 전체 묶음의 몇 분의 몇일까요? (묶음 수로 나타내요)`,")
+
+
+# 윤문(교수님 11/24): 문제를 올리기 직전에 조사 받침·띄어쓰기를 맞춘다(src/kfix.js)
+_a = "function question(q){\n"
+assert h.count(_a) == 1, h.count(_a)
+h = h.replace(_a, "function question(q){ q=window.kfixQ?window.kfixQ(q):q;\n")
 
 # 문제지형 화면(교수님 11/23: 문제 제시가 전문적이지 않고 UI가 깔끔하지 않다 → 늘품이·진단도구 학습지 짜임을 따름)
 # 3~6학년(ep36): 말풍선 대신 '번호 + 발문', 그림은 테두리 상자, 보기는 ①②③④ 번호를 단 목록. 1~2학년은 캐릭터 말풍선 그대로.

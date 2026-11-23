@@ -2473,7 +2473,7 @@ function game(g){
 }
 
 /* ---------- 문제 ---------- */
-function question(q){
+function question(q){ q=window.kfixQ?window.kfixQ(q):q;
   S.tries=0; S.counted=0; app.className='wrap';
   app.innerHTML=`
     <div class="top">
@@ -6231,7 +6231,7 @@ B('S5-08', ['480 ÷ 2 = 240, 480 ÷ 4 = 120, 480 ÷ 8 = 60. 이 규칙에서 넷
 const FIXT=[
  [/^(\d+) \+ (\d+), 청이가 (\d+)이래\. 맞을까\?$/, (m,a,b,c)=>`${a} + ${b} = ? 청이의 답은 ${c}. 바르게 계산하면?`],
  [/^(\d+) − (\d+), 청이는 거꾸로 뺐대$/, (m,a,b)=>`${a} − ${b} = ? 청이는 자리마다 큰 숫자에서 작은 숫자를 뺐대요. 바르게 계산하면?`],
- [/^바구니 (\d+)개씩 (\d+)묶음, 도토리는\?$/, (m,a,b)=>`열 개짜리 바구니가 ${a}개씩 ${b}묶음이에요. 도토리는 모두 몇 개일까요?`],
+ [/^바구니 (\d+)개씩 (\d+)묶음, 도토리는\?$/, (m,a,b)=>`도토리가 10개씩 든 바구니가 ${a}개씩 ${b}묶음 있어요. 도토리는 모두 몇 개일까요?`],
  [/^구리 아저씨 가게에서 도토리를 한 봉지에 (\d{3,})개씩 담았어요\. (\d+)봉지에 담은 도토리는 모두 몇 개일까요\?$/, (m,a,b)=>`구리 아저씨가 도토리를 수레 한 대에 ${a}개씩 실었어요. 수레 ${b}대에 실은 도토리는 모두 몇 개일까요?`],
  [/^(\d+ ÷ \d+ = \d+ … \d+), 맞을까\?$/, (m,a)=>`잘못된 계산: ${a}. 바르게 계산하면?`],
  [/^대분수 (.+)을 가분수로$/, (m,a)=>`대분수 ${a}을 가분수로 나타내면?`], [/^대분수 (.+)를 가분수로$/, (m,a)=>`대분수 ${a}를 가분수로 나타내면?`],
@@ -6248,7 +6248,7 @@ const FIXT=[
  [/^도토리 (\d+)개를 10개씩 바구니에, 가득 찬 바구니는\?$/, (m,a)=>`도토리 ${a}개를 한 바구니에 10개씩 담으면 가득 찬 바구니는 몇 개일까요?`],
  [/^사람 (\d+)명이 (\d+)명씩 타는 배, 배는 몇 척\? 어떤 어림\?$/, (m,a,b)=>`${a}명이 한 척에 ${b}명씩 배를 타요. 필요한 배의 수를 구할 때 알맞은 어림은?`],
  [/^동전 (\d+)원을 1000원 지폐로 바꾸면\? 어떤 어림\?$/, (m,a)=>`동전 ${a}원을 1000원짜리 지폐로 바꿀 때 알맞은 어림은?`],
- [/^키 (\d+) cm를 약 몇 cm라고 말할까\? 어떤 어림\?$/, (m,a)=>`키 ${a} cm를 약 몇십 cm라고 말할 때 알맞은 어림은?`],
+ [/^키 (\d+) cm를 약 몇 cm라고 말할까\? 어떤 어림\?$/, (m,a)=>`키 ${a} cm를 약 몇십 cm라고 말할 때 알맞은 어림 방법은?`],
  [/^(\d+[을를] 반올림하여 [가-힣]+의 자리까지)\??$/, (m,a)=>`${a} 나타내면?`],
  [/^(.+분의 \d+)[을를] 통분 \(최소공배수로\)$/, (m,a)=>`${a}, 가장 작은 공통분모로 통분하면?`],
  [/^(.+의 몫을 반올림하여 소수 [가-힣]+ 자리까지)\??$/, (m,a)=>`${a} 나타내면?`],
@@ -6270,8 +6270,25 @@ const FIXT=[
  [/쌓기나무는 모두\?$/, ()=>'쌓기나무는 모두 몇 개일까요?'],
  [/^정육면체 전개도에서 한 면과 이웃한 면은 몇 개\?$/, ()=>'정육면체의 전개도를 접었을 때 한 면과 만나는 면은 몇 개일까요?'],
  [/^물병 하나의 들이에 알맞은 단위는\?$/, ()=>'작은 음료수 캔 하나의 들이에 알맞은 단위는?'],
- [/^(.+)[은는] 약\?$/, (m,a)=>`${a}, 약 얼마일까요?`],
- [/^(\d+ m의 .+만큼은 몇 m일까요\?) 반반이가 리본을 잘라요\.$/, (m,a)=>`반반이가 리본을 잘라요. ${a}`],
+ [/^(.+)([은는]) 약\?$/, (m,a,j)=>`${a}${j} 약 얼마일까요?`],
+ [/^(\d+ m의 .+만큼은 몇 m일까요\?) 반반이가 리본을 잘라요\.$/, (m,a)=>`반반이가 리본을 잘라요. ${a}`], /* 윤문(11/24): 평가원 발문 꼴로 */
+ [/^(\d+)의 배수를 작은 수부터, (\d+)번째는\?$/, (m,a,b)=>`${a}의 배수를 작은 수부터 차례로 쓸 때, ${b}번째 수는 얼마일까요?`],
+ [/^(\d+) 이하에 (\d+)[이가] 들어갈까\?$/, (m,a,b)=>`${a} 이하인 수에 ${b}도 들어갈까요?`],
+ [/^(\d+) × (\d+), 영은 몇 개\?$/, (m,a,b)=>`${a} × ${b}의 곱은 끝에 0이 몇 개 있을까요?`],
+ [/^(.+)([은는]) (\d+)보다\?$/, (m,a,j,k)=>`${a}의 값은 ${k}보다 클까요, 작을까요?`],
+ [/^(\d+)의 (\d+)에 대한 비율을 분수로\?$/, (m,a,b)=>`${b}에 대한 ${a}의 비율을 분수로 나타내면?`],
+ [/^키 ([\d.]+) cm를 약 몇 cm라고 말할까\? 어떤 어림\?$/, (m,a)=>`키 ${a} cm를 가까운 쪽으로 어림하여 약 몇 cm라고 말할 때, 알맞은 어림 방법은?`],
+ [/^1보다 작은 수로 나누면 몫은 나누어지는 수보다\?$/, ()=>'1보다 작은 수로 나누면 몫은 나누어지는 수보다 어떻게 될까요?'],
+ [/^(.+?) ?의 곱은 (\d+)과 비교하면\?$/, (m,a,k)=>`${a}의 곱을 ${k}과 비교하면?`],
+ [/^(.+?) ?의 곱은 (\d+)와 비교하면\?$/, (m,a,k)=>`${a}의 곱을 ${k}와 비교하면?`],
+ [/^(.+?) ?의 몫은 (\d+)[과와] 비교하면\?$/, (m,a,k)=>`${a}의 몫을 ${k}와 비교하면?`],
+ [/^교실 문의 높이는 약 얼마\?$/, ()=>'교실 문의 높이는 약 얼마일까요?'],
+ [/^연필의 길이는 약 얼마\?$/, ()=>'연필의 길이는 약 얼마일까요?'],
+ [/^9\.3 ÷ 3, 몫은\?$/, ()=>'9.3 ÷ 3의 몫은?'],
+ [/^([\d.]+ ÷ \d+), 몫은\?$/, (m,a)=>`${a}의 몫은?`],
+ [/^학생 (\d+)명이 (\d+)인승 보트를 타요\. 보트는 최소 몇 대\?$/, (m,a,b)=>`학생 ${a}명이 ${b}인승 보트를 모두 타려고 해요. 보트는 적어도 몇 대 필요할까요?`],
+ [/^한 상자에 (\d+)개씩 담아요\. 사과 (\d+)개를 모두 담으려면 상자는 몇 개\?$/, (m,a,b)=>`사과 ${b}개를 한 상자에 ${a}개씩 모두 담으려면 상자는 적어도 몇 개 필요할까요?`],
+ [/^(\d+)를 1 : 2 로 나눌 때 작은 쪽을 구하는 식은\?$/, (m,a)=>`${a}를 1 : 2로 나눌 때, 작은 쪽을 구하는 식은?`],
 ];
 const _bat=n=>/[013678]$/.test(String(n));   /* 수를 읽었을 때 받침이 있는지(끝자리 0·1·3·6·7·8) */
 /* 숫자 바로 뒤 조사를 읽는 소리의 받침에 맞춤(화면 글): 0.3와→0.3과, 4을→4를, 3로→3으로 */
@@ -7859,7 +7876,7 @@ NT.decMulUse=()=>{ const a=rndPick(23,27,34,36,43), b=rndPick(12,14,16,18,24), p
 NT.decDivUse=()=>{ const b=rndPick(12,14,16,18,24), q=rndPick(23,27,34,36), a=b*q, f=v=>String(+v.toFixed(4)); return cq(`${a} ÷ ${b} = ${q} 예요. 이것을 이용하면 ${f(a/100)} ÷ ${f(b/10)} 의 값은 얼마일까요?`,'',f(q/10),[[String(q),'N6-07'],[f(q/100),'N6-07'],[String(q*10),null]]); };
 /* --- 규칙성 --- */
 NT.shapeNth=()=>{ const S=['🔴','🔺','🟦'], pat=rndPick([0,1,1],[0,0,1],[0,1,2],[0,1,2,2],[0,1]), n=rnd(9,14), ans=S[pat[(n-1)%pat.length]]; const row=Array.from({length:pat.length*2+1},(_,i)=>S[pat[i%pat.length]]).join(' '); const used=[...new Set(pat.map(i=>S[i]))];
-  return cq(`규칙에 따라 모양을 늘어놓았어요. ${n}째에 올 모양은 무엇일까요?`,`<div style="font-size:1.3rem;letter-spacing:1px;white-space:nowrap">${row} …</div>`,ans,S.filter(x=>x!==ans).map(x=>[x,used.includes(x)?'R1-01':null])); };
+  return cq(`규칙에 따라 모양을 늘어놓았어요. ${['','첫','둘','셋','넷','다섯','여섯','일곱','여덟','아홉','열','열한','열두','열셋','열넷','열다섯','열여섯','열일곱','열여덟','열아홉','스무'][n]||n+'번'}째에 올 모양은 무엇일까요?`,`<div style="font-size:1.3rem;letter-spacing:1px;white-space:nowrap">${row} …</div>`,ans,S.filter(x=>x!==ans).map(x=>[x,used.includes(x)?'R1-01':null])); };
 NT.growDots=()=>{ const kind=rndPick('tri','sq','L'), f=kind==='tri'?k=>k*(k+1)/2:kind==='sq'?k=>k*k:k=>2*k-1, rows=k=>kind==='tri'?Array.from({length:k},(_,i)=>i+1):kind==='sq'?Array(k).fill(k):[...Array(k-1).fill(1),k], n=rndPick(5,6);
   const pics=[1,2,3,4].map(k=>`<div style="display:flex;flex-direction:column;align-items:center;justify-content:flex-end">${dotsSvg(rows(k),Math.max(...rows(k))*13+6)}<span style="font-size:.82rem">${['첫째','둘째','셋째','넷째'][k-1]}</span></div>`).join('');
   return WM(`규칙에 따라 바둑돌을 놓았어요. ${n===5?'다섯째':'여섯째'}에 놓이는 바둑돌은 모두 몇 개일까요?`,`<div style="display:flex;gap:8px;justify-content:center;align-items:flex-end;flex-wrap:nowrap">${pics}</div>`,f(n),[[kind==='L'?null:f(4)+(f(4)-f(3))*(n-4),'R4-01'],[f(n-1),'N1-07'],[kind==='L'?2*n:f(n)+1,null]],'','개'); };
@@ -8239,7 +8256,7 @@ GT.cans=()=>{ const r=rnd(2,8), n=rnd(2,4), ans=2*r*n; let g=`<rect x="8" y="8" 
 GT.graphClaim=()=>{ const base=rndPick(20,30,40), a=base+rnd(1,2), b=a+rnd(2,4), yv=v=>120-(v-base)*14-20, x1=80, x2=190; let g=`<line x1="40" y1="10" x2="40" y2="120" stroke="${GX_S}"/><line x1="40" y1="120" x2="230" y2="120" stroke="${GX_S}"/><path d="M34 108 q3 -4 6 0 t6 0" fill="none" stroke="${GX_S}" stroke-width="1.6"/>`+gxT(30,124,'0',10,'#4A2E14','end'); for(let v=base;v<=base+6;v++){ g+=`<line x1="40" y1="${yv(v)}" x2="230" y2="${yv(v)}" stroke="#E8DCC6" stroke-width="1"/>`+(v%2===0||v===base?gxT(34,yv(v)+4,v,10,'#4A2E14','end'):''); } g+=`<path d="M${x1} ${yv(a)} L${x2} ${yv(b)}" stroke="#B04A2E" stroke-width="2.4" fill="none"/><circle cx="${x1}" cy="${yv(a)}" r="4" fill="#B04A2E"/><circle cx="${x2}" cy="${yv(b)}" r="4" fill="#B04A2E"/>`+gxT(x1,136,'오전 9시',11)+gxT(x2,136,'오후 1시',11)+gxT(44,10,'(℃)',10,'#4A2E14','start'); return cq(`기온을 나타낸 꺾은선그래프예요(아래쪽은 물결선으로 줄였어요). 람이가 "오후 1시 기온은 오전 9시 기온의 2배가 넘어."라고 말했어요. 이 말에 대한 생각으로 알맞은 것은 어느 것일까요?`,cpWrap(cpSvg(g,240,142,280)),_two('틀린 말이에요',`${a}℃에서 ${b}℃로 ${b-a}℃ 올랐을 뿐이에요`),[[_two('맞는 말이에요','그래프에서 점의 높이가 2배보다 높아요'),'D4-02'],[_two('맞는 말이에요','선이 오른쪽 위로 많이 올라갔어요'),'D4-02'],[_two('알 수 없어요','물결선이 있으면 기온을 읽을 수 없어요'),'D4-01']]); };
 /* --- 누가 바르게 말했나 (일본 전국학력조사의 대화문 문항) --- */
 GT.talkHeight=()=>{ const b=rnd(5,11), h=rnd(3,8), s=h+rnd(1,3), sk=22, g=`<polygon points="${10+sk},14 ${10+sk+110},14 ${10+110},${14+70} 10,${14+70}" fill="${GX_F}" stroke="${GX_S}" stroke-width="2"/><line x1="${10+sk}" y1="14" x2="${10+sk}" y2="84" stroke="#B04A2E" stroke-width="1.6" stroke-dasharray="4 3"/>`+gxT(64,100,b+' cm',11)+gxT(10+sk+6,54,h+' cm',11,'#B04A2E','start')+gxT(4,46,s+' cm',11,'#4A2E14','start'); if(b*s===b*h||(b+s)*2===b*h||b*h%2) return GT.talkHeight(); return cq('평행사변형의 넓이를 세 친구가 구했어요. 바르게 구한 친구는 누구일까요?',cpWrap(cpSvg(g,170,106,230)),`람이: ${b} × ${h} = ${b*h} (cm²)`,[[`도토: ${b} × ${s} = ${b*s} (cm²)`,'G5-02'],[`청이: (${b} + ${s}) × 2 = ${(b+s)*2} (cm²)`,'G5-01'],[`구리: ${b} × ${h} ÷ 2 = ${b*h/2} (cm²)`,'G5-16']]); };
-GT.talkDecAlign=()=>{ const a=rnd(2,7), b=rnd(1,3), c=rnd(1,9), ok=((a*10+b*10+c)/100).toFixed(2), bad=((b*10+c+a)/100).toFixed(2), bad2=((a*10+b*10+c)/10).toFixed(1); return cq(`0.${a} + 0.${b}${c} 을 세 친구가 계산했어요. 바르게 계산한 친구는 누구일까요?`,'',`람이: 0.${a}는 0.${a}0과 같으니까 ${ok}`.replace(/(0\.\d)는/,(m,v)=>v+('2459'.includes(v.slice(-1))?'는':'은')),[[`도토: 끝자리를 맞추어 더하면 ${bad}`,'N4-03'],[`청이: ${a} + ${b}${c} = ${a+b*10+c}이니까 ${bad2}`,'N3-08'],[`구리: 자릿수가 달라서 더할 수 없어요`,'N4-03']]); };
+GT.talkDecAlign=()=>{ const a=rnd(2,7), b=rnd(1,3), c=rnd(1,9), ok=((a*10+b*10+c)/100).toFixed(2), bad=((b*10+c+a)/100).toFixed(2), bad2=((a*10+b*10+c)/10).toFixed(1); return cq(`0.${a} + 0.${b}${c} 을 세 친구가 계산했어요. 바르게 계산한 친구는 누구일까요?`,'',`람이: 0.${a}는 0.01이 ${a*10}개, 0.${b}${c}는 0.01이 ${b*10+c}개이니까 ${ok}`,[[`도토: 끝자리를 맞추어 더하면 ${bad}`,'N4-03'],[`청이: ${a} + ${b}${c} = ${a+b*10+c}이니까 ${bad2}`,'N3-08'],[`구리: 자릿수가 달라서 더할 수 없어요`,'N4-03']]); };
 /* --- 조건을 바꾸어도 변하지 않는 것 --- */
 GT.scaleAngles=()=>{ const k=rndPick(2,3), sh=rndPick(['삼각형','세',180],['사각형','네',360]); return _W(`${sh[0]}의 모든 변의 길이를 ${k}배로 늘여 같은 모양의 큰 ${sh[0]}을 그렸어요. 큰 ${sh[0]}의 ${sh[1]} 각의 크기의 합은 몇 도일까요?`,sh[2],_kw(sh[2],[[sh[2]*k,'G3-01'],[sh[2]===180?360:180,'G4-12']]),'°'); };
 GT.avgAdd=()=>{ const m=rnd(12,30), n=rnd(3,5); return _W(`${n}명의 줄넘기 기록의 평균이 ${m}번이에요. 기록이 ${m}번인 학생 한 명이 더 들어오면, ${n+1}명의 평균은 몇 번이 될까요?`,m,_kw(m,[[2*m,'D5-04'],[m+1,'N1-07'],[Math.round(m*(n+1)/n)!==m?Math.round(m*(n+1)/n):null,'D5-04']]),'번'); };
@@ -8517,6 +8534,7 @@ window.KT_STAGE_NAME=['만져 보기','기본 익히기','이야기 문제','도
     add('S3-31',GD.divSteps); add('S3-30',GD.remPick); add('S2-03',GD.chips); add('S2-07',GD.estTalk); add('S3-17',GD.fracSay); add('S3-17',GD.equalPick); add('S6-49',GD.angleHow); add('S6-49',GD.angleSumDiff); add('S4-10',GD.barScale); }catch(e){}
 }
 /* 문제지형 발문: 수와 단위가 줄바꿈으로 떨어지지 않게 */
+window.nmJ=w=>{ const k=(String(w).charCodeAt(String(w).length-1)-0xAC00)%28; return k>0?w+'이는':w+'는'; };
 window.qpNb=t=>(/[가-힣]/.test(String(t||'').replace(/<[^>]+>/g,''))?String(t):`${t}<span class="qp-sub">계산해 보세요.</span>`).replace(/(\d[\d,.]*)\s(?=(cm|mm|km|m|kg|g|t|L|mL|°|%|초|분|시간|개|명|원|쪽|번|권|자루|마리|장|대|송이|배)(?![a-zA-Z]))/g,'$1&nbsp;');
 
 /* ---------- 3-77. 국가 수리력 진단도구 꼴 문항(편에 섞어 냄) ----------
@@ -8539,22 +8557,22 @@ window.qpNb=t=>(/[가-힣]/.test(String(t||'').replace(/<[^>]+>/g,''))?String(t)
   const N1=[
     ['10까지의 수 세기',()=>{ const n=rnd(5,9); let g=''; for(let i=0;i<n;i++) g+=dot(22+(i%5)*30,22+Math.floor(i/5)*30,'#F7B6C2'); return Q4('사탕은 모두 몇 개인가요?',pic(g,160,70),n+'개',[[(n-1)+'개','N1-07'],[(n+1)+'개','N1-07'],[(n+2)+'개',null],[(n-2)+'개',null]]); }],
     ['모으기',()=>{ const a=rnd(2,6), b=rnd(2,9-a); let g=''; for(let i=0;i<a;i++) g+=`<rect x="${12+i*16}" y="14" width="9" height="46" rx="2" fill="#FFD35C" stroke="${S}"/>`; for(let i=0;i<b;i++) g+=`<rect x="${132+i*16}" y="14" width="9" height="46" rx="2" fill="#9CC9F0" stroke="${S}"/>`; return Q4('연필을 모으면 모두 몇 자루인가요?',pic(g,240,72),(a+b)+'자루',[[(Math.abs(a-b)||a+b+2)+'자루','N1-03'],[a+'자루',null],[b+'자루',null],[(a+b+1)+'자루','N1-07']]); }],
-    ['받아올림이 있는 두 자리 수의 덧셈(문장)',()=>{ const a=rnd(14,48), b=rnd(13,49); if(a%10+b%10<10||a+b>99) return null; const w=nm(); return Q4(`${w}는 어제 동화책을 ${a}쪽, 오늘 ${b}쪽 읽었어요. 어제와 오늘 읽은 동화책은 모두 몇 쪽인가요?`,'',(a+b)+'쪽',[[(a+b-10)+'쪽','N2-01'],[(a+b+10)+'쪽',null],[(Math.floor(a/10)+Math.floor(b/10))*10+(a%10+b%10)%10+10+'쪽',null],[Math.abs(a-b)+'쪽','N1-03']]); }],
+    ['받아올림이 있는 두 자리 수의 덧셈(문장)',()=>{ const a=rnd(14,48), b=rnd(13,49); if(a%10+b%10<10||a+b>99) return null; const w=nm(); return Q4(`${nmJ(w)} 어제 동화책을 ${a}쪽, 오늘 ${b}쪽 읽었어요. 어제와 오늘 읽은 동화책은 모두 몇 쪽인가요?`,'',(a+b)+'쪽',[[(a+b-10)+'쪽','N2-01'],[(a+b+10)+'쪽',null],[(Math.floor(a/10)+Math.floor(b/10))*10+(a%10+b%10)%10+10+'쪽',null],[Math.abs(a-b)+'쪽','N1-03']]); }],
     ['받아올림이 있는 두 자리 수의 덧셈(생활)',()=>{ const a=rnd(15,39), b=rnd(26,59); if(a%10+b%10<10||a+b>99) return null; return Q4(`줄넘기를 어제는 ${a}번, 오늘은 ${b}번 넘었어요. 어제와 오늘 넘은 줄넘기는 모두 몇 번인가요?`,'',(a+b)+'번',[[(a+b-10)+'번','N2-01'],[(b-a)+'번','N1-03'],[(a+b+10)+'번',null],[(a+b+1)+'번',null]]); }],
     ['네 자리 수 (수 모형)',()=>{ const th=rnd(1,4), h=rnd(1,5), t=rnd(1,5), o=rnd(1,8); const n=th*1000+h*100+t*10+o; let g='', x=8; const blk=(w,hh,c,k)=>{ for(let i=0;i<k;i++){ g+=`<rect x="${x}" y="${70-hh}" width="${w}" height="${hh}" fill="${c}" stroke="${S}" stroke-width="1"/>`; x+=w+3; } x+=8; }; blk(22,40,'#E9D5F5',th); blk(16,30,'#FBD9A5',h); blk(5,30,'#CFE0F7',t); blk(6,6,'#FFF3C4',o);
       const cap='큰 정육면체 1000, 판 100, 막대 10, 작은 정육면체 1'; return Q4('수 모형이 나타내는 수는 얼마인가요?',pic(g,Math.max(x,120),76,cap),n,[[th*1000+t*100+h*10+o,'N4-15'],[n+100,null],[(th+1)*1000+h*100+t*10+o,null],[th*1000+h*100+o*10+t,'N4-15']]); }],
     ['전체에서 부분 빼기(문장)',()=>{ const tot=rnd(21,32), b=rnd(11,tot-8); return Q4(`우리 반 학생은 모두 ${tot}명이에요. 남학생이 ${b}명이면 여학생은 몇 명인가요?`,'',(tot-b)+'명',[[(tot+b)+'명','N1-03'],[(tot-b+10)+'명','N2-02'],[(tot-b-2)+'명',null],[b+'명',null]]); }],
     ['묶어 세기',()=>{ const k=pk([5,10]), m=rnd(4,8), n=k*m; let g=''; for(let i=0;i<m;i++){ const x=10+(i%4)*58, y=8+Math.floor(i/4)*44; g+=`<rect x="${x}" y="${y}" width="52" height="38" rx="8" fill="none" stroke="${BL}" stroke-dasharray="3 2"/>`; for(let j=0;j<Math.min(k,5);j++) g+=`<circle cx="${x+9+j*9}" cy="${y+12}" r="4" fill="#F7B6C2" stroke="${S}" stroke-width=".8"/>`; g+=gxT(x+26,y+32,k+'개',10); } return Q4(`풍선을 ${k}개씩 묶었어요. 풍선은 모두 몇 개인가요?`,pic(g,250,Math.ceil(m/4)*44+10),n+'개',[[(k+m)+'개','N2-05'],[(n-k)+'개',null],[(n+k)+'개',null],[m+'개',null]]); }],
-    ['가르기',()=>{ const n=10, a=rnd(2,n-2); let g=''; for(let i=0;i<n;i++) g+=dot(16+(i%6)*24,18+Math.floor(i/6)*24,'#fff'); g+=`<text x="190" y="30" font-size="15" fill="#4A2E14">${n} → ${jw(a)} □</text>`; return Q4(`축구공 ${n}개를 ${a}개와 몇 개로 가르기 했어요. □에 들어갈 수는?`,pic(g,290,60),n-a,[[n+a,'N1-03'],[n,null],[a,null],[n-a+1,'N1-02']]); }],
+    ['가르기',()=>{ const n=10, a=rnd(2,n-2); let g=''; for(let i=0;i<n;i++) g+=dot(16+(i%6)*24,18+Math.floor(i/6)*24,'#fff'); g+=`<text x="190" y="30" font-size="15" fill="#4A2E14">${n} → ${jw(a)} □</text>`; return Q4(`축구공 ${n}개를 ${a}개와 몇 개로 갈랐어요. □ 안에 알맞은 수는?`,pic(g,290,60),n-a,[[n+a,'N1-03'],[n,null],[a,null],[n-a+1,'N1-02']]); }],
     ['세 자리 수 읽기',()=>{ const mk=()=>{ const n=rnd(1,9)*100+pk([0,rnd(1,9)])*10+rnd(1,9); return n; }; const ns=[mk(),mk(),mk(),mk()]; if(new Set(ns).size<4) return null; const bad=rnd(0,3); const wr=n=>{ const h=Math.floor(n/100), t=Math.floor(n/10)%10, o=n%10; return t===0?sino(h*100)+'영'+sino(o):sino(h)+'백'+sino(t)+sino(o); };
       const ctx=['번 버스가 와요','쪽까지 읽었어요','번 번호표를 뽑았어요','개를 모았어요'], lines=ns.map((n,i)=>`“${n}${ctx[i]}” → ${i===bad?wr(n):sino(n)}`);
       return Q4('수를 바르게 읽지 않은 것은 무엇인가요?','',lines[bad],lines.filter((_,i)=>i!==bad).map(s=>[s,null]).concat([['모두 바르게 읽었어요',null]])); }],
     ['두 자리 수 쓰고 읽기',()=>{ const t=rnd(5,9), o=rnd(1,9), n=t*10+o; let g=''; for(let i=0;i<t;i++) g+=`<rect x="${6+i*26}" y="6" width="22" height="30" rx="4" fill="#FFF3C4" stroke="${S}"/>`+gxT(17+i*26,26,'10',9); for(let i=0;i<o;i++) g+=`<ellipse cx="${14+i*16}" cy="52" rx="6" ry="8" fill="#fff" stroke="${S}"/>`; return Q4('달걀의 수를 바르게 쓰고 읽은 것은?',pic(g,Math.max(t*26+10,o*16+20),66,'한 판에 10개씩'),`${n} – ${sino(n)}`,[[`${n} – ${sino(t)}${sino(o)}`,'N1-10'],[`${t+1}${o} – ${sino(t+1)}십${sino(o)}`.replace(/^(\d+)/,m=>m),null],[`${(t+1)*10+o} – ${sino(t)}${sino(o)}`,null],[`${o}${t} – ${sino(o*10+t)}`,'N4-15']]); }],
     ['덧셈식과 뺄셈식의 관계',()=>{ const a=rnd(31,58), b=rnd(11,a-12); const c=a-b; return Q4(`뺄셈식 ${a} − ${b} = ${c}를 덧셈식으로 바꾸면 □ + ${b} = ${a}, ${b} + □ = ${a}예요. □에 공통으로 들어갈 수는?`,'',c,[[b,'N1-08'],[a,'N1-08'],[a+b,'N1-03'],[c+1,null]]); }],
     ['수 카드로 가장 큰 네 자리 수',()=>{ const ds=shuffle([1,2,3,4,5,6,7,8,9]).slice(0,4); const hi=+ds.slice().sort((a,b)=>b-a).join(''), lo=+ds.slice().sort((a,b)=>a-b).join(''); const big=pk([1,0]); const cards=`<div style="display:flex;gap:8px;justify-content:center">${ds.map(d=>`<span style="display:inline-block;width:34px;height:44px;border:2px solid #7A4A1E;border-radius:6px;font:700 24px/44px Jua,sans-serif;background:#fff">${d}</span>`).join('')}</div>`;
-      return big?Q4('수 카드 4장을 한 번씩만 써서 가장 큰 네 자리 수를 만들면?',cards,hi,[[lo,'N3-37'],[+ds.join(''),null],[+String(hi).slice(0,2)+String(hi).slice(3)+String(hi)[2]+'' ,null],[+(String(hi)[1]+String(hi)[0]+String(hi).slice(2)),null]]):Q4('수 카드 4장을 한 번씩만 써서 가장 작은 네 자리 수를 만들면?',cards,lo,[[hi,'N3-37'],[+ds.join(''),null],[+(String(lo)[1]+String(lo)[0]+String(lo).slice(2)),null],[+(String(lo).slice(0,2)+String(lo)[3]+String(lo)[2]),null]]); }],
+      return big?Q4('수 카드 4장을 한 번씩만 써서 만들 수 있는 가장 큰 네 자리 수는 얼마일까요?',cards,hi,[[lo,'N3-37'],[+ds.join(''),null],[+String(hi).slice(0,2)+String(hi).slice(3)+String(hi)[2]+'' ,null],[+(String(hi)[1]+String(hi)[0]+String(hi).slice(2)),null]]):Q4('수 카드 4장을 한 번씩만 써서 만들 수 있는 가장 작은 네 자리 수는 얼마일까요?',cards,lo,[[hi,'N3-37'],[+ds.join(''),null],[+(String(lo)[1]+String(lo)[0]+String(lo).slice(2)),null],[+(String(lo).slice(0,2)+String(lo)[3]+String(lo)[2]),null]]); }],
     ['수 카드로 뺄셈식 만들기',()=>{ const a=rnd(12,29), b=rnd(13,39); const c=a+b; if(c>99||a===b) return null; const cards=[a,b,c].sort((x,y)=>x-y); return Q4(`수 카드 ${cards.join(', ')}을 모두 한 번씩 써서 만든 뺄셈식으로 알맞은 것은?`,'',`${c} − ${b} = ${a}`,[[`${Math.max(a,b)} − ${Math.min(a,b)} = ${c}`,null],[`${c} − ${b} = ${b}`,null],[`${a} + ${b} = ${c}`,'N1-03']]); }],
-    ['더 많은 수 구하기(비교)',()=>{ const a=rnd(41,68), b=rnd(19,a-9); if(a%10>=b%10) return null; const w=nm(); return Q4(`${w}는 딸기를 ${a}개, 동생은 ${b}개 땄어요. ${w}는 동생보다 딸기를 몇 개 더 땄나요?`,'',(a-b)+'개',[[(a-b+10)+'개','N2-02'],[(a+b)+'개','N1-03'],[(Math.floor(a/10)-Math.floor(b/10))*10+Math.abs(a%10-b%10)+'개','N2-02'],[(a-b-1)+'개',null]]); }],
+    ['더 많은 수 구하기(비교)',()=>{ const a=rnd(41,68), b=rnd(19,a-9); if(a%10>=b%10) return null; const w=nm(); return Q4(`${nmJ(w)} 딸기를 ${a}개, 동생은 ${b}개 땄어요. ${nmJ(w)} 동생보다 딸기를 몇 개 더 땄나요?`,'',(a-b)+'개',[[(a-b+10)+'개','N2-02'],[(a+b)+'개','N1-03'],[(Math.floor(a/10)-Math.floor(b/10))*10+Math.abs(a%10-b%10)+'개','N2-02'],[(a-b-1)+'개',null]]); }],
   ];
   reg(1,'수',N1);
 
@@ -8574,7 +8592,7 @@ window.qpNb=t=>(/[가-힣]/.test(String(t||'').replace(/<[^>]+>/g,''))?String(t)
     ['도형 바르게 설명하기',()=>{ const good=pk(['삼각형은 꼭짓점이 3개예요.','사각형은 변이 4개예요.','원은 뾰족한 곳이 없어요.']); const bad=['원은 꼭짓점이 1개예요.','삼각형은 변이 4개예요.','사각형은 꼭짓점이 3개예요.','원은 곧은 선으로 둘러싸여 있어요.']; return Q4('도형에 대해 바르게 말한 것은?','',good,shuffle(bad).slice(0,3).map(s=>[s,'G1-02'])); }],
     ['몇 시간 몇 분',()=>{ const n=rnd(65,115); const h=Math.floor(n/60), m=n%60; return Q4(`${n}분은 몇 시간 몇 분인가요?`,'',`${h}시간 ${m}분`,[[`${h}시간 ${m+10}분`,null],[`${h}시간 ${m+20}분`,null],[`${h+1}시간 ${m}분`,null],[`${Math.floor(n/10)}시간 ${n%10}분`,'G2-03']]); }],
     ['그림을 보고 가장 많은 것',()=>{ const ds=['월','화','수','목'], v=ds.map(()=>rnd(1,5)); const mx=Math.max(...v); if(v.filter(x=>x===mx).length>1) return null; let g=''; v.forEach((k,i)=>{ for(let j=0;j<k;j++) g+=`<rect x="${20+i*58}" y="${110-(j+1)*20}" width="40" height="18" rx="3" fill="#C9E3B4" stroke="${S}"/>`; g+=gxT(40+i*58,126,ds[i]+'요일',12); }); const i=v.indexOf(mx); const mn=v.indexOf(Math.min(...v)); return Q4('요일별로 음식물 쓰레기 통을 쌓았어요. 쓰레기가 가장 많이 나온 요일은?',pic(g,250,132,'통 하나의 양은 모두 같아요'),ds[i]+'요일',ds.map((d,j)=>[d+'요일',j===mn?'N1-13':null]).filter(x=>x[0]!==ds[i]+'요일')); }],
-    ['달력에서 몇 주일 후',()=>{ const d=rnd(2,12), k=pk([1,2]); const A=d+7*k; const first=rnd(0,6); let cal='<table style="border-collapse:collapse;margin:0 auto;font-size:.9rem">'+'<tr>'+['일','월','화','수','목','금','토'].map(x=>`<th style="padding:2px 6px">${x}</th>`).join('')+'</tr><tr>'; for(let i=0;i<first;i++) cal+='<td></td>'; for(let x=1;x<=31;x++){ cal+=`<td style="padding:2px 6px;${x===d?'background:#FFE3B0;border-radius:6px;font-weight:700':''}">${x}</td>`; if((x+first)%7===0) cal+='</tr><tr>'; } cal+='</tr></table>'; return Q4(`5월 달력이에요. 색칠한 날은 ${d}일이에요. 이날부터 ${k}주일 후는 몇 월 며칠인가요?`,cal,`5월 ${A}일`,[[`5월 ${d+k}일`,null],[`5월 ${d+7*k+1}일`,null],[`5월 ${d+7*(k+1)}일`,null],[`${5+k}월 ${d}일`,null]]); }],
+    ['달력에서 몇 주일 후',()=>{ const d=rnd(2,10), k=pk([1,2]); const A=d+7*k; const first=rnd(0,6); let cal='<table style="border-collapse:collapse;margin:0 auto;font-size:.9rem">'+'<tr>'+['일','월','화','수','목','금','토'].map(x=>`<th style="padding:2px 6px">${x}</th>`).join('')+'</tr><tr>'; for(let i=0;i<first;i++) cal+='<td></td>'; for(let x=1;x<=31;x++){ cal+=`<td style="padding:2px 6px;${x===d?'background:#FFE3B0;border-radius:6px;font-weight:700':''}">${x}</td>`; if((x+first)%7===0) cal+='</tr><tr>'; } cal+='</tr></table>'; return Q4(`5월 달력이에요. 색칠한 날은 ${d}일이에요. 이날부터 ${k}주일 후는 몇 월 며칠인가요?`,cal,`5월 ${A}일`,[[`5월 ${d+k}일`,null],[`5월 ${d+7*k+1}일`,null],[`5월 ${d+7*(k+1)}일`,null],[`${5+k}월 ${d}일`,null]]); }],
     ['쌓기나무의 위치',()=>{ const cols=[rnd(1,3),rnd(2,3),rnd(1,3)]; const cells=[]; cols.forEach((h,c)=>{ for(let r=0;r<h;r++) cells.push([c,r]); }); const can=cells.filter(([c,r])=>r<cols[c]-1); if(!can.length) return null; const [cc,cr]=pk(can); const lab=shuffle(['ㄱ','ㄴ','ㄷ','ㄹ','ㅁ','ㅂ','ㅅ','ㅇ','ㅈ']); let g=''; cells.forEach(([c,r],i)=>{ const x=40+c*44, y=130-(r+1)*40; g+=`<rect x="${x}" y="${y}" width="42" height="38" fill="${c===cc&&r===cr?'#BBB':'#F3D7A6'}" stroke="${S}" stroke-width="2"/>`+gxT(x+21,y+25,lab[i],15); }); const L=k=>lab[cells.findIndex(([c,r])=>c===k[0]&&r===k[1])]; const ans=L([cc,cr+1]); const wr=[]; if(cr>0) wr.push([L([cc,cr-1]),'G1-04']); if(cols[cc-1]>cr) wr.push([L([cc-1,cr]),'G1-04']); if(cols[cc+1]>cr) wr.push([L([cc+1,cr]),'G1-04']); cells.forEach(k=>wr.push([L(k),null])); return Q4('회색 쌓기나무의 바로 위에 있는 쌓기나무는?',pic(g,220,136,'앞에서 본 모양'),ans,wr); }],
     ['길이 어림하기',()=>{ const n=rnd(3,8); let g=''; for(let i=0;i<n;i++) g+=`<circle cx="${22+i*20}" cy="20" r="9" fill="#CFE0F7" stroke="${S}"/>`; g+=`<rect x="12" y="40" width="${n*20}" height="12" rx="6" fill="#B9BEC6" stroke="${S}"/>`; return Q4('공깃돌 하나의 길이는 약 1 cm예요. 클립의 길이는 약 얼마인가요?',pic(g,n*20+30,60),`약 ${n} cm`,[[`약 ${n} m`,'G3-07'],[`약 ${n*10} cm`,'G3-07'],[`약 1 cm`,null],[`약 ${n+5} cm`,null]]); }],
   ];
@@ -8583,12 +8601,12 @@ window.qpNb=t=>(/[가-힣]/.test(String(t||'').replace(/<[^>]+>/g,''))?String(t)
   /* ===== 2수준 · 수와 연산 (20문항, 12개 이상) ===== */
   const fr=(a,b)=>`${b}분의 ${a}`;
   const N2=[
-    ['큰 수 읽기(금액)',()=>{ const n=rnd(2,9)*10000+rnd(1,9)*1000+rnd(1,9)*100+pk([0,50]); return Q4(`영수증의 받을 금액은 ${won(n)}원이에요. 바르게 읽은 것은?`,'',bigRead(n)+' 원',[[bigRead(n*10)+' 원','N4-07'],[bigRead(Math.floor(n/10))+' 원','N4-07'],[sino(Math.floor(n/1000))+'천 '+bigRead(n%1000)+' 원','N4-08'],[bigRead(n+1000)+' 원',null]]); }],
+    ['큰 수 읽기(금액)',()=>{ const n=rnd(2,9)*10000+rnd(1,9)*1000+rnd(1,9)*100+pk([0,50]); return Q4(`영수증에 적힌 금액은 ${won(n)}원이에요. 이 금액을 바르게 읽은 것은?`,'',bigRead(n)+' 원',[[bigRead(n*10)+' 원','N4-07'],[bigRead(Math.floor(n/10))+' 원','N4-07'],[sino(Math.floor(n/1000))+'천 '+bigRead(n%1000)+' 원','N4-08'],[bigRead(n+1000)+' 원',null]]); }],
     ['큰 수의 크기 비교',()=>{ const base=rnd(85,99)*1000000; const vs=shuffle([base, base+rnd(15,25)*1000000, base+rnd(5,14)*1000000+500000, base-rnd(3,9)*1000000]); const ns=['가','나','다','라']; const mx=vs.indexOf(Math.max(...vs)), mn=vs.indexOf(Math.min(...vs)); const tb=`<table style="margin:0 auto;border-collapse:collapse">${vs.map((v,i)=>`<tr><td style="padding:2px 10px">${ns[i]}회사</td><td style="padding:2px 10px;text-align:right">${won(v)}원</td></tr>`).join('')}</table>`; const pair=(a,b)=>`${ns[a]}회사 – ${ns[b]}회사`; const oth=[0,1,2,3].filter(i=>i!==mx&&i!==mn); return Q4('올해 번 돈이 가장 많은 회사와 가장 적은 회사를 차례로 쓴 것은?',tb,pair(mx,mn),[[pair(mn,mx),null],[pair(mx,oth[0]),'N4-10'],[pair(oth[1],mn),'N4-10'],[pair(oth[0],oth[1]),null]]); }],
-    ['표를 읽고 세 자리 수의 덧셈',()=>{ const a=rnd(105,189), b=rnd(126,198); if(a%10+b%10<10) return null; const tb=`<table style="margin:0 auto;border-collapse:collapse;border:1px solid #C9A877">${[['활동(30분)','쓰는 열량(킬로칼로리)'],['자전거 타기',a],['배드민턴',b]].map(r=>`<tr>${r.map(c=>`<td style="border:1px solid #C9A877;padding:3px 10px">${c}</td>`).join('')}</tr>`).join('')}</table>`; return Q4('30분 동안 자전거를 타고, 30분 동안 배드민턴을 쳤어요. 쓴 열량은 모두 몇 킬로칼로리인가요?',tb,a+b,[[a+b-10,'N2-01'],[a+b+10,null],[b-a,'N1-03'],[a+b-100,null]]); }],
+    ['표를 읽고 세 자리 수의 덧셈',()=>{ const a=rnd(105,189), b=rnd(126,198); if(a%10+b%10<10) return null; const tb=`<table style="margin:0 auto;border-collapse:collapse;border:1px solid #C9A877">${[['활동(30분)','쓰는 열량(킬로칼로리)'],['자전거 타기',a],['배드민턴',b]].map(r=>`<tr>${r.map(c=>`<td style="border:1px solid #C9A877;padding:3px 10px">${c}</td>`).join('')}</tr>`).join('')}</table>`; return Q4('30분 동안 자전거를 타고, 30분 동안 배드민턴을 쳤어요. 운동하는 데 쓴 열량은 모두 몇 킬로칼로리인가요?',tb,a+b,[[a+b-10,'N2-01'],[a+b+10,null],[b-a,'N1-03'],[a+b-100,null]]); }],
     ['배치도에서 곱셈',()=>{ const r=rnd(6,9), c=rnd(12,24); let g=gxT(130,12,'무대',12); for(let i=0;i<r;i++) for(let j=0;j<c;j++) g+=`<rect x="${10+j*(240/c)}" y="${20+i*10}" width="${240/c-1.5}" height="8" fill="#9CC9F0"/>`; return Q4(`공연장 좌석이 한 줄에 ${c}개씩 ${r}줄 있어요. 좌석은 모두 몇 개인가요?`,pic(g,260,26+r*10),(r*c)+'개',[[(r+c)+'개','N2-05'],[(r*c-r)+'개',null],[(r*c+c)+'개',null],[((r*Math.floor(c/10))*10+(r*(c%10))%10)+'개','N3-14']]); }],
     ['세 자리 수 × 한 자리 수(생활)',()=>{ const p=rnd(13,19)*10, k=rnd(4,8); return Q4(`중국 돈 1위안을 우리나라 돈 ${p}원으로 바꿀 수 있다고 해요. 중국 돈 ${k}위안은 우리나라 돈으로 얼마인가요?`,'',won(p*k)+'원',[[won(p+k)+'원','N2-05'],[won(p*k-100)+'원','N3-14'],[won(p*k+p)+'원',null],[won(p*(k-1))+'원',null]]); }],
-    ['두 자리 수 × 두 자리 수(문장)',()=>{ const a=rnd(24,68), b=rnd(12,19); return Q4(`강낭콩을 한 상자에 ${a}개씩 ${b}개 상자에 심었어요. 강낭콩은 모두 몇 개인가요?`,'',(a*b)+'개',[[(a*(b%10)+a*Math.floor(b/10))+'개','N3-03'],[(a+b)+'개','N2-05'],[(a*b-a)+'개',null],[(a*b+10)+'개',null]]); }],
+    ['두 자리 수 × 두 자리 수(문장)',()=>{ const a=rnd(24,68), b=rnd(12,19); return Q4(`강낭콩을 상자 ${b}개에 ${a}개씩 심었어요. 강낭콩은 모두 몇 개인가요?`,'',(a*b)+'개',[[(a*(b%10)+a*Math.floor(b/10))+'개','N3-03'],[(a+b)+'개','N2-05'],[(a*b-a)+'개',null],[(a*b+10)+'개',null]]); }],
     ['곱셈식을 나눗셈식으로',()=>{ const mk=()=>{ const a=rnd(3,9), b=rnd(3,9); return [a,b]; }; const [a,b]=mk(); if(a===b) return null; const good=`${a} × ${b} = ${a*b} → ${a*b} ÷ ${a} = ${b}, ${a*b} ÷ ${b} = ${a}`; return Q4('곱셈식을 나눗셈식 2개로 바르게 나타낸 것은?','',good,[[`${a} × ${b} = ${a*b} → ${a*b} ÷ ${a} = ${b}, ${a*b} ÷ 2 = ${a*b/2}`.replace(/÷ 2 = [\d.]+/,`÷ ${b} = ${b}`),'N3-30'],[`${a} × ${b} = ${a*b} → ${a} ÷ ${b} = ${a*b}, ${b} ÷ ${a} = ${a*b}`,'N3-01'],[`${a} × ${b} = ${a*b} → ${a*b} ÷ ${a+1} = ${b}, ${a*b} ÷ ${b} = ${a+1}`,null],[`${a} × ${b} = ${a*b} → ${a*b} − ${a} = ${b}, ${a*b} − ${b} = ${a}`,'N3-11']]); }],
     ['나눗셈식을 곱셈식으로',()=>{ const d=rnd(3,9), q=rnd(3,9); const n=d*q; return Q4(`${n} ÷ ${d} = ${q}를 곱셈식 ${d} × □ = △로 나타내요. □, △에 알맞은 수를 차례로 쓴 것은?`,'',`${q}, ${n}`,[[`${d}, ${n}`,'N3-30'],[`${q}, ${d}`,null],[`${n}, ${q}`,'N3-01'],[`${q+1}, ${n}`,null]]); }],
     ['잘못 계산한 나눗셈 찾기',()=>{ const mk=()=>{ const d=rnd(2,6), q=rnd(12,19); return [d*q,d,q]; }; const xs=[mk(),mk(),mk(),mk()]; if(new Set(xs.map(x=>x[0]+'/'+x[1])).size<4) return null; const bad=rnd(0,3); const L=xs.map(([n,d,q],i)=>`${n} ÷ ${d} = ${i===bad?q+pk([1,-1,10]):q}`); return Q4('잘못 계산한 것을 고르세요.','',L[bad],L.filter((_,i)=>i!==bad).map(s=>[s,null]).concat([['모두 맞게 계산했어요',null]])); }],
@@ -8599,8 +8617,8 @@ window.qpNb=t=>(/[가-힣]/.test(String(t||'').replace(/<[^>]+>/g,''))?String(t)
     ['분수의 크기 비교',()=>{ const b=pk([5,6,7,8,9]), a=rnd(2,b-2); const big=rnd(a+1,b-1), small=[rnd(1,a-1),a]; return Q4(`${fr(a,b)}보다 큰 분수는?`,'',fr(big,b),[[fr(a,b+3),'N3-06'],[fr(small[0],b),'N3-41'],[fr(a,b+1),'N3-06'],[fr(a,b),null]]); }],
     ['바르게 설명한 사람(단위분수)',()=>{ const a=rnd(3,5), b=rnd(a+2,9); const p=[`준기: ${fr(1,a)}이 ${fr(1,b)}보다 더 커요.`, `슬기: ${fr(1,b)}이 ${fr(1,a)}보다 더 커요.`, `연수: ${fr(1,a)}이 ${fr(1,b)}보다 더 작아요.`]; return Q4('바르게 설명한 친구는?','',p[0],[[p[1],'N3-06'],[p[2],'N3-06'],['모두 바르게 말했어요',null]]); }],
     ['분수를 소수로',()=>{ const k=rnd(1,9), m=rnd(11,99); if(m%10===0) return null; const good=`${fr(k,10)} → 0.${k}`; return Q4('분수를 소수로 바르게 나타낸 것은?','',good,[[`${fr(k,100)} → 0.${k}`,'N4-24'],[`${fr(m,100)} → ${m/10}`,'N4-24'],[`${fr(k,10)} → ${k}.0`,'N3-08'],[`${fr(m,10)} → 0.${m}`,'N4-24']]); }],
-    ['말하는 소수 쓰기',()=>{ const o=rnd(1,5), t=rnd(1,9), h=rnd(0,9), th=rnd(1,9); const v=(o*1000+t*100+h*10+th)/1000; const say=`1이 ${o}개, 0.1이 ${t}개, ${h?`0.01이 ${h}개, `:''}0.001이 ${th}개인 수`; return Q4(`${say}는 얼마인가요?`,'',String(v),[[`${o}.${t}${th}`+(h?'':'0'),'N4-15'],[String((o*1000+t*100+th*10+h)/1000),'N4-24'],[String(v*10),null],[`${o}${t}.${h}${th}`,'N4-24']]); }],
-    ['소수의 크기 비교(대화)',()=>{ const a=rnd(11,89), b=rnd(2,9); if(a/100>=b/10) return null; const p=[`수지: ${a}이 ${b}보다 크니까 0.${a}가 0.${b}보다 커요.`,`지태: 0.${b}는 0.01이 ${b*10}개이고 0.${a}는 0.01이 ${a}개라서 0.${b}가 더 커요.`,`민기: 소수점 아래 숫자가 많은 0.${a}가 더 커요.`]; return Q4(`0.${a}와 0.${b}의 크기를 비교한 대화예요. 바르게 말한 친구는?`,'',p[1],[[p[0],'N3-08'],[p[2],'N4-02'],['둘의 크기가 같아요',null]]); }],
+    ['말하는 소수 쓰기',()=>{ const o=rnd(1,5), t=rnd(1,9), h=rnd(0,9), th=rnd(1,9); const v=+((o*1000+t*100+h*10+th)/1000).toFixed(3); const say=`1이 ${o}개, 0.1이 ${t}개, ${h?`0.01이 ${h}개, `:''}0.001이 ${th}개인 수`; return Q4(`${say}는 얼마인가요?`,'',String(v),[[`${o}.${t}${th}`+(h?'':'0'),'N4-15'],[String((o*1000+t*100+th*10+h)/1000),'N4-24'],[String(v*10),null],[`${o}${t}.${h}${th}`,'N4-24']]); }],
+    ['소수의 크기 비교(대화)',()=>{ const a=rnd(11,89), b=rnd(2,9); if(a/100>=b/10||a%10===0) return null; const p=[`수지: ${a}이 ${b}보다 크니까 0.${a}가 0.${b}보다 커요.`,`지태: 0.${b}는 0.01이 ${b*10}개이고 0.${a}는 0.01이 ${a}개라서 0.${b}가 더 커요.`,`민기: 소수점 아래 숫자가 많은 0.${a}가 더 커요.`]; return Q4(`0.${a}와 0.${b}의 크기를 비교한 대화예요. 바르게 말한 친구는?`,'',p[1],[[p[0],'N3-08'],[p[2],'N4-02'],['둘의 크기가 같아요',null]]); }],
     ['소수의 덧셈(생활)',()=>{ const a=rnd(11,29)/10, b=rnd(11,39)/10; if(Math.round((a%1)*10)+Math.round((b%1)*10)<10) return null; const A=+(a+b).toFixed(1); return Q4(`우유를 어제 ${a} L, 오늘 ${b} L 마셨어요. 모두 몇 L 마셨나요?`.replace('우유를','물을'),'',A+' L',[[+(A-1).toFixed(1)+' L','N2-01'],[+(A+0.1).toFixed(1)+' L',null],[`${Math.floor(a)+Math.floor(b)}.${Math.round((a%1)*10)+Math.round((b%1)*10)} L`,'N3-08'],[+(Math.abs(a-b)).toFixed(1)+' L','N1-03']]); }],
     ['소수의 뺄셈(두 높이의 차)',()=>{ const a=rnd(101,135)/10, b=rnd(801,999)/100; const A=+(a-b).toFixed(2); return Q4(`탑 가의 높이는 ${a} m, 탑 나의 높이는 ${b} m예요. 더 높은 탑과 두 높이의 차를 바르게 쓴 것은?`,'',`가, ${A} m`,[[`나, ${A} m`,'N4-02'],[`가, ${+(Math.round(a*10)-Math.round(b*100)/10).toFixed(1)} m`.replace(/-/,''),'N4-03'],[`가, ${+(A+1).toFixed(2)} m`,null],[`나, ${+(b-a+20).toFixed(2)} m`,null]]); }],
   ];
@@ -8619,9 +8637,9 @@ window.qpNb=t=>(/[가-힣]/.test(String(t||'').replace(/<[^>]+>/g,''))?String(t)
     ['직각이 있는 도형',()=>{ const ks=shuffle(['sq','rect','tri','pent']); const has=k=>k==='sq'||k==='rect'; const ids=ks.map((k,i)=>has(k)?i:-1).filter(i=>i>=0); const g=ks.map((k,i)=>shp[k](36+i*64,34)+gxT(36+i*64,74,HG[i],13)).join(''); const ans=ids.map(i=>HG[i]).join(', '); const all=[[0,1],[0,2],[0,3],[1,2],[1,3],[2,3]].map(p=>p.map(i=>HG[i]).join(', ')).filter(s=>s!==ans); return Q4('직각이 있는 도형을 모두 고른 것은?',pic(g,260,82),ans,shuffle(all).map(s=>[s,null])); }],
     ['둔각 찾기',()=>{ const ds=shuffle([rnd(100,160),rnd(25,75),90,rnd(20,80)]); if(ds[3]===ds[1]) return null; const i=ds.findIndex(d=>d>90); const g=ds.map((d,j)=>`<g transform="translate(${j*68},0)">${angPic(d)}</g>`+gxT(30+j*68,100,L4[j],13)).join(''); return Q4('둔각을 고르세요.',pic(g,280,106),L4[i],ds.map((d,j)=>[L4[j],'G4-07']).filter((_,j)=>j!==i)); }],
     ['평행한 두 직선',()=>{ const i=rnd(0,3); let g=''; for(let j=0;j<4;j++){ const ox=10+j*68, t=j===i?0:pk([8,-8,12,-12]); g+=`<line x1="${ox}" y1="20" x2="${ox+55}" y2="${20+t/2}" stroke="${S}" stroke-width="3"/><line x1="${ox}" y1="55" x2="${ox+55}" y2="${55-t}" stroke="${S}" stroke-width="3"/>`+gxT(ox+28,90,L4[j],13); } return Q4('두 직선이 서로 평행한 것은?',pic(g,280,96),L4[i],L4.filter((_,j)=>j!==i).map(s=>[s,'G4-03'])); }],
-    ['도형 밀기',()=>transQ('보기의 도형을 오른쪽으로 밀었을 때의 도형은?',c=>c,b=>[flipH(b),flipV(b),rot90(b)],'G4-15')],
-    ['도형 뒤집기',()=>transQ('보기의 도형을 아래쪽으로 뒤집었을 때의 도형은?',c=>flipV(c),b=>[b,flipH(b),rot90(rot90(rot90(b)))],'G4-14')],
-    ['도형 돌리기',()=>transQ('보기의 도형을 시계 방향으로 180°만큼 돌린 도형은?',c=>rot90(rot90(c)),b=>[flipV(b),flipH(b),rot90(b)],'G4-13')],
+    ['도형 밀기',()=>transQ('〈보기〉의 도형을 오른쪽으로 밀었을 때의 도형은?',c=>c,b=>[flipH(b),flipV(b),rot90(b)],'G4-15')],
+    ['도형 뒤집기',()=>transQ('〈보기〉의 도형을 아래쪽으로 뒤집었을 때의 도형은?',c=>flipV(c),b=>[b,flipH(b),rot90(rot90(rot90(b)))],'G4-14')],
+    ['도형 돌리기',()=>transQ('〈보기〉의 도형을 시계 방향으로 180°만큼 돌린 도형은?',c=>rot90(rot90(c)),b=>[flipV(b),flipH(b),rot90(b)],'G4-13')],
     ['원의 반지름',()=>{ const r=rnd(3,9); return Q4(`원의 지름이 ${2*r} cm예요. 반지름은 몇 cm인가요?`,pic(`<circle cx="70" cy="60" r="50" fill="#fff" stroke="${S}" stroke-width="2"/><line x1="20" y1="60" x2="120" y2="60" stroke="${RED}" stroke-width="2"/><circle cx="70" cy="60" r="3" fill="${S}"/>`+gxT(70,52,`${2*r} cm`,13,RED),140,120),r+' cm',[[(4*r)+' cm','G3-04'],[(2*r)+' cm','G3-04'],[(r+2)+' cm',null],[(r*3)+' cm',null]]); }],
     ['이등변삼각형의 변',()=>{ const a=rnd(5,12), b=rnd(3,a+3); if(a===b) return null; return Q4(`이등변삼각형의 두 변의 길이가 ${a} cm로 같고, 나머지 한 변이 ${b} cm예요. 세 변의 길이의 합은?`,'',(2*a+b)+' cm',[[(a+2*b)+' cm',null],[(a+b)+' cm',null],[(3*a)+' cm',null],[(3*b)+' cm',null]]); }],
     ['정삼각형의 한 변',()=>{ const s=rnd(4,13); return Q4(`정삼각형의 세 변의 길이의 합이 ${3*s} cm예요. 한 변은 몇 cm인가요?`,'',s+' cm',[[(3*s/2).toString().includes('.')?(s+1)+' cm':(3*s/2)+' cm',null],[(3*s)+' cm',null],[(s+3)+' cm',null],[(s-1)+' cm',null]]); }],
@@ -8629,7 +8647,7 @@ window.qpNb=t=>(/[가-힣]/.test(String(t||'').replace(/<[^>]+>/g,''))?String(t)
     ['설명에 맞는 사각형',()=>{ return Q4('“네 각이 모두 직각이에요. 그런데 네 변의 길이가 모두 같지는 않아요.” 어떤 도형인가요?','','직사각형',[['정사각형','G3-03'],['마름모','G4-05'],['사다리꼴',null]]); }],
     ['사다리꼴 찾기',()=>{ return Q4('사다리꼴에 대해 바르게 말한 것은?','','평행한 변이 한 쌍이라도 있으면 사다리꼴이에요.',[['평행한 변이 꼭 두 쌍 있어야 사다리꼴이에요.','G4-05'],['직사각형은 사다리꼴이 아니에요.','G4-05'],['네 변의 길이가 모두 같아야 사다리꼴이에요.',null]]); }],
     ['정사각형의 변',()=>{ const s=rnd(3,9); return Q4(`정사각형의 네 변의 길이의 합이 ${4*s} cm예요. 한 변은 몇 cm인가요?`,'',s+' cm',[[(2*s)+' cm',null],[(4*s)+' cm',null],[(s+4)+' cm',null],[(s-1)+' cm',null]]); }],
-    ['설명에 맞는 도형',()=>{ return Q4('“마주 보는 두 쌍의 변이 서로 평행하고, 네 변의 길이가 모두 같아요.” 어떤 도형일까요? (가장 알맞은 것)','','마름모',[['사다리꼴','G4-05'],['삼각형',null],['원',null]]); }],
+    ['설명에 맞는 도형',()=>{ return Q4('“마주 보는 두 쌍의 변이 서로 평행하고, 네 변의 길이가 모두 같아요.” 이 설명에 가장 알맞은 도형은 무엇일까요?','','마름모',[['사다리꼴','G4-05'],['삼각형',null],['원',null]]); }],
     ['시간 계산(걸린 시간)',()=>{ const h=rnd(8,10), m=rnd(5,45), d=rnd(25,115); const e=h*60+m+d; const eh=Math.floor(e/60), em=e%60; const A=d>=60?`${Math.floor(d/60)}시간 ${d%60}분`.replace(/ 0분/,''):`${d}분`; return Q4(`온라인 수업이 ${h}시 ${m}분에 시작해서 ${eh}시 ${em}분에 끝났어요. 수업한 시간은?`,'',A,[[(d+40)>=60?`${Math.floor((d+40)/60)}시간 ${(d+40)%60}분`:`${d+40}분`,'G2-03'],[`${(eh-h)}시간 ${Math.abs(em-m)}분`,'G2-03'],[`${d+5}분`,null],[`${d+60}분`,null]].map(([s,c])=>[s.replace(/ 0분$/,''),c])); }],
     ['시각 읽기(초)',()=>{ const h=rnd(1,11), m=rnd(1,11)*5, s=rnd(1,11)*5; const v=`<div style="display:inline-block;background:#222;color:#7CFC7C;font:700 28px/1 monospace;padding:6px 14px;border-radius:8px">${h}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}</div>`; return Q4('시각을 바르게 읽은 것은?',v,`${h}시 ${m}분 ${s}초`,[[`${h}시 ${s}분 ${m}초`,null],[`${m}시 ${h}분 ${s}초`,null],[`${h}시 ${m/5}분 ${s/5}초`,'G2-07'],[`${h+1}시 ${m}분 ${s}초`,null]]); }],
     ['알맞은 단위',()=>{ const it=pk([['교실 문의 높이는 약 2 □예요.','m'],['연필의 길이는 약 15 □예요.','cm'],['개미의 몸길이는 약 5 □예요.','mm'],['집에서 학교까지 약 1 □예요.','km']]); return Q4(it[0]+' □에 알맞은 단위는?','',it[1],['mm','cm','m','km'].filter(u=>u!==it[1]).map(u=>[u,'G3-07'])); }],
@@ -8685,7 +8703,7 @@ window.qpNb=t=>(/[가-힣]/.test(String(t||'').replace(/<[^>]+>/g,''))?String(t)
     return cq4('세로셈에서 ㉠에 알맞은 수는?',vis,p2,[[a*b1,'N3-03'],[p1+p2,null],[a*b-p1+a,null],[a*(b1+b0),'N2-05']]); };
   /* ⑤ <보기>의 ㉠, ㉡ 낱말 (3학년 나머지 있는 나눗셈) */
   L.words=()=>{ const d=rnd(3,8), q=rnd(3,9), r=rnd(1,d-1), n=d*q+r; const vis=bogi(`${n} ÷ ${d} = ${q} … ${r}<div style="margin-top:6px">${jj(q,'은','는')} ㉠이고, ${jj(r,'은','는')} ㉡이에요.</div>`);
-    return cq4('<보기>의 ㉠, ㉡에 알맞은 말을 차례로 쓴 것은?',vis,'몫, 나머지',[['나머지, 몫','N3-22'],['나누는 수, 몫','N3-22'],['몫, 나누는 수','N3-22'],['나누어지는 수, 나머지',null]]); };
+    return cq4('〈보기〉의 ㉠, ㉡에 알맞은 말을 차례로 쓴 것은?',vis,'몫, 나머지',[['나머지, 몫','N3-22'],['나누는 수, 몫','N3-22'],['몫, 나누는 수','N3-22'],['나누어지는 수, 나머지',null]]); };
   const pk0=a=>a[rnd(0,a.length-1)];
   const T=f=>()=>{ for(let t=0;t<30;t++){ const q=f(); if(q) return q; } return null; };
   window._LW=L;
@@ -8701,7 +8719,7 @@ window.qpNb=t=>(/[가-힣]/.test(String(t||'').replace(/<[^>]+>/g,''))?String(t)
   const T=f=>()=>{ for(let t=0;t<30;t++){ const q=f(); if(q) return q; } return null; };
   const won=n=>n.toLocaleString('ko-KR'), J={};
   /* 4학년 소수의 덧셈: 몇의 몇 개로 보기 (2025 3(1): 0.1·1로 본 오답) */
-  J.unit=()=>{ const a=rnd(2,9), b=rnd(1,9); return Q4(`0.${a} + 0.0${b}를 계산하려고 해요. 두 수를 모두 '무엇이 몇 개'로 생각하면 쉽게 더할 수 있을까요?`,'',`0.01`,[['0.1','N4-24'],['1','N4-24'],['10',null],['0.001',null]]); };
+  J.unit=()=>{ const a=rnd(2,9), b=rnd(1,9); return Q4(`0.${a} + 0.0${b}를 계산하려고 해요. 두 수를 모두 '□가 몇 개인 수'로 나타내어 더하려고 할 때, □에 알맞은 수는 얼마일까요?`,'',`0.01`,[['0.1','N4-24'],['1','N4-24'],['10',null],['0.001',null]]); };
   /* 3학년 저울 눈금 (2025 4(3): 최소 눈금을 1 g, 10 g, 0.5 g으로 봄) */
   J.scale=()=>{ const step=pk([5,20]), k=rnd(2,4); const base=pk([100,200,300]); const v=base+step*k; let g=`<line x1="20" y1="40" x2="300" y2="40" stroke="${S}" stroke-width="2"/>`; for(let i=0;i<=10;i++){ const x=20+i*28; g+=`<line x1="${x}" y1="${i%5?32:26}" x2="${x}" y2="40" stroke="${S}"/>`; if(i%5===0) g+=gxT(x,20,base+step*i,11); }
     g+=`<polygon points="${20+k*28},44 ${14+k*28},58 ${26+k*28},58" fill="#C2412F"/>`;
@@ -8804,6 +8822,73 @@ window.qpNb=t=>(/[가-힣]/.test(String(t||'').replace(/<[^>]+>/g,''))?String(t)
     const q=cq('각도기로 각의 크기를 재었어요. 각의 크기는 몇 도인가요?',vis,A,o); q.hint1='각도기의 중심을 꼭짓점에, 밑금을 한 변(갈색)에 맞추었어요. 이 변이 0°인 줄의 눈금을 따라가며 다른 한 변(주황)이 가리키는 눈금을 읽어요.'; return q; };
   try{ const g=()=>{ for(let t=0;t<20;t++){ const q=window._PROT(); if(q) return q; } return null; }; (window._NTW=window._NTW||[]).push(['S6-47',G36['S6-47'].length,g]); G36['S6-47'].push(g); }catch(e){}
 }
+
+/* ---------- 3-90. 문장 다듬기(윤문): 조사 받침 맞추기·띄어쓰기·끝맺음 ----------
+   문제를 화면에 올리기 직전에 한 번 거친다. 수·단위·자음 기호(ㄱ, ㄴ…)·따옴표 낱말 뒤의 조사를
+   읽는 소리의 받침에 맞추고(57예요→57이에요, 137를→137을, 20로→20으로, ㄹㅁㅂ는→ㄹㅁㅂ은),
+   식과 조사 사이의 빈칸을 없앤다(28 ÷ 4 의→28 ÷ 4의). 소수 계산 찌꺼기(52.019999…)도 정리한다. */
+(()=>{
+  const DB={'0':1,'1':8,'2':0,'3':1,'4':0,'5':0,'6':1,'7':8,'8':8,'9':0};      /* 영·일·이·삼… 받침: 0 없음, 8 ㄹ, 1 그 밖 */
+  const UB={'°':0,'%':0,'cm':0,'mm':0,'km':0,'m':0,'kg':1,'g':1,'t':1,'L':0,'mL':0,'cm²':0,'m²':0,'km²':0,'cm³':0,'m³':0};
+  const jong=ch=>{ const k=ch.charCodeAt(0)-0xAC00; if(k<0||k>=11172) return -1; const j=k%28; return j===0?0:(j===8?8:1); };
+  const J=[['이에요','예요'],['이라고','라고'],['으로','로'],['은','는'],['이','가'],['을','를'],['과','와']];
+  const pickJ=(b,j)=>{ for(const [a,c] of J){ if(j===a||j===c){ if(a==='으로') return (b===0||b===8)?'로':'으로'; return b?a:c; } } return j; };
+  const JS='이에요|예요|이라고|라고|으로|로|은|는|이|가|을|를|과|와';
+  const END='(?=$|[\\s,.?!)\\]\'"”’…·:;]|<|&)';
+  const UNITS='cm²|cm³|km²|m²|m³|mL|cm|mm|km|kg|m|g|t|L';
+  const reNum=new RegExp('(\\d)(?:\\s)?((?:'+UNITS+')(?![A-Za-z²³]))?( ?)('+JS+')'+END,'g');
+  const reDeg=new RegExp('([°%])( ?)('+JS+')'+END,'g');
+  const reJamo=new RegExp('((?:^|[\\s(])[ㄱ-ㅎ]{1,4})( ?)('+JS+')'+END,'g');
+  const reQuo=new RegExp('([가-힣])(\\u200b?[\'’”"])('+JS+')'+END,'g');
+  const reSp=new RegExp('(\\d|[°%²³□△○)]|\\b(?:'+UNITS+'))\\s(의|에서|에|만큼|보다|까지|부터|처럼)'+END,'g');
+  const fixText=s=>{
+    if(s==null||typeof s!=='string'||!/[가-힣]/.test(s)) return s;
+    let t=s;
+    t=t.replace(/(\d+\.\d*?)(?:9{5,}\d*|0{5,}[1-9]\d*)(?!\d)/g,m=>String(+(+m).toFixed(6)));
+    t=t.replace(/(\d (?:L|kg|km|m|cm)) 0 (?:mL|g|m|cm|mm)(?![\d²³A-Za-z])/g,'$1');
+    t=t.replace(/(\d)\s?\(이\)라고/g,(m,d)=>d+(DB[d]?'이라고':'라고'));
+    /* 숫자(+단위) 뒤 조사 */
+    t=t.replace(reNum,(m,d,u,sp,j)=>{
+      const b=u?UB[u]:DB[d];
+      if(u){ return d+(m.slice(1).match(/^\s?/)[0])+u+pickJ(b,j); }
+      return d+pickJ(b,j);
+    });
+    t=t.replace(reDeg,(m,c,sp,j)=>c+pickJ(0,j));
+    t=t.replace(reJamo,(m,w,sp,j)=>w+pickJ(/ㄹ$/.test(w)?8:1,j));
+    t=t.replace(reQuo,(m,c,q,j)=>c+q+pickJ(jong(c),j));
+    t=t.replace(reSp,'$1$2');
+    t=t.replace(/(\d) (배|장|개|명|자루|권|살|그루|봉지|묶음|송이|마리|대|척|컵|병|도막|층|쪽)(?=$|[\s,.?!)]|[이가은는을를과와도씩만])/g,'$1$2');
+    /* 끝맺음 없는 짧은 물음: '…를 소수로' → '…를 소수로 나타내면?' */
+    t=t.replace(/^(.{2,40}?(?:을|를)\s(?:소수|분수|가분수|대분수|기약분수|백분율|숫자|수))로\??$/,'$1로 나타내면?');
+    t=t.replace(/^(.{2,40}?)(?:을|를)\s(올림|버림|반올림)하여\s(.{2,6}자리)까지$/,(m,a,k,z)=>m+' 나타내면?');
+    t=t.replace(/^(.{1,30}?(?:최대공약수|최소공배수|공약수|공배수|크기가 같은 분수))$/,'$1는?');
+    return t;
+  };
+  const reTag=new RegExp('(\\d|[°%])((?:</[a-z]+>)+)\\s?('+JS+')'+END,'g');
+  const reTagSp=new RegExp('(\\d|[°%²³□])((?:</[a-z]+>)+)\\s(의|에서|에|만큼|보다|까지|부터|처럼)'+END,'g');
+  const fixHTML=h=>{ if(h==null||typeof h!=='string') return h;
+    h=h.replace(reTag,(m,d,tg,j)=>d+tg+pickJ(d in DB?DB[d]:0,j)).replace(reTagSp,'$1$2$3');
+    return h.replace(/>([^<>]*[가-힣][^<>]*)</g,(m,x)=>'>'+fixText(x)+'<').replace(/^([^<>]*[가-힣][^<>]*)(?=<|$)/,x=>fixText(x)); };
+  const fixAny=v=>typeof v==='string'?(/<[a-z!\/]/i.test(v)?fixHTML(v):fixText(v)):v;
+  window.kfixText=fixText; window.kfixAny=fixAny;
+  window.kfixQ=q=>{
+    if(!q||typeof q!=='object'||q._kf) return q;
+    try{
+      for(const k of ['q','speech','hint','hint1','why','ansText','visual']){
+        const d=Object.getOwnPropertyDescriptor(q,k);
+        if(!d) continue;
+        if(d.get){ const g=d.get; Object.defineProperty(q,k,{get(){ return fixAny(g.call(this)); },configurable:true,enumerable:d.enumerable}); }
+        else if(typeof d.value==='string'&&d.writable!==false) q[k]=fixAny(d.value);
+      }
+      if(Array.isArray(q.opts)) q.opts=q.opts.map(fixAny);
+      if(typeof q.ans==='string') q.ans=fixAny(q.ans);
+      for(const k of ['mis','fx']){ const m=q[k]; if(m&&typeof m==='object'&&!Array.isArray(m)){ const n={}; for(const key of Object.keys(m)) n[fixAny(key)]=m[key]; q[k]=n; } }
+      if(q.manip&&typeof q.manip.html==='string') q.manip.html=fixHTML(q.manip.html);
+      Object.defineProperty(q,'_kf',{value:1,enumerable:false});
+    }catch(e){}
+    return q;
+  };
+})();
 
 // ===== manip2.js — 적은 엔진으로 많은 편을 덮는 '직접 해 보기'(구체적 조작) 엔진 (교수님 11/22 밤) =====
 // 원칙: ① 끌기 대신 누르기(터치 기기·저학년에서 안정) ② 판정은 [다 했어요]를 누른 때의 마지막 상태로만(중간 장난은 보지 않음)
