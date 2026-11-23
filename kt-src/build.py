@@ -474,6 +474,14 @@ _a = '.opt.text{font-size:1.4rem}'
 assert h.count(_a) == 1
 h = h.replace(_a, _a + _css)
 
+# 6-2 단원 차례(교수님 11/23 밤: 원기둥 편에서 아직 배우지 않은 원주를 구하는 문제가 나옴) → 교과서처럼 '원주와 원주율 → 원의 넓이 → 원기둥 → 원뿔과 구' 차례로
+_u0 = h.index("unit(6,'6-2 원기둥·원뿔·구, 원의 넓이',[")
+_a = h.index(" ['S6-62','원기둥','원기둥',[", _u0); _b = h.index(" ['S6-74','원주와 원주율'", _u0); _c = h.index(" ['S6-80','숲 마을 운동회'", _u0)
+h = h[:_a] + h[_b:_c] + h[_a:_b] + h[_c:]
+h = h.replace("unit(6,'6-2 원기둥·원뿔·구, 원의 넓이',[", "unit(6,'6-2 원의 넓이, 원기둥·원뿔·구',[", 1)
+h = h.replace("'6-2 원기둥·원뿔·구, 원의 넓이':'KG6-4'", "'6-2 원의 넓이, 원기둥·원뿔·구':'KG6-4'")
+h = h.replace("GC18:['S6-74','S6-75'],GC19:['S6-62','S6-63']", "GC18:['S6-74','S6-75'],GC19:['S6-62','S6-63']")
+
 # 만든 사람 표시(교수님 11/23): 눈에 띄지 않게 코드 안에만
 h = h.replace('<head>', '<head>\n<!-- 도토리 숲 수학 퀴즈 · made by 굳잡맨(goodjobMan) · CC BY-NC 4.0 · 비영리·교육 목적, 출처를 밝히고 고쳐 써도 됩니다 -->\n<meta name="author" content="굳잡맨 (goodjobMan)">', 1)
 h = h.replace('</body>', '<script>/* gjm */(function(){try{Object.defineProperty(window,"__dotori",{value:Object.freeze({by:decodeURIComponent("%EA%B5%B3%EC%9E%A1%EB%A7%A8"),id:"goodjobMan",license:"CC BY-NC 4.0"}),enumerable:false});}catch(e){}})();</script>\n</body>', 1)

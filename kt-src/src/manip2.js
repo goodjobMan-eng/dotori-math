@@ -825,7 +825,7 @@ M2.digits=(cards,slots,render,ok)=>{ const put=Array(slots).fill(null); let cur=
     const q=mq('띠그래프를 보고 과일별 비율을 이어 보세요. (하나는 남아요)','항목의 비율은 끝 눈금에서 시작 눈금을 뺀 길이예요. 끝 눈금만 읽으면 앞 항목까지 더한 값이 돼요.',M2.match(nm,ord.map(i=>R[i]),[0,1,2,3].map(i=>ord.indexOf(i))),'바르게 이은 것',{'잘못 이은 것이 있어요':'D6-03'}); q.visual=bar+(q.visual||''); return q; };
   window._M2Y=Y;
   try{ const add=(ep,g)=>{ if(G36[ep]&&g){ (window._NTW=window._NTW||[]).push([ep,G36[ep].length,g]); G36[ep].push(g); } };
-    [['S2-10','mMulDiv'],['S6-18','pRight'],['S6-38','mUnit'],['S5-03','tSeq'],['S3-47','wQuot'],['S6-31','pPara'],['S6-47','wProt'],['S4-13','mGraph'],['S4-12','wWave'],['S3-72','tLcm'],['S5-12','mRule'],['S3-84','pRange'],['S6-54','tSym'],['S4-15','wAvg0'],['S4-18','mChance'],['S3-107','tFdiv'],['S5-16','wDisc'],['S6-59','tSolid'],['S6-75','wCircle2'],['S4-21','wSchool'],['S4-19','mBand']].forEach(([e,k])=>add(e,Y[k])); }catch(e){}
+    [['S2-10','mMulDiv'],['S6-18','pRight'],['S6-38','mUnit'],['S5-03','tSeq'],['S3-47','wQuot'],['S6-31','pPara'],['S6-47','wProt'],['S4-13','mGraph'],['S4-12','wWave'],['S3-72','tLcm'],['S5-12','mRule'],['S3-84','pRange'],['S6-54','tSym'],['S4-15','wAvg0'],['S4-18','mChance'],['S3-107','tFdiv'],['S5-16','wDisc'],['S6-63','tSolid'],['S6-75','wCircle2'],['S4-21','wSchool'],['S4-19','mBand']].forEach(([e,k])=>add(e,Y[k])); }catch(e){}
 }
 
 /* ===== 3-82. 네온 표 나머지(11/23 밤): 답+까닭·잇기·판별로 7틀 ===== */
