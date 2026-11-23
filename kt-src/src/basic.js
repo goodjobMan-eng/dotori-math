@@ -124,7 +124,7 @@ window.qpNb=t=>(/[가-힣]/.test(String(t||'').replace(/<[^>]+>/g,''))?String(t)
     ['무게 단위 설명',()=>{ const k=rnd(2,7), g=rnd(1,9)*100; const bad=pk([`${g} g은 ${g/100} kg이에요.`,`${k} kg ${g} g은 ${k}${g/100} g이에요.`]); const ok=[`${k} kg은 ${k*1000} g이에요.`,`1 kg ${g} g은 ${1000+g} g이에요.`,`${k*1000+g} g은 ${k} kg ${g} g이에요.`]; return Q4('무게의 단위를 잘못 설명한 것은?','',bad,ok.map(s=>[s,'G3-05'])); }],
     ['무게의 덧셈',()=>{ const a=[rnd(1,3),rnd(3,9)*100], b=[rnd(1,2),rnd(3,9)*100]; const s=a[1]+b[1]; if(s<1000) return null; const A=`${a[0]+b[0]+1} kg ${s-1000} g`.replace(/ 0 g$/,''); return Q4(`고기를 ${a[0]} kg ${a[1]} g, ${b[0]} kg ${b[1]} g 샀어요. 산 고기는 모두 얼마인가요?`,'',A,[[`${a[0]+b[0]} kg ${s-1000} g`.replace(/ 0 g$/,''),'G2-17'],[`${a[0]+b[0]} kg ${s} g`,'G2-17'],[`${a[0]+b[0]+2} kg ${s-1000} g`.replace(/ 0 g$/,''),null],[`${a[0]+b[0]+1} kg ${s-900} g`,null]]); }],
     ['각도 읽기',()=>{ const d=rnd(3,8)*10+pk([0,0,5]); const r=60, x0=150, y0=90; let g=`<path d="M${x0-r-10},${y0} A${r+10},${r+10} 0 0 1 ${x0+r+10},${y0}" fill="#FFF3C4" stroke="${S}"/>`; for(let k=0;k<=18;k++){ const a=k*10*Math.PI/180; g+=`<line x1="${x0+(r+10)*Math.cos(a)}" y1="${y0-(r+10)*Math.sin(a)}" x2="${x0+(r+4)*Math.cos(a)}" y2="${y0-(r+4)*Math.sin(a)}" stroke="${S}"/>`; if(k%3===0) g+=gxT(x0+(r+22)*Math.cos(a),y0-(r+22)*Math.sin(a)+4,k*10,9)+gxT(x0+(r-8)*Math.cos(a),y0-(r-8)*Math.sin(a)+4,180-k*10,8,'#9A7A5A'); }
-      g+=`<line x1="${x0}" y1="${y0}" x2="${x0+r+10}" y2="${y0}" stroke="${RED}" stroke-width="3"/><line x1="${x0}" y1="${y0}" x2="${x0+(r+10)*Math.cos(d*Math.PI/180)}" y2="${y0-(r+10)*Math.sin(d*Math.PI/180)}" stroke="${RED}" stroke-width="3"/>`; return Q4('각도기로 잰 각도는?',pic(g,300,110,'바깥 눈금: 검은 수, 안쪽 눈금: 회색 수'),d+'°',[[(180-d)+'°','G4-01'],[(d+10)+'°',null],[(d-5)+'°',null],['180°',null]]); }],
+      g+=`<line x1="${x0}" y1="${y0}" x2="${x0+r+10}" y2="${y0}" stroke="${RED}" stroke-width="3"/><line x1="${x0}" y1="${y0}" x2="${x0+(r+10)*Math.cos(d*Math.PI/180)}" y2="${y0-(r+10)*Math.sin(d*Math.PI/180)}" stroke="${RED}" stroke-width="3"/>`; return Q4('각도기로 잰 각도는?',pic(g,300,110,'밑금에 맞춘 변을 0°로 하여 시작하는 눈금을 읽어요'),d+'°',[[(180-d)+'°','G4-01'],[(d+10)+'°',null],[(d-5)+'°',null],['180°',null]]); }],
   ];
   reg(2,'도',G2);
 
@@ -273,4 +273,16 @@ window.qpNb=t=>(/[가-힣]/.test(String(t||'').replace(/<[^>]+>/g,''))?String(t)
   window._KS=K;
   try{ const add=(ep,g)=>{ if(G36[ep]){ (window._NTW=window._NTW||[]).push([ep,G36[ep].length,g]); G36[ep].push(g); } };
     add('S3-40',T(K.expand)); add('S3-31',T(K.frontDiv)); add('S2-06',T(K.leftEq)); }catch(e){}
+}
+
+/* ---------- 3-89. 각도기 그림을 보고 각도 읽기(늘품이 진단A '각도기를 보고 빈칸에 각의 크기를 써넣으시오' 꼴) ----------
+   교과서 말: 각도기의 중심을 꼭짓점에, 밑금을 한 변에 맞추고, 그 변을 0°로 하여 다른 한 변이 가리키는 눈금을 읽는다.
+   오답: 다른 줄 눈금(180°−각)을 읽음(G4-01). 변이 오른쪽·왼쪽 어느 쪽에 맞춰져도 나오게 한다. */
+{ const pk=a=>a[rnd(0,a.length-1)];
+  window._PROT=()=>{ const deg=rnd(2,16)*10+pk([0,0,5]); if(deg===90) return null; const left=Math.random()<.5; const a=(left?180-deg:deg)*Math.PI/180;
+    let s=`<g transform="translate(160,150)">${protG(140)}</g>`; const bx=left?5:315; s+=`<line x1="160" y1="150" x2="${bx}" y2="150" stroke="#6B3E1C" stroke-width="3"/><line x1="160" y1="150" x2="${(160+155*Math.cos(a)).toFixed(1)}" y2="${(150-155*Math.sin(a)).toFixed(1)}" stroke="#D45F16" stroke-width="3"/>`;
+    const vis=`<svg viewBox="0 0 320 160" style="width:100%;max-width:340px;display:block;margin:auto">${s}</svg>`;
+    const o=[[String(180-deg)+'°','G4-01'],[String(deg+10)+'°',null],[String(Math.max(5,deg-10))+'°',null]]; const A=deg+'°'; if(o.some(x=>x[0]===A)) return null;
+    const q=cq('각도기로 각의 크기를 재었어요. 각의 크기는 몇 도인가요?',vis,A,o); q.hint1='각도기의 중심을 꼭짓점에, 밑금을 한 변(갈색)에 맞추었어요. 이 변이 0°인 줄의 눈금을 따라가며 다른 한 변(주황)이 가리키는 눈금을 읽어요.'; return q; };
+  try{ const g=()=>{ for(let t=0;t<20;t++){ const q=window._PROT(); if(q) return q; } return null; }; (window._NTW=window._NTW||[]).push(['S6-47',G36['S6-47'].length,g]); G36['S6-47'].push(g); }catch(e){}
 }
