@@ -416,6 +416,21 @@ for _a,_b in [
   ("if(!mode) mode=g>=3?'pad':'hand';", "if(!mode) mode=g>=3?'pad':'hand'; if(g>=3) mode='pad';"),
 ]:
     assert h.count(_a)==1, (_a, h.count(_a)); h = h.replace(_a,_b)
+# 다른 세션(Opus 5.5, 302b600)이 index.html에 바로 고친 것을 원본에 옮김: 편마다 유튜브 쇼츠 연결(시즌3~6 208편), 옛 시즌1 영상은 비공개라 비움.
+# 영상 주소를 바꿀 때는 src/videos_patch.json을 고친다(index.html을 바로 고치면 다음 빌드에서 사라짐).
+import json as _json
+_vp = _json.load(open('src/videos_patch.json', encoding='utf8'))
+_i = h.index(_vp['videos_start']); _j = h.index('\n};', _i) + 3
+h = h[:_i] + _vp['videos'] + h[_j:]
+_l36 = [l for l in h.split('\n') if l.startswith('const VIDEOS36=')]; assert len(_l36) == 1
+h = h.replace(_l36[0], _vp['videos36'])
+_nl = [l for l in h.split('\n') if 'class="nolink"' in l and 'if(!id)' in l]; assert len(_nl) == 1
+h = h.replace(_nl[0], _vp['nolink'])
+# 묶음으로 분수 나타내기(교수님 11/23: 2분의 1이라고 썼는데 틀렸다고 나옴 — 4분의 2와 크기가 같으니 틀렸다고 하면 안 됨)
+# ① 문장에 '묶음 수로 나타낸다'는 것을 밝힘 ② 약분하면 다른 분수가 되는 수(4분의 2 같은 것)는 내지 않음 → 맞는 답을 틀렸다고 하는 일이 없게.
+_a = "()=>{ const g=rnd(3,6), k=rnd(2,4), part=rnd(1,g-1); return W36('rami',`${g*k}개를 ${k}개씩 묶으면 ${part*k}개는 전체의 얼마?`,"
+assert h.count(_a) == 1
+h = h.replace(_a, "()=>{ let g=rnd(3,6), k=rnd(2,4), part=rnd(1,g-1); const _gc=(x,y)=>y?_gc(y,x%y):x; for(let t=0;t<40&&_gc(part,g)!==1;t++){ g=rnd(3,6); part=rnd(1,g-1); } return W36('rami',`${g*k}개를 ${k}개씩 묶었어요. ${part*k}개는 전체 묶음의 몇 분의 몇일까요? (묶음 수로 나타내요)`,")
 # 만든 사람 표시(교수님 11/23): 눈에 띄지 않게 코드 안에만
 h = h.replace('<head>', '<head>\n<!-- 도토리 숲 수학 퀴즈 · made by 굳잡맨(goodjobMan) · CC BY-NC 4.0 · 비영리·교육 목적, 출처를 밝히고 고쳐 써도 됩니다 -->\n<meta name="author" content="굳잡맨 (goodjobMan)">', 1)
 h = h.replace('</body>', '<script>/* gjm */(function(){try{Object.defineProperty(window,"__dotori",{value:Object.freeze({by:decodeURIComponent("%EA%B5%B3%EC%9E%A1%EB%A7%A8"),id:"goodjobMan",license:"CC BY-NC 4.0"}),enumerable:false});}catch(e){}})();</script>\n</body>', 1)
