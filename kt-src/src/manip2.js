@@ -927,3 +927,112 @@ M2.compass=(pts,lens,ok,wrongOf,extra)=>{ let at=null, L=null, drawn=false; cons
   try{ const add=(ep,g)=>{ if(G36[ep]&&g){ (window._NTW=window._NTW||[]).push([ep,G36[ep].length,g]); G36[ep].push(g); } };
     add('S3-40',PV.show); add('S3-39',PV.move); add('S6-30',PV.para); add('S6-28',PV.iso); }catch(e){}
 }
+
+/* ===== 3-91. 조작이 없던 편에 '직접 해 보기' + 진단(11/24) =====
+   틀린 상태마다 오개념 코드가 붙는다(m.wrong → q.mis). 엔진은 있던 것(paint·pickAll·color2·match)을 쓰고, 쌓기나무 직육면체만 새로 만든다.
+   레퍼런스: 늘품이 놀이 '같은 부피의 직육면체 만들기'(6학년), 진단도구 분수·어림·규칙 문항의 오답 유형 */
+{ const pick=a=>a[rnd(0,a.length-1)], key=(x,y)=>x+','+y;
+  const fr=(n,d)=>`${d}분의 ${n}`, mx=(w,n,d)=>`${w}${'136780'.includes(String(w).slice(-1))?'과':'와'} ${d}분의 ${n}`;
+  const reW=(m,f)=>{ const ow=m._o.wrong; m._o.wrong=()=>{ let r=null; try{ r=f(m._o.state()); }catch(e){} return r||ow(); }; return m; };
+  const pts=s=>[...s].map(k=>k.split(',').map(Number));
+  const box=s=>{ const p=pts(s); if(!p.length) return null; const xs=p.map(v=>v[0]), ys=p.map(v=>v[1]); const w=Math.max(...xs)-Math.min(...xs)+1, h=Math.max(...ys)-Math.min(...ys)+1; return {w,h,full:w*h===p.length}; };
+  const X={};
+  /* ① 3학년 분수만큼은 몇 개: 12의 3분의 2 — 분자만큼(2개), 한 묶음만(4개) 칠하는 오개념 */
+  X.fracOf=()=>{ const g=pick([3,4]), per=pick([3,4,5]), k=rnd(2,g-1), N=g*per, need=k*per; const sol=[]; for(let y=0;y<k;y++) for(let x=0;x<per;x++) sol.push([x,y]);
+    const m=M2.paint(per,g,[],{tip:'한 줄이 한 묶음이에요. 칸을 누르면 칠해져요.',check:s=>s.size===need,wrong:s=>s.size===k?'분자의 수만큼만 칠했어요':s.size===per?'한 묶음만 칠했어요':s.size===N-need?'남는 쪽을 칠했어요':'칠한 개수가 맞지 않아요',sol});
+    return m2q(`도토리 ${N}개를 똑같이 ${g}묶음으로 나누었어요(한 줄이 한 묶음). ${N}의 ${fr(k,g)}만큼 칠해 보세요.`,`${N}의 ${fr(1,g)}은 한 묶음(${per}개)이에요. ${fr(k,g)}은 그 묶음이 ${k}개예요.`,m,`${need}개`,{'분자의 수만큼만 칠했어요':'N3-07','한 묶음만 칠했어요':'N3-39','남는 쪽을 칠했어요':null,'칠한 개수가 맞지 않아요':null}); };
+  /* ② 3학년 진분수·가분수 색칠 — 분자와 분모가 같은 분수를 진분수로 보는 오개념 */
+  X.propImp=()=>{ const d=pick([4,5,6,7]); const items=shuffle([[rnd(1,d-1),d],[rnd(1,d-1),d],[d,d],[d+rnd(1,4),d],[d+rnd(1,3),d],[rnd(1,d-1),d]].map(([n,dd])=>[n,dd])); const seen=new Set(); const uq=items.filter(([n,dd])=>{ const k=n+'/'+dd; if(seen.has(k)) return false; seen.add(k); return true; }); if(uq.length<5) return X.propImp();
+    const want=uq.map(([n,dd])=>n<dd?'r':'b'), eqI=uq.findIndex(([n,dd])=>n===dd);
+    const m=M2.color2(uq.map(([n,dd])=>fr(n,dd)),want,['진분수','가분수'],'진분수와 가분수를 바꿔 칠했어요');
+    reW(m,st=>st.s[eqI]==='r'?'분자와 분모가 같은 분수를 진분수로 칠했어요':st.s.includes('0')?'아직 칠하지 않은 분수가 있어요':null);
+    return m2q('진분수는 빨간색, 가분수는 파란색으로 칠해 보세요.','분자가 분모보다 작으면 진분수, 분자가 분모와 같거나 크면 가분수예요.',m,'진분수 빨강, 가분수 파랑',{'분자와 분모가 같은 분수를 진분수로 칠했어요':'N3-18','진분수와 가분수를 바꿔 칠했어요':'N3-32','아직 칠하지 않은 분수가 있어요':null,'색칠이 맞지 않은 것이 있어요':'N3-32'}); };
+  /* ③ 3학년 대분수 ↔ 가분수 잇기 — 자연수를 분자에 더함(N3-35), 자연수와 분자를 이어 씀(N3-36) */
+  X.mixImp=()=>{ const d=pick([3,4,5,6]); const raw=[]; while(raw.length<3){ const w=rnd(1,3), n=rnd(1,d-1); if(!raw.some(r=>r[0]===w&&r[1]===n)) raw.push([w,n]); }
+    const R0=raw.map(([w,n])=>fr(w*d+n,d)), dA=fr(raw[0][0]+raw[0][1],d), dB=fr(+(String(raw[1][0])+raw[1][1]),d);
+    if(new Set([...R0,dA,dB]).size<5) return X.mixImp();
+    const R=shuffle([...R0,dA,dB]), ans=R0.map(r=>R.indexOf(r)), wm={}; wm['0>'+R.indexOf(dA)]='자연수를 분자에 그대로 더했어요'; wm['1>'+R.indexOf(dB)]='자연수와 분자를 이어 썼어요';
+    return m2q('대분수와 크기가 같은 가분수를 이어 보세요. (남는 가분수도 있어요)','자연수 1은 분모만큼의 조각이에요. 자연수 × 분모에 분자를 더하면 가분수의 분자가 돼요.',M2.match(raw.map(([w,n])=>mx(w,n,d)),R,ans,wm),R0.join(', '),{'자연수를 분자에 그대로 더했어요':'N3-35','자연수와 분자를 이어 썼어요':'N3-36','잘못 이은 것이 있어요':'N3-38','아직 다 잇지 않았어요':null}); };
+  /* ④ 5학년 기약분수 잇기 — 공약수로 한 번만 나누고 멈춤(N5-12) */
+  X.lowest=()=>{ const base=shuffle([[1,2],[2,3],[3,4],[1,3],[2,5],[3,5]]).slice(0,3), ks=[4,6,4]; const L=base.map(([a,b],i)=>[a*ks[i],b*ks[i]]); const R0=base.map(([a,b])=>fr(a,b)), dA=fr(L[0][0]/2,L[0][1]/2), dB=fr(L[1][0]/2,L[1][1]/2);
+    if(new Set([...R0,dA,dB]).size<5) return X.lowest();
+    const R=shuffle([...R0,dA,dB]), ans=R0.map(r=>R.indexOf(r)), wm={}; wm['0>'+R.indexOf(dA)]='한 번만 약분하고 멈췄어요'; wm['1>'+R.indexOf(dB)]='한 번만 약분하고 멈췄어요';
+    return m2q('분수를 기약분수로 나타낸 것과 이어 보세요. (남는 분수도 있어요)','분모와 분자의 공약수가 1뿐일 때까지 나누어요. 최대공약수로 한 번에 나누면 빨라요.',M2.match(L.map(([a,b])=>fr(a,b)),R,ans,wm),R0.join(', '),{'한 번만 약분하고 멈췄어요':'N5-12','잘못 이은 것이 있어요':null,'아직 다 잇지 않았어요':null}); };
+  /* ⑤ 5학년 이상·이하·초과·미만 고르기 — 경계 수를 넣고 빼는 오개념 */
+  X.range=()=>{ const a=rnd(12,30), b=a+rnd(4,6), kind=pick(['이상이하','이상미만','초과이하']); const inR=v=>(kind==='초과이하'?v>a:v>=a)&&(kind==='이상미만'?v<b:v<=b);
+    const nums=shuffle([...new Set([a-1,a,a+1,rnd(a+2,b-2),b-1,b,b+1])]); const good=nums.map((v,i)=>inR(v)?i:-1).filter(i=>i>=0);
+    const nm={이상이하:`${a} 이상 ${b} 이하`,이상미만:`${a} 이상 ${b} 미만`,초과이하:`${a} 초과 ${b} 이하`}[kind];
+    const ia=nums.indexOf(a), ib=nums.indexOf(b);
+    const m=M2.pickAll(nums.map(String),good);
+    reW(m,st=>{ const s=st.s; const bad=(i,want)=>(s[i]==='1')!==want; if(bad(ia,inR(a))||bad(ib,inR(b))) return '경계에 있는 수를 잘못 넣거나 뺐어요'; return null; });
+    return m2q(`${nm}인 수를 모두 찾아 ○표 하세요.`,'이상·이하는 그 수를 포함하고, 초과·미만은 포함하지 않아요.',m,good.map(i=>nums[i]).join(', '),{'경계에 있는 수를 잘못 넣거나 뺐어요':'N5-08','아닌 것에도 ○ 표 했어요':null,'빠뜨린 것이 있어요':null}); };
+  /* ⑥ 5학년 올림·버림·반올림해서 같은 수가 되는 수 고르기 — 경계(올림 340, 버림 360, 반올림 450·550) */
+  X.roundSet=kind=>()=>{ const t=rnd(3,8)*100, R=kind==='반올림'?t:t+rnd(2,8)*10; const unit=kind==='반올림'?100:10, place=kind==='반올림'?'백':'십';
+    const f=v=>kind==='올림'?Math.ceil(v/unit)*unit:kind==='버림'?Math.floor(v/unit)*unit:Math.round(v/unit)*unit;
+    const cand=kind==='반올림'?[R-51,R-50,R-1-rnd(0,30),R+rnd(5,30),R+49,R+50,R+51]:kind==='올림'?[R-10,R-9,R-rnd(2,8),R,R+1]:[R-1,R,R+rnd(2,8),R+9,R+10];
+    const nums=shuffle([...new Set(cand)]); const good=nums.map((v,i)=>f(v)===R?i:-1).filter(i=>i>=0);
+    const edge=kind==='반올림'?[R-50,R+50,R-51,R+49]:kind==='올림'?[R-10,R]:[R,R+10];
+    const m=M2.pickAll(nums.map(String),good);
+    reW(m,st=>{ const s=st.s; for(const e of edge){ const i=nums.indexOf(e); if(i>=0&&(s[i]==='1')!==(f(e)===R)) return kind==='반올림'?'5에서 올리는 것과 경계를 헷갈렸어요':'올림·버림의 경계를 헷갈렸어요'; } return null; });
+    return m2q(`${kind}하여 ${place}의 자리까지 나타내면 ${R}이 되는 수를 모두 찾아 ○표 하세요.`,kind==='반올림'?'구하려는 자리 바로 아래 자리 숫자가 0~4이면 버리고, 5~9이면 올려요.':kind==='올림'?'구하려는 자리 아래 수가 0이 아니면 올려요. 아래 수가 모두 0이면 그대로예요.':'구하려는 자리 아래 수를 모두 0으로 버려요.',m,good.map(i=>nums[i]).join(', '),{'5에서 올리는 것과 경계를 헷갈렸어요':'N5-14','올림·버림의 경계를 헷갈렸어요':'N6-10','아닌 것에도 ○ 표 했어요':null,'빠뜨린 것이 있어요':null}); };
+  /* ⑦ 5학년 (자연수) ÷ (자연수)의 몫을 분수로: 피자 a판을 b명이 — 한 판을 통째로(1), 한 조각만(b분의 1) */
+  X.pizza=()=>{ const b=pick([3,4,5,6]), a=rnd(2,b-1); const sol=[]; for(let y=0;y<a;y++) sol.push([0,y]);
+    const m=M2.paint(b,a,[],{tip:'한 줄이 피자 한 판이에요(똑같이 '+b+'조각). 칸을 누르면 칠해져요.',check:s=>s.size===a,wrong:s=>s.size===b?'피자 한 판을 통째로 한 명 몫으로 봤어요':s.size===1?'한 판에서 한 조각만 칠했어요':'칠한 조각 수가 맞지 않아요',sol});
+    return m2q(`피자 ${a}판을 ${b}명이 똑같이 나누어 먹어요. 한 명이 먹는 양만큼 칠해 보세요.`,`한 판을 ${b}조각으로 나누면 한 명은 판마다 1조각씩 먹어요. 그래서 ${a} ÷ ${b} = ${fr(a,b)}예요.`,m,`${fr(a,b)}판 (${a}조각)`,{'피자 한 판을 통째로 한 명 몫으로 봤어요':'N3-01','한 판에서 한 조각만 칠했어요':'N3-39','칠한 조각 수가 맞지 않아요':null}); };
+  /* ⑧ 5학년 늘어나는 모양의 규칙: 계단 1, 3, 6, … 다음 — 늘어나는 수를 그대로(+2) 두는 오개념 */
+  X.stairs=()=>{ const n=pick([4,5]); const tri=k=>k*(k+1)/2; let vis='<div style="display:flex;gap:14px;align-items:flex-end;justify-content:center">'; for(let k=1;k<n;k++){ let g=''; for(let i=0;i<k;i++) for(let j=0;j<=i;j++) g+=`<rect x="${2+j*12}" y="${2+(k-1-i+0)*12}" width="12" height="12" fill="#F2A65A" stroke="#7A4A1E"/>`; vis+=`<div style="text-align:center;font-size:.85rem"><svg viewBox="0 0 ${4+k*12} ${4+k*12}" width="${4+k*12}" style="box-shadow:none;display:block;margin:auto">${g}</svg>${['','첫','둘','셋','넷'][k]}째</div>`; } vis+='</div>';
+    const need=tri(n), prev=tri(n-1), d0=tri(n-1)-tri(n-2); const sol=[]; for(let i=0;i<n;i++) for(let j=0;j<=i;j++) sol.push([j,i]);
+    const m=M2.paint(n+1,n+1,[],{check:s=>s.size===need,wrong:s=>s.size===prev+d0?'늘어나는 수를 앞과 똑같이 더했어요':s.size===prev*2?'앞 모양의 2배로 늘렸어요':'칸 수가 규칙에 맞지 않아요',sol});
+    const q=m2q(`규칙에 따라 계단 모양을 쌓고 있어요. ${['','','','','넷','다섯'][n]}째 모양을 칠해 보세요.`,`모양마다 칸 수가 ${[1,2,3].slice(0,n-1).map(tri).join(', ')}…로 늘어요. 늘어나는 수가 1씩 커져요.`,m,`${need}칸`,{'늘어나는 수를 앞과 똑같이 더했어요':'R4-01','앞 모양의 2배로 늘렸어요':'R5-03','칸 수가 규칙에 맞지 않아요':null});
+    q.visual=vis+q.visual; return q; };
+  /* ⑨ 3학년 둘레가 ■ cm인 직사각형 칠하기 — 넓이를 ■로 그림(G5-01) */
+  X.perim=()=>{ const P=pick([10,12,14,16]); const c=8, r=5; const ok=s=>{ const b=box(s); return !!b&&b.full&&2*(b.w+b.h)===P; }; const w0=P/2-2, sol=[]; for(let y=0;y<2;y++) for(let x=0;x<w0;x++) sol.push([x,y]); if(w0>c) return X.perim();
+    return m2q(`모눈 한 칸의 한 변은 1 cm예요. 둘레가 ${P} cm인 직사각형을 칠해 보세요.`,'둘레는 도형의 바깥 테두리 길이예요. (가로 + 세로) × 2를 생각해 보세요.',M2.paint(c,r,[],{check:ok,wrong:s=>{ const b=box(s); if(!b) return '아직 칠하지 않았어요'; if(!b.full) return '직사각형 모양이 아니에요'; return s.size===P?'칸 수(넓이)를 둘레와 같게 칠했어요':'둘레가 맞지 않아요'; },sol}),`둘레 ${P} cm 직사각형`,{'칸 수(넓이)를 둘레와 같게 칠했어요':'G5-01','직사각형 모양이 아니에요':null,'둘레가 맞지 않아요':null,'아직 칠하지 않았어요':null}); };
+  /* ⑩ 5학년 합동인 도형 칠하기 — 넓이(칸 수)만 같게 칠함(G5-07) */
+  X.congr=()=>{ const c=9, r=5; const sh=pick([[[0,0],[1,0],[2,0],[0,1]],[[0,0],[1,0],[1,1],[2,1]],[[0,0],[1,0],[2,0],[1,1],[1,2]],[[0,0],[0,1],[1,1],[2,1],[2,2]],[[0,0],[1,0],[0,1],[0,2],[1,2]]]); const oy=rnd(0,r-1-Math.max(...sh.map(p=>p[1]))); const given=sh.map(([x,y])=>[x,y+oy]);
+    const norm=a=>{ const mnx=Math.min(...a.map(p=>p[0])), mny=Math.min(...a.map(p=>p[1])); return a.map(([x,y])=>(x-mnx)+','+(y-mny)).sort().join(' '); };
+    const forms=new Set(); let cur=sh; for(let f=0;f<2;f++){ for(let t=0;t<4;t++){ forms.add(norm(cur)); cur=cur.map(([x,y])=>[y,-x]); } cur=cur.map(([x,y])=>[-x,y]); }
+    const sol=sh.map(([x,y])=>[x+5,y+oy]);
+    return m2q('왼쪽 주황색 도형과 합동인 도형을 오른쪽에 칠해 보세요. (돌리거나 뒤집어도 돼요)','합동은 모양과 크기가 같아서 포개었을 때 완전히 겹치는 도형이에요. 칸 수만 같으면 안 돼요.',M2.paint(c,r,given,{tip:'오른쪽 빈칸을 누르면 칠해져요.',check:s=>s.size===sh.length&&forms.has(norm(pts(s))),wrong:s=>s.size===sh.length?'칸 수(넓이)만 같고 모양이 달라요':'칸 수가 달라요',sol}),'모양과 크기가 같은 도형',{'칸 수(넓이)만 같고 모양이 달라요':'G5-07','칸 수가 달라요':'G5-14'}); };
+  window._M2N=X;
+  try{ const add=(ep,g)=>{ if(G36[ep]&&g){ (window._NTW=window._NTW||[]).push([ep,G36[ep].length,g]); G36[ep].push(g); } };
+    add('S3-35',X.fracOf); add('S3-36',X.propImp); add('S3-38',X.mixImp); add('S3-75',X.lowest); add('S3-83',X.range);
+    add('S3-85',X.roundSet('올림')); add('S3-86',X.roundSet('버림')); add('S3-87',X.roundSet('반올림')); add('S3-97',X.pizza); add('S5-06',X.stairs);
+    add('S6-66',X.perim); add('S6-52',X.congr); add('S5-17',M2.qRatio); add('S5-14',M2.qBandPct); }catch(e){}
+}
+
+/* ===== 3-92. 쌓기나무로 같은 부피의 직육면체 만들기(늘품이 6학년 놀이) =====
+   가로·세로·높이를 바꾸어 쌓기나무 N개짜리 직육면체를 서로 다르게 여러 개 만든다. 돌려 놓은 같은 직육면체는 하나로 센다. */
+M2.box3=(N,need)=>{ let d=[1,1,1]; const saved=[]; const lab=['가로','세로','높이']; let note='';
+  const iso=(a,b,c)=>{ const u=Math.max(6,Math.min(16,Math.floor(120/(a+b+c)))), cx=u*b*0.87, P=(x,y,z)=>[(x-y)*u*0.87+cx+8, (x+y)*u*0.5-z*u+c*u+8]; const q=pts=>pts.map(p=>p.map(v=>v.toFixed(1)).join(',')).join(' ');
+    let g=`<polygon points="${q([P(0,0,c),P(a,0,c),P(a,b,c),P(0,b,c)])}" fill="#F7D9A8" stroke="#7A4A1E" stroke-width="1.5"/><polygon points="${q([P(a,0,0),P(a,b,0),P(a,b,c),P(a,0,c)])}" fill="#E8B56C" stroke="#7A4A1E" stroke-width="1.5"/><polygon points="${q([P(0,b,0),P(a,b,0),P(a,b,c),P(0,b,c)])}" fill="#D99A4E" stroke="#7A4A1E" stroke-width="1.5"/>`;
+    const L=(p1,p2)=>`<line x1="${p1[0].toFixed(1)}" y1="${p1[1].toFixed(1)}" x2="${p2[0].toFixed(1)}" y2="${p2[1].toFixed(1)}" stroke="#7A4A1E" stroke-width=".7"/>`;
+    for(let i=1;i<a;i++){ g+=L(P(i,0,c),P(i,b,c))+L(P(i,b,0),P(i,b,c)); } for(let j=1;j<b;j++){ g+=L(P(0,j,c),P(a,j,c))+L(P(a,j,0),P(a,j,c)); } for(let k=1;k<c;k++){ g+=L(P(a,0,k),P(a,b,k))+L(P(0,b,k),P(a,b,k)); }
+    const W=(a+b)*u*0.87+16, H=(a+b)*u*0.5+c*u+16; return `<svg viewBox="0 0 ${W.toFixed(0)} ${H.toFixed(0)}" width="${Math.min(220,W).toFixed(0)}" style="box-shadow:none;display:block;margin:auto">${g}</svg>`; };
+  const keyOf=t=>t.slice().sort((x,y)=>x-y).join('x');
+  const o={ draw(){ const [a,b,c]=d; return `${iso(a,b,c)}<div style="font-size:.95rem">쌓기나무 <b>${a*b*c}개</b></div><div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center">${lab.map((l,i)=>`<div style="display:flex;align-items:center;gap:4px">${m2b('m'+i,'−','min-width:38px;padding:4px')}<span style="min-width:62px;text-align:center">${l} ${d[i]}</span>${m2b('p'+i,'+','min-width:38px;padding:4px')}</div>`).join('')}</div><div>${m2b('save','이 모양 담기 ✓')}</div><div style="font-size:.88rem;color:#8A6A4A">담은 모양: ${saved.length?saved.map(t=>t.join(' × ')).join(', '):'아직 없어요'}${note?' — '+note:''}</div>`; },
+    on(a){ note=''; if(a==='save'){ if(saved.some(t=>keyOf(t)===keyOf(d))){ note='돌려 놓으면 같은 모양이에요'; o._dup=(o._dup||0)+1; return; } saved.push(d.slice()); return; } const i=+a.slice(1); if(a[0]==='p'&&d[i]<12) d[i]++; if(a[0]==='m'&&d[i]>1) d[i]--; },
+    check(){ return saved.length>=need&&saved.every(t=>t[0]*t[1]*t[2]===N); },
+    wrong(){ if(saved.some(t=>t[0]*t[1]*t[2]!==N)){ const t=saved.find(t=>t[0]*t[1]*t[2]!==N); return t[0]+t[1]+t[2]===N?'가로·세로·높이를 더했어요':2*(t[0]*t[1]+t[1]*t[2]+t[0]*t[2])===N?'겉넓이를 맞췄어요':'쌓기나무 수가 맞지 않는 모양이 있어요'; } if(o._dup) return '돌려 놓은 같은 모양을 다시 담으려 했어요'; return '아직 모양이 모자라요'; },
+    reveal(){ saved.length=0; const out=[]; for(let a=1;a<=N;a++) for(let b=a;b<=N;b++){ if(N%(a*b)) continue; const c=N/(a*b); if(c>=b&&c<=12&&out.length<need) out.push([a,b,c]); } out.forEach(t=>saved.push(t)); d=out[0].slice(); },
+    goal(){ return null; }, state:()=>({s:saved.map(keyOf).join('_')}) };
+  const m=m2make(o); m._o=o; return m; };
+window._qBox3=M2.qBox3=()=>{ const N=rndPick(12,18,24), need=3; return m2q(`쌓기나무 ${N}개를 모두 써서 부피가 같은 직육면체를 서로 다르게 ${need}가지 만들어 담아 보세요.`,`쌓기나무 한 개의 부피는 1 cm³예요. 가로 × 세로 × 높이 = ${N}이 되는 세 수를 찾아요. 돌려 놓은 모양은 같은 것으로 쳐요.`,M2.box3(N,need),`가로 × 세로 × 높이 = ${N}`,{'가로·세로·높이를 더했어요':'G6-05','겉넓이를 맞췄어요':'G6-05','쌓기나무 수가 맞지 않는 모양이 있어요':null,'돌려 놓은 같은 모양을 다시 담으려 했어요':null,'아직 모양이 모자라요':null}); };
+try{ if(G36['S6-77']) G36['S6-77'].push(M2.qBox3); if(G36['S6-78']) G36['S6-78'].push(M2.qBox3); (window._NTW=window._NTW||[]).push(['S6-77',0,M2.qBox3]); }catch(e){}
+
+/* ===== 3-93. 3학년 mm 자로 길이 재기(11/24): 'cm 몇 mm'를 두 단추로 맞춘다 =====
+   오개념: 0이 아닌 눈금에서 시작했는데 끝 눈금을 그대로 읽음(G2-08), 작은 눈금(mm)을 세지 않음, 작은 눈금 한 칸을 0.5나 2로 봄 */
+M2.read2=(svg,ansMM,alts)=>{ let c=0, mm=0;
+  const o={ draw(){ return svg+`<div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;justify-content:center"><span style="display:flex;align-items:center;gap:4px">${m2b('cm','−')}<b style="font-size:1.3rem;min-width:56px;text-align:center">${c} cm</b>${m2b('cp','+')}</span><span style="display:flex;align-items:center;gap:4px">${m2b('mm','−')}<b style="font-size:1.3rem;min-width:62px;text-align:center">${mm} mm</b>${m2b('mp','+')}</span></div>`; },
+    on(a){ if(a==='cp'&&c<20) c++; if(a==='cm'&&c>0) c--; if(a==='mp'&&mm<9) mm++; if(a==='mm'&&mm>0) mm--; },
+    check(){ return c*10+mm===ansMM; }, wrong(){ return alts[c*10+mm]||null; }, reveal(){ c=Math.floor(ansMM/10); mm=ansMM%10; },
+    goal(){ return {taps:[...Array(Math.floor(ansMM/10)).fill('cp'),...Array(ansMM%10).fill('mp')],mis:null}; }, state:()=>({x:c*10+mm}) };
+  const m=m2make(o); m._o=o; return m; };
+window._qRulerMM=M2.qRulerMM=()=>{ const s=rndPick(0,0,1,2), A=s*10+rnd(0,4), L=rnd(23,58); if(L%10===0) return M2.qRulerMM(); const B=A+L, n=Math.ceil(B/10)+1-s, u=34, X=v=>14+(v-s*10)*u/10;
+  let g=`<rect x="4" y="44" width="${X((s+n)*10)+6}" height="40" fill="#FFF3C4" stroke="#7A4A1E" stroke-width="1.8" rx="3"/>`;
+  for(let v=s*10;v<=(s+n)*10;v++){ const big=v%10===0, mid=v%5===0; g+=`<line x1="${X(v).toFixed(1)}" y1="44" x2="${X(v).toFixed(1)}" y2="${big?62:mid?56:51}" stroke="#4A2E14" stroke-width="${big?1.8:.9}"/>`; if(big) g+=`<text x="${X(v).toFixed(1)}" y="78" font-size="13" text-anchor="middle" font-weight="700" fill="#4A2E14">${v/10}</text>`; }
+  g+=`<rect x="${X(A).toFixed(1)}" y="20" width="${(X(B)-X(A)).toFixed(1)}" height="14" rx="3" fill="#7CB0E0" stroke="#2F6FA8" stroke-width="1.6"/><line x1="${X(A).toFixed(1)}" y1="12" x2="${X(A).toFixed(1)}" y2="44" stroke="#D45F16" stroke-dasharray="3 3"/><line x1="${X(B).toFixed(1)}" y1="12" x2="${X(B).toFixed(1)}" y2="44" stroke="#D45F16" stroke-dasharray="3 3"/>`;
+  const svg=`<div style="width:100%;overflow-x:auto"><svg viewBox="0 0 ${(X((s+n)*10)+16).toFixed(0)} 90" style="width:100%;min-width:300px;max-width:420px;display:block;margin:auto">${g}</svg></div><div style="font-size:.85rem;color:#8A6A4A">큰 눈금 한 칸은 1 cm, 작은 눈금 한 칸은 1 mm예요.</div>`;
+  const alts={}; if(A) alts[B]='끝 눈금을 그대로 읽었어요'; alts[Math.floor(L/10)*10]='작은 눈금(mm)을 세지 않았어요'; const half=Math.floor(L/10)*10+Math.round((L%10)/2); if(half!==L&&!alts[half]) alts[half]='작은 눈금 한 칸을 2 mm로 봤어요';
+  return m2q('자로 색 테이프의 길이를 재었어요. 몇 cm 몇 mm인지 맞추어 보세요.','테이프의 왼쪽 끝 눈금에서 오른쪽 끝 눈금까지 1 cm가 몇 번, 1 mm가 몇 번 들어가는지 세어요.',M2.read2(svg,L,alts),`${Math.floor(L/10)} cm ${L%10} mm`,{'끝 눈금을 그대로 읽었어요':'G2-08','작은 눈금(mm)을 세지 않았어요':'D4-01','작은 눈금 한 칸을 2 mm로 봤어요':'D4-01'}); };
+try{ if(G36['S6-37']){ G36['S6-37'].push(M2.qRulerMM); (window._NTW=window._NTW||[]).push(['S6-37',G36['S6-37'].length-1,M2.qRulerMM]); } }catch(e){}
