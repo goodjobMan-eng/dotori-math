@@ -93,6 +93,7 @@ def main(src, out):
     for d, r in qrecs:
         by_tpl[(r[1], r[2])].append((d, r))
     rows, flags = [], []
+    optrows = []
     for (ep, ti), xs in sorted(by_tpl.items()):
         n = len(xs)
         nd = len({d for d, _ in xs})
@@ -162,6 +163,32 @@ def main(src, out):
                     fl.append(f'조작을 거의 안 하고 냄 {pct(q)}(무엇을 할지 모름?)')
                 if rr >= 0.4:
                     fl.append(f'되돌리기가 많음 {pct(rr)}(조작 방법이 헷갈림?)')
+        # 보기별·실력 띠별 선택 비율(캐나다 온타리오 EQAO 공개 문항 자료의 표와 같은 꼴, 11/24)
+        # 실력 띠: 그 틀을 뺀 기기 정답률로 4등분(아래 1 ~ 위 4). 고르기 문제(c)에서만.
+        if form == 'c' and len(ab) >= 40:
+            band_of = {}
+            sab = sorted(((ok - 0) / tot, d) for d, (ok, tot) in dev_tot.items() if tot >= 20)
+            for i, (_, d) in enumerate(sab):
+                band_of[d] = 1 + min(3, i * 4 // max(1, len(sab)))
+            tab = defaultdict(Counter)
+            for d, r in xs:
+                if d in band_of:
+                    tab[band_of[d]][str(r[5])] += 1
+            opts = sorted({g for c in tab.values() for g in c})
+            right = Counter(str(r[5]) for _, r in xs if r[6]).most_common(1)
+            right = right[0][0] if right else ''
+            for g in opts:
+                if g == right:
+                    continue
+                lo = tab[1][g] / max(1, sum(tab[1].values())); hi = tab[4][g] / max(1, sum(tab[4].values()))
+                if sum(tab[4].values()) >= 10 and hi >= 0.15 and hi >= 2 * lo and hi - lo >= 0.1:
+                    fl.append(f'잘하는 아이를 끄는 오답 "{g}" (위 띠 {pct(hi)}, 아래 띠 {pct(lo)}): 글이 모호하거나 정답이 둘일 수 있음')
+            b1 = tab[1]; tot1 = sum(b1.values())
+            if enough and tot1 >= 20 and len(b1) >= 3:
+                sh = [k / tot1 for k in b1.values()]
+                if max(sh) - min(sh) < 0.15:
+                    fl.append('아래 띠는 보기를 고르게 고름(찍기)')
+            optrows.append([ep, ti, title] + [';'.join(f'{g}:{tab[b][g]}' for g in opts) for b in (1, 2, 3, 4)] + [right])
         rows.append([ep, ti, title, t.get('stage', ''), form, n, nd, round(acc, 3), round(med), '' if disc is None else round(disc, 3), len(wrong), len(unc), ' / '.join(fl), t.get('sample', '')])
         if fl:
             flags.append({'ep': ep, 'ti': ti, 'title': title, 'n': n, 'acc': round(acc, 3), 'flags': fl, 'sample': t.get('sample', ''), 'tags': dict(tags), 'tag_acc': {a: round(v[0] / v[1], 2) for a, v in tag_ok.items() if v[1] >= 10}})
@@ -169,6 +196,10 @@ def main(src, out):
         w = csv.writer(f)
         w.writerow(['편', '틀', '편 이름', '단계', '응답 형태', '응답 수', '기기 수', '정답률', '가운데 시간(ms)', '변별(위−아래)', '오답 수', '안 잡힌 오답', '고칠 후보', '문제 예'])
         w.writerows(rows)
+    with open(os.path.join(out, 'options.csv'), 'w', newline='', encoding='utf-8-sig') as f:
+        w = csv.writer(f)
+        w.writerow(['편', '틀', '편 이름', '실력 띠1(아래) 보기:수', '띠2', '띠3', '띠4(위)', '정답'])
+        w.writerows(optrows)
     judged = sum(1 for r in rows if r[5] >= MIN_N and r[6] >= MIN_DEV)
     flags.sort(key=lambda x: (-len(x['flags']), -x['n']))
     L += ['## 1. 고칠 문제 후보', '', f'틀 {len(rows)}개에 기록이 있고, 그중 {judged}개가 판단 기준을 넘었습니다. 후보 {len(flags)}개.', '']

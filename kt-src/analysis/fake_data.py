@@ -18,7 +18,7 @@ def main(out, ndev=120):
     random.seed(7)
     cat = json.load(open(os.path.join(HERE, 'catalog.json'), encoding='utf-8'))
     eps = [e for e in cat['eps'] if e.startswith('S3-')][:12]
-    plant = {'EASY': (eps[0], 0), 'HARD': (eps[1], 0), 'REV': (eps[2], 0), 'FAST': (eps[3], 0), 'UNC': (eps[4], 0), 'DEAD': (eps[5], 0), 'MQ': (eps[6], 0)}
+    plant = {'EASY': (eps[0], 0), 'HARD': (eps[1], 0), 'REV': (eps[2], 0), 'FAST': (eps[3], 0), 'UNC': (eps[4], 0), 'DEAD': (eps[5], 0), 'MQ': (eps[6], 0), 'TRAP': (eps[7], 0)}
     inv = {v: k for k, v in plant.items()}
     days = [f'2026-11-{d:02d}' for d in range(23, 29)]
     for i in range(ndev + 3):
@@ -38,6 +38,8 @@ def main(out, ndev=120):
                     p = 0.99
                 if tag == 'HARD':
                     p = 0.1
+                if tag == 'TRAP':
+                    p = 1 - abil * 0.6
                 if tag == 'REV':
                     p = 1 - abil
                 if tag == 'FAST':
@@ -49,7 +51,9 @@ def main(out, ndev=120):
                     ok, ms = random.randint(0, 1), 100
                 if not ok:
                     code = random.choice(['N3-01', 'N3-02'])
-                    given = '5'
+                    given = random.choice(['5', '7', '9'])
+                    if tag == 'TRAP':
+                        given = '8' if abil > 0.6 else random.choice(['5', '7'])
                     if tag == 'UNC':
                         form, code, given = 'w', None, random.choice(['24', '24', '24', '42', '7'])
                     if tag == 'DEAD':
