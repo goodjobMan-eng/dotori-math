@@ -703,3 +703,58 @@ M2.color2=(items,want,names,wrongOf)=>{ const c=items.map(()=>''); const nx={'':
   try{ const add=(ep,g)=>{ if(G36[ep]&&g){ (window._NTW=window._NTW||[]).push([ep,G36[ep].length,g]); G36[ep].push(g); } };
     add('S3-29',M2X.mDiv); add('S3-41',M2X.mRead); add('S6-32',M2X.mPoly); add('S3-61',M2X.mDec); add('S6-18',M2X.pAngle); add('S3-70',M2X.pMult); add('S6-29',M2X.cTri); add('S3-58',M2X.cDec); }catch(e){}
 }
+
+/* ===== 3-80. 다른 나라 평가 꼴(11/23 교수님이 레퍼런스에 넣음) =====
+   독일 VERA-3(IQB, CC BY): '맞아요/아니에요'를 줄마다 고르기(stimmt/stimmt nicht), 숫자 카드를 칸에 넣어 식 완성(Ziffern einsetzen)
+   일본 전국학력·학습상황조사: 답을 고르고 '그렇게 고른 까닭'도 고르기(찍기와 이해를 가름) */
+/* 줄마다 맞아요/아니에요: rows=[[글, true/false, 틀렸을 때 오개념 이름]] */
+M2.truth=rows=>{ const v=rows.map(()=>null);
+  const btn=(i,val,lab)=>`<button type="button" data-ma="${val?'y':'n'}${i}" style="min-width:66px;min-height:42px;border-radius:10px;border:2.5px solid ${v[i]===val?(val?'#3C9A5F':'#C2412F'):'#C9A56B'};background:${v[i]===val?(val?'#DDF1E2':'#FBE0DB'):'#fff'};font-family:Jua,sans-serif;font-size:1rem;color:#4A2E14;cursor:pointer;touch-action:manipulation">${lab}</button>`;
+  const o={ draw(){ return `<div style="display:flex;flex-direction:column;gap:8px;width:100%;max-width:460px">${rows.map((r,i)=>`<div style="display:flex;align-items:center;gap:8px;background:#fff;border:2px solid #EAD5B0;border-radius:12px;padding:6px 8px"><span style="flex:1;font-family:'Gowun Dodum',Jua,sans-serif;font-weight:700;font-size:1.02rem;line-height:1.45;text-align:left">${r[0]}</span>${btn(i,true,'맞아요')}${btn(i,false,'아니에요')}</div>`).join('')}</div><div style="font-size:.88rem;color:#8A6A4A">줄마다 하나씩 골라요.</div>`; },
+    on(a){ const i=+a.slice(1); v[i]=a[0]==='y'; },
+    check(){ return rows.every((r,i)=>v[i]===r[1]); },
+    wrong(){ if(v.some(x=>x===null)) return '아직 고르지 않은 줄이 있어요'; for(let i=0;i<rows.length;i++) if(v[i]!==rows[i][1]&&rows[i][2]) return rows[i][2]; return '맞지 않게 고른 줄이 있어요'; },
+    reveal(){ rows.forEach((r,i)=>v[i]=r[1]); }, goal(){ return {taps:rows.map((r,i)=>(r[1]?'y':'n')+i),mis:null}; }, state:()=>({s:v.map(x=>x===null?'x':x?1:0).join('')}) };
+  const m=m2make(o); m._o=o; return m; };
+/* 답 + 까닭 고르기: ans/reason 보기 목록과 정답 번호. 답만 맞고 까닭이 틀리면 '까닭' 오개념 */
+M2.why=(A,ai,R,ri,reasonMis)=>{ let a=null, r=null;
+  const chip=(act,lab,on)=>`<button type="button" data-ma="${act}" style="width:100%;min-height:44px;padding:6px 10px;border-radius:12px;border:2.5px solid ${on?'#D45F16':'#C9A56B'};background:${on?'#FFF1D6':'#fff'};font-family:'Gowun Dodum',Jua,sans-serif;font-weight:700;font-size:1rem;text-align:left;color:#4A2E14;cursor:pointer;touch-action:manipulation;line-height:1.4">${lab}</button>`;
+  const o={ draw(){ return `<div style="width:100%;max-width:460px;display:flex;flex-direction:column;gap:6px"><div style="font-family:Jua,sans-serif;text-align:left">① 답을 골라요</div>${A.map((t,i)=>chip('a'+i,t,a===i)).join('')}<div style="font-family:Jua,sans-serif;text-align:left;margin-top:6px">② 그렇게 고른 까닭을 골라요</div>${R.map((t,i)=>chip('r'+i,t,r===i)).join('')}</div>`; },
+    on(x){ const i=+x.slice(1); if(x[0]==='a') a=i; else r=i; },
+    check(){ return a===ai&&r===ri; },
+    wrong(){ if(a===null||r===null) return '답과 까닭을 모두 골라요'; if(a===ai&&r!==ri) return (reasonMis&&reasonMis[r])||'답은 맞았지만 까닭이 맞지 않아요'; return (reasonMis&&reasonMis[r])||'답이 맞지 않아요'; },
+    reveal(){ a=ai; r=ri; }, goal(){ return {taps:['a'+ai,'r'+ri],mis:null}; }, state:()=>({s:`${a==null?'x':a}${r==null?'x':r}`}) };
+  const m=m2make(o); m._o=o; return m; };
+/* 숫자 카드를 빈칸에: tpl = 식 모양 ['□','□','□','−','□','□','=', '921'] 처럼. 카드는 한 번씩. ok(vals)로 판정(답이 여러 가지면 모두 인정) */
+M2.digits=(cards,slots,render,ok)=>{ const put=Array(slots).fill(null); let cur=null;
+  const o={ draw(){ const used=new Set(put.filter(x=>x!==null)); return `<div style="font:700 1.6rem/1.3 ui-monospace,monospace">${render(i=>`<button type="button" data-ma="s${i}" style="width:44px;height:52px;margin:2px;border-radius:8px;border:2.5px ${put[i]===null?'dashed':'solid'} ${cur!==null&&put[i]===null?'#D45F16':'#C9A56B'};background:#fff;font:700 1.5rem Jua,sans-serif;color:#2F6FA8;cursor:pointer;touch-action:manipulation">${put[i]===null?'':cards[put[i]]}</button>`)}</div><div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:6px">${cards.map((c,k)=>`<button type="button" data-ma="c${k}" style="width:46px;height:56px;border-radius:8px;border:2.5px solid ${cur===k?'#D45F16':'#7A4A1E'};background:${used.has(k)?'#EEE':'#FFF8EC'};opacity:${used.has(k)?.4:1};font:700 1.6rem Jua,sans-serif;color:#4A2E14;cursor:pointer;touch-action:manipulation">${c}</button>`).join('')}</div><div style="font-size:.88rem;color:#8A6A4A">카드를 누르고 칸을 누르면 들어가요. 칸을 다시 누르면 빠져요.</div>`; },
+    on(a){ const k=+a.slice(1); if(a[0]==='c'){ if(put.includes(k)) return; cur=cur===k?null:k; return; } if(put[k]!==null){ put[k]=null; return; } if(cur!==null){ put[k]=cur; cur=null; } },
+    check(){ return put.every(x=>x!==null)&&ok(put.map(x=>cards[x])); },
+    wrong(){ if(put.some(x=>x===null)) return '빈칸이 남았어요'; return '식이 맞지 않아요'; },
+    reveal(){ if(o._sol) o._sol.forEach((c,i)=>put[i]=c); }, goal(){ return o._sol?{taps:o._sol.flatMap((c,i)=>['c'+c,'s'+i]),mis:null}:null; }, state:()=>({s:put.map(x=>x===null?'x':cards[x]).join('')}) };
+  const m=m2make(o); m._o=o; return m; };
+
+{ const pick=a=>a[rnd(0,a.length-1)], sh=a=>shuffle(a.slice());
+  const X={};
+  /* 맞아요/아니에요 ① 사각형 사이의 관계 (4학년) */
+  X.tQuad=()=>{ const pool=[['정사각형은 직사각형이라고 할 수 있어요.',true,'정사각형은 직사각형이 아니라고 봤어요'],['직사각형은 모두 정사각형이에요.',false,'직사각형과 정사각형을 같게 봤어요'],['마름모는 평행사변형이라고 할 수 있어요.',true,'사각형 사이의 관계를 모름'],['평행사변형은 모두 마름모예요.',false,'사각형 사이의 관계를 모름'],['사다리꼴은 모두 평행사변형이에요.',false,'사다리꼴의 뜻을 모름'],['정사각형은 마름모라고 할 수 있어요.',true,'사각형 사이의 관계를 모름'],['직사각형은 사다리꼴이라고 할 수 있어요.',true,'사다리꼴의 뜻을 모름']];
+    const rows=sh(pool).slice(0,4); if(rows.every(r=>r[1])||rows.every(r=>!r[1])) return X.tQuad();
+    return m2q('사각형에 대한 설명이에요. 줄마다 맞으면 [맞아요], 틀리면 [아니에요]를 골라요.','뜻을 떠올려요. 사다리꼴: 평행한 변이 한 쌍이라도 있음. 평행사변형: 두 쌍. 마름모: 네 변이 같음. 직사각형: 네 각이 직각. 정사각형: 둘 다.',M2.truth(rows),'줄마다 바르게',{'정사각형은 직사각형이 아니라고 봤어요':'G3-04','직사각형과 정사각형을 같게 봤어요':'G3-04','사각형 사이의 관계를 모름':'G4-14','사다리꼴의 뜻을 모름':'G4-14'}); };
+  /* 맞아요/아니에요 ② 소수의 크기 (4학년) */
+  X.tDec=()=>{ const a=rnd(1,8), b=rnd(1,9), c=rnd(10,99); const rows=sh([[`0.${b} 와 0.${b}0 은 크기가 같아요.`,true,'끝자리 0을 붙이면 커진다고 봤어요'],[`0.${c} 는 0.${b} 보다 커요.`,c/100>b/10,'자릿수가 많으면 크다고 봤어요'],[`${a}.${b} 는 ${a}.0${b} 보다 커요.`,true,'0이 있는 자리를 무시했어요'],[`0.${b} 는 0.01이 ${b}개인 수예요.`,false,'자릿값을 잘못 봤어요']]).map(r=>[r[0].replace(/ (와|는|은|이) /g,(m,j)=>j+' ').replace(/ 보다/,'보다'),r[1],r[2]]);
+    if(String(c).length===2&&c%10===0) return X.tDec(); return m2q('소수에 대한 설명이에요. 줄마다 맞는지 골라요.','소수점 아래 끝자리 0은 생략해도 크기가 같아요. 크기는 자연수 부분 → 소수 첫째 자리 → 둘째 자리 차례로 비교해요.',M2.truth(rows),'줄마다 바르게',{'자릿수가 많으면 크다고 봤어요':'N3-32','끝자리 0을 붙이면 커진다고 봤어요':'N3-32','0이 있는 자리를 무시했어요':'N3-31','자릿값을 잘못 봤어요':'N3-31'}); };
+  /* 답+까닭 ① 비율그래프: 비율이 줄어도 양은 늘 수 있음 (6학년, 일본 전국학력 2025 꼴) */
+  X.wBand=()=>{ const T1=rnd(40,60)*10, T2=T1+rnd(20,40)*10, p1=rnd(15,25), p2=p1-rnd(1,4); const a1=T1*p1/100, a2=T2*p2/100; if(a2<=a1||a1%1||a2%1) return X.wBand();
+    const vis=`<table style="margin:4px auto;border-collapse:collapse;font-size:.95rem;background:#fff">${[['','전체 수확량','우리 마을의 비율'],['작년',T1+' kg',p1+' %'],['올해',T2+' kg',p2+' %']].map((r,i)=>`<tr>${r.map(c=>`<t${i?'d':'h'} style="border:1.5px solid #C9A877;padding:3px 10px">${c}</t${i?'d':'h'}>`).join('')}</tr>`).join('')}</table>`;
+    const q=m2q('우리 마을이 차지하는 비율은 작년보다 줄었어요. 그렇다면 우리 마을의 수확량도 줄었을까요?','비율은 전체에 대한 몫이에요. 양을 알려면 (전체) × (비율)을 계산해서 비교해야 해요.',M2.why(['줄었어요','늘었어요'],1,[`비율이 ${p1}%에서 ${p2}%로 줄었으니까`,`작년 ${T1}×${p1}÷100=${a1} kg, 올해 ${T2}×${p2}÷100=${a2} kg이니까`,`전체 수확량이 늘었으니까 무조건 늘어요`],1,{0:'비율만 보고 양을 판단했어요',2:'전체만 보고 판단했어요'}),'늘었어요 (양을 계산해서 비교)',{'비율만 보고 양을 판단했어요':'R6-08','전체만 보고 판단했어요':'R6-08','답은 맞았지만 까닭이 맞지 않아요':'R6-08'}); q.visual=vis+(q.visual||''); return q; };
+  /* 답+까닭 ② 평균 비교: 합이 커도 평균은 작을 수 있음 (5학년) */
+  X.wAvg=()=>{ const n1=4, n2=5, s1=n1*rnd(6,9), s2=n2*rnd(4,6)+rnd(0,1)*0; const m1=s1/n1, m2=s2/n2; if(s2<=s1||m2>=m1) return X.wAvg();
+    return m2q(`줄넘기를 가 모둠 ${n1}명은 모두 ${s1}번, 나 모둠 ${n2}명은 모두 ${s2}번 했어요. 한 사람이 평균 더 많이 한 모둠은?`,'사람 수가 다르면 합으로 비교할 수 없어요. 평균 = 합 ÷ 사람 수로 비교해요.',M2.why(['가 모둠','나 모둠'],0,[`나 모둠의 합 ${s2}번이 더 크니까`,`가 모둠 ${s1}÷${n1}=${m1}, 나 모둠 ${s2}÷${n2}=${m2}이니까`,`사람 수가 적은 모둠이 늘 평균이 높으니까`],1,{0:'합으로 평균을 비교했어요',2:'사람 수로만 판단했어요'}),'가 모둠 (평균으로 비교)',{'합으로 평균을 비교했어요':'D5-02','사람 수로만 판단했어요':'D5-02','답은 맞았지만 까닭이 맞지 않아요':'D5-02'}); };
+  /* 숫자 카드 ① 세 자리 수 − 두 자리 수 = 결과 (3학년, VERA-3 Ziffern einsetzen 꼴) */
+  X.dSub=()=>{ for(let t=0;t<200;t++){ const cards=sh([1,2,3,4,5,6,7,8,9]).slice(0,5); const sols=[]; for(const p of (function*(){ for(const a of cards) for(const b of cards) for(const c of cards) for(const d of cards) for(const e of cards){ const s=[a,b,c,d,e]; if(new Set(s).size===5) yield s; } })()){ const A=p[0]*100+p[1]*10+p[2], B=p[3]*10+p[4]; if(A-B>0) sols.push([p,A-B]); } const R=pick(sols)[1]; const good=sols.filter(s=>s[1]===R); if(good.length!==1||R<100) continue; const sol=good[0][0].map(v=>cards.indexOf(v));
+      const m=M2.digits(cards,5,S=>`<table style="margin:auto;border-collapse:collapse"><tr><td></td><td>${S(0)}</td><td>${S(1)}</td><td>${S(2)}</td></tr><tr><td style="padding-right:6px">−</td><td></td><td>${S(3)}</td><td>${S(4)}</td></tr><tr style="border-top:3px solid #4A2E14">${('  '+R).slice(-4).split('').map(c=>`<td style="text-align:center;font:700 1.6rem Jua,sans-serif">${c===' '?'':c}</td>`).join('')}</tr></table>`,v=>(v[0]*100+v[1]*10+v[2])-(v[3]*10+v[4])===R); m._o._sol=sol;
+      return m2q(`숫자 카드 ${cards.join(', ')}을 한 번씩만 써서 뺄셈의 차가 ${R}이 되게 만들어 보세요.`,'일의 자리부터 차례로 생각해요. 받아내림이 있으면 윗자리에서 10을 빌려 와요. 맞지 않으면 카드를 바꿔 보며 찾아요.',m,'차가 맞는 뺄셈식',{'식이 맞지 않아요':null}); } return null; };
+  window._M2V=X;
+  try{ const add=(ep,g)=>{ if(G36[ep]&&g){ (window._NTW=window._NTW||[]).push([ep,G36[ep].length,g]); G36[ep].push(g); } };
+    add('S6-31',X.tQuad); add('S3-58',X.tDec); add('S4-21',X.wBand); add('S4-16',X.wAvg); add('S2-06',X.dSub); }catch(e){}
+}
