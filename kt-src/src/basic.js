@@ -221,3 +221,24 @@ window.qpNb=t=>(/[가-힣]/.test(String(t||'').replace(/<[^>]+>/g,''))?String(t)
   try{ const add=(ep,g)=>{ if(G36[ep]){ (window._NTW=window._NTW||[]).push([ep,G36[ep].length,g]); G36[ep].push(g); } };
     [['S3-61','unit'],['S6-44','scale'],['S5-16','inc'],['S3-24','zero'],['S3-72','lcm'],['S5-16','pct'],['S5-12','chair'],['S3-25','tens'],['S2-04','fewer'],['S6-74','circ'],['S3-110','divDec'],['S6-59','prism'],['S6-76','cube'],['S3-87','round'],['S3-62','decSub'],['S4-10','times']].forEach(([e,k])=>add(e,T(J[k]))); }catch(e){}
 }
+
+/* ---------- 3-85. 독일 VERA-3 과제 해설(IQB)의 '예상되는 어려움'에서 가져온 오답 보기 ---------- */
+{ const pk=a=>a[rnd(0,a.length-1)], won=n=>n.toLocaleString('ko-KR');
+  const Q4=(q,vis,ans,wr)=>{ const A=String(ans), s=new Set([A]), w=[]; for(const [v,c] of wr){ if(v==null) continue; const k=String(v); if(s.has(k)) continue; s.add(k); w.push([k,c]); } if(w.length<3) return null; return cq(q,vis,A,w.slice(0,3)); };
+  const T=f=>()=>{ for(let t=0;t<30;t++){ const q=f(); if(q) return q; } return null; }, V={};
+  /* 걸린 시간: 시와 분을 따로 '큰 수에서 작은 수'로 뺌 (SendungmitderMaus) */
+  V.span=()=>{ const h=rnd(8,10), m=rnd(31,55), d=rnd(50,110); const e=h*60+m+d, eh=Math.floor(e/60), em=e%60; if(em>=m) return null; const A=`${Math.floor(d/60)}시간 ${d%60}분`.replace(/^0시간 /,'').replace(/ 0분$/,''); const naive=`${eh-h}시간 ${m-em}분`;
+    return Q4(`영화가 ${h}시 ${m}분에 시작해서 ${eh}시 ${em}분에 끝났어요. 영화를 본 시간은?`,'',A,[[naive,'G2-03'],[`${eh-h}시간 ${em+60-m+40}분`,'G2-03'],[`${d+40}분`,'G2-03'],[`${eh-h+1}시간 ${em}분`,null]]); };
+  /* 단위가 섞인 길이 비교: 2.35 m가 2.5 m보다 길다고 봄 (Größenumwandeln) */
+  V.len=()=>{ const a=rnd(1,3), b=rnd(2,8); const xs=[`${a}.${b}`,`${a}.${b-1}${rnd(5,9)}`,`${a}.0${rnd(5,9)}`,`${a}.${b-1}`]; const v=xs.map(Number); if(new Set(v).size<4) return null; const mx=xs[v.indexOf(Math.max(...v))]; return Q4(`줄넘기 줄의 길이예요. 가장 긴 줄은? (${xs.map(x=>x+' m').join(', ')})`,'',mx+' m',xs.filter(x=>x!==mx).map(x=>[x+' m',x.length>mx.length?'N4-02':null])); };
+  /* 묶음 할인: 가장 싸게 사기 (Bleistifte: 묶음을 쓰지 않은 값) */
+  V.pack=()=>{ const one=pk([300,400,500]), k=pk([4,5,6]), pack=one*k-pk([200,300,400]), n=k*2+rnd(1,k-1); const best=Math.floor(n/k)*pack+(n%k)*one;
+    return Q4(`연필 한 자루는 ${won(one)}원, ${k}자루 묶음은 ${won(pack)}원이에요. 연필 ${n}자루를 가장 싸게 사려면 얼마가 필요할까요?`,'',won(best)+'원',[[won(n*one)+'원',null],[won(Math.ceil(n/k)*pack)+'원',null],[won(best+one)+'원',null],[won(pack*n/k|0)+'원',null]]); };
+  /* 구할 수 없는 문제: 보이는 수를 아무렇게나 계산함 (Kapitänsaufgabe) */
+  V.capt=()=>{ const a=rnd(11,29), b=rnd(12,25); return Q4(`버스에 어른 ${a}명과 어린이 ${b}명이 타고 있어요. 버스 운전사는 몇 살일까요?`,'',`주어진 것으로는 알 수 없어요`,[[`${a+b}살`,'N1-03'],[`${Math.abs(a-b)}살`,'N1-03'],[`${a}살`,null],[`${b}살`,null]]); };
+  /* 24시간 시각 (Uhrzeitenzuordnen: 24시각제를 12시각제로 바꾸지 못함) */
+  V.h24=()=>{ const h=rnd(13,21), m=rnd(1,11)*5; return Q4(`기차가 ${h}시 ${m}분에 출발해요. 같은 시각은?`,'',`오후 ${h-12}시 ${m}분`,[[`오후 ${h-10}시 ${m}분`,'G2-12'],[`오전 ${h-12}시 ${m}분`,'G2-12'],[`오후 ${h}시 ${m}분`,'G2-12'],[`오후 ${h-12}시 ${60-m}분`,null]]); };
+  window._DE=V;
+  try{ const add=(ep,g)=>{ if(G36[ep]){ (window._NTW=window._NTW||[]).push([ep,G36[ep].length,g]); G36[ep].push(g); } };
+    [['S6-36','span'],['S3-58','len'],['S3-24','pack'],['S2-04','capt'],['S6-34','h24']].forEach(([e,k])=>add(e,T(V[k]))); }catch(e){}
+}
