@@ -453,6 +453,7 @@ _css = """
 .qp-q{flex:1;font-family:"Gowun Dodum","Jua",sans-serif;font-weight:700;font-size:1.28rem;line-height:1.55;color:var(--ink);word-break:keep-all;text-wrap:pretty}
 .qp-who{flex:none;width:64px;height:64px;overflow:hidden}.qp-who img,.qp-who svg{width:64px!important;height:64px!important;object-fit:contain}
 .qp-q,.qp-opts .opt,.qp-sym .opt{font-variant-numeric:tabular-nums}
+.opt.kt-arm{border-color:#E8743B!important;box-shadow:0 0 0 3px #FFD9A0!important;background:#FFF6E8!important}
 .qp-sub{display:block;font-size:.85rem;font-weight:400;color:var(--ink-soft)}
 /* 가로 2단은 쓰지 않음(교수님 11/23: 세로 숏츠·문제풀이 정체성 유지) */
 .visual.qp-vis{border:2px solid var(--line);border-radius:14px;background:#fff;padding:10px;margin:12px 0 4px}
