@@ -107,8 +107,8 @@ function finishDaily(S0){ const st=state(), t=dstr(Date.now());
 function ktResult(S0){ const box=document.querySelector('.result'); if(!box) return;
   if(S0.kt){ const n=S0.acts.length, b=box.querySelector('.big'); if(b) b.textContent=b.textContent.replace('/ 10','/ '+n);
     box.querySelector('#nextbtn')?.remove(); const ag=document.getElementById('again'), li=document.getElementById('list');
-    if(S0.kt==='daily') finishDaily(S0); if(S0.kt==='basic') try{ basicResult(S0,box); }catch(e){}
-    if(ag){ ag.textContent=S0.kt==='quick'?'5문제 더':S0.kt==='hard'?'도전 문장제 더 풀기':S0.kt==='basic'?'다른 점검 하기':'더 풀기'; ag.onclick=S0.kt==='quick'?startQuick:S0.kt==='hard'?hardPage:S0.kt==='basic'?basicPage:()=>startDaily({cont:true}); if(S0.kt==='daily') ag.textContent='계속 풀기'; }
+    if(S0.kt==='daily') finishDaily(S0);
+    if(ag){ ag.textContent=S0.kt==='quick'?'5문제 더':S0.kt==='hard'?'도전 문장제 더 풀기':'더 풀기'; ag.onclick=S0.kt==='quick'?startQuick:S0.kt==='hard'?hardPage:()=>startDaily({cont:true}); if(S0.kt==='daily') ag.textContent='계속 풀기'; }
     if(li){ li.textContent='그만하기'; li.onclick=home; }
     try{ /* 갇혀서 선수 내용으로 바꿔 준 세트: 점수보다 다진 것을 말해 준다. 거의 다 맞힌 세트: 도전 문장제로 잇는 단추 */
       if(S0._eased) box.insertAdjacentHTML('afterbegin','<p class="kt-ease" style="font-family:Jua,sans-serif;color:#B5541A;margin:0 0 8px">끝까지 푼 것만으로도 오늘 수학 힘이 자랐어요. 앞에서 배운 내용을 다시 다졌으니, 다음에 이어서 도전해요!</p>');
@@ -130,10 +130,10 @@ function modesHTML(){ const P=pref(), st=state(), done=st.daily&&st.daily.d===ds
   const diag=P.band>=3&&!st.lvl;
   /* 홈 정리(11/22, 카본 교차검토): 주 활동 하나를 크게, 다른 활동은 작은 판자로. 설정은 맨 위 '설정'으로 옮기고 칩 줄은 없앤다. */
   return `<div class="kt-main"><button class="kt-mode kt-big" id="kt-daily"><img class="who" src="${JU['부엉 박사님']['자세_손가락하나']}" alt=""><b>오늘의 문제</b><span>${sub}</span>${done?'<i class="stamp">다 풀었어요</i>':''}</button></div>
-    <div class="kt-small${diag?' three':''}"><button class="kt-mode kt-sm" id="kt-quick"><b>가볍게 풀기</b><span>5문제만</span></button><button class="kt-mode kt-sm" id="kt-hard"><b>도전 문장제</b><span>어려운 이야기 문제</span></button><button class="kt-mode kt-sm" id="kt-basic"><b>기초학력 점검</b><span>수리력 진단 꼴</span></button>${diag?'<button class="kt-mode kt-sm" id="kt-diag"><b>내 수준 찾기</b><span>처음 한 번</span></button>':''}</div>
+    <div class="kt-small${diag?' three':''}"><button class="kt-mode kt-sm" id="kt-quick"><b>가볍게 풀기</b><span>5문제만</span></button><button class="kt-mode kt-sm" id="kt-hard"><b>도전 문장제</b><span>어려운 이야기 문제</span></button>${diag?'<button class="kt-mode kt-sm" id="kt-diag"><b>내 수준 찾기</b><span>처음 한 번</span></button>':''}</div>
     <h2 class="sec">골라서 풀기</h2>`; }
 function bindModes(){ const on=(id,f)=>{ const b=document.getElementById(id); if(b) b.onclick=f; };
-  on('kt-quick',startQuick); on('kt-daily',startDaily); on('kt-diag',startDiag); on('kt-hard',hardPage); on('kt-basic',basicPage); homeTop(); }
+  on('kt-quick',startQuick); on('kt-daily',startDaily); on('kt-diag',startDiag); on('kt-hard',hardPage); homeTop(); }
 /* 처음 화면 맨 위 줄: 스크롤해도 붙어 있고, 오른쪽에 '설정'과 내 친구(placeBadge가 이 줄 끝에 넣음) */
 function homeTop(){ const root=document.getElementById('app'); if(!root||root.querySelector('.kt-hometop')) return;
   root.insertAdjacentHTML('afterbegin','<div class="top kt-hometop"><button class="kt-gear" id="kt-set" type="button">설정</button></div>');
@@ -162,17 +162,6 @@ function hardPage(){ if(!pref().band) return bandPage(hardPage); hush(); app.cla
   document.getElementById('back').onclick=home;
   app.querySelectorAll('[data-dom]').forEach(x=>x.onclick=()=>{ const d=DOMS[+x.dataset.dom]; let qs=[]; try{ qs=window._hqPick(d,b,5,pref().gr); }catch(e){} if(!qs.length) return home(); runSet(qs.map(q=>({kind:'q',q})),'도전 문장제 · '+d,{kt:'hard',hard:1}); }); }
 window._hardPage=()=>hardPage();
-/* 기초학력 점검(11/23): 국가 「수리력 진단도구」의 짜임·도달 기준을 따른 새 문항 세트(src/basic.js) */
-function basicPage(){ hush(); app.className='wrap'; const B=window._BK; if(!B) return home();
-  app.innerHTML=`<div class="top"><button class="back" id="back">← 처음</button><div class="crumb">기초학력 점검</div><span style="width:70px"></span></div>
-    <div class="stage"><div style="font-family:Jua;font-size:1.25rem;margin-bottom:4px">어느 점검을 해 볼까요?</div><div style="font-size:.92rem;color:#7B5632;margin-bottom:12px">국가 수리력 진단과 같은 짜임으로 새로 만든 문제예요. 풀 때마다 수가 바뀌어요.</div>
-    <div class="kt-modes" style="grid-template-columns:1fr 1fr">${Object.entries(B.sets).map(([k,s])=>`<button class="kt-mode kt-band" data-bk="${k}"><b>${s.n}</b><span>${s.g} · ${s.it.length}문제</span></button>`).join('')}</div></div>`;
-  document.getElementById('back').onclick=home;
-  app.querySelectorAll('[data-bk]').forEach(x=>x.onclick=()=>{ const k=x.dataset.bk, qs=B.make(k); if(!qs.length) return home(); runSet(qs.map(q=>({kind:'q',q})),'기초학력 점검 · '+B.sets[k].n,{kt:'basic'}); }); }
-function basicResult(S0,box){ const B=window._BK, k=(S0.acts[0].q._bk||{}).key, s=B&&B.sets[k]; if(!s) return; const n=S0.acts.length, ok=(S0.results||[]).filter(x=>x===true).length, pass=ok>=Math.round(s.cut*n/s.it.length);
-  const miss=S0.acts.map((a,i)=>S0.results[i]===true?null:(a.q._bk||{}).std).filter(Boolean); if(ok<n) box.querySelectorAll('p,div').forEach(e=>{ if(!e.children.length&&/다 맞았/.test(e.textContent)) e.remove(); });
-  box.insertAdjacentHTML('afterbegin',`<div class="kt-bk" style="text-align:left;background:${pass?'#EAF6E1':'#FFF1E3'};border:2px solid ${pass?'#9CC98A':'#F2B27A'};border-radius:12px;padding:10px 14px;margin:0 0 12px"><div style="font-family:Jua,sans-serif;font-size:1.15rem">${s.n}: ${n}문제 중 ${ok}문제 · ${pass?'기초학력 도달 수준이에요':'조금 더 다져요'}</div><div style="font-size:.85rem;color:#7B5632">도달 기준 ${s.cut}/${s.it.length} (국가 수리력 진단도구 기준과 같은 비율)</div>${miss.length?`<div style="margin-top:6px;font-size:.95rem">다시 볼 내용: ${miss.map(esc).join(', ')}</div>`:''}</div>`); }
-
 /* ---------- 10-3. 골라서 풀기: 영상이 있든 없든 학년 → 영역 → 단원 순서(계열)로 한 줄에 ---------- */
 const DOMS=['수와 연산','변화와 관계','도형과 측정','자료와 가능성'];
 const domOf=u=>({S2:'수와 연산',S3:'수와 연산',S4:'자료와 가능성',S5:'변화와 관계',S6:'도형과 측정'})[String(u.eps[0]).slice(0,2)]||'수와 연산';

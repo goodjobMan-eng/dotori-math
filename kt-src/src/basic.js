@@ -1,5 +1,5 @@
 
-/* ---------- 3-77. 기초학력 점검(수리력) ----------
+/* ---------- 3-77. 국가 수리력 진단도구 꼴 문항(편에 섞어 냄) ----------
    국가기초학력지원포털의 「수리력 진단도구」(한국교육과정평가원, 1수준·2수준 × 수와 연산·도형과 측정)의
    문항 '짜임'(차례, 생활 맥락, 4지선다, 말풍선 고르기, 표·그림 읽기)과 도달 기준(분할 점수)만 따왔다.
    문항 글·수·그림은 모두 새로 만들고, 풀 때마다 수가 바뀐다(검사지 문항을 옮기지 않음 — 저작권은 평가원).
@@ -25,7 +25,7 @@
       const cap='큰 정육면체 1000, 판 100, 막대 10, 작은 정육면체 1'; return Q4('수 모형이 나타내는 수는 얼마인가요?',pic(g,Math.max(x,120),76,cap),n,[[th*1000+t*100+h*10+o,'N1-07'],[n+100,null],[(th+1)*1000+h*100+t*10+o,null],[th*1000+h*100+o*10+t,'N1-07']]); }],
     ['전체에서 부분 빼기(문장)',()=>{ const tot=rnd(21,32), b=rnd(11,tot-8); return Q4(`우리 반 학생은 모두 ${tot}명이에요. 남학생이 ${b}명이면 여학생은 몇 명인가요?`,'',(tot-b)+'명',[[(tot+b)+'명','N1-06'],[(tot-b+10)+'명','N2-02'],[(tot-b-2)+'명',null],[b+'명',null]]); }],
     ['묶어 세기',()=>{ const k=pk([5,10]), m=rnd(4,8), n=k*m; let g=''; for(let i=0;i<m;i++){ const x=10+(i%4)*58, y=8+Math.floor(i/4)*44; g+=`<rect x="${x}" y="${y}" width="52" height="38" rx="8" fill="none" stroke="${BL}" stroke-dasharray="3 2"/>`; for(let j=0;j<Math.min(k,5);j++) g+=`<circle cx="${x+9+j*9}" cy="${y+12}" r="4" fill="#F7B6C2" stroke="${S}" stroke-width=".8"/>`; g+=gxT(x+26,y+32,k+'개',10); } return Q4(`풍선을 ${k}개씩 묶었어요. 풍선은 모두 몇 개인가요?`,pic(g,250,Math.ceil(m/4)*44+10),n+'개',[[(k+m)+'개','N4-15'],[(n-k)+'개',null],[(n+k)+'개',null],[m+'개',null]]); }],
-    ['가르기',()=>{ const n=rnd(7,12), a=rnd(2,n-2); let g=''; for(let i=0;i<n;i++) g+=dot(16+(i%6)*24,18+Math.floor(i/6)*24,'#fff'); g+=`<text x="190" y="30" font-size="15" fill="#4A2E14">${n} → ${jw(a)} □</text>`; return Q4(`축구공 ${n}개를 ${a}개와 몇 개로 가르기 했어요. □에 들어갈 수는?`,pic(g,290,60),n-a,[[n+a,'N1-06'],[n,null],[a,null],[n-a+1,'N1-01']]); }],
+    ['가르기',()=>{ const n=10, a=rnd(2,n-2); let g=''; for(let i=0;i<n;i++) g+=dot(16+(i%6)*24,18+Math.floor(i/6)*24,'#fff'); g+=`<text x="190" y="30" font-size="15" fill="#4A2E14">${n} → ${jw(a)} □</text>`; return Q4(`축구공 ${n}개를 ${a}개와 몇 개로 가르기 했어요. □에 들어갈 수는?`,pic(g,290,60),n-a,[[n+a,'N1-06'],[n,null],[a,null],[n-a+1,'N1-01']]); }],
     ['세 자리 수 읽기',()=>{ const mk=()=>{ const n=rnd(1,9)*100+pk([0,rnd(1,9)])*10+rnd(1,9); return n; }; const ns=[mk(),mk(),mk(),mk()]; if(new Set(ns).size<4) return null; const bad=rnd(0,3); const wr=n=>{ const h=Math.floor(n/100), t=Math.floor(n/10)%10, o=n%10; return t===0?sino(h*100)+'영'+sino(o):sino(h)+'백'+sino(t)+sino(o); };
       const ctx=['번 버스가 와요','쪽까지 읽었어요','번 번호표를 뽑았어요','개를 모았어요'], lines=ns.map((n,i)=>`“${n}${ctx[i]}” → ${i===bad?wr(n):sino(n)}`);
       return Q4('수를 바르게 읽지 않은 것은 무엇인가요?','',lines[bad],lines.filter((_,i)=>i!==bad).map(s=>[s,null]).concat([['모두 바르게 읽었어요','N1-07']])); }],
@@ -126,7 +126,13 @@
   ];
   reg(2,'도',G2);
 
-  window._BK={
-    sets:{ '1수': {n:'1수준 · 수와 연산', g:'1~2학년 내용', it:N1, cut:10}, '1도': {n:'1수준 · 도형과 측정', g:'1~2학년 내용', it:G1, cut:8}, '2수': {n:'2수준 · 수와 연산', g:'3~4학년 내용', it:N2, cut:12}, '2도': {n:'2수준 · 도형과 측정', g:'3~4학년 내용', it:G2, cut:18} },
-    make(key){ const s=this.sets[key]; return s.it.map(([std,f],i)=>{ const q=tryQ(f); if(q){ q._bk={key,no:i+1,std}; q.hint1=q.hint1||''; } return q; }).filter(Boolean); } };
+  /* 점검 세트로 따로 내지 않고(낙인 걱정 — 교수님 11/23), 각 틀을 알맞은 편의 문제 묶음에 넣어 평소 풀이 속에 섞는다 */
+  const MAP={ N1:[3,15,31,31,39,32,40,14,36,17,34,39,32,32], G1:['S6-03','S6-01','S6-05','S6-10','S6-15','S6-16','S6-05','S6-11','S4-05','S6-13','S6-02','S6-14'],
+    N2:['S3-41','S3-44','S2-03','S2-15','S3-24','S3-27','S2-10','S2-10','S3-33','S3-29','S3-18','S3-35','S3-37','S3-38','S3-20','S3-56','S3-56','S3-58','S3-61','S3-62'],
+    G2:['S6-18','S6-48','S6-20','S6-22','S6-23','S6-24','S6-26','S6-28','S6-28','S6-29','S6-31','S6-30','S6-19','S6-30','S6-36','S6-34','S6-38','S6-37','S6-39','S6-41','S6-40','S6-42','S6-44','S6-43','S6-46','S6-47'] };
+  const wrap=f=>()=>tryQ(f);
+  window._BK={N1,G1,N2,G2,MAP,wrap};
+  try{ [['N1',N1],['G1',G1],['N2',N2],['G2',G2]].forEach(([k,arr])=>arr.forEach(([std,f],i)=>{ const ep=MAP[k][i], g=wrap(f);
+      if(typeof ep==='number'){ if(typeof G!=='undefined'&&G[ep]) G[ep].push(g); }
+      else if(G36[ep]){ (window._NTW=window._NTW||[]).push([ep,G36[ep].length,g]); G36[ep].push(g); } })); }catch(e){}
 }
