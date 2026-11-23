@@ -451,19 +451,10 @@ _css = """
 .qp{display:flex;align-items:flex-start;gap:10px;padding:4px 2px 10px;border-bottom:2px dashed var(--line)}
 .qp-no{flex:none;min-width:30px;height:30px;border-radius:8px;background:#E8743B;color:#fff;font:700 1.05rem/30px "Jua",sans-serif;text-align:center;margin-top:2px}
 .qp-q{flex:1;font-family:"Gowun Dodum","Jua",sans-serif;font-weight:700;font-size:1.28rem;line-height:1.55;color:var(--ink);word-break:keep-all;text-wrap:pretty}
-.qp-who{flex:none;width:46px;height:46px;overflow:hidden}.qp-who img,.qp-who svg{width:46px!important;height:46px!important;object-fit:contain}
+.qp-who{flex:none;width:64px;height:64px;overflow:hidden}.qp-who img,.qp-who svg{width:64px!important;height:64px!important;object-fit:contain}
 .qp-q,.qp-opts .opt,.qp-sym .opt{font-variant-numeric:tabular-nums}
 .qp-sub{display:block;font-size:.85rem;font-weight:400;color:var(--ink-soft)}
-@media (min-width:900px) and (orientation:landscape){
- .wrap:has(.stage > .qp){max-width:1000px}
- .stage:has(> .qp){display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);column-gap:22px;align-items:start}
- .stage:has(> .qp) > .qp{grid-column:1;grid-row:1}
- .stage:has(> .qp) > .visual{grid-column:1;grid-row:2 / span 3}
- .stage:has(> .qp) > #opts,.stage:has(> .qp) > #wpad{grid-column:2;grid-row:1 / span 2;margin-top:4px;align-self:start}
- .stage:has(> .qp) > #fb{grid-column:2;grid-row:3}
- .stage:has(> .qp) > .qp-opts:not(.qp-list){grid-template-columns:1fr}
- .stage:has(> .qp) .qp-vis > svg, .stage:has(> .qp) .qp-vis .cpa > svg{min-width:min(100%,380px);height:auto}
-}
+/* 가로 2단은 쓰지 않음(교수님 11/23: 세로 숏츠·문제풀이 정체성 유지) */
 .visual.qp-vis{border:2px solid var(--line);border-radius:14px;background:#fff;padding:10px;margin:12px 0 4px}
 .qp-opts{counter-reset:qo}
 .visual.qp-novis{min-height:0;margin:4px 0}
