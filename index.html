@@ -9536,6 +9536,37 @@ M2.digits=(cards,slots,render,ok)=>{ const put=Array(slots).fill(null); let cur=
     [['S3-55','wMixSub'],['S5-10','wEq'],['S3-79','wFracAdd'],['S3-112','wDecRem'],['S5-19','wProp'],['S6-71','mArea'],['S4-08','tPicto']].forEach(([e,k])=>add(e,Z[k])); }catch(e){}
 }
 
+/* ===== 3-83. 모눈 칠하기·완성하기(늘품이 통권 발문 2위 '그리기·완성하기', 독일 VERA '그려 넣기') =====
+   M2.paint(c,r,given,o): given=이미 칠해진 칸(바꿀 수 없음), 누를 때마다 칠/지움. o.check(set) o.wrong(set) o.axis o.center o.sol */
+M2.paint=(c,r,given,opt)=>{ const on=new Set(), G=new Set(given.map(([x,y])=>x+','+y)), u=Math.min(38,Math.floor(300/c));
+  const o={ draw(){ let g=''; for(let y=0;y<r;y++) for(let x=0;x<c;x++){ const k=x+','+y, fix=G.has(k), v=on.has(k); g+=`<rect ${fix?'':`data-ma="c${x}_${y}"`} x="${6+x*u}" y="${6+y*u}" width="${u}" height="${u}" fill="${fix?'#F2A65A':v?'#9CC9F0':'#fff'}" stroke="#C9B48E" stroke-width="1" style="${fix?'':'cursor:pointer'}"/>`; }
+      if(opt.axis!=null) g+=`<line x1="${6+opt.axis*u}" y1="0" x2="${6+opt.axis*u}" y2="${12+r*u}" stroke="#C2412F" stroke-width="3" stroke-dasharray="6 4"/>`;
+      if(opt.center) g+=`<circle cx="${6+opt.center[0]*u}" cy="${6+opt.center[1]*u}" r="5" fill="#C2412F"/>`;
+      return `<svg viewBox="0 0 ${12+c*u} ${12+r*u}" width="${12+c*u}" style="max-width:100%;display:block;margin:auto;box-shadow:none;touch-action:manipulation">${g}</svg><div style="font-size:.88rem;color:#8A6A4A">${opt.tip||'칸을 누르면 칠해지고, 다시 누르면 지워져요.'} (칠한 칸 ${on.size}개)</div>`; },
+    on(a){ const [x,y]=a.slice(1).split('_'); const k=x+','+y; on.has(k)?on.delete(k):on.add(k); },
+    check(){ return opt.check(on); }, wrong(){ return opt.wrong?opt.wrong(on):'아직 맞지 않아요'; },
+    reveal(){ on.clear(); (opt.sol||[]).forEach(([x,y])=>on.add(x+','+y)); }, goal(){ return opt.sol?{taps:opt.sol.map(([x,y])=>`c${x}_${y}`),mis:null}:null; }, state:()=>({n:on.size}) };
+  const m=m2make(o); m._o=o; return m; };
+{ const pick=a=>a[rnd(0,a.length-1)], W={}, key=(x,y)=>x+','+y, same=(set,arr)=>set.size===arr.length&&arr.every(([x,y])=>set.has(key(x,y)));
+  const blob=(c,r,n,x0,y0,xmax)=>{ const s=[[x0,y0]], S=new Set([key(x0,y0)]); let t=0; while(s.length<n&&t++<400){ const [x,y]=pick(s), [dx,dy]=pick([[1,0],[-1,0],[0,1],[0,-1]]), nx=x+dx, ny=y+dy; if(nx<0||ny<0||nx>=(xmax==null?c:xmax)||ny>=r||S.has(key(nx,ny))) continue; S.add(key(nx,ny)); s.push([nx,ny]); } return s.length===n?s:null; };
+  /* ① 부분이 전체의 몇 분의 1일 때 전체 칠하기 (3학년) */
+  W.whole=()=>{ const n=pick([2,3,4]), k=pick([2,3]); const c=6, r=4; const g=blob(c,r,k,0,0); if(!g) return W.whole(); const need=n*k;
+    return m2q(`주황색 부분은 전체의 ${n}분의 1이에요. 전체가 되도록 파란색으로 더 칠해 보세요.`,`주황색 ${k}칸이 ${n}분의 1이면, 전체는 ${k}칸이 ${n}묶음이에요. 주황색까지 모두 ${need}칸이 되게 칠해요.`,M2.paint(c,r,g,{check:s=>s.size+k===need,wrong:s=>s.size===need?'주황색 칸을 빼고 셌어요':s.size+k===n?'칸 수를 묶음 수와 같게 봤어요':'전체의 칸 수가 맞지 않아요',sol:(()=>{ const out=[]; for(let y=0;y<r&&out.length<need-k;y++) for(let x=0;x<c&&out.length<need-k;x++) if(!g.some(p=>p[0]===x&&p[1]===y)) out.push([x,y]); return out; })()}),`모두 ${need}칸`,{'주황색 칸을 빼고 셌어요':'N3-07','칸 수를 묶음 수와 같게 봤어요':'N3-07','전체의 칸 수가 맞지 않아요':'N3-07'}); };
+  /* ② 선대칭도형 완성 (5학년) */
+  W.sym=()=>{ const c=8, r=5, ax=4; const half=blob(c,r,rnd(4,6),3,rnd(1,3),ax); if(!half) return W.sym(); const sol=half.map(([x,y])=>[2*ax-1-x,y]); const shift=half.map(([x,y])=>[x+ax,y]);
+    return m2q('빨간 점선을 대칭축으로 하는 선대칭도형이 되도록 오른쪽을 칠해 완성하세요.','대칭축에서 각 칸까지의 거리가 같도록 반대쪽에 칠해요. 그대로 옮기는(밀기) 것이 아니라 거울처럼 뒤집어야 해요.',M2.paint(c,r,half,{axis:ax,check:s=>same(s,sol),wrong:s=>same(s,shift)?'뒤집지 않고 그대로 옮겼어요':'대칭축까지의 거리가 맞지 않아요',sol}),'거울처럼 뒤집은 모양',{'뒤집지 않고 그대로 옮겼어요':'G5-15','대칭축까지의 거리가 맞지 않아요':'G5-10'}); };
+  /* ③ 점대칭도형 완성 (5학년): 대칭의 중심 = 모눈 가운데 꼭짓점 */
+  W.psym=()=>{ const c=8, r=6; const half=blob(c,r,rnd(4,6),3,rnd(1,2),4).filter(([x,y])=>y<3); if(half.length<3) return W.psym(); const sol=half.map(([x,y])=>[c-1-x,r-1-y]); const line=half.map(([x,y])=>[c-1-x,y]); if(sol.some(([x,y])=>half.some(p=>p[0]===x&&p[1]===y))) return W.psym();
+    return m2q('빨간 점을 대칭의 중심으로 하는 점대칭도형이 되도록 칠해 완성하세요.','점대칭은 대칭의 중심을 기준으로 180° 돌렸을 때 겹치는 도형이에요. 각 칸을 중심을 지나 반대편 같은 거리에 칠해요.',M2.paint(c,r,half,{center:[c/2,r/2],check:s=>same(s,sol),wrong:s=>same(s,line)?'선대칭처럼 옆으로만 뒤집었어요':'대칭의 중심까지의 거리가 맞지 않아요',sol}),'180° 돌린 모양',{'선대칭처럼 옆으로만 뒤집었어요':'G5-05','대칭의 중심까지의 거리가 맞지 않아요':'G5-10'}); };
+  /* ④ 넓이가 ■ cm²인 직사각형 그리기 (5학년): 둘레와 넓이 혼동을 잡음 */
+  W.rectA=()=>{ const A=pick([6,8,10,12,15,16,18]); const c=8, r=5; const ok=s=>{ if(s.size!==A) return false; const p=[...s].map(k=>k.split(',').map(Number)); const xs=p.map(v=>v[0]), ys=p.map(v=>v[1]); const w=Math.max(...xs)-Math.min(...xs)+1, h=Math.max(...ys)-Math.min(...ys)+1; return w*h===A; };
+    const fac=[...Array(8)].map((_,i)=>i+1).filter(w=>A%w===0&&w<=c&&A/w<=r); if(!fac.length) return W.rectA(); const w0=fac[fac.length-1], sol=[]; for(let y=0;y<A/w0;y++) for(let x=0;x<w0;x++) sol.push([x,y]);
+    return m2q(`모눈 한 칸은 1 cm²예요. 넓이가 ${A} cm²인 직사각형을 칠해 보세요.`,`넓이는 칠한 칸의 수예요. 가로 × 세로 = ${A}가 되는 가로·세로를 먼저 찾아 보세요.`,M2.paint(c,r,[],{check:ok,wrong:s=>{ if(s.size===A) return '칸 수는 맞지만 직사각형이 아니에요'; const p=[...s].map(k=>k.split(',').map(Number)); if(!p.length) return '아직 칠하지 않았어요'; const xs=p.map(v=>v[0]), ys=p.map(v=>v[1]); const w=Math.max(...xs)-Math.min(...xs)+1, h=Math.max(...ys)-Math.min(...ys)+1; return 2*(w+h)===A?'둘레가 '+A+'인 직사각형을 그렸어요':'넓이가 맞지 않아요'; },sol}),`넓이 ${A} cm² 직사각형`,{['둘레가 '+A+'인 직사각형을 그렸어요']:'G5-01','넓이가 맞지 않아요':'G5-01','칸 수는 맞지만 직사각형이 아니에요':null}); };
+  window._M2W=W;
+  try{ const add=(ep,g)=>{ if(G36[ep]&&g){ (window._NTW=window._NTW||[]).push([ep,G36[ep].length,g]); G36[ep].push(g); } };
+    [['S3-34','whole'],['S6-54','sym'],['S6-55','psym'],['S6-68','rectA']].forEach(([e,k])=>add(e,W[k])); }catch(e){}
+}
+
 /* ---------- 3-12. 개념 조각과 보기별 무게 (오개념 코드 → 모르는 개념 조각) ---------- */
 // 교수님 지적(2026-11-20): 오답에 코드만 붙일 게 아니라 "이 보기를 고른 아이는 어떤 개념을 모른다"는 가정과 무게가 있어야 한다.
 // CPC: 조각 → [이름, 처음 배우는 학년-학기, 선수 조각들]. MISC: 오개념 코드 → [[주 조각, 무게], [부 조각, 무게]].
