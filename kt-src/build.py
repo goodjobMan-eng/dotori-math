@@ -465,6 +465,11 @@ _css = """
 .bubble .q{font-family:"Gowun Dodum","Jua",sans-serif;font-weight:700}
 .bubble{background:#fff!important;border:2px solid var(--line)}.bubble:before{border-right-color:var(--line)!important}
 .opt.kt-arm{border-color:#E8743B!important;box-shadow:0 0 0 3px #FFD9A0!important;background:#FFF6E8!important}
+.qp-vis button svg,.qp-vis button img,.qp-vis [data-ma] svg{max-width:100%;height:auto}.qp-vis button{box-sizing:border-box;min-width:0;max-width:100%}
+.qp-vis button svg,.qp-vis [data-ma] svg{background:transparent!important;box-shadow:none!important;border-radius:0!important}.qp-vis .manip{border:0!important;background:transparent!important;padding:4px 0 2px!important;box-shadow:none!important}
+.qp-vis{min-width:0}.qp-vis>*,.qp-vis .manip,.qp-vis .fbars,.qp-vis .vert{max-width:100%;box-sizing:border-box}.qp-vis [style*="white-space:nowrap"]{max-width:100%;overflow-x:auto}
+.qp-vis .fbars{width:100%}.qp-vis .fbar{width:min(320px,100%);box-sizing:border-box}.qp-vis .vert{padding:8px}.qp-vis .vert.w4{grid-template-columns:24px repeat(4,minmax(0,52px));gap:4px}.qp-vis .vert.w5{grid-template-columns:20px repeat(5,minmax(0,44px));gap:3px}.qp-vis .vert.w6{grid-template-columns:16px repeat(6,minmax(0,38px));gap:2px}
+.qp-vis svg{overflow:hidden}
 .qp-sub{display:block;font-size:.85rem;font-weight:400;color:var(--ink-soft)}
 /* 가로 2단은 쓰지 않음(교수님 11/23: 세로 숏츠·문제풀이 정체성 유지) */
 .visual.qp-vis{border:2px solid var(--line);border-radius:14px;background:#fff;padding:10px;margin:12px 0 4px}
@@ -502,6 +507,17 @@ h = h.replace(_a, _a + """ let flip=false, zoom=false; const gf=svg.querySelecto
 # 만든 사람 표시(교수님 11/23): 눈에 띄지 않게 코드 안에만
 h = h.replace('<head>', '<head>\n<!-- 도토리 숲 수학 퀴즈 · made by 굳잡맨(goodjobMan) · CC BY-NC 4.0 · 비영리·교육 목적, 출처를 밝히고 고쳐 써도 됩니다 -->\n<meta name="author" content="굳잡맨 (goodjobMan)">', 1)
 h = h.replace('</body>', '<script>/* gjm */(function(){try{Object.defineProperty(window,"__dotori",{value:Object.freeze({by:decodeURIComponent("%EA%B5%B3%EC%9E%A1%EB%A7%A8"),id:"goodjobMan",license:"CC BY-NC 4.0"}),enumerable:false});}catch(e){}})();</script>\n</body>', 1)
+
+# 빈틈없이 채워요(S6-33) 도움말: 각의 합 360°가 아니라 모양 조각 관계로(교수님 11/24, 교육과정 범위)
+_a = "'S6-33':'한 꼭짓점에 모인 각의 합이 360°가 되면 빈틈없이 채울 수 있어요.'"
+assert h.count(_a) == 1, 'S6-33 tip'
+h = h.replace(_a, "'S6-33':'모양 조각을 겹치지 않게, 빈틈없이 놓아 보세요. 큰 조각 하나가 작은 조각 몇 개와 크기가 같은지 생각해요.'")
+
+# 새 버전 알림(교수님 11/24: 밤새 열어 둔 탭이 옛 버전 그대로) — 화면에 돌아올 때·20분마다 새 버전이 있는지 보고, 있으면 위에 '눌러서 새로 고침' 띠
+import hashlib as _hl
+_bid = _hl.sha1(h.encode('utf-8')).hexdigest()[:10]
+h = h.replace("</body>", r"""<script>window.__BUILD="%s";(function(){var shown=0;function chk(){ if(shown||!navigator.onLine) return; fetch(location.pathname+'?v='+Date.now(),{cache:'no-store'}).then(function(r){return r.text();}).then(function(t){ var m=t.match(/window\.__BUILD="(\w+)"/); if(m&&m[1]!==window.__BUILD){ shown=1; var b=document.createElement('button'); b.textContent='새 버전이 나왔어요 · 눌러서 새로 고침'; b.style.cssText='position:fixed;top:8px;left:50%%;transform:translateX(-50%%);z-index:99999;padding:10px 16px;border-radius:999px;border:2px solid #7A4A1E;background:#FFE7A8;color:#4A2E14;font:16px Jua,sans-serif;box-shadow:0 2px 8px rgba(0,0,0,.25)'; b.onclick=function(){ location.reload(); }; document.body.appendChild(b); } }).catch(function(){}); } document.addEventListener('visibilitychange',function(){ if(document.visibilityState==='visible') chk(); }); setInterval(chk,20*60*1000); setTimeout(chk,5000); })();</script>
+</body>""" % _bid, 1)
 open('out/index.html', 'w', encoding='utf-8').write(h)
 print('built', len(out))
 

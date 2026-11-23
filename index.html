@@ -109,6 +109,11 @@ button:focus-visible{outline:4px solid var(--sky);outline-offset:2px}
 .bubble .q{font-family:"Gowun Dodum","Jua",sans-serif;font-weight:700}
 .bubble{background:#fff!important;border:2px solid var(--line)}.bubble:before{border-right-color:var(--line)!important}
 .opt.kt-arm{border-color:#E8743B!important;box-shadow:0 0 0 3px #FFD9A0!important;background:#FFF6E8!important}
+.qp-vis button svg,.qp-vis button img,.qp-vis [data-ma] svg{max-width:100%;height:auto}.qp-vis button{box-sizing:border-box;min-width:0;max-width:100%}
+.qp-vis button svg,.qp-vis [data-ma] svg{background:transparent!important;box-shadow:none!important;border-radius:0!important}.qp-vis .manip{border:0!important;background:transparent!important;padding:4px 0 2px!important;box-shadow:none!important}
+.qp-vis{min-width:0}.qp-vis>*,.qp-vis .manip,.qp-vis .fbars,.qp-vis .vert{max-width:100%;box-sizing:border-box}.qp-vis [style*="white-space:nowrap"]{max-width:100%;overflow-x:auto}
+.qp-vis .fbars{width:100%}.qp-vis .fbar{width:min(320px,100%);box-sizing:border-box}.qp-vis .vert{padding:8px}.qp-vis .vert.w4{grid-template-columns:24px repeat(4,minmax(0,52px));gap:4px}.qp-vis .vert.w5{grid-template-columns:20px repeat(5,minmax(0,44px));gap:3px}.qp-vis .vert.w6{grid-template-columns:16px repeat(6,minmax(0,38px));gap:2px}
+.qp-vis svg{overflow:hidden}
 .qp-sub{display:block;font-size:.85rem;font-weight:400;color:var(--ink-soft)}
 /* 가로 2단은 쓰지 않음(교수님 11/23: 세로 숏츠·문제풀이 정체성 유지) */
 .visual.qp-vis{border:2px solid var(--line);border-radius:14px;background:#fff;padding:10px;margin:12px 0 4px}
@@ -4754,7 +4759,7 @@ const TIP_EP={
 'S6-30':'평행한 변이 한 쌍이라도 있으면 사다리꼴, 두 쌍이면 평행사변형, 네 변이 모두 같으면 마름모예요.',
 'S6-31':'정사각형은 직사각형이면서 마름모예요. 직사각형·마름모는 모두 평행사변형, 평행사변형은 사다리꼴이에요.',
 'S6-32':'선분으로만 둘러싸인 도형이 다각형이에요. 이웃하지 않은 두 꼭짓점을 이은 선분이 대각선이에요.',
-'S6-33':'한 꼭짓점에 모인 각의 합이 360°가 되면 빈틈없이 채울 수 있어요.',
+'S6-33':'모양 조각을 겹치지 않게, 빈틈없이 놓아 보세요. 큰 조각 하나가 작은 조각 몇 개와 크기가 같은지 생각해요.',
 'S6-66':'둘레는 도형을 한 바퀴 돈 길이예요. 직사각형 둘레 = (가로 + 세로) × 2',
 'S6-67':'한 변이 1 cm인 정사각형의 넓이가 1 cm²예요. 몇 칸인지 세면 넓이예요.',
 'S6-68':'직사각형 넓이 = 가로 × 세로, 정사각형 넓이 = 한 변 × 한 변',
@@ -9065,9 +9070,9 @@ M2.qSalt=()=>{ const total=rndPick(100,200), pct=rndPick(10,20,30,40), step=tota
    누를 곳은 답과 상관없이 늘 같은 개수(숫자 수 + 2)라서 자리 수가 답을 알려 주지 않는다. pos = 소수점 아래 자리 수. */
 M2.point=(digits,pos,alts)=>{ let at=-1; const D=String(digits).split(''), L=D.length;
   const txt=s=>s<0?'':s===0?D.join(''):s<L?D.slice(0,L-s).join('')+'.'+D.slice(L-s).join(''):'0.'+'0'.repeat(s-L)+D.join('');
-  const o={ draw(){ const slot=(s,lab)=>m2b('g'+s,at===s?`<b style="color:#D45F16;font-size:${s===0?'1rem':'1.9rem'}">${lab}</b>`:`<span style="color:#C9B28A;font-size:${s===0?'.8rem':'1.4rem'}">${s===0?'점 없음':'·'}</span>`,'min-width:'+(s===0?52:44)+'px;min-height:50px;padding:0 1px;border-style:dashed;'+(at===s?'background:#FFE9B8;border-color:#D45F16':''));
+  const o={ draw(){ const slot=(s,lab)=>m2b('g'+s,at===s?`<b style="color:#D45F16;font-size:${s===0?'1rem':'1.9rem'}">${lab}</b>`:`<span style="color:#C9B28A;font-size:${s===0?'.8rem':'1.4rem'}">${s===0?'점 없음':'·'}</span>`,'min-width:'+(s===0?(L>=4?40:46):(L>=4?28:34))+'px;min-height:50px;padding:0 1px;border-style:dashed;'+(at===s?'background:#FFE9B8;border-color:#D45F16':''));
       let h=`<div style="display:flex;align-items:flex-end;justify-content:center;gap:2px;font-size:2rem;line-height:1">`+slot(L+1,'0.0')+slot(L,at===L+1?'':'0.');
-      for(let i=0;i<L;i++){ h+=`<span style="display:inline-block;min-width:22px;text-align:center;padding:4px 0;border-bottom:3px solid #C9A56B">${D[i]}</span>`; const s=L-1-i; h+=slot(s,s===0?'점 없음':'.'); }
+      for(let i=0;i<L;i++){ h+=`<span style="display:inline-block;min-width:20px;text-align:center;padding:4px 0;border-bottom:3px solid #C9A56B">${D[i]}</span>`; const s=L-1-i; h+=slot(s,s===0?'점 없음':'.'); }
       return h+`</div><div style="font-size:1rem;color:#6B4A1E;margin-top:6px;min-height:1.5em">${at<0?'<span style="font-size:.9rem;color:#8A6A4A">소수점이 들어갈 자리를 눌러요. 다시 누르면 지워져요.</span>':`지금 만든 수: <b style="font-size:1.25rem;color:#D45F16">${txt(at)}</b>`}</div>`; },
     on(a){ const i=+a.slice(1); at=at===i?-1:i; }, check(){ return at===pos; },
     wrong(){ if(at<0) return null; return (alts&&alts[at])||'소수점의 자리가 달라요'; }, reveal(){ at=pos; },
@@ -9781,7 +9786,7 @@ M2.paint=(c,r,given,opt)=>{ const on=new Set(), G=new Set(given.map(([x,y])=>x+'
    ② 컴퍼스 꽂을 자리·벌릴 길이 고르기 — 일본 전국학력 2025 2(1)(평행사변형 작도에서 꽂을 꼭짓점·벌릴 길이를 잘못 고름), 늘품이 '컴퍼스'(35회) */
 M2.pv=(cols,start,opt)=>{ const v=start.slice(); const moved=()=>v.reduce((s,x,i)=>s+Math.abs(x-start[i]),0);
   const val=()=>v.reduce((s,x,i)=>s*10+x,0);
-  const o={ draw(){ const W=Math.min(76,Math.floor(330/cols.length)); return `<div style="display:grid;grid-template-columns:repeat(${cols.length},${W}px);gap:0;border:2.5px solid #7A4A1E;border-radius:10px;overflow:hidden;background:#fff">${cols.map((c,i)=>`<div style="border-left:${i?'2px solid #C9A56B':'0'};display:flex;flex-direction:column;align-items:center"><div style="width:100%;text-align:center;background:#FFF1D6;font-family:Jua,sans-serif;padding:4px 0;border-bottom:2px solid #C9A56B">${c}</div><button type="button" data-ma="u${i}" style="width:100%;min-height:96px;border:0;background:#fff;cursor:pointer;touch-action:manipulation;display:flex;flex-wrap:wrap;align-content:flex-start;justify-content:center;gap:3px;padding:6px 4px">${'<span style="width:16px;height:16px;border-radius:50%;background:#3A3A3A;display:inline-block"></span>'.repeat(v[i])}</button><button type="button" data-ma="d${i}" style="width:100%;min-height:40px;border:0;border-top:2px dashed #E8D9BF;background:#FFF8EC;font-family:Jua,sans-serif;color:#8A6A4A;cursor:pointer;touch-action:manipulation">빼기</button></div>`).join('')}</div><div style="font-size:.9rem;color:#8A6A4A">${opt.moveOne?'칸을 누르면 바둑돌이 놓이고, [빼기]를 누르면 빠져요. 돌은 하나만 옮겨요.':'칸을 누르면 바둑돌이 하나 놓이고, [빼기]를 누르면 하나 빠져요.'}</div>`; },
+  const o={ draw(){ const W=Math.min(76,Math.floor(280/cols.length)); return `<div style="display:grid;max-width:100%;grid-template-columns:repeat(${cols.length},minmax(0,${W}px));gap:0;border:2.5px solid #7A4A1E;border-radius:10px;overflow:hidden;background:#fff">${cols.map((c,i)=>`<div style="border-left:${i?'2px solid #C9A56B':'0'};display:flex;flex-direction:column;align-items:center"><div style="width:100%;text-align:center;background:#FFF1D6;font-family:Jua,sans-serif;padding:4px 0;border-bottom:2px solid #C9A56B">${c}</div><button type="button" data-ma="u${i}" style="width:100%;min-height:96px;border:0;background:#fff;cursor:pointer;touch-action:manipulation;display:flex;flex-wrap:wrap;align-content:flex-start;justify-content:center;gap:3px;padding:6px 4px">${'<span style="width:16px;height:16px;border-radius:50%;background:#3A3A3A;display:inline-block"></span>'.repeat(v[i])}</button><button type="button" data-ma="d${i}" style="width:100%;min-height:40px;border:0;border-top:2px dashed #E8D9BF;background:#FFF8EC;font-family:Jua,sans-serif;color:#8A6A4A;cursor:pointer;touch-action:manipulation">빼기</button></div>`).join('')}</div><div style="font-size:.9rem;color:#8A6A4A">${opt.moveOne?'칸을 누르면 바둑돌이 놓이고, [빼기]를 누르면 빠져요. 돌은 하나만 옮겨요.':'칸을 누르면 바둑돌이 하나 놓이고, [빼기]를 누르면 하나 빠져요.'}</div>`; },
     on(a){ const i=+a.slice(1); if(a[0]==='u'){ if(v[i]<9) v[i]++; } else if(v[i]>0) v[i]--; },
     check(){ return opt.check(val(),v,moved()); }, wrong(){ return opt.wrong?opt.wrong(val(),v,moved()):'아직 맞지 않아요'; },
     reveal(){ opt.sol.forEach((x,i)=>v[i]=x); }, goal(){ const t=[]; opt.sol.forEach((x,i)=>{ const d=x-start[i]; for(let k=0;k<Math.abs(d);k++) t.push((d>0?'u':'d')+i); }); return {taps:t,mis:null}; }, state:()=>({s:v.join('')}) };
@@ -9935,6 +9940,142 @@ try{ if(G36['S6-37']){ G36['S6-37'].push(M2.qRulerMM); (window._NTW=window._NTW|
     wm['0>'+R.indexOf(S[2])]='맞추기 전에 눈금부터 읽었어요'; wm['1>'+R.indexOf(S[2])]='맞추기 전에 눈금부터 읽었어요';
     return m2q('각도기로 각도를 재는 순서에 맞게 이어 보세요.','중심과 밑금을 먼저 맞춘 다음, 밑금에 맞춘 변의 0°에서 시작하는 눈금을 읽어요.',M2.match(L,R,ans,wm),'중심 맞추기 → 밑금 맞추기 → 0°에서 시작하는 눈금 읽기',{'맞추기 전에 눈금부터 읽었어요':'G4-01','잘못 이은 것이 있어요':null,'아직 다 잇지 않았어요':null}); };
   try{ if(G36['S6-47']){ G36['S6-47'].push(window._qProtOrder); (window._NTW=window._NTW||[]).push(['S6-47',G36['S6-47'].length-1,window._qProtOrder]); } }catch(e){} }
+
+/* ===== 3-95. '빈틈없이 채워요'(S6-33)를 교과서·늘품이 방식으로(교수님 11/24) =====
+   4학년 '다각형'의 모양 채우기는 모양 조각(정삼각형·마름모·사다리꼴·정육각형)을 겹치지 않게 빈틈없이 놓는 활동이다.
+   정다각형의 한 각(108°, 120°)이나 '한 꼭짓점에 모인 각의 합 360°'로 판단하는 문제는 교육과정 밖이라 뺀다. */
+{ const s=34, h=s*0.866, P={
+    tri:{n:'정삼각형',u:1,p:[[0,h],[s,h],[s/2,0]]}, rho:{n:'마름모',u:2,p:[[0,h],[s,h],[1.5*s,0],[0.5*s,0]]},
+    trap:{n:'사다리꼴',u:3,p:[[0,h],[2*s,h],[1.5*s,0],[0.5*s,0]]}, hex:{n:'정육각형',u:6,p:[[0.5*s,0],[1.5*s,0],[2*s,h],[1.5*s,2*h],[0.5*s,2*h],[0,h]]},
+    big:{n:'큰 정삼각형',u:4,p:[[0,2*h],[2*s,2*h],[s,0]]}, para:{n:'평행사변형',u:4,p:[[0,h],[2*s,h],[2.5*s,0],[0.5*s,0]]} };
+  const poly=(sh,dx,dy,fill,sw)=>`<polygon points="${sh.p.map(([x,y])=>(x+dx).toFixed(1)+','+(y+dy).toFixed(1)).join(' ')}" fill="${fill}" stroke="#7A4A1E" stroke-width="${sw}" stroke-linejoin="round"/>`;
+  const W=sh=>Math.max(...sh.p.map(v=>v[0])), H=sh=>Math.max(...sh.p.map(v=>v[1]));
+  const PAIRS=[['hex','tri'],['hex','rho'],['hex','trap'],['big','tri'],['trap','tri'],['para','tri'],['para','rho'],['rho','tri']];
+  window._qFillPieces=()=>{ const [tk,pk]=pick2(); const T=P[tk], K=P[pk], ans=T.u/K.u;
+    const w1=W(T)*1.25, svg=`<svg viewBox="-6 -6 ${(w1+W(K)+40).toFixed(0)} ${(Math.max(H(T)*1.25,H(K))+30).toFixed(0)}" style="max-width:300px;width:100%;display:block;margin:auto;box-shadow:none"><g transform="scale(1.25)">${poly(T,0,0,'#FFF','3')}</g>${poly(K,w1+24,(H(T)*1.25-H(K))/2,'#F2A65A','2')}<text x="${(w1/2).toFixed(0)}" y="${(H(T)*1.25+20).toFixed(0)}" text-anchor="middle" font-size="13" fill="#4A2E14">채울 모양</text><text x="${(w1+24+W(K)/2).toFixed(0)}" y="${(H(T)*1.25+20).toFixed(0)}" text-anchor="middle" font-size="13" fill="#4A2E14">모양 조각</text></svg>`;
+    /* 그림은 같은 비율이 아니라 '채울 모양'을 조금 크게 그린다 → 그림 길이를 재서 답하지 않게, 조각의 관계(정삼각형 몇 개 크기)로 판단 */
+    const rel=`(${K.n} 조각 1개는 정삼각형 조각 ${K.u}개와 크기가 같아요. ${T.n}은 정삼각형 조각 ${T.u}개로 채울 수 있어요.)`;
+    const sides=T.p.length; let cand=[ans,T.u,sides,K.u*ans+1].filter((v,i,a)=>v>0&&a.indexOf(v)===i); while(cand.length<3) cand.push(ans+cand.length);
+    const opts=shuffle(cand.slice(0,4).map(v=>v+'개'));
+    const ob=w=>w+(((w.charCodeAt(w.length-1)-0xAC00)%28)?'을':'를');
+    return {q:`${ob(T.n)} ${K.n} 조각으로 겹치지 않게 빈틈없이 채우려고 해요. ${K.n} 조각은 몇 개 필요할까요?`, visual:svg, opts, ans:ans+"개", mis:{}, hint1:"조각을 겹치지 않게, 빈틈없이 놓아 보세요.", hint:rel+` 그래서 ${T.u} ÷ ${K.u} = ${ans}(개)예요.`}; };
+  const pick2=()=>PAIRS[rnd(0,PAIRS.length-1)];
+  try{ if(G36['S6-33']){ const BAD=/한 각은|한 각의 크기|꼭짓점에 모이는|채울 수 없는|채울 수 있는 정다각형|360°/; G36['S6-33']=G36['S6-33'].filter(f=>{ for(let t=0;t<12;t++){ try{ const q=f(); const txt=[q.q,...(q.opts||[]),q.hint||'',q.hint1||''].join(' '); if(BAD.test(txt)) return false; }catch(e){} } return true; });
+    G36['S6-33'].push(window._qFillPieces,window._qFillPieces); } }catch(e){}
+}
+
+/* ===== 3-96. 모양 조각 놓기(패턴 블록) — 4학년 '모양 채우기'를 직접 해 보기(교수님 11/24: "차라리 조작활동을") =====
+   삼각형 눈금 위에 채울 모양이 있다. 조각(정삼각형·마름모·사다리꼴·정육각형)을 고르고 빈칸을 누르면 그 칸을 덮도록 조각이 놓인다.
+   [돌리기]는 방금 놓은 조각의 방향을 바꾸고, 놓인 조각을 누르면 빠진다. 겹치거나 모양 밖으로 나가게는 놓이지 않는다. */
+{ const S=30, Hh=S*0.866, up=(r,c)=>((r+c)%2===0), K=(r,c)=>r+'x'+c;
+  const PC={tri:{n:'정삼각형',u:1,col:'#7CC47F'},rho:{n:'마름모',u:2,col:'#6FA8DC'},trap:{n:'사다리꼴',u:3,col:'#E06666'},hex:{n:'정육각형',u:6,col:'#F6C343'}};
+  const pts=(r,c)=>up(r,c)?[[c*S/2,(r+1)*Hh],[(c+2)*S/2,(r+1)*Hh],[(c+1)*S/2,r*Hh]]:[[c*S/2,r*Hh],[(c+2)*S/2,r*Hh],[(c+1)*S/2,(r+1)*Hh]];
+  const nb=(r,c)=>[[r,c-1],[r,c+1],up(r,c)?[r+1,c]:[r-1,c]];
+  const verts=(r,c)=>pts(r,c).map(([x,y])=>Math.round(x*2/S)+'_'+Math.round(y/Hh));
+  /* 채울 모양 */
+  const SH={
+    hex:()=>[[0,0],[0,1],[0,2],[1,0],[1,1],[1,2]],
+    big3:()=>{ const o=[]; for(let k=0;k<3;k++) for(let c=2-k;c<=2+k;c++) o.push([k,c]); return o; },
+    big2:()=>{ const o=[]; for(let k=0;k<2;k++) for(let c=2-k;c<=2+k;c++) o.push([k,c]); return o; },
+    trap2:()=>{ const o=[]; for(let k=1;k<3;k++) for(let c=2-k;c<=2+k;c++) o.push([k,c]); return o; },
+    para:()=>{ const o=[]; for(let c=1;c<=4;c++) o.push([0,c]); for(let c=0;c<=3;c++) o.push([1,c]); return o; },
+    bighex:()=>{ const o=[]; const rows=[[0,2,6],[1,1,7],[2,1,7],[3,2,6]]; for(const [r,a,b] of rows) for(let c=a;c<=b;c++) o.push([r,c]); return o; } };
+  /* 놓을 수 있는 자리: 칸 집합(키 목록) */
+  const placements=(type,cell,inT)=>{ const [r,c]=cell, out=[], seen=new Set(), add=a=>{ if(!a.every(([x,y])=>inT(x,y))) return; const k=a.map(([x,y])=>K(x,y)).sort().join(' '); if(!seen.has(k)){ seen.add(k); out.push(a); } };
+    if(type==='tri') add([[r,c]]);
+    if(type==='rho') nb(r,c).forEach(n=>add([[r,c],n]));
+    if(type==='trap'){ const ns=nb(r,c); for(let i=0;i<3;i++) for(let j=i+1;j<3;j++) add([[r,c],ns[i],ns[j]]); ns.forEach(n=>nb(...n).forEach(m=>{ if(!(m[0]===r&&m[1]===c)) add([[r,c],n,m]); })); }
+    if(type==='hex'){ verts(r,c).forEach(v=>{ const [vx,vy]=v.split('_').map(Number); const cand=[]; for(let rr=vy-1;rr<=vy;rr++) for(let cc=vx-2;cc<=vx;cc++){ if(verts(rr,cc).includes(v)) cand.push([rr,cc]); } if(cand.length===6) add(cand); }); }
+    return out; };
+  /* 가장 적은 조각 수(작은 모양이라 끝까지 찾아도 빠름) */
+  const solve=(cells,types)=>{ const inS=new Set(cells.map(([r,c])=>K(r,c))); let best=null; const ord=cells.slice().sort((a,b)=>a[0]-b[0]||a[1]-b[1]);
+    const rec=(used,list)=>{ if(best&&list.length>=best.length) return; const f=ord.find(([r,c])=>!used.has(K(r,c))); if(!f){ best=list.slice(); return; }
+      for(const t of types.slice().sort((a,b)=>PC[b].u-PC[a].u)) for(const p of placements(t,f,(x,y)=>inS.has(K(x,y))&&!used.has(K(x,y)))){ p.forEach(([x,y])=>used.add(K(x,y))); list.push([t,p]); rec(used,list); list.pop(); p.forEach(([x,y])=>used.delete(K(x,y))); } };
+    rec(new Set(),[]); return best; };
+  M2.tiles=(cells,types,o2)=>{ const inS=new Set(cells.map(([r,c])=>K(r,c))); let cur=types[0], placed=[], last=null, saved=[], note=''; const kOf=pl=>pl.map(p=>({tri:'t',rho:'r',trap:'p',hex:'h'})[p.t]).sort().join(''); const owner=()=>{ const m={}; placed.forEach((p,i)=>p.cells.forEach(([r,c])=>m[K(r,c)]=i)); return m; };
+    const minC=Math.min(...cells.map(v=>v[1])), maxC=Math.max(...cells.map(v=>v[1])), maxR=Math.max(...cells.map(v=>v[0]));
+    const o={ draw(){ const ow=owner(); let g=''; cells.forEach(([r,c])=>{ const i=ow[K(r,c)]; g+=`<polygon data-ma="c${r}x${c}" points="${pts(r,c).map(p=>p.map(v=>v.toFixed(1)).join(',')).join(' ')}" fill="${i==null?'#FFFDF6':PC[placed[i].t].col}" stroke="${i==null?'#C9B28A':PC[placed[i].t].col}" stroke-width="${i==null?1:0.6}" ${i==null?'stroke-dasharray="3 2"':''} style="cursor:pointer"/>`; });
+        placed.forEach(p=>{ /* 조각 테두리: 조각 안쪽 변은 그리지 않는다 */ const own=new Set(p.cells.map(([r,c])=>K(r,c))); p.cells.forEach(([r,c])=>{ const P=pts(r,c); const edges=[[P[0],P[1]],[P[1],P[2]],[P[2],P[0]]]; const ns=nb(r,c); edges.forEach(([a,b])=>{ const mx=(a[0]+b[0])/2, my=(a[1]+b[1])/2; const inner=ns.some(([x,y])=>own.has(K(x,y))&&pts(x,y).filter(q=>Math.abs(q[0]-a[0])+Math.abs(q[1]-a[1])<0.5||Math.abs(q[0]-b[0])+Math.abs(q[1]-b[1])<0.5).length===2); if(!inner) g+=`<line x1="${a[0].toFixed(1)}" y1="${a[1].toFixed(1)}" x2="${b[0].toFixed(1)}" y2="${b[1].toFixed(1)}" stroke="#4A2E14" stroke-width="2.2" stroke-linecap="round" pointer-events="none"/>`; }); }); });
+        const vb=`${(minC*S/2-4).toFixed(0)} -4 ${((maxC-minC+2)*S/2+8).toFixed(0)} ${((maxR+1)*Hh+8).toFixed(0)}`;
+        const pal=types.map(t=>{ const sel=t===cur; const mini={tri:'0,17 18,17 9,1',rho:'0,17 18,17 27,1 9,1',trap:'0,17 36,17 27,1 9,1',hex:'9,1 27,1 36,17 27,33 9,33 0,17'}[t]; return m2b('p'+t,`<svg viewBox="-2 -2 40 ${t==='hex'?38:22}" width="${t==='hex'?34:38}" style="display:block;margin:auto;box-shadow:none;background:transparent"><polygon points="${mini}" fill="${PC[t].col}" stroke="#4A2E14" stroke-width="1.5"/></svg><span style="font-size:.8rem">${PC[t].n}</span>`,'padding:4px 6px;min-width:58px;'+(sel?'border-color:#D45F16;background:#FFE9B8;box-shadow:0 0 0 2px #F2A65A':'')); }).join('');
+        const left=cells.length-placed.reduce((a,p)=>a+p.cells.length,0);
+        const wl=o2.ways?`<div style="display:flex;gap:8px;justify-content:center;align-items:center;flex-wrap:wrap">${m2b('save','이 방법 담기 ✓')}<span style="font-size:.85rem;color:#8A6A4A">담은 방법: ${saved.length?saved.map(k=>k.split('').map(ch=>({t:'정삼각형',r:'마름모',p:'사다리꼴',h:'정육각형'})[ch]).reduce((a,n)=>{ a[n]=(a[n]||0)+1; return a; },{})).map(m=>Object.entries(m).map(([n,c])=>n+' '+c).join('+')).join(' / '):'아직 없어요'}${note?' — '+note:''}</span></div>`:'';
+        return `<div style="display:flex;gap:6px;flex-wrap:wrap;justify-content:center">${pal}</div><svg viewBox="${vb}" style="width:100%;max-width:300px;display:block;margin:auto;box-shadow:none;background:transparent;touch-action:manipulation">${g}</svg><div style="display:flex;gap:8px;justify-content:center">${m2b('rot','돌리기 ↻')}${m2b('clr','모두 빼기')}</div><div style="font-size:.9rem;color:#8A6A4A">조각 ${placed.length}개 · 빈칸 ${left}칸</div>${wl}`; },
+      on(a){ note=''; if(a==='save'){ if(placed.reduce((x,p)=>x+p.cells.length,0)<cells.length){ note='빈칸을 다 채운 다음 담아요'; return; } const k=kOf(placed); if(saved.includes(k)){ note='조각 종류와 수가 같은 방법이에요'; o._dupW=1; return; } saved.push(k); placed=[]; last=null; return; } if(a[0]==='p'){ cur=a.slice(1); return; } if(a==='clr'){ placed=[]; last=null; return; }
+        if(a==='rot'){ if(!last) return; const i=placed.indexOf(last.p); if(i<0) return; placed.splice(i,1); const ow=owner(); const alts=placements(last.t,last.anchor,(x,y)=>inS.has(K(x,y))&&ow[K(x,y)]==null); if(!alts.length) return; last.idx=(last.idx+1)%alts.length; last.p={t:last.t,cells:alts[last.idx]}; placed.push(last.p); return; }
+        const m=a.match(/^c(\d+)x(\d+)$/); if(!m) return; const r=+m[1], c=+m[2]; const ow=owner(); if(ow[K(r,c)]!=null){ placed.splice(ow[K(r,c)],1); last=null; return; }
+        const alts=placements(cur,[r,c],(x,y)=>inS.has(K(x,y))&&ow[K(x,y)]==null); if(!alts.length){ o._miss=(o._miss||0)+1; return; } const p={t:cur,cells:alts[0]}; placed.push(p); last={t:cur,anchor:[r,c],idx:0,p}; },
+      check(){ if(o2.ways) return saved.length>=o2.ways; return placed.reduce((a,p)=>a+p.cells.length,0)===cells.length&&(!o2.check||o2.check(placed)); },
+      wrong(){ if(o2.ways) return o._dupW?'같은 방법을 다시 담으려 했어요':'방법이 아직 모자라요'; const cov=placed.reduce((a,p)=>a+p.cells.length,0); if(cov<cells.length) return placed.length?'빈칸이 남았어요':'아직 조각을 놓지 않았어요'; return o2.wrong?o2.wrong(placed):null; },
+      reveal(){ if(o2.ways){ saved=(o2.waySols||[]).map(b=>kOf(b.map(([t,c])=>({t,cells:c})))); } const b=o2.sol||solve(cells,types); placed=(b||[]).map(([t,c])=>({t,cells:c})); last=null; },
+      goal(){ return null; }, state:()=>({s:(o2.ways?saved.join('_')+'/':'')+placed.map(p=>p.t[0]).sort().join('')}) };
+    const mm=m2make(o); mm._o=o; return mm; };
+  window._tileSolve=solve; window._tileShapes=SH;
+  const ob=w=>w+(((w.charCodeAt(w.length-1)-0xAC00)%28)?'을':'를');
+  /* ① 한 가지 조각으로만 채우기 */
+  window._qTileOne=()=>{ const opts=[['hex','trap'],['hex','rho'],['hex','tri'],['big3','trap'],['para','rho'],['big2','tri'],['trap2','tri']].filter(([s,t])=>solve(SH[s](),[t])); const [sk,t]=opts[rnd(0,opts.length-1)]; const cells=SH[sk](); const nm={hex:'정육각형',big3:'큰 정삼각형',big2:'정삼각형',trap2:'사다리꼴',para:'평행사변형'}[sk]; const need=cells.length/PC[t].u;
+    return m2q(`${ob(nm)} ${PC[t].n} 조각으로만 겹치지 않게 빈틈없이 채워 보세요.`,`빈칸을 누르면 조각이 놓여요. 방향이 안 맞으면 [돌리기]를 눌러요. ${PC[t].n} 조각 1개는 작은 정삼각형 ${PC[t].u}칸이에요.`,M2.tiles(cells,[t],{}),`${PC[t].n} ${need}개`,{'빈칸이 남았어요':null,'아직 조각을 놓지 않았어요':null}); };
+  /* ② 가장 적은 조각으로 채우기(늘품이 '조각 수를 가장 적게') */
+  window._qTileMin=()=>{ const sk=['hex','big3','trap2','bighex'][rnd(0,3)]; const cells=SH[sk](); const types=['tri','rho','trap','hex']; const best=solve(cells,types); const nm={hex:'정육각형',big3:'큰 정삼각형',trap2:'사다리꼴',bighex:'큰 육각형'}[sk];
+    return m2q(`모양 조각을 가장 적게 써서 ${ob(nm)} 빈틈없이 채워 보세요.`,'큰 조각을 먼저 놓으면 조각 수가 줄어요. 정육각형 1개는 사다리꼴 2개, 마름모 3개, 정삼각형 6개와 크기가 같아요.',M2.tiles(cells,types,{sol:best,check:pl=>pl.length===best.length,wrong:pl=>pl.length>best.length?'조각 수를 더 줄일 수 있어요':null}),`조각 ${best.length}개`,{'조각 수를 더 줄일 수 있어요':null,'빈칸이 남았어요':null,'아직 조각을 놓지 않았어요':null}); };
+  /* ③ 세 가지 조각을 모두 써서 채우기 */
+  window._qTileThree=()=>{ const sk=['big3','bighex','trap2'][rnd(0,2)]; const cells=SH[sk](); const nm={big3:'큰 정삼각형',bighex:'큰 육각형',trap2:'사다리꼴'}[sk];
+    return m2q(`정삼각형, 마름모, 사다리꼴 조각을 모두 한 번 이상 써서 ${ob(nm)} 빈틈없이 채워 보세요.`,'세 가지 조각이 모두 들어가야 해요. 큰 조각부터 놓고 남는 칸을 작은 조각으로 채워 보세요.',M2.tiles(cells,['tri','rho','trap'],{check:pl=>['tri','rho','trap'].every(t=>pl.some(p=>p.t===t)),wrong:pl=>'쓰지 않은 조각이 있어요',sol:(()=>{ /* 세 가지가 다 들어가는 채우기 하나 찾기 */ const all=[]; const inS=new Set(cells.map(([r,c])=>K(r,c))); const ord=cells.slice().sort((a,b)=>a[0]-b[0]||a[1]-b[1]); let found=null; const rec=(used,list)=>{ if(found) return; const f=ord.find(([r,c])=>!used.has(K(r,c))); if(!f){ if(['tri','rho','trap'].every(t=>list.some(x=>x[0]===t))) found=list.slice(); return; } for(const t of ['trap','rho','tri']) for(const p of placements(t,f,(x,y)=>inS.has(K(x,y))&&!used.has(K(x,y)))){ p.forEach(([x,y])=>used.add(K(x,y))); list.push([t,p]); rec(used,list); list.pop(); p.forEach(([x,y])=>used.delete(K(x,y))); if(found) return; } }; rec(new Set(),[]); return found; })()}),'세 가지 조각을 모두 쓴 채우기',{'쓰지 않은 조각이 있어요':null,'빈칸이 남았어요':null,'아직 조각을 놓지 않았어요':null}); };
+  try{ if(G36['S6-33']){ G36['S6-33'].push(window._qTileOne,window._qTileMin,window._qTileThree); (window._NTW=window._NTW||[]).push(['S6-33',G36['S6-33'].length-1,window._qTileThree]); } }catch(e){}
+  /* ④ 같은 모양을 서로 다른 방법으로 채우기(네온 11/24: 다양한 방법 찾기) */
+  window._qTileWays=()=>{ const cells=SH.hex(); const ways=[['hex'],['trap'],['rho'],['tri']].map(t=>solve(cells,t)); const mix=solve(cells,['trap','tri']); const pool=[...ways,mix].filter(Boolean);
+    return m2q('정육각형을 서로 다른 방법으로 3가지 채워 보세요. 하나를 다 채우면 [이 방법 담기]를 눌러요.','조각의 종류나 개수가 달라야 다른 방법이에요. 정육각형 1개, 사다리꼴 2개, 마름모 3개, 정삼각형 6개… 섞어서 채워도 돼요.',M2.tiles(cells,['tri','rho','trap','hex'],{ways:3,waySols:pool.slice(0,3)}),'예: 정육각형 1개 / 사다리꼴 2개 / 마름모 3개',{'같은 방법을 다시 담으려 했어요':null,'방법이 아직 모자라요':null}); };
+  try{ if(G36['S6-33']) G36['S6-33'].push(window._qTileWays); }catch(e){}
+}
+
+/* ===== 3-97. 칠교 조각 놓기(교수님 11/24: "칠교놀이를 다른 학년에") =====
+   2학년 '칠교로 만들어요'(S6-06): 칠교 조각으로 삼각형·사각형 만들기 — 교과서 활동.
+   5학년 평행사변형·삼각형 넓이(S6-70·71): 늘품이 5학년 놀이 '칠교야 놀자!'([6수03-05]·[6수03-06]) — 칠교 조각으로 만든 도형을
+   같은 조각으로 직사각형으로 바꾸고 모눈 칸 수로 넓이를 센다(조각을 옮겨도 넓이는 그대로).
+   그림자 안을 누르면 고른 조각이 그 자리에 맞을 때만 놓인다(돌리기는 자동). 크기·모양을 잘못 고른 것을 기록한다. */
+{ const U=34, PN={L:'큰 삼각형',M:'중간 삼각형',S:'작은 삼각형',Q:'정사각형',P:'평행사변형'}, COL={L:'#E06666',M:'#F6C343',S:'#7CC47F',Q:'#6FA8DC',P:'#B48AD6'};
+  const ICON={L:'0,18 36,18 18,0',M:'4,18 22,18 22,0',S:'5,18 23,18 14,9',Q:'18,1 27,10 18,19 9,10',P:'2,18 12,8 32,8 22,18'};
+  M2.tang=(slots,stock,o2)=>{ const put=slots.map(()=>false); let cur=Object.keys(stock)[0], val=0; const miss=[]; const left=t=>stock[t]-slots.filter((s,i)=>put[i]&&s.t===t).length;
+    const xs=slots.flatMap(s=>s.p.map(v=>v[0])), ys=slots.flatMap(s=>s.p.map(v=>v[1])); const X0=Math.min(...xs), Y0=Math.min(...ys), X1=Math.max(...xs), Y1=Math.max(...ys); const FY=y=>Y0+Y1-y; /* 위쪽이 위로 오게(뾰족한 꼭짓점이 위) */
+    const o={ draw(){ let g=''; if(o2.grid){ for(let x=X0-1;x<=X1+1;x++) g+=`<line x1="${x*U}" y1="${(Y0-1)*U}" x2="${x*U}" y2="${(Y1+1)*U}" stroke="#E6D6B8" stroke-width="1"/>`; for(let y=Y0-1;y<=Y1+1;y++) g+=`<line x1="${(X0-1)*U}" y1="${y*U}" x2="${(X1+1)*U}" y2="${y*U}" stroke="#E6D6B8" stroke-width="1"/>`; }
+        slots.forEach((s,i)=>{ const P=s.p.map(([x,y])=>(x*U).toFixed(1)+','+(FY(y)*U).toFixed(1)).join(' '); g+=put[i]?`<polygon data-ma="s${i}" points="${P}" fill="${COL[s.t]}" stroke="#4A2E14" stroke-width="2" stroke-linejoin="round"/>`:`<polygon data-ma="s${i}" points="${P}" fill="#CDB58E" stroke="#CDB58E" stroke-width="1.2" stroke-linejoin="round" style="cursor:pointer"/>`; });
+        const pal=Object.keys(stock).map(t=>m2b('p'+t,`<svg viewBox="-1 -1 38 21" width="40" style="display:block;margin:auto;box-shadow:none;background:transparent"><polygon points="${ICON[t]}" fill="${COL[t]}" stroke="#4A2E14" stroke-width="1.4"/></svg><span style="font-size:.72rem">${PN[t]} ${left(t)}개</span>`,'padding:3px 4px;min-width:58px;'+(t===cur?'border-color:#D45F16;background:#FFE9B8;box-shadow:0 0 0 2px #F2A65A;':'')+(left(t)<=0?'opacity:.45;':''))).join('');
+        const done=put.every(Boolean), pad=o2.grid?1:0;
+        const area=o2.askArea?`<div style="display:flex;align-items:center;gap:6px;justify-content:center;flex-wrap:wrap"><span>넓이: 모눈</span>${m2b('vm','−')}<b style="font-size:1.3rem;min-width:34px;text-align:center">${val}</b>${m2b('vp','+')}<span>칸</span></div>`:'';
+        const src=o2.src?`<div style="font-size:.85rem">처음 모양: ${o2.srcName}</div><svg viewBox="${o2.srcBox}" style="width:46%;max-width:150px;display:block;margin:auto;box-shadow:none;background:transparent">${o2.src.map(s=>`<polygon points="${s.p.map(([x,y])=>(x*U).toFixed(1)+','+((o2.srcH||2)-y)*U).join(' ')}" fill="${COL[s.t]}" stroke="#4A2E14" stroke-width="2" stroke-linejoin="round"/>`).join('')}</svg><div style="font-size:.85rem">같은 조각으로 만들 모양 ↓</div>`:'';
+        return `${src}<div style="display:flex;gap:4px;flex-wrap:wrap;justify-content:center">${pal}</div><svg viewBox="${((X0-pad)*U-4).toFixed(0)} ${((Y0-pad)*U-4).toFixed(0)} ${((X1-X0+2*pad)*U+8).toFixed(0)} ${((Y1-Y0+2*pad)*U+8).toFixed(0)}" style="width:100%;max-width:${Math.min(280,(X1-X0+2*pad)*U+8)}px;display:block;margin:auto;box-shadow:none;background:transparent">${g}</svg><div style="font-size:.88rem;color:#8A6A4A;min-height:1.3em">${o._note||(done?'다 채웠어요!':'조각을 고르고, 그림자 안을 눌러 놓아요. 놓은 조각을 누르면 빠져요.')}</div>${area}`; },
+      on(a){ o._note=''; if(a==='vp'&&val<60){ val++; return; } if(a==='vm'&&val>0){ val--; return; } if(a[0]==='p'){ cur=a.slice(1); return; }
+        const m=a.match(/^s(\d+)$/); if(!m) return; const i=+m[1]; if(put[i]){ put[i]=false; return; }
+        if(!cur||left(cur)<=0){ o._note='그 조각은 다 썼어요. 다른 조각을 골라요.'; return; }
+        if(slots[i].t!==cur){ miss.push(cur+slots[i].t); o._note=`${PN[cur]}${'MPQ'.includes(cur)?'은':'은'} 그 자리에 맞지 않아요.`; return; }
+        put[i]=true; if(left(cur)<=0){ const nx=Object.keys(stock).find(k=>left(k)>0); if(nx) cur=nx; } },
+      check(){ return put.every(Boolean)&&(!o2.askArea||val===o2.askArea); },
+      wrong(){ if(!put.every(Boolean)){ if(miss.some(x=>/^[LMS][LMS]$/.test(x))) return '크기가 다른 삼각형을 헷갈렸어요'; if(miss.some(x=>x==='QP'||x==='PQ')) return '정사각형과 평행사변형을 헷갈렸어요'; return '빈 곳이 남았어요'; }
+        if(o2.askArea&&val!==o2.askArea) return o2.perim&&val===o2.perim?'넓이 대신 둘레를 셌어요':'칸 수를 잘못 셌어요'; return null; },
+      reveal(){ put.fill(true); if(o2.askArea) val=o2.askArea; },
+      goal(){ return null; }, state:()=>({s:put.map(b=>b?1:0).join('')+(o2.askArea?'v'+val:'')}) };
+    const mm=m2make(o); mm._o=o; return mm; };
+  const T=(t,...p)=>({t,p});
+  const SET={L:2,M:1,S:2,Q:1,P:1};
+  const ob=w=>w+(((w.charCodeAt(w.length-1)-0xAC00)%28)?'을':'를');
+  /* 2학년: 칠교 한 벌(7조각)에서 알맞은 조각을 골라 삼각형·사각형 만들기 */
+  const G2=[
+    ['삼각형',[T('M',[2,0],[4,0],[2,2]),T('S',[0,0],[2,0],[1,1]),T('S',[1,1],[2,0],[2,2])]],
+    ['삼각형',[T('Q',[2,0],[3,1],[2,2],[1,1]),T('S',[0,0],[2,0],[1,1]),T('S',[2,0],[4,0],[3,1])]],
+    ['사각형',[T('M',[0,0],[2,0],[0,2]),T('S',[2,0],[2,2],[1,1]),T('S',[0,2],[1,1],[2,2])]],
+    ['사각형',[T('P',[0,1],[1,0],[3,0],[2,1]),T('S',[2,1],[3,0],[4,1])]],
+    ['삼각형',[T('L',[0,0],[4,0],[2,2]),T('L',[2,2],[4,0],[4,4])]] ];
+  window._qTang2=()=>{ const [nm,sl]=G2[rnd(0,G2.length-1)];
+    return m2q(`칠교 조각 ${sl.length}개로 ${ob(nm)} 만들어요. 알맞은 조각을 골라 그림자를 채워 보세요.`,'어떤 조각이 들어갈지 크기와 모양을 비교해 보세요. 크기가 다른 삼각형이 세 가지 있어요.',M2.tang(sl,SET,{}),`그림자에 맞는 조각 ${sl.length}개`,{'크기가 다른 삼각형을 헷갈렸어요':null,'정사각형과 평행사변형을 헷갈렸어요':null,'빈 곳이 남았어요':null}); };
+  /* 5학년: 평행사변형·삼각형(칠교 조각) → 같은 조각으로 직사각형 → 모눈 칸 수 */
+  const RECT=[T('M',[0,0],[2,0],[0,2]),T('S',[2,0],[2,2],[1,1]),T('S',[0,2],[1,1],[2,2])];
+  const SRC={ para:{n:'평행사변형',s:[T('M',[0,0],[2,0],[2,2]),T('S',[2,0],[3,1],[2,2]),T('S',[3,1],[4,2],[2,2])],box:`-6 -6 ${4*U+12} ${2*U+12}`},
+              tri:{n:'삼각형',s:[T('M',[2,0],[4,0],[2,2]),T('S',[0,0],[2,0],[1,1]),T('S',[1,1],[2,0],[2,2])],box:`-6 -6 ${4*U+12} ${2*U+12}`} };
+  const q5=k=>()=>{ const S=SRC[k];
+    return m2q(`칠교 조각으로 만든 ${S.n}이에요. 같은 조각으로 직사각형을 만들고, 넓이가 모눈 몇 칸인지 세어 보세요.`,`조각을 옮겨 붙여도 넓이는 그대로예요. 직사각형의 넓이는 (가로) × (세로)로 셀 수 있어요. 그래서 처음 ${S.n}의 넓이도 같아요.`,M2.tang(RECT,{M:1,S:2},{grid:1,askArea:4,perim:8,src:S.s,srcName:S.n,srcBox:S.box}),'모눈 4칸',{'넓이 대신 둘레를 셌어요':'G5-01','칸 수를 잘못 셌어요':null,'크기가 다른 삼각형을 헷갈렸어요':null,'빈 곳이 남았어요':null}); };
+  window._qTang5p=q5('para'); window._qTang5t=q5('tri');
+  try{ if(G36['S6-06']) G36['S6-06'].push(window._qTang2,window._qTang2); if(G36['S6-70']) G36['S6-70'].push(window._qTang5p); if(G36['S6-71']) G36['S6-71'].push(window._qTang5t); (window._NTW=window._NTW||[]).push(['S6-06',0,window._qTang2]); }catch(e){}
+}
 
 /* ---------- 3-12. 개념 조각과 보기별 무게 (오개념 코드 → 모르는 개념 조각) ---------- */
 // 교수님 지적(2026-11-20): 오답에 코드만 붙일 게 아니라 "이 보기를 고른 아이는 어떤 개념을 모른다"는 가정과 무게가 있어야 한다.
@@ -11603,5 +11744,6 @@ function kcDone(c,tries){ try{ const L=JSON.parse(localStorage.getItem(KCK)||'[]
 
 </script>
 <script>/* gjm */(function(){try{Object.defineProperty(window,"__dotori",{value:Object.freeze({by:decodeURIComponent("%EA%B5%B3%EC%9E%A1%EB%A7%A8"),id:"goodjobMan",license:"CC BY-NC 4.0"}),enumerable:false});}catch(e){}})();</script>
+<script>window.__BUILD="defff867f2";(function(){var shown=0;function chk(){ if(shown||!navigator.onLine) return; fetch(location.pathname+'?v='+Date.now(),{cache:'no-store'}).then(function(r){return r.text();}).then(function(t){ var m=t.match(/window\.__BUILD="(\w+)"/); if(m&&m[1]!==window.__BUILD){ shown=1; var b=document.createElement('button'); b.textContent='새 버전이 나왔어요 · 눌러서 새로 고침'; b.style.cssText='position:fixed;top:8px;left:50%;transform:translateX(-50%);z-index:99999;padding:10px 16px;border-radius:999px;border:2px solid #7A4A1E;background:#FFE7A8;color:#4A2E14;font:16px Jua,sans-serif;box-shadow:0 2px 8px rgba(0,0,0,.25)'; b.onclick=function(){ location.reload(); }; document.body.appendChild(b); } }).catch(function(){}); } document.addEventListener('visibilitychange',function(){ if(document.visibilityState==='visible') chk(); }); setInterval(chk,20*60*1000); setTimeout(chk,5000); })();</script>
 </body>
 </html>
