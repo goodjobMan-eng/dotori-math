@@ -236,3 +236,4 @@ const CLOCK_EPS=new Set(['S6-09','S6-10','S6-11','S6-12','S6-13','S6-34','S6-35'
   /* 단계 이름표: 지금 문제가 어느 단계인지 작은 표로 보여 준다(오늘의 문제의 새 내용, 편 연습) */
   try{ const a=S&&S.acts&&S.acts[S.i], q=a&&a.q, stg=q?(q._stg!=null?q._stg:(S.mode==='ep36'&&!S.kt&&!S.diagRun&&window.ktStage?window.ktStage(q):null)):null, box=document.querySelector('.stage'); if(box&&stg!=null&&document.querySelector('.bubble .q')&&!box.querySelector('.kt-stg')){ const col=['#5BA85B','#4F8FD9','#E8873A','#B5541A'][stg]; box.insertAdjacentHTML('afterbegin',`<div class="kt-stg" style="display:flex;gap:5px;justify-content:center;margin:0 0 6px;font-family:Jua,sans-serif;font-size:.8rem">${window.KT_STAGE_NAME.map((n,i)=>`<span style="padding:2px 8px;border-radius:999px;border:1.5px solid ${i===stg?col:'#E3CFA8'};background:${i===stg?col:'transparent'};color:${i===stg?'#fff':'#B9A888'}">${n}</span>`).join('')}</div>`); } }catch(e){}
   return _r; }; }
+window._runSet=(acts,t,f)=>runSet(acts,t,f);

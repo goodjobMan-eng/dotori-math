@@ -1,3 +1,5 @@
+/* 문제지형 발문: 수와 단위가 줄바꿈으로 떨어지지 않게 */
+window.qpNb=t=>(/[가-힣]/.test(String(t||'').replace(/<[^>]+>/g,''))?String(t):`${t}<span class="qp-sub">계산해 보세요.</span>`).replace(/(\d[\d,.]*)\s(?=(cm|mm|km|m|kg|g|t|L|mL|°|%|초|분|시간|개|명|원|쪽|번|권|자루|마리|장|대|송이|배)(?![a-zA-Z]))/g,'$1&nbsp;');
 
 /* ---------- 3-77. 국가 수리력 진단도구 꼴 문항(편에 섞어 냄) ----------
    국가기초학력지원포털의 「수리력 진단도구」(한국교육과정평가원, 1수준·2수준 × 수와 연산·도형과 측정)의
@@ -135,4 +137,40 @@
   try{ [['N1',N1],['G1',G1],['N2',N2],['G2',G2]].forEach(([k,arr])=>arr.forEach(([std,f],i)=>{ const ep=MAP[k][i], g=wrap(f);
       if(typeof ep==='number'){ if(typeof G!=='undefined'&&G[ep]) G[ep].push(g); }
       else if(G36[ep]){ (window._NTW=window._NTW||[]).push([ep,G36[ep].length,g]); G36[ep].push(g); } })); }catch(e){}
+}
+
+/* ---------- 3-78. 학습지(늘품이) 꼴 새 유형: <보기> 상자, 검산 사슬, 10배 화살표, 세로셈 ㉠ ----------
+   네온 제안(11/23)을 따라 고르기형으로 먼저 넣고, 조작형은 다음에. 선행 금지: 편마다 그 학년 범위의 수만 쓴다. */
+{ const S=GX_S, RED='#B04A2E', BL='#2F6FA8';
+  const bogi=(inner,t)=>`<div class="bogi" style="position:relative;border:2px solid #C9A877;border-radius:12px;padding:16px 14px 10px;margin:8px auto;max-width:340px;background:#fff;text-align:left;font-size:1.05rem;line-height:1.7"><span style="position:absolute;top:-11px;left:12px;background:#fff;padding:0 6px;font-weight:700;color:#7A4A1E">&lt;${t||'보기'}&gt;</span>${inner}</div>`;
+  const chip=(t,c)=>`<span style="display:inline-block;min-width:34px;padding:2px 8px;margin:0 2px;border-radius:8px;background:${c||'#FFF3C4'};border:1.5px solid #C9A877;text-align:center;font-weight:700">${t}</span>`;
+  const vcalc=(rows,w)=>`<table class="vcalc" style="margin:6px auto;border-collapse:collapse;font:700 1.45rem/1.5 ui-monospace,monospace;font-variant-numeric:tabular-nums">${rows.map(r=>`<tr${r.line?' style="border-top:2.5px solid #4A2E14"':''}>${[...String(r.s).padStart(w,' ')].map(ch=>`<td style="width:1.15em;text-align:center;${r.c?'color:'+r.c:''}">${ch===' '?'':ch}</td>`).join('')}${r.note?`<td style="padding-left:10px;font:400 .85rem sans-serif;color:#7B5632">${r.note}</td>`:''}</tr>`).join('')}</table>`;
+  const L={}; const cq4=(q,v,A,w)=>{ const seen=new Set([String(A)]), u=[]; for(const x of w){ const k=String(x[0]); if(x[0]==null||seen.has(k)) continue; seen.add(k); u.push(x); } return u.length>=3?cq(q,v,A,u.slice(0,3)):null; }; const jj=(n,a,b)=>n+('013678'.includes(String(n).slice(-1))?a:b);
+  /* ① 나눗셈 검산 사슬 (3학년 나눗셈) */
+  L.chain=()=>{ const d=rnd(3,9), q=rnd(4,9)+pk0([0,10]), r=rnd(1,d-1), n=d*q+r; if(n>99&&q<10) return null; const vis=bogi(`${n} ÷ ${d} = ${q} … ${r}<div style="margin-top:6px">${chip(d,'#FBD9A5')} × ${chip(q,'#CFE0F7')} = ${chip('㉠')} → ${chip('㉠')} + ${chip(r,'#E9D5F5')} = ${chip('㉡')}</div>`,'계산 결과 확인하기');
+    return cq4('나눗셈을 맞게 했는지 확인하는 식이에요. ㉠, ㉡에 알맞은 수를 차례로 쓴 것은?',vis,`${d*q}, ${n}`,[[`${d*q}, ${d*q-r}`,'N3-15'],[`${d*r}, ${d*r+q}`,'N3-01'],[`${q*r}, ${q*r+d}`,'N3-01'],[`${d*q}, ${n+d}`,null],[`${d+q}, ${d+q+r}`,'N2-05'],[`${n}, ${n+r}`,null]]); };
+  /* ② 10배 화살표 관계 (3학년: 두 자리 × 몇십) */
+  L.tenX=()=>{ const a=rnd(12,48), b=rnd(2,6); const p=a*b; const vis=`<div style="display:inline-grid;grid-template-columns:auto auto auto auto auto;gap:4px 8px;align-items:center;font:700 1.3rem sans-serif;margin:8px auto">
+      <span>${a}</span><span>×</span>${chip(b)}<span>=</span><span>${p}</span>
+      <span></span><span></span><span style="color:${RED};font-size:.8rem;text-align:center">↓ 10배</span><span></span><span style="color:${RED};font-size:.8rem;text-align:center">↓ 10배</span>
+      <span>${a}</span><span>×</span>${chip(b*10)}<span>=</span>${chip('㉠')}</div>`;
+    return cq4('곱하는 수가 10배가 되면 곱도 10배가 돼요. ㉠에 알맞은 수는?',vis,p*10,[[p,'N3-12'],[p*100,'N3-33'],[p+10,'N2-05'],[a*b+a*10,null]]); };
+  /* ③ 10배·10분의 1 화살표 (5학년 소수의 곱셈) */
+  L.tenthX=()=>{ const a=rnd(12,89), b=rnd(2,9); if(a%10===0) return null; const p=a*b, A=+(p/10).toFixed(1); const vis=`<div style="display:inline-grid;grid-template-columns:auto auto auto auto auto;gap:4px 8px;align-items:center;font:700 1.3rem sans-serif;margin:8px auto">
+      <span>${a}</span><span>×</span><span>${b}</span><span>=</span><span>${p}</span>
+      <span style="color:${BL};font-size:.75rem">↓ 10분의 1배</span><span></span><span></span><span></span><span style="color:${BL};font-size:.75rem">↓ 10분의 1배</span>
+      <span>${a/10}</span><span>×</span><span>${b}</span><span>=</span>${chip('㉠')}</div>`;
+    return cq4('곱해지는 수가 10분의 1배가 되면 곱은 어떻게 될까요? ㉠에 알맞은 수는?',vis,A,[[p,'N3-08'],[+(p/100).toFixed(2),'N5-07'],[p*10,'N6-07'],[+(A+1).toFixed(1),null]]); };
+  /* ④ 세로셈의 ㉠ 줄 (3학년 두 자리 × 두 자리: 부분곱의 자리) */
+  L.vPart=()=>{ const a=rnd(13,49), b1=rnd(2,4), b0=rnd(2,9); const b=b1*10+b0; const p1=a*b0, p2=a*b1*10; const w=String(a*b).length+1;
+    const vis=vcalc([{s:a},{s:'×'+String(b).padStart(w-1,' ')},{s:p1,line:1},{s:'㉠'.padStart(w,' '),c:RED},{s:a*b,line:1}],w)+`<div style="font-size:.8rem;color:#7B5632">${a} × ${b0} = ${p1}</div>`;
+    return cq4('세로셈에서 ㉠에 알맞은 수는?',vis,p2,[[a*b1,'N3-03'],[p1+p2,null],[a*b-p1+a,null],[a*(b1+b0),'N2-05']]); };
+  /* ⑤ <보기>의 ㉠, ㉡ 낱말 (3학년 나머지 있는 나눗셈) */
+  L.words=()=>{ const d=rnd(3,8), q=rnd(3,9), r=rnd(1,d-1), n=d*q+r; const vis=bogi(`${n} ÷ ${d} = ${q} … ${r}<div style="margin-top:6px">${jj(q,'은','는')} ㉠이고, ${jj(r,'은','는')} ㉡이에요.</div>`);
+    return cq4('<보기>의 ㉠, ㉡에 알맞은 말을 차례로 쓴 것은?',vis,'몫, 나머지',[['나머지, 몫','N3-01'],['나누는 수, 몫','N3-01'],['몫, 나누는 수','N3-02'],['나누어지는 수, 나머지',null]]); };
+  const pk0=a=>a[rnd(0,a.length-1)];
+  const T=f=>()=>{ for(let t=0;t<30;t++){ const q=f(); if(q) return q; } return null; };
+  window._LW=L;
+  try{ const add=(ep,g)=>{ if(G36[ep]){ (window._NTW=window._NTW||[]).push([ep,G36[ep].length,g]); G36[ep].push(g); } };
+    add('S3-33',T(L.chain)); add('S3-25',T(L.tenX)); add('S3-96',T(L.tenthX)); add('S3-27',T(L.vPart)); add('S3-29',T(L.words)); }catch(e){}
 }

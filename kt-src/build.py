@@ -431,6 +431,52 @@ h = h.replace(_nl[0], _vp['nolink'])
 _a = "()=>{ const g=rnd(3,6), k=rnd(2,4), part=rnd(1,g-1); return W36('rami',`${g*k}개를 ${k}개씩 묶으면 ${part*k}개는 전체의 얼마?`,"
 assert h.count(_a) == 1
 h = h.replace(_a, "()=>{ let g=rnd(3,6), k=rnd(2,4), part=rnd(1,g-1); const _gc=(x,y)=>y?_gc(y,x%y):x; for(let t=0;t<40&&_gc(part,g)!==1;t++){ g=rnd(3,6); part=rnd(1,g-1); } return W36('rami',`${g*k}개를 ${k}개씩 묶었어요. ${part*k}개는 전체 묶음의 몇 분의 몇일까요? (묶음 수로 나타내요)`,")
+
+# 문제지형 화면(교수님 11/23: 문제 제시가 전문적이지 않고 UI가 깔끔하지 않다 → 늘품이·진단도구 학습지 짜임을 따름)
+# 3~6학년(ep36): 말풍선 대신 '번호 + 발문', 그림은 테두리 상자, 보기는 ①②③④ 번호를 단 목록. 1~2학년은 캐릭터 말풍선 그대로.
+_a = '<div class="talker">${talker(q.who)}<div class="bubble"><div class="who">${NAMES[q.who]}</div><div class="q">${q.q}</div><div class="hint">${q.hint}</div></div></div>\n      <div class="visual" id="visual">${q.visual}</div>'
+assert h.count(_a) == 1, h.count(_a)
+h = h.replace(_a, '${S.mode===\'ep36\'?`<div class="qp"><span class="qp-no">${S.i+1}</span><div class="qp-q">${window.qpNb(q.q)}</div><div class="qp-who">${talker(q.who)}</div></div>`:`' + _a.split('\n')[0].strip() + '`}\n      <div class="visual${S.mode===\'ep36\'?(String(q.visual||\'\').trim()?\' qp-vis\':\' qp-novis\'):\'\'}" id="visual">${q.visual}</div>')
+_a = '`<div class="opts${q.opts.some(o=>String(o).length>9)?" wide":""}" id="opts">'
+assert h.count(_a) == 1, h.count(_a)
+h = h.replace(_a, '`<div class="opts${q.opts.some(o=>String(o).length>9)?" wide":""}${S.mode===\'ep36\'?(q.opts.every(o=>/^[①-⑳㉠-㉭]/.test(String(o)))?" qp-sym":q.opts.some(o=>String(o).length>14)?" qp-opts qp-list":" qp-opts"):""}" id="opts">')
+
+_a = 'id="opts">${q.opts.map(o=>`<button class="opt${q.text?\' text\':\'\'}" data-v="${o}">${o}</button>`).join(\'\')}'
+assert h.count(_a) == 1, h.count(_a)
+h = h.replace(_a, _a.replace('${q.opts.map(', '${(q.opts.every(o=>/^[①-⑳㉠-㉭]/.test(String(o)))?q.opts.slice().sort():q.opts).map('))
+_a = "const sel='.bubble .q, .opt,"
+assert h.count(_a) == 1
+h = h.replace(_a, "const sel='.bubble .q, .qp-q, .opt,")
+_css = """
+.qp{display:flex;align-items:flex-start;gap:10px;padding:4px 2px 10px;border-bottom:2px dashed var(--line)}
+.qp-no{flex:none;min-width:30px;height:30px;border-radius:8px;background:#E8743B;color:#fff;font:700 1.05rem/30px "Jua",sans-serif;text-align:center;margin-top:2px}
+.qp-q{flex:1;font-family:"Gowun Dodum","Jua",sans-serif;font-weight:700;font-size:1.28rem;line-height:1.55;color:var(--ink);word-break:keep-all;text-wrap:pretty}
+.qp-who{flex:none;width:46px;height:46px;overflow:hidden}.qp-who img,.qp-who svg{width:46px!important;height:46px!important;object-fit:contain}
+.qp-q,.qp-opts .opt,.qp-sym .opt{font-variant-numeric:tabular-nums}
+.qp-sub{display:block;font-size:.85rem;font-weight:400;color:var(--ink-soft)}
+@media (min-width:900px) and (orientation:landscape){
+ .wrap:has(.stage > .qp){max-width:1000px}
+ .stage:has(> .qp){display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);column-gap:22px;align-items:start}
+ .stage:has(> .qp) > .qp{grid-column:1;grid-row:1}
+ .stage:has(> .qp) > .visual{grid-column:1;grid-row:2 / span 3}
+ .stage:has(> .qp) > #opts,.stage:has(> .qp) > #wpad{grid-column:2;grid-row:1 / span 2;margin-top:4px;align-self:start}
+ .stage:has(> .qp) > #fb{grid-column:2;grid-row:3}
+ .stage:has(> .qp) > .qp-opts:not(.qp-list){grid-template-columns:1fr}
+ .stage:has(> .qp) .qp-vis > svg, .stage:has(> .qp) .qp-vis .cpa > svg{min-width:min(100%,380px);height:auto}
+}
+.visual.qp-vis{border:2px solid var(--line);border-radius:14px;background:#fff;padding:10px;margin:12px 0 4px}
+.qp-opts{counter-reset:qo}
+.visual.qp-novis{min-height:0;margin:4px 0}
+.qp-sym{grid-template-columns:repeat(4,1fr)}
+.qp-opts .opt{counter-increment:qo;position:relative;padding-left:36px!important;font-size:1.35rem;text-align:left}
+.qp-opts .opt::before{content:counter(qo,decimal);position:absolute;left:9px;top:50%;transform:translateY(-50%);width:20px;height:20px;border-radius:50%;border:1.6px solid var(--ink-soft);font:700 .75rem/18px sans-serif;text-align:center;color:var(--ink-soft)}
+.qp-opts:not(.qp-list){grid-template-columns:repeat(2,1fr)}
+.qp-list{grid-template-columns:1fr!important}.qp-list .opt{font-family:"Gowun Dodum",sans-serif;font-weight:700;font-size:1.08rem;padding:12px 12px 12px 40px!important;line-height:1.45}
+"""
+_a = '.opt.text{font-size:1.4rem}'
+assert h.count(_a) == 1
+h = h.replace(_a, _a + _css)
+
 # 만든 사람 표시(교수님 11/23): 눈에 띄지 않게 코드 안에만
 h = h.replace('<head>', '<head>\n<!-- 도토리 숲 수학 퀴즈 · made by 굳잡맨(goodjobMan) · CC BY-NC 4.0 · 비영리·교육 목적, 출처를 밝히고 고쳐 써도 됩니다 -->\n<meta name="author" content="굳잡맨 (goodjobMan)">', 1)
 h = h.replace('</body>', '<script>/* gjm */(function(){try{Object.defineProperty(window,"__dotori",{value:Object.freeze({by:decodeURIComponent("%EA%B5%B3%EC%9E%A1%EB%A7%A8"),id:"goodjobMan",license:"CC BY-NC 4.0"}),enumerable:false});}catch(e){}})();</script>\n</body>', 1)

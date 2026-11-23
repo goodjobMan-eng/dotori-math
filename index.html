@@ -98,6 +98,31 @@ button:focus-visible{outline:4px solid var(--sky);outline-offset:2px}
 .opts{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:14px}
 .opt{font-family:"Jua",sans-serif;font-size:1.9rem;padding:18px 6px;border-radius:18px;background:var(--bg);border:3px solid var(--line);color:var(--ink);box-shadow:var(--shadow);transition:transform .08s;word-break:keep-all}
 .opt.text{font-size:1.4rem}
+.qp{display:flex;align-items:flex-start;gap:10px;padding:4px 2px 10px;border-bottom:2px dashed var(--line)}
+.qp-no{flex:none;min-width:30px;height:30px;border-radius:8px;background:#E8743B;color:#fff;font:700 1.05rem/30px "Jua",sans-serif;text-align:center;margin-top:2px}
+.qp-q{flex:1;font-family:"Gowun Dodum","Jua",sans-serif;font-weight:700;font-size:1.28rem;line-height:1.55;color:var(--ink);word-break:keep-all;text-wrap:pretty}
+.qp-who{flex:none;width:46px;height:46px;overflow:hidden}.qp-who img,.qp-who svg{width:46px!important;height:46px!important;object-fit:contain}
+.qp-q,.qp-opts .opt,.qp-sym .opt{font-variant-numeric:tabular-nums}
+.qp-sub{display:block;font-size:.85rem;font-weight:400;color:var(--ink-soft)}
+@media (min-width:900px) and (orientation:landscape){
+ .wrap:has(.stage > .qp){max-width:1000px}
+ .stage:has(> .qp){display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);column-gap:22px;align-items:start}
+ .stage:has(> .qp) > .qp{grid-column:1;grid-row:1}
+ .stage:has(> .qp) > .visual{grid-column:1;grid-row:2 / span 3}
+ .stage:has(> .qp) > #opts,.stage:has(> .qp) > #wpad{grid-column:2;grid-row:1 / span 2;margin-top:4px;align-self:start}
+ .stage:has(> .qp) > #fb{grid-column:2;grid-row:3}
+ .stage:has(> .qp) > .qp-opts:not(.qp-list){grid-template-columns:1fr}
+ .stage:has(> .qp) .qp-vis > svg, .stage:has(> .qp) .qp-vis .cpa > svg{min-width:min(100%,380px);height:auto}
+}
+.visual.qp-vis{border:2px solid var(--line);border-radius:14px;background:#fff;padding:10px;margin:12px 0 4px}
+.qp-opts{counter-reset:qo}
+.visual.qp-novis{min-height:0;margin:4px 0}
+.qp-sym{grid-template-columns:repeat(4,1fr)}
+.qp-opts .opt{counter-increment:qo;position:relative;padding-left:36px!important;font-size:1.35rem;text-align:left}
+.qp-opts .opt::before{content:counter(qo,decimal);position:absolute;left:9px;top:50%;transform:translateY(-50%);width:20px;height:20px;border-radius:50%;border:1.6px solid var(--ink-soft);font:700 .75rem/18px sans-serif;text-align:center;color:var(--ink-soft)}
+.qp-opts:not(.qp-list){grid-template-columns:repeat(2,1fr)}
+.qp-list{grid-template-columns:1fr!important}.qp-list .opt{font-family:"Gowun Dodum",sans-serif;font-weight:700;font-size:1.08rem;padding:12px 12px 12px 40px!important;line-height:1.45}
+
 .opt:active{transform:translateY(3px);box-shadow:none}
 .opt.ok{background:var(--ok-bg);border-color:var(--ok)}
 .opt.no{background:var(--no-bg);border-color:var(--no);animation:shake .4s}
@@ -2460,9 +2485,9 @@ function question(q){
       <button class="speak" id="speak" aria-label="다시 읽어 주기">🔊</button>
     </div>
     <div class="stage">
-      <div class="talker">${talker(q.who)}<div class="bubble"><div class="who">${NAMES[q.who]}</div><div class="q">${q.q}</div><div class="hint">${q.hint}</div></div></div>
-      <div class="visual" id="visual">${q.visual}</div>
-      ${q.manip?'<div class="opts wide" id="opts"><button class="opt text mdone" id="mdone" data-v="__done">다 했어요! ✓</button></div>':q.write?'<div id="wpad"></div>':`<div class="opts${q.opts.some(o=>String(o).length>9)?" wide":""}" id="opts">${q.opts.map(o=>`<button class="opt${q.text?' text':''}" data-v="${o}">${o}</button>`).join('')}</div>`}
+      ${S.mode==='ep36'?`<div class="qp"><span class="qp-no">${S.i+1}</span><div class="qp-q">${window.qpNb(q.q)}</div><div class="qp-who">${talker(q.who)}</div></div>`:`<div class="talker">${talker(q.who)}<div class="bubble"><div class="who">${NAMES[q.who]}</div><div class="q">${q.q}</div><div class="hint">${q.hint}</div></div></div>`}
+      <div class="visual${S.mode==='ep36'?(String(q.visual||'').trim()?' qp-vis':' qp-novis'):''}" id="visual">${q.visual}</div>
+      ${q.manip?'<div class="opts wide" id="opts"><button class="opt text mdone" id="mdone" data-v="__done">다 했어요! ✓</button></div>':q.write?'<div id="wpad"></div>':`<div class="opts${q.opts.some(o=>String(o).length>9)?" wide":""}${S.mode==='ep36'?(q.opts.every(o=>/^[①-⑳㉠-㉭]/.test(String(o)))?" qp-sym":q.opts.some(o=>String(o).length>14)?" qp-opts qp-list":" qp-opts"):""}" id="opts">${(q.opts.every(o=>/^[①-⑳㉠-㉭]/.test(String(o)))?q.opts.slice().sort():q.opts).map(o=>`<button class="opt${q.text?' text':''}" data-v="${o}">${o}</button>`).join('')}</div>`}
       <div id="fb"></div>
     </div>`;
   document.getElementById('back').onclick=backToList;
@@ -4418,7 +4443,7 @@ ADD('S6-74', ()=>{ const d=rnd(2,20); const c=+(d*3.14).toFixed(2); return WN(`�
 /* ---------- 글로 쓴 분수를 분수 모양으로 (문제·보기·피드백·풀이) ---------- */
 const FR_RE=/(?:(\d+)[과와] )?(\d+)분의 (\d+)/g;
 const frBox=(n,d)=>`<span class="ifr"><span class="ifn">${n}</span><span class="ifd">${d}</span></span>`;
-function prettyFrac(root){ const sel='.bubble .q, .opt, .fb .msg, .solve, .cc-box, .hint1, .ccard h2, .cc-topic, .wt, .recent .rt, .ep .t, .withadult, .manip .mval, .manip .mlab';
+function prettyFrac(root){ const sel='.bubble .q, .qp-q, .opt, .fb .msg, .solve, .cc-box, .hint1, .ccard h2, .cc-topic, .wt, .recent .rt, .ep .t, .withadult, .manip .mval, .manip .mlab';
   root.querySelectorAll(sel).forEach(el=>{ const tw=document.createTreeWalker(el,NodeFilter.SHOW_TEXT,{acceptNode:n=>n.parentElement.closest('svg,.ifr')?NodeFilter.FILTER_REJECT:(/\d+분의 \d+/.test(n.nodeValue)?NodeFilter.FILTER_ACCEPT:NodeFilter.FILTER_SKIP)}); const nodes=[]; while(tw.nextNode()) nodes.push(tw.currentNode);
     nodes.forEach(t=>{ const html=t.nodeValue.replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c])).replace(FR_RE,(m,w,d,n)=>`<span class="imx">${w?`<span class="ifw">${w}</span>`:''}${frBox(n,d)}</span>`); const sp=document.createElement('span'); sp.innerHTML=html; t.replaceWith(...sp.childNodes); }); }); }
 (function(){ let busy=false; const ob=new MutationObserver(()=>{ if(busy) return; busy=true; try{ prettyFrac(app); }finally{ busy=false; } }); ob.observe(app,{childList:true,subtree:true,characterData:true}); })();
@@ -8489,6 +8514,8 @@ window.KT_STAGE_NAME=['만져 보기','기본 익히기','이야기 문제','도
   try{ const add=(ep,g)=>{ if(G36[ep]){ (window._NTW=window._NTW||[]).push([ep,G36[ep].length,g]); G36[ep].push(g); } };
     add('S3-31',GD.divSteps); add('S3-30',GD.remPick); add('S2-03',GD.chips); add('S2-07',GD.estTalk); add('S3-17',GD.fracSay); add('S3-17',GD.equalPick); add('S6-49',GD.angleHow); add('S6-49',GD.angleSumDiff); add('S4-10',GD.barScale); }catch(e){}
 }
+/* 문제지형 발문: 수와 단위가 줄바꿈으로 떨어지지 않게 */
+window.qpNb=t=>(/[가-힣]/.test(String(t||'').replace(/<[^>]+>/g,''))?String(t):`${t}<span class="qp-sub">계산해 보세요.</span>`).replace(/(\d[\d,.]*)\s(?=(cm|mm|km|m|kg|g|t|L|mL|°|%|초|분|시간|개|명|원|쪽|번|권|자루|마리|장|대|송이|배)(?![a-zA-Z]))/g,'$1&nbsp;');
 
 /* ---------- 3-77. 국가 수리력 진단도구 꼴 문항(편에 섞어 냄) ----------
    국가기초학력지원포털의 「수리력 진단도구」(한국교육과정평가원, 1수준·2수준 × 수와 연산·도형과 측정)의
@@ -8626,6 +8653,42 @@ window.KT_STAGE_NAME=['만져 보기','기본 익히기','이야기 문제','도
   try{ [['N1',N1],['G1',G1],['N2',N2],['G2',G2]].forEach(([k,arr])=>arr.forEach(([std,f],i)=>{ const ep=MAP[k][i], g=wrap(f);
       if(typeof ep==='number'){ if(typeof G!=='undefined'&&G[ep]) G[ep].push(g); }
       else if(G36[ep]){ (window._NTW=window._NTW||[]).push([ep,G36[ep].length,g]); G36[ep].push(g); } })); }catch(e){}
+}
+
+/* ---------- 3-78. 학습지(늘품이) 꼴 새 유형: <보기> 상자, 검산 사슬, 10배 화살표, 세로셈 ㉠ ----------
+   네온 제안(11/23)을 따라 고르기형으로 먼저 넣고, 조작형은 다음에. 선행 금지: 편마다 그 학년 범위의 수만 쓴다. */
+{ const S=GX_S, RED='#B04A2E', BL='#2F6FA8';
+  const bogi=(inner,t)=>`<div class="bogi" style="position:relative;border:2px solid #C9A877;border-radius:12px;padding:16px 14px 10px;margin:8px auto;max-width:340px;background:#fff;text-align:left;font-size:1.05rem;line-height:1.7"><span style="position:absolute;top:-11px;left:12px;background:#fff;padding:0 6px;font-weight:700;color:#7A4A1E">&lt;${t||'보기'}&gt;</span>${inner}</div>`;
+  const chip=(t,c)=>`<span style="display:inline-block;min-width:34px;padding:2px 8px;margin:0 2px;border-radius:8px;background:${c||'#FFF3C4'};border:1.5px solid #C9A877;text-align:center;font-weight:700">${t}</span>`;
+  const vcalc=(rows,w)=>`<table class="vcalc" style="margin:6px auto;border-collapse:collapse;font:700 1.45rem/1.5 ui-monospace,monospace;font-variant-numeric:tabular-nums">${rows.map(r=>`<tr${r.line?' style="border-top:2.5px solid #4A2E14"':''}>${[...String(r.s).padStart(w,' ')].map(ch=>`<td style="width:1.15em;text-align:center;${r.c?'color:'+r.c:''}">${ch===' '?'':ch}</td>`).join('')}${r.note?`<td style="padding-left:10px;font:400 .85rem sans-serif;color:#7B5632">${r.note}</td>`:''}</tr>`).join('')}</table>`;
+  const L={}; const cq4=(q,v,A,w)=>{ const seen=new Set([String(A)]), u=[]; for(const x of w){ const k=String(x[0]); if(x[0]==null||seen.has(k)) continue; seen.add(k); u.push(x); } return u.length>=3?cq(q,v,A,u.slice(0,3)):null; }; const jj=(n,a,b)=>n+('013678'.includes(String(n).slice(-1))?a:b);
+  /* ① 나눗셈 검산 사슬 (3학년 나눗셈) */
+  L.chain=()=>{ const d=rnd(3,9), q=rnd(4,9)+pk0([0,10]), r=rnd(1,d-1), n=d*q+r; if(n>99&&q<10) return null; const vis=bogi(`${n} ÷ ${d} = ${q} … ${r}<div style="margin-top:6px">${chip(d,'#FBD9A5')} × ${chip(q,'#CFE0F7')} = ${chip('㉠')} → ${chip('㉠')} + ${chip(r,'#E9D5F5')} = ${chip('㉡')}</div>`,'계산 결과 확인하기');
+    return cq4('나눗셈을 맞게 했는지 확인하는 식이에요. ㉠, ㉡에 알맞은 수를 차례로 쓴 것은?',vis,`${d*q}, ${n}`,[[`${d*q}, ${d*q-r}`,'N3-15'],[`${d*r}, ${d*r+q}`,'N3-01'],[`${q*r}, ${q*r+d}`,'N3-01'],[`${d*q}, ${n+d}`,null],[`${d+q}, ${d+q+r}`,'N2-05'],[`${n}, ${n+r}`,null]]); };
+  /* ② 10배 화살표 관계 (3학년: 두 자리 × 몇십) */
+  L.tenX=()=>{ const a=rnd(12,48), b=rnd(2,6); const p=a*b; const vis=`<div style="display:inline-grid;grid-template-columns:auto auto auto auto auto;gap:4px 8px;align-items:center;font:700 1.3rem sans-serif;margin:8px auto">
+      <span>${a}</span><span>×</span>${chip(b)}<span>=</span><span>${p}</span>
+      <span></span><span></span><span style="color:${RED};font-size:.8rem;text-align:center">↓ 10배</span><span></span><span style="color:${RED};font-size:.8rem;text-align:center">↓ 10배</span>
+      <span>${a}</span><span>×</span>${chip(b*10)}<span>=</span>${chip('㉠')}</div>`;
+    return cq4('곱하는 수가 10배가 되면 곱도 10배가 돼요. ㉠에 알맞은 수는?',vis,p*10,[[p,'N3-12'],[p*100,'N3-33'],[p+10,'N2-05'],[a*b+a*10,null]]); };
+  /* ③ 10배·10분의 1 화살표 (5학년 소수의 곱셈) */
+  L.tenthX=()=>{ const a=rnd(12,89), b=rnd(2,9); if(a%10===0) return null; const p=a*b, A=+(p/10).toFixed(1); const vis=`<div style="display:inline-grid;grid-template-columns:auto auto auto auto auto;gap:4px 8px;align-items:center;font:700 1.3rem sans-serif;margin:8px auto">
+      <span>${a}</span><span>×</span><span>${b}</span><span>=</span><span>${p}</span>
+      <span style="color:${BL};font-size:.75rem">↓ 10분의 1배</span><span></span><span></span><span></span><span style="color:${BL};font-size:.75rem">↓ 10분의 1배</span>
+      <span>${a/10}</span><span>×</span><span>${b}</span><span>=</span>${chip('㉠')}</div>`;
+    return cq4('곱해지는 수가 10분의 1배가 되면 곱은 어떻게 될까요? ㉠에 알맞은 수는?',vis,A,[[p,'N3-08'],[+(p/100).toFixed(2),'N5-07'],[p*10,'N6-07'],[+(A+1).toFixed(1),null]]); };
+  /* ④ 세로셈의 ㉠ 줄 (3학년 두 자리 × 두 자리: 부분곱의 자리) */
+  L.vPart=()=>{ const a=rnd(13,49), b1=rnd(2,4), b0=rnd(2,9); const b=b1*10+b0; const p1=a*b0, p2=a*b1*10; const w=String(a*b).length+1;
+    const vis=vcalc([{s:a},{s:'×'+String(b).padStart(w-1,' ')},{s:p1,line:1},{s:'㉠'.padStart(w,' '),c:RED},{s:a*b,line:1}],w)+`<div style="font-size:.8rem;color:#7B5632">${a} × ${b0} = ${p1}</div>`;
+    return cq4('세로셈에서 ㉠에 알맞은 수는?',vis,p2,[[a*b1,'N3-03'],[p1+p2,null],[a*b-p1+a,null],[a*(b1+b0),'N2-05']]); };
+  /* ⑤ <보기>의 ㉠, ㉡ 낱말 (3학년 나머지 있는 나눗셈) */
+  L.words=()=>{ const d=rnd(3,8), q=rnd(3,9), r=rnd(1,d-1), n=d*q+r; const vis=bogi(`${n} ÷ ${d} = ${q} … ${r}<div style="margin-top:6px">${jj(q,'은','는')} ㉠이고, ${jj(r,'은','는')} ㉡이에요.</div>`);
+    return cq4('<보기>의 ㉠, ㉡에 알맞은 말을 차례로 쓴 것은?',vis,'몫, 나머지',[['나머지, 몫','N3-01'],['나누는 수, 몫','N3-01'],['몫, 나누는 수','N3-02'],['나누어지는 수, 나머지',null]]); };
+  const pk0=a=>a[rnd(0,a.length-1)];
+  const T=f=>()=>{ for(let t=0;t<30;t++){ const q=f(); if(q) return q; } return null; };
+  window._LW=L;
+  try{ const add=(ep,g)=>{ if(G36[ep]){ (window._NTW=window._NTW||[]).push([ep,G36[ep].length,g]); G36[ep].push(g); } };
+    add('S3-33',T(L.chain)); add('S3-25',T(L.tenX)); add('S3-96',T(L.tenthX)); add('S3-27',T(L.vPart)); add('S3-29',T(L.words)); }catch(e){}
 }
 
 // ===== manip2.js — 적은 엔진으로 많은 편을 덮는 '직접 해 보기'(구체적 조작) 엔진 (교수님 11/22 밤) =====
@@ -10183,6 +10246,7 @@ const CLOCK_EPS=new Set(['S6-09','S6-10','S6-11','S6-12','S6-13','S6-34','S6-35'
   /* 단계 이름표: 지금 문제가 어느 단계인지 작은 표로 보여 준다(오늘의 문제의 새 내용, 편 연습) */
   try{ const a=S&&S.acts&&S.acts[S.i], q=a&&a.q, stg=q?(q._stg!=null?q._stg:(S.mode==='ep36'&&!S.kt&&!S.diagRun&&window.ktStage?window.ktStage(q):null)):null, box=document.querySelector('.stage'); if(box&&stg!=null&&document.querySelector('.bubble .q')&&!box.querySelector('.kt-stg')){ const col=['#5BA85B','#4F8FD9','#E8873A','#B5541A'][stg]; box.insertAdjacentHTML('afterbegin',`<div class="kt-stg" style="display:flex;gap:5px;justify-content:center;margin:0 0 6px;font-family:Jua,sans-serif;font-size:.8rem">${window.KT_STAGE_NAME.map((n,i)=>`<span style="padding:2px 8px;border-radius:999px;border:1.5px solid ${i===stg?col:'#E3CFA8'};background:${i===stg?col:'transparent'};color:${i===stg?'#fff':'#B9A888'}">${n}</span>`).join('')}</div>`); } }catch(e){}
   return _r; }; }
+window._runSet=(acts,t,f)=>runSet(acts,t,f);
 
 /* ===== 교사가 옆에 없어도: 비계 사다리 · 보호자용 한 장 (core2.js 안쪽에 들어감, 로드맵 27번) ===== */
 /* ===== 비계 사다리 (로드맵 1단계-③) =====
@@ -10551,7 +10615,7 @@ try{ new MutationObserver(()=>placeBadge()).observe(document.getElementById('app
     document.querySelectorAll('.tf').forEach(f=>{ const n=lab(f); if(n&&names.has(n)&&!f._pick){ f._pick=1; f.style.cursor='pointer'; f.style.borderRadius='12px'; f.style.padding='4px'; f.setAttribute('role','button'); f.setAttribute('aria-label','보기 '+n); } }); };
   try{ new MutationObserver(()=>mark()).observe(document.body,{childList:true,subtree:true}); }catch(e){}
   document.addEventListener('click',e=>{ const t=e.target; if(!t||!t.closest) return; const isOpt=t.closest('.opts > .opt'), fig=t.closest('.tf');
-    if((isOpt||fig)&&Date.now()-shownAt<(window._tapLockMs==null?(((document.querySelector('.bubble .q')||document.querySelector('.bubble')||{}).textContent||'').length>45?800:350):window._tapLockMs)){ e.stopPropagation(); e.preventDefault(); return; }
+    if((isOpt||fig)&&Date.now()-shownAt<(window._tapLockMs==null?(((document.querySelector('.bubble .q, .qp-q')||document.querySelector('.bubble')||{}).textContent||'').length>45?800:350):window._tapLockMs)){ e.stopPropagation(); e.preventDefault(); return; }
     if(fig&&fig._pick&&!isOpt){ const n=lab(fig), b=[...document.querySelectorAll('.opts > .opt')].find(x=>x.textContent.trim()===n&&!x.disabled); if(b){ fig.style.outline='3px solid #E88A2C'; setTimeout(()=>{ try{ fig.style.outline=''; }catch(_){} },500); b.click(); } } },true); })();
 
 /* ===== 개념 카드 (로드맵 1단계-①) =====
