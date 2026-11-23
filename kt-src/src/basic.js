@@ -174,3 +174,50 @@ window.qpNb=t=>(/[가-힣]/.test(String(t||'').replace(/<[^>]+>/g,''))?String(t)
   try{ const add=(ep,g)=>{ if(G36[ep]){ (window._NTW=window._NTW||[]).push([ep,G36[ep].length,g]); G36[ep].push(g); } };
     add('S3-33',T(L.chain)); add('S3-25',T(L.tenX)); add('S3-96',T(L.tenthX)); add('S3-27',T(L.vPart)); add('S3-29',T(L.words)); }catch(e){}
 }
+
+/* ---------- 3-84. 일본 전국학력·학습상황조사(2022~2026) '해설'의 解答類型에서 가져온 오답 보기 ----------
+   해설은 문항마다 오답을 '어떤 생각에서 나왔는지'로 나눠 둔다(예: 저울 최소 눈금을 1 g·10 g으로 봄, 10% 증량을 0.1로 봄).
+   그 오답 생각을 그대로 보기로 쓰고, 문항 글·수·맥락은 새로 만든다. 학년은 우리 교육과정 차례에 맞춘다. */
+{ const S=GX_S, pk=a=>a[rnd(0,a.length-1)];
+  const Q4=(q,vis,ans,wr)=>{ const A=String(ans), s=new Set([A]), w=[]; for(const [v,c] of wr){ if(v==null) continue; const k=String(v); if(s.has(k)||/NaN|undefined/.test(k)) continue; s.add(k); w.push([k,c]); } if(w.length<3) return null; return cq(q,vis,A,w.slice(0,3)); };
+  const T=f=>()=>{ for(let t=0;t<30;t++){ const q=f(); if(q) return q; } return null; };
+  const won=n=>n.toLocaleString('ko-KR'), J={};
+  /* 4학년 소수의 덧셈: 몇의 몇 개로 보기 (2025 3(1): 0.1·1로 본 오답) */
+  J.unit=()=>{ const a=rnd(2,9), b=rnd(1,9); return Q4(`0.${a} + 0.0${b}를 계산하려고 해요. 두 수를 모두 '무엇이 몇 개'로 생각하면 쉽게 더할 수 있을까요?`,'',`0.01`,[['0.1','N4-24'],['1','N4-24'],['10',null],['0.001',null]]); };
+  /* 3학년 저울 눈금 (2025 4(3): 최소 눈금을 1 g, 10 g, 0.5 g으로 봄) */
+  J.scale=()=>{ const step=pk([5,20]), k=rnd(2,4); const base=pk([100,200,300]); const v=base+step*k; let g=`<line x1="20" y1="40" x2="300" y2="40" stroke="${S}" stroke-width="2"/>`; for(let i=0;i<=10;i++){ const x=20+i*28; g+=`<line x1="${x}" y1="${i%5?32:26}" x2="${x}" y2="40" stroke="${S}"/>`; if(i%5===0) g+=gxT(x,20,base+step*i,11); }
+    g+=`<polygon points="${20+k*28},44 ${14+k*28},58 ${26+k*28},58" fill="#C2412F"/>`;
+    return Q4('저울의 바늘이 가리키는 무게는 몇 g인가요?',cpWrap(cpSvg(g,320,64,320),`작은 눈금 한 칸이 몇 g인지 먼저 알아봐요`),v+' g',[[(base+k)+' g','G2-09'],[(base+10*k)+' g','D4-01'],[(base+k*(step===5?10:5))+' g',null],[(base+step*(k+1))+' g',null]]); };
+  /* 6학년 백분율 증량 (2025 4(4): 0.1·10배·110으로 봄) */
+  J.inc=()=>{ const p=pk([10,20,25,30]); return Q4(`세제 양을 ${p}% 늘렸어요. 늘린 뒤의 양은 처음 양의 몇 배일까요?`,'',String(1+p/100),[[String(p/100),'R6-06'],[String(p),'R6-04'],[String(100+p),'R6-04'],[String(p/10),'R6-04']]); };
+  /* 3학년 가운데 0이 있는 곱셈 (2022: 0을 무시하고 계산) */
+  J.zero=()=>{ const h=rnd(1,4), o=rnd(2,9), k=rnd(2,4); const n=h*100+o; return Q4(`${n} × ${k}를 계산하면?`,'',n*k,[[(h*10+o)*k,null],[h*k*100+o*k*10,null],[n*k+100,null],[h*100*k+o,'N1-12']]); };
+  /* 5학년 최소공배수 (2022: 두 수의 곱, 최대공약수, 공약수 중 최소, 공배수 여러 개) */
+  J.lcm=()=>{ const [a,b]=pk([[14,21],[6,10],[9,15],[12,18],[8,20],[10,15]]); const g=_m2gcd(a,b), l=_m2lcm(a,b); return Q4(`${a}와 ${b}의 최소공배수는?`.replace(/(\d)와/,(m,d)=>d+('013678'.includes(d)?'과':'와')),'',l,[[a*b,'N5-12'],[g,'N5-02'],[1,'N5-02'],[l*2,'N5-12']]); };
+  /* 6학년 백분율 계산 (2022 2(2): 40, 0.4, 0.04, 1000÷0.4) */
+  J.pct=()=>{ const tot=pk([800,1000,1200,1500]), p=pk([20,30,40,60]); const A=tot*p/100; return Q4(`${won(tot)}원짜리 물건값의 ${p}%는 얼마인가요?`,'',won(A)+'원',[[p+'원','R6-04'],[won(tot*p/1000)+'원','R6-04'],[won(Math.round(tot/(p/100)))+'원','R6-01'],[won(tot-A)+'원',null]]); };
+  /* 5학년 대응: 겹쳐 쌓는 의자 높이 (2023 1: 비례라고 잘못 봄) */
+  J.chair=()=>{ const h=pk([70,80,90]), d=pk([10,12,15]), n=rnd(4,7); const A=h+d*(n-1); return Q4(`의자 1개의 높이는 ${h} cm예요. 의자를 하나씩 겹쳐 쌓을 때마다 높이가 ${d} cm씩 높아져요. 의자 ${n}개를 쌓으면 높이는?`,'',A+' cm',[[h*n+' cm','R5-02'],[(h+d*n)+' cm','R5-01'],[d*n+' cm','R5-01'],[(h+d)*(n-1)+' cm',null]]); };
+  /* 3학년 몇십 × 몇십 (2023 2: 5×4=20 뒤 0을 하나만, 셋 붙임) */
+  J.tens=()=>{ const a=rnd(2,9), b=rnd(2,9); const p=a*b; if(p%10===0) return null; return Q4(`${a*10} × ${b*10}을 계산하면?`.replace(/(\d)을/,(m,d)=>d+('013678'.includes(d)?'을':'를')),'',p*100,[[p*10,'N3-33'],[p*1000,'N3-33'],[p,'N3-12'],[p*100+10,null]]); };
+  /* 3학년 '적다'라는 말에 끌린 뺄셈 (2024 1(1)) */
+  J.fewer=()=>{ const a=rnd(12,29), d=rnd(3,9); return Q4(`민수가 가진 사탕은 ${a}개예요. 민수는 누나보다 ${d}개 적게 가졌어요. 누나가 가진 사탕은 몇 개인가요?`,'',(a+d)+'개',[[(a-d)+'개','N1-13'],[(a*d)+'개','N6-06'],[d+'개',null],[(a+d+1)+'개',null]]); };
+  /* 6학년 원주 (2024 3(2): 지름의 2배, 4배로 봄) */
+  J.circ=()=>{ const d=pk([4,6,8,10,20]); return Q4(`지름이 ${d} cm인 원의 원주는 약 몇 cm일까요? (원주율 3.14)`,'',+(d*3.14).toFixed(2)+' cm',[[d*2+' cm','G6-12'],[d*4+' cm','G6-12'],[+(d/2*3.14).toFixed(2)+' cm','G6-12'],[+(d*d*3.14).toFixed(2)+' cm','G6-12']]); };
+  /* 6학년 (자연수)÷(소수) (2024 3(3): 나누는 수만 10배) */
+  J.divDec=()=>{ const q=rnd(3,9)*100, d=pk([0.2,0.4,0.5,0.6,0.8]); const n=Math.round(q*d); return Q4(`${n} ÷ ${d}를 계산하면?`,'',q,[[q/10,'N6-07'],[q*10,'N6-07'],[+(n*d).toFixed(1),'N6-06'],[q+1,null]]); };
+  /* 6학년 오각기둥의 면 (2024: 밑면을 하나로, 옆면을 둘로 봄) */
+  J.prism=()=>{ const k=pk([5,6,7]), nm={5:'오',6:'육',7:'칠'}[k]; return Q4(`${nm}각기둥의 면은 모두 몇 개인가요?`,'',(k+2)+'개',[[(k+1)+'개','G6-03'],[k+'개','G6-03'],[(k+3)+'개','G6-03'],[(2*k)+'개','G6-03']]); };
+  /* 6학년 정육면체 겉넓이 (2026: 정사각형 넓이만, 한 변×6, 부피) */
+  J.cube=()=>{ const a=rnd(2,7); return Q4(`한 모서리가 ${a} cm인 정육면체의 겉넓이는?`,'',a*a*6+' cm²',[[a*a+' cm²','G6-06'],[a*6+' cm²','G6-06'],[a*a*a+' cm²','G6-05'],[a*a*4+' cm²','G6-06']]); };
+  /* 5학년 반올림 (2026: 올림·버림, 다른 자리에서 반올림) */
+  J.round=()=>{ const n=rnd(2,9)*10000+rnd(1,9)*1000+rnd(1,4)*100+rnd(10,99); const th=Math.round(n/1000)*1000; return Q4(`${won(n)}을 반올림하여 천의 자리까지 나타내면?`,'',won(th),[[won(th+1000),'N5-14'],[won(Math.round(n/100)*100),'N5-14'],[won(Math.round(n/10)*10),'N5-14'],[won(Math.floor(n/10000)*10000),'N5-14']]); };
+  /* 4학년 자연수 − 소수 (2026: 자리마다 큰 수에서 작은 수, 받아내림 한 번만) */
+  J.decSub=()=>{ const w=rnd(3,9), x=rnd(101,(w-1)*100+99)/100; if(Math.round(x*100)%10===0) return null; const A=+(w-x).toFixed(2); const xs=x.toFixed(2).split(''); const naive=(w-+xs[0])+'.'+xs[2]+xs[3]; return Q4(`${w} − ${x.toFixed(2)}를 계산하면?`,'',A,[[naive,'N2-02'],[+(A+0.1).toFixed(2),'N2-08'],[+(A+1).toFixed(2),'N2-08'],[+(w-x/10).toFixed(3),'N4-03']]); };
+  /* 4학년 막대그래프: 약 몇 배 (2025 1(1): 차를 구함) */
+  J.times=()=>{ const a=rnd(3,8), k=pk([2,3]); const b=a*k; let g=''; [[a,'2005년'],[b,'2025년']].forEach(([v,l],i)=>{ g+=`<rect x="${60+i*90}" y="${110-v*4}" width="40" height="${v*4}" fill="#9CC9F0" stroke="${S}"/>`+gxT(80+i*90,126,l,11); }); for(let i=0;i<=8;i++) g+=`<line x1="40" y1="${110-i*12}" x2="230" y2="${110-i*12}" stroke="#E8D9BF"/>`+gxT(30,114-i*12,i*3,9);
+    return Q4('2025년의 수확량은 2005년의 약 몇 배인가요? (단위: 만 상자)',cpWrap(cpSvg(g,250,132,280),''),`약 ${k}배`,[[`약 ${b-a}배`,'D4-01'],[`약 ${k+1}배`,null],[`약 ${b}배`,null],[`약 ${a}배`,null]]); };
+  window._JP=J;
+  try{ const add=(ep,g)=>{ if(G36[ep]){ (window._NTW=window._NTW||[]).push([ep,G36[ep].length,g]); G36[ep].push(g); } };
+    [['S3-61','unit'],['S6-44','scale'],['S5-16','inc'],['S3-24','zero'],['S3-72','lcm'],['S5-16','pct'],['S5-12','chair'],['S3-25','tens'],['S2-04','fewer'],['S6-74','circ'],['S3-110','divDec'],['S6-59','prism'],['S6-76','cube'],['S3-87','round'],['S3-62','decSub'],['S4-10','times']].forEach(([e,k])=>add(e,T(J[k]))); }catch(e){}
+}
