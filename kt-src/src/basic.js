@@ -262,3 +262,15 @@ window.qpNb=t=>(/[가-힣]/.test(String(t||'').replace(/<[^>]+>/g,''))?String(t)
   try{ const add=(ep,g)=>{ if(G36[ep]){ (window._NTW=window._NTW||[]).push([ep,G36[ep].length,g]); G36[ep].push(g); } };
     add('S3-43',T(F.big)); add('S3-21',T(F.dec1)); add('S3-56',T(F.dec2)); add('S3-22',T(F.half)); }catch(e){}
 }
+
+/* ---------- 3-87. 영국 KS2 계산 시험(2026) 꼴: □가 식의 앞·가운데에 오는 문제(등호를 '답은'으로만 보지 않게) ---------- */
+{ const pk=a=>a[rnd(0,a.length-1)], won=n=>n.toLocaleString('ko-KR');
+  const Q4=(q,vis,ans,wr)=>{ const A=String(ans), s=new Set([A]), w=[]; for(const [v,c] of wr){ if(v==null) continue; const k=String(v); if(s.has(k)) continue; s.add(k); w.push([k,c]); } if(w.length<3) return null; return cq(q,vis,A,w.slice(0,3)); };
+  const T=f=>()=>{ for(let t=0;t<30;t++){ const q=f(); if(q) return q; } return null; }, K={};
+  K.expand=()=>{ const m=rnd(2,9), t=rnd(1,9), h=rnd(1,9), o=rnd(1,9); const n=m*1000000+t*10000+h*100+o; return Q4(`${won(n)} = ${won(m*1000000)} + □ + ${h*100} + ${o}에서 □에 알맞은 수는?`,'',won(t*10000),[[won(t*1000),'N4-15'],[won(t*100000),'N4-15'],[String(t),'N4-15'],[won(t*10),null]]); };
+  K.frontDiv=()=>{ const d=rnd(3,9), q=rnd(11,19); return Q4(`□ ÷ ${d} = ${q}에서 □에 알맞은 수는?`,'',d*q,[[d+q,'N3-30'],[q-d,'N3-30'],[d*q+d,null],[d*(q-1),null]]); };
+  K.leftEq=()=>{ const a=rnd(430,999), b=rnd(115,a-210); if(a%10>=b%10) return null; return Q4(`□ = ${a} − ${b}에서 □에 알맞은 수는?`,'',a-b,[[a+b,'R4-02'],[a-b+10,'N2-08'],[Math.abs(Math.floor(a/10)*10-Math.floor(b/10)*10)+Math.abs(a%10-b%10),'N2-02'],[a-b-10,null]]); };
+  window._KS=K;
+  try{ const add=(ep,g)=>{ if(G36[ep]){ (window._NTW=window._NTW||[]).push([ep,G36[ep].length,g]); G36[ep].push(g); } };
+    add('S3-40',T(K.expand)); add('S3-31',T(K.frontDiv)); add('S2-06',T(K.leftEq)); }catch(e){}
+}
