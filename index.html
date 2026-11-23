@@ -8759,6 +8759,26 @@ window.qpNb=t=>(/[가-힣]/.test(String(t||'').replace(/<[^>]+>/g,''))?String(t)
     [['S6-36','span'],['S3-58','len'],['S3-24','pack'],['S2-04','capt'],['S6-34','h24']].forEach(([e,k])=>add(e,T(V[k]))); }catch(e){}
 }
 
+/* ---------- 3-86. 프랑스 repères '눈금 있는 수직선에 수 놓기' 꼴: 눈금 한 칸의 크기를 바꿔 가며 묻는다 ---------- */
+{ const S=GX_S, pk=a=>a[rnd(0,a.length-1)];
+  const Q4=(q,vis,ans,wr)=>{ const A=String(ans), s=new Set([A]), w=[]; for(const [v,c] of wr){ if(v==null) continue; const k=String(v); if(s.has(k)||/NaN|e/.test(k)) continue; s.add(k); w.push([k,c]); } if(w.length<3) return null; return cq(q,vis,A,w.slice(0,3)); };
+  const fmt=(v,dp)=>dp?(+v.toFixed(dp)).toString():Math.round(v).toLocaleString('ko-KR');
+  const line=(start,step,per,k,dp)=>{ /* 큰 눈금 2개(첫 칸·마지막 칸)에만 수를 쓰고, 그 사이를 per칸으로 나눔. 화살표는 k번째 */ const W=280, u=W/(per*2); let g=`<line x1="14" y1="40" x2="${14+W}" y2="40" stroke="${S}" stroke-width="2"/>`; for(let i=0;i<=per*2;i++){ const x=14+i*u; g+=`<line x1="${x}" y1="${i%per?33:27}" x2="${x}" y2="${i%per?47:53}" stroke="${S}" stroke-width="${i%per?1:2}"/>`; if(i%per===0&&i<per*2) g+=gxT(x,70,fmt(start+step*i,dp),11); }
+    g+=`<polygon points="${14+k*u},26 ${8+k*u},12 ${20+k*u},12" fill="#C2412F"/>`; return cpWrap(cpSvg(g,W+28,76,320),''); };
+  const mk=(start,step,per,dp,grade)=>{ const k=rnd(1,per*2-1); if(k===per) return null; const v=start+step*k; const one=start+k*(dp?Math.pow(10,-dp):1), ten=start+step*10*k/((per===10)?10:1);
+    return Q4('화살표가 가리키는 수는 얼마인가요?',line(start,step,per,k,dp),fmt(v,dp),[[fmt(one,dp),'D4-01'],[fmt(start+step*(k+1),dp),'G2-09'],[fmt(start+step*10*k,dp),'N3-09'],[fmt(start+step*(k-1),dp),'G2-09']]); };
+  const F={
+    big:()=>{ const step=pk([1000,10000,100000]), per=pk([5,10]); const start=rnd(1,8)*step*per; return mk(start,step,per,0); },
+    dec1:()=>{ const per=pk([5,10]), step=per===5?0.2:0.1; return mk(rnd(0,3),step,per,1); },
+    dec2:()=>{ const per=pk([5,10]), step=per===5?0.02:0.01; return mk(rnd(1,4)+rnd(0,9)/10,step,per,2); },
+    half:()=>{ return mk(rnd(0,4)*2,0.5,2,1); }
+  };
+  const T=f=>()=>{ for(let t=0;t<40;t++){ const q=f(); if(q) return q; } return null; };
+  window._FR=F;
+  try{ const add=(ep,g)=>{ if(G36[ep]){ (window._NTW=window._NTW||[]).push([ep,G36[ep].length,g]); G36[ep].push(g); } };
+    add('S3-43',T(F.big)); add('S3-21',T(F.dec1)); add('S3-56',T(F.dec2)); add('S3-22',T(F.half)); }catch(e){}
+}
+
 // ===== manip2.js — 적은 엔진으로 많은 편을 덮는 '직접 해 보기'(구체적 조작) 엔진 (교수님 11/22 밤) =====
 // 원칙: ① 끌기 대신 누르기(터치 기기·저학년에서 안정) ② 판정은 [다 했어요]를 누른 때의 마지막 상태로만(중간 장난은 보지 않음)
 //       ③ 틀린 상태마다 오개념 코드(m.wrong()이 보기 이름을 돌려주고, 문제의 mis에 이름→코드) ④ 시간은 따지지 않음
