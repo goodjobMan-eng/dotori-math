@@ -2133,7 +2133,10 @@ hq('H5D4',[6],'자료와 가능성','S4-21',['비율그래프 비교','전체가
 function hqMake(h){ for(let t=0;t<30;t++){ let q=null; try{ q=h.gen(); }catch(e){ q=null; } if(!q||typeof q!=='object') continue; const A=String(q.ans); if(q.opts&&q.opts.length&&new Set(q.opts.map(String)).size!==q.opts.length) continue;
     q._hq=h.id; q._kcs=h.kcs; q._ep=h.ep; q._ti=-1; q._lvl='상(임시)'; if(h.nokt) q._kt=1; try{ nowrapExpr(q); }catch(e){} try{ if(h.grades[0]>=3||h.dom!=='수와 연산') cpaVis(h.ep,q); }catch(e){} q._cpaPic=null; delete q._svEp; return q; } return null; }
 window._HQ=HQ; window._hqMake=hqMake;
-window._hqPick=(dom,band,n=5)=>{ const gs=band>=5?[5,6]:band>=3?[3,4]:[1,2]; const pool=shuffle(HQ.filter(h=>h.dom===dom&&h.grades.some(g=>gs.includes(g)))); const out=[], seen=new Set(); for(let r=0;r<3&&out.length<n;r++) for(const h of pool){ if(out.length>=n) break; const q=hqMake(h); if(!q) continue; const k=String(q.q); if(seen.has(k)) continue; seen.add(k); out.push(q); } return out; };
+/* 11/23: 학년으로 고른 경우(gr) 그 학년 틀만. 틀이 3개가 안 되면 바로 아래 학년(이미 배운 내용) 틀로 채운다. 위 학년 것은 내지 않는다. */
+const hqPool=(dom,band,gr)=>{ if(!gr){ const gs=band>=5?[5,6]:band>=3?[3,4]:[1,2]; return HQ.filter(h=>h.dom===dom&&h.grades.some(g=>gs.includes(g))); } const own=HQ.filter(h=>h.dom===dom&&h.grades.includes(band)); if(own.length>=3||band<=1) return own; const low=HQ.filter(h=>h.dom===dom&&!h.grades.includes(band)&&h.grades.includes(band-1)); return own.concat(shuffle(low).slice(0,3-own.length)); };
+window._hqCount=(dom,band,gr)=>hqPool(dom,band,gr).length;
+window._hqPick=(dom,band,n=5,gr)=>{ const pool=shuffle(hqPool(dom,band,gr)); const out=[], seen=new Set(); for(let r=0;r<3&&out.length<n;r++) for(const h of pool){ if(out.length>=n) break; const q=hqMake(h); if(!q) continue; const k=String(q.q); if(seen.has(k)) continue; seen.add(k); out.push(q); } return out; };
 window._hqRec=(q,ok)=>{ try{ if(!q||!q._hq||q._hqDone) return; q._hqDone=1; const o=JSON.parse(localStorage.getItem('kt_hq')||'{}'), r=o[q._hq]=o[q._hq]||{n:0,ok:0}; r.n++; if(ok) r.ok++; localStorage.setItem('kt_hq',JSON.stringify(o)); }catch(e){} };
 
 
@@ -2804,3 +2807,19 @@ window.KT_STAGE_NAME=['만져 보기','기본 익히기','이야기 문제','도
   /* 맞혔을 때 작은 별·도토리가 튀어 오름(0.9초 뒤 스스로 사라짐, 누름을 막지 않음) */
   const burst=el=>{ try{ if(window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches) return; const r=el.getBoundingClientRect(), cx=r.left+Math.min(r.width/2,160), cy=r.top+10, E=['⭐','✨','🌰','⭐','✨','🍂','⭐','✨']; for(let i=0;i<8;i++){ const s=document.createElement('span'); s.className='kt-star'; s.textContent=E[i]; const a=(-150+i*17+Math.random()*10)*Math.PI/180, d=60+Math.random()*50; s.style.left=cx+'px'; s.style.top=cy+'px'; s.style.setProperty('--dx',(Math.cos(a)*d).toFixed(0)+'px'); s.style.setProperty('--dy',(Math.sin(a)*d).toFixed(0)+'px'); s.style.setProperty('--rot',(Math.random()*240-120).toFixed(0)+'deg'); s.style.animationDelay=(i*25)+'ms'; document.body.appendChild(s); setTimeout(()=>{ try{ s.remove(); }catch(e){} },1300); } }catch(e){} };
   new MutationObserver(ms=>{ for(const m of ms) for(const n of m.addedNodes){ if(n.nodeType===1&&n.classList&&n.classList.contains('fb')&&n.classList.contains('ok')&&!n._brst){ n._brst=1; burst(n); } } }).observe(document.body,{childList:true,subtree:true}); }catch(e){} })();
+
+/* ---------- 3-72. 맞혔을 때도 풀이를 볼 수 있게 (11/23 교사 의견: "찍어서 맞으면 어떻게 푸는지 모른다") ----------
+   정한 것(교육적 판단):
+   ① 맞힌 아이에게 풀이를 늘 펼쳐 보이지는 않는다 — 이미 아는 아이에게 설명을 읽히면 시간만 들고 흐름이 끊긴다. 대신 [풀이 보기] 단추를 늘 둔다(스스로 궁금할 때 펼침).
+   ② 찍은 것 같을 때는 스스로 펼친다 — 고르기 문제를 3초 안에 맞혔을 때(읽고 계산하기엔 너무 빠름). 조작·쓰기 문제는 찍어서 맞히기 어려우므로 단추만.
+   ③ 한 번 틀리고 맞힌 경우는 원래대로 도움말이 붙는다(위 answer 덧씌우기). 거기에도 단추를 둔다.
+   풀이를 펼쳐 본 것은 기록의 '받은 도움' 칸에 남기지 않는다(정답 뒤에 본 것이라 그 문제의 도움이 아님). */
+{ const GUESS_MS=3000;
+  const css=document.createElement('style'); css.textContent='.kt-solbtn{display:inline-block;margin:8px 8px 0 0;padding:9px 14px;border:2px solid #C9A46A;border-radius:14px;background:#FFF8E6;color:#6B4A1E;font-family:"Jua",sans-serif;font-size:1rem;cursor:pointer;touch-action:manipulation}.kt-solbox{margin-top:8px;text-align:left}.kt-solnote{font-size:.9rem;color:#7B5632;margin-top:6px}'; document.head.appendChild(css);
+  const attach=box=>{ try{ if(box._sol||typeof S==='undefined'||!S||S.mode!=='ep36') return; const a=S.acts&&S.acts[S.i], q=a&&a.q; if(!q||q.manip||typeof solveHTML!=='function') return; const msg=box.querySelector('.msg'); if(!msg||msg.querySelector('.solve')) return; box._sol=1;
+      const open=auto=>{ if(msg.querySelector('.kt-solbox')) return; msg.insertAdjacentHTML('beforeend',`<div class="kt-solbox">${auto?'<div class="kt-solnote">빨리 맞혔네요! 이렇게 풀었는지 한번 볼까요?</div>':''}${solveHTML(q)}</div>`); const b=msg.querySelector('.kt-solbtn'); if(b) b.remove(); };
+      const ms=q._t0?Date.now()-q._t0:99999, choice=!q.write&&!q.onMount, txt=String(q.q||'').replace(/<[^>]+>/g,'');
+      if(choice&&S.tries===0&&ms<GUESS_MS&&txt.length>=10) open(true);
+      else { msg.insertAdjacentHTML('beforeend','<br><button type="button" class="kt-solbtn">풀이 보기</button>'); msg.querySelector('.kt-solbtn').onclick=e=>{ e.stopPropagation(); open(false); }; } }catch(e){} };
+  new MutationObserver(ms=>{ for(const m of ms) for(const n of m.addedNodes){ if(n.nodeType!==1) continue; const bx=n.classList&&n.classList.contains('fb')&&n.classList.contains('ok')?n:(n.querySelector?n.querySelector('.fb.ok'):null); if(bx) setTimeout(()=>attach(bx),0); } }).observe(document.body,{childList:true,subtree:true});
+}

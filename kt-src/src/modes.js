@@ -4,9 +4,13 @@
 const PK='dotori-kt-pref';
 const pref=()=>Object.assign({why:false,band:0,pace:10,d12:null,seen:{}},J(PK,{}));
 const setPref=o=>{ const p=Object.assign(pref(),o); W(PK,p); return p; };
-const BANDS=[[1,'1~2학년 내용'],[3,'3~4학년 내용'],[5,'5~6학년 내용']];
-const bandName=b=>(BANDS.find(x=>x[0]===b)||[0,'내용 고르기'])[1];
+/* 11/23 교수님: 학년군(1~2·3~4·5~6)이 아니라 학년으로 고른다. pref.band에 학년(1~6)을 넣고 pref.gr=1로 표시한다.
+   gr 표시가 없는 옛 설정(band 1·3·5 = 학년군)은 다시 고를 때까지 예전처럼 움직인다. 1·2학년은 같은 엔진(영상편 차례)을 쓰므로 band<3으로 묶어 본다. */
+const BANDS=[[1,'1학년'],[2,'2학년'],[3,'3학년'],[4,'4학년'],[5,'5학년'],[6,'6학년']];
+const OLD_BAND={1:'1~2학년 내용',3:'3~4학년 내용',5:'5~6학년 내용'};
+const bandName=b=>!b?'내용 고르기':pref().gr?b+'학년':(OLD_BAND[b]||b+'학년');
 const EPO=[1,2,3].flatMap(c=>EP_ORDER[c]);
+const G2I=EP_ORDER[1].length+EP_ORDER[2].length;   /* 2학년 내용(3장)이 시작하는 자리 */
 const dstr=t=>{ const d=new Date(t); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; };
 function ptr(){ const p=pref(); if(p.d12!=null) return Math.max(0,Math.min(EPO.length-1,p.d12)); const best=load(); let i=EPO.findIndex(e=>best['EP'+e]==null); if(i<0) i=EPO.length-1; setPref({d12:i}); return i; }
 
@@ -49,12 +53,14 @@ function pieceVideo(c,L){ const card=!L.k&&typeof KCARDS!=='undefined'&&!!KCARDS
   if(card) return {kind:'card',c,key:'card:'+c,label:'개념 카드'};
   return {kind:'video',key:L.k,label:`${L.k} ${lecName(L.k)}`}; }
 /* 학년 막기(교수님 11/22): 기본은 수준에 따라 아래 학년으로도, 위 학년으로도 나아간다. 설정에서 '설정 학년보다 높은 내용 막기'를 켜면 푸는 학년 묶음(1~2 / 3~4 / 5~6)의 위 학년 내용은 내지 않는다. */
-const capG=()=>{ const P=pref(); return P.cap?((P.band||1)+1):9; }, kcG=k=>+((String(k).match(/^K[A-Z](\d)/)||[])[1]||0); try{ window._capG=capG; }catch(e){}
-function frontier(st){ const c=capG(); return Object.keys(LADDER).map(s=>{ const L=LADDER[s].filter(k=>kcG(k)<=c); if(!L.length) return null; return L.find(k=>!['숙달','추정'].includes(kcStatus(k,st)))||L[L.length-1]; }).filter(Boolean); }
+const capG=()=>{ const P=pref(); return P.cap?(P.gr?(P.band||1):((P.band||1)+1)):9; }, kcG=k=>+((String(k).match(/^K[A-Z](\d)/)||[])[1]||0); try{ window._capG=capG; }catch(e){}
+function frontier(st){ const c=capG(); return Object.keys(LADDER).map(s=>{ const L=LADDER[s].filter(k=>kcG(k)<=c); if(!L.length) return null; return L.find(k=>!['숙달','추정'].includes(kcStatus(k,st)))||L[L.length-1]; }).filter(Boolean)
+  /* 학년으로 고른 경우: 고른 학년까지의 내용이 남아 있으면 그것부터(3학년을 골랐는데 4학년 '규칙 찾기'가 먼저 나오던 것 막음). 그 학년 내용을 다 익힌 영역만 남으면 위 학년으로. */
+  .filter((k,i,A)=>{ const P=pref(); if(!P.gr||P.band<3) return true; const own=A.filter(x=>kcG(x)<=P.band&&!['숙달','추정'].includes(kcStatus(x,st))); return own.length?own.includes(k):true; }); }
 
 // 가볍게 풀기: 이미 아는 내용에서 5문제. 복습할 것이 있으면 먼저 넣는다.
 function startQuick(){ const P=pref(); if(!P.band) return bandPage(startQuick); const B=bag(), N=5; let g=0;
-  if(P.band===1){ for(const [k,f] of dueFacts()){ if(B.acts.length>=2) break; B.push(regenFact(k,f)); } const hi=ptr(); while(B.acts.length<N&&g++<80) B.push(qFromEp(EPO[rnd(0,hi)])); }
+  if(P.band<3){ for(const [k,f] of dueFacts()){ if(B.acts.length>=2) break; B.push(regenFact(k,f)); } const hi=ptr(); while(B.acts.length<N&&g++<80) B.push(qFromEp(EPO[rnd(0,hi)])); }
   else { const st=state(); misActs(B,1); const known=Object.values(LADDER).flat().filter(k=>kcG(k)<=capG()&&['숙달','추정','연습'].includes(kcStatus(k,st))), pool=known.length?known:Object.values(LADDER).map(l=>l[0]);
     while(B.acts.length<N&&g++<80){ const eps=epsOf(pool[rnd(0,pool.length-1)]); B.push(qFromEp36(eps[rnd(0,eps.length-1)])); } }
   runSet(shuffle(B.acts),'가볍게 풀기',{kt:'quick'}); }
@@ -64,8 +70,8 @@ function startQuick(){ const P=pref(); if(!P.band) return bandPage(startQuick); 
 function startDaily(opt){ const P=pref(); if(!P.band) return bandPage(startDaily); const N=P.pace||10, B=bag(); let g=0, video=null, n0=0;
   /* 계속 풀기(11/22): 이어서 풀 때는 복습 몫을 40%→20%로 줄이고 탐색 문제를 빼서, 통과한 아이는 다음 개념으로 빨리 넘어간다 */
   const cont=!!(opt&&opt.cont===true), RV=cont?.2:.4;
-  if(P.band===1&&!P.cap){ try{ const best=load(); if(EPO.every(e=>(best['EP'+e]??-1)>=8)){ setPref({band:3}); return startDaily(opt); } }catch(e){} }   /* 1~2학년 내용을 모두 마쳤으면 3~4학년 내용으로 올라감 */
-  if(P.band===1){ for(const [k,f] of dueFacts()){ if(B.acts.length>=Math.ceil(N*RV)) break; B.push(regenFact(k,f)); }
+  if(P.band<3&&!P.cap){ try{ const best=load(); if(EPO.every(e=>(best['EP'+e]??-1)>=8)){ setPref({band:3}); return startDaily(opt); } }catch(e){} }   /* 1~2학년 내용을 모두 마쳤으면 3~4학년 내용으로 올라감 */
+  if(P.band<3){ for(const [k,f] of dueFacts()){ if(B.acts.length>=Math.ceil(N*RV)) break; B.push(regenFact(k,f)); }
     const i=ptr(), cur=EPO[i], want=B.acts.length+Math.ceil((N-B.acts.length)*.7);
     while(B.acts.length<want&&g++<80) B.push(qFromEp(cur),'_new');
     while(B.acts.length<N&&g++<240) B.push(qFromEp(i>0?EPO[rnd(0,i-1)]:cur));
@@ -75,7 +81,7 @@ function startDaily(opt){ const P=pref(); if(!P.band) return bandPage(startDaily
     const fr=frontier(st); n0=B.acts.length; const usedEp=new Set();
     /* 새 내용은 한 편을 '직접 해 보기 → 기본 → 문장제 → 생각 넓히기' 차례로 낸다(11/22 밤). 그 편에 없는 단계는 건너뛰고, 자리가 남으면 다음 편으로 */
     while(B.acts.length<N&&g++<N*10){ const ep=nextEp(fr[g%fr.length],st); if(!ep) continue; if(!usedEp.has(ep)){ usedEp.add(ep); flowActs(B,ep,N-B.acts.length,st); } else { const q=qFromEp36(ep); if(q){ q._stg=window.ktStage(q); B.push(q,'_new'); } } } }
-  let acts=B.acts; if(P.band!==1){ const head=shuffle(acts.slice(0,n0)), tail=acts.slice(n0).map((a,k)=>[a,k]).sort((x,y)=>((x[0].q._stg??1)-(y[0].q._stg??1))||(x[1]-y[1])).map(x=>x[0]); acts=head.concat(tail); }
+  let acts=B.acts; if(P.band>=3){ const head=shuffle(acts.slice(0,n0)), tail=acts.slice(n0).map((a,k)=>[a,k]).sort((x,y)=>((x[0].q._stg??1)-(y[0].q._stg??1))||(x[1]-y[1])).map(x=>x[0]); acts=head.concat(tail); }
   runSet(acts,cont?'계속 풀기':'오늘의 문제',{kt:'daily'},video); }
 try{ window.__flowActs=(ep,room)=>{ const B=bag(); flowActs(B,ep,room,state()); return B.acts; }; }catch(e){}
 // 한 편의 문제를 단계 차례로 담는다: 조작 1 → 기본(자리의 40%쯤) → 문장제 → 여러 개념 1. 단계 안에서는 지금 가장 많이 알려 줄 문제(bestQ).
@@ -93,9 +99,9 @@ function flowActs(B,ep,room,st){ if(room<=0) return; const F=G36[ep]||[]; const 
     if(n<want[s]){ for(const i of shuffle(by[s].slice())){ if(n>=want[s]) break; for(let t=0;t<4&&n<want[s];t++){ try{ const q=F[i](); if(q&&!q.manip&&!q.onMount&&window.ktStage(q)===s){ q._ti=i; if(put(q,s)) n++; } }catch(e){ break; } } } } } }
 function finishDaily(S0){ const st=state(), t=dstr(Date.now());
   if(!st.daily||st.daily.d!==t){ st.streak=(st.daily&&st.daily.d===dstr(Date.now()-864e5))?(st.streak||0)+1:1; st.daily={d:t}; W(SK,st); }
-  if(pref().band===1){ const idx=S0.acts.map((a,k)=>a.q&&a.q._new?k:-1).filter(k=>k>=0); if(idx.length>=3){ const acc=idx.filter(k=>S0.results[k]).length/idx.length; const i=ptr(); setPref({d12:Math.max(0,Math.min(EPO.length-1,i+(acc>=.8?1:acc<.5?-1:0)))});
+  if(pref().band<3){ const idx=S0.acts.map((a,k)=>a.q&&a.q._new?k:-1).filter(k=>k>=0); if(idx.length>=3){ const acc=idx.filter(k=>S0.results[k]).length/idx.length; const i=ptr(); { const P0=pref(), top=(P0.cap&&P0.gr&&P0.band===1)?G2I-1:EPO.length-1; /* 1학년으로 고르고 '높은 학년 막기'면 2학년 내용으로 넘어가지 않음 */ setPref({d12:Math.max(0,Math.min(top,i+(acc>=.8?1:acc<.5?-1:0)))}); if(P0.gr&&P0.band===1&&!P0.cap&&i+1>=G2I&&acc>=.8) setPref({band:2}); }
       /* 1~2학년 마지막 편까지 통과하면 3~4학년 내용으로 넘어간다 */
-      if(i>=EPO.length-1&&acc>=.8){ setPref({band:3}); const s2=state(); Object.values(LADDER).flat().forEach(k=>{ if(+k[2]<3) s2.est[k]=1; }); W(SK,s2); } } } }
+      if(i>=EPO.length-1&&acc>=.8&&!pref().cap){ setPref({band:3}); const s2=state(); Object.values(LADDER).flat().forEach(k=>{ if(+k[2]<3) s2.est[k]=1; }); W(SK,s2); } } } }
 
 // 세트가 끝난 뒤: 내 방식에 맞는 버튼, 그리고 (켜 두었다면) 틀린 문제 돌아보기
 function ktResult(S0){ const box=document.querySelector('.result'); if(!box) return;
@@ -111,11 +117,11 @@ function ktResult(S0){ const box=document.querySelector('.result'); if(!box) ret
   if(pref().why&&w.length){ box.insertAdjacentHTML('beforeend',`<div style="text-align:left;margin-top:16px"><div class="kt-sec">틀린 문제 돌아보기</div><ul class="recent kt-list">${w.slice(0,10).map(x=>`<li><b>${esc(x.q)}</b><div class="kt-ex">내 답 <b>${esc(x.g||'?')}</b> → 정답 <b>${esc(x.a)}</b></div>${x.tip?`<div class="kt-tip">${x.tip}</div>`:''}</li>`).join('')}</ul></div>`); } }
 
 function bandPage(next){ hush(); app.className='wrap';
-  app.innerHTML=`<div class="top"><button class="back" id="back">← 처음</button><div class="crumb">어떤 내용을 풀까요?</div><span style="width:70px"></span></div>
-    <div class="stage"><div style="font-family:Jua;font-size:1.25rem;margin-bottom:12px">풀고 싶은 내용을 골라요. 나중에 바꿀 수 있어요.</div>
-    <div class="kt-modes" style="grid-template-columns:1fr">${BANDS.map(([b,n])=>`<button class="kt-mode kt-band" data-band="${b}"><b>${n}</b></button>`).join('')}</div></div>`;
+  app.innerHTML=`<div class="top"><button class="back" id="back">← 처음</button><div class="crumb">몇 학년 내용을 풀까요?</div><span style="width:70px"></span></div>
+    <div class="stage"><div style="font-family:Jua;font-size:1.25rem;margin-bottom:12px">풀고 싶은 학년을 골라요. 나중에 바꿀 수 있어요.</div>
+    <div class="kt-modes" style="grid-template-columns:1fr 1fr">${BANDS.map(([b,n])=>`<button class="kt-mode kt-band" data-band="${b}"><b>${n}</b></button>`).join('')}</div></div>`;
   document.getElementById('back').onclick=home;
-  app.querySelectorAll('[data-band]').forEach(x=>x.onclick=()=>{ const b=+x.dataset.band; setPref({band:b});
+  app.querySelectorAll('[data-band]').forEach(x=>x.onclick=()=>{ const b=+x.dataset.band; setPref({band:b,gr:1}); if(b===2){ if(ptr()<G2I) setPref({d12:G2I}); } else if(b===1){ if(ptr()>=G2I) setPref({d12:0}); }
     if(b>=3){ const st=state(); Object.values(LADDER).flat().forEach(k=>{ if(+k[2]<b) st.est[k]=1; else if(st.kc[k]==null) delete st.est[k]; }); W(SK,st); }
     (next||home)(); }); }
 
@@ -152,9 +158,9 @@ function setPage(){ hush(); app.className='wrap'; const P=pref();
 function hardPage(){ if(!pref().band) return bandPage(hardPage); hush(); app.className='wrap'; const b=pref().band;
   app.innerHTML=`<div class="top"><button class="back" id="back">← 처음</button><div class="crumb">도전 문장제</div><span style="width:70px"></span></div>
     <div class="stage"><div style="font-family:Jua;font-size:1.25rem;margin-bottom:4px">어느 영역에 도전할까요?</div><div style="font-size:.95rem;color:#7B5632;margin-bottom:12px">${bandName(b)} · 여러 개념을 함께 쓰는 문장제 5문제</div>
-    <div class="kt-modes" style="grid-template-columns:1fr">${DOMS.map((d,i)=>`<button class="kt-mode kt-band" data-dom="${i}"><b>${d}</b></button>`).join('')}</div></div>`;
+    <div class="kt-modes" style="grid-template-columns:1fr">${DOMS.map((d,i)=>{ let n=1; try{ n=window._hqCount(d,b,pref().gr); }catch(e){} return n?`<button class="kt-mode kt-band" data-dom="${i}"><b>${d}</b></button>`:''; }).join('')}</div></div>`;
   document.getElementById('back').onclick=home;
-  app.querySelectorAll('[data-dom]').forEach(x=>x.onclick=()=>{ const d=DOMS[+x.dataset.dom]; let qs=[]; try{ qs=window._hqPick(d,b,5); }catch(e){} if(!qs.length) return home(); runSet(qs.map(q=>({kind:'q',q})),'도전 문장제 · '+d,{kt:'hard',hard:1}); }); }
+  app.querySelectorAll('[data-dom]').forEach(x=>x.onclick=()=>{ const d=DOMS[+x.dataset.dom]; let qs=[]; try{ qs=window._hqPick(d,b,5,pref().gr); }catch(e){} if(!qs.length) return home(); runSet(qs.map(q=>({kind:'q',q})),'도전 문장제 · '+d,{kt:'hard',hard:1}); }); }
 window._hardPage=()=>hardPage();
 
 /* ---------- 10-3. 골라서 풀기: 영상이 있든 없든 학년 → 영역 → 단원 순서(계열)로 한 줄에 ---------- */
@@ -208,7 +214,7 @@ function gradePage(g){ if(g>capG()){ home(); try{ const n=document.querySelector
   document.getElementById('back').onclick=home;
   app.querySelectorAll('[data-g]').forEach(b=>b.onclick=()=>gradePage(+b.dataset.g));
   app.querySelectorAll('[data-gi]').forEach(b=>b.onclick=()=>{ const x=items[+b.dataset.gi]; if(x.ch) chapter(x.ch); else unit36(x.ui); }); }
-function hereGrade(){ const b=pref().band; if(!b) return 0; return b===1?CH_GRADE[chapterOf(EPO[ptr()])]||1:b; }
+function hereGrade(){ const b=pref().band; if(!b) return 0; return b<3?CH_GRADE[chapterOf(EPO[ptr()])]||1:b; }
 // 학년은 순서가 있는 길이다. 마을 길을 따라 그 학년의 장소 그림 여섯 장을 세운다.
 function gradesHTML(){ const here=hereGrade(), H=600, pts=[0,1,2,3,4,5].map(i=>[i%2?72:28,(i+.6)*H/6]);
   const d=pts.map((p,i)=>i?`S${(pts[i-1][0]+p[0])/2+(i%2?12:-12)},${p[1]-10} ${p[0]},${p[1]}`:`M${p[0]},${p[1]}`).join(' ');

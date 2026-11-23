@@ -408,6 +408,14 @@ h=h.replace(_a,"""<text x="4" y="29" font-size="13" font-weight="700">도토</te
 _a='<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">'
 assert h.count(_a)==1
 h=h.replace(_a,_a+'\n<meta name="color-scheme" content="only light">\n<meta name="supported-color-schemes" content="light">\n<style>:root{color-scheme:only light}</style>')
+# 다른 세션(Opus 5.5, 02458e7)이 index.html에 바로 고친 것을 원본에 옮김: 3학년 이상은 늘 숫자판, 자릿수 칸 없이 상자 하나(교수님 11/23)
+for _a,_b in [
+  ("<style>:root{color-scheme:only light}</style>", "<style>:root{color-scheme:only light}#wpad.g3 .wmode{display:none}</style>"),
+  ("if(!_m0) _m0=g>=3?'pad':'hand';", "if(!_m0) _m0=g>=3?'pad':'hand'; if(g>=3) _m0='pad'; host.classList.toggle('g3',g>=3); /* 3학년 이상은 늘 숫자판, 자릿수 칸 없이 상자 하나(교수님 11/23) */"),
+  ("||document.querySelectorAll('#visual .vgrp').length!==1)) return null", "||(g<3&&document.querySelectorAll('#visual .vgrp').length!==1))) return null"),
+  ("if(!mode) mode=g>=3?'pad':'hand';", "if(!mode) mode=g>=3?'pad':'hand'; if(g>=3) mode='pad';"),
+]:
+    assert h.count(_a)==1, (_a, h.count(_a)); h = h.replace(_a,_b)
 # 만든 사람 표시(교수님 11/23): 눈에 띄지 않게 코드 안에만
 h = h.replace('<head>', '<head>\n<!-- 도토리 숲 수학 퀴즈 · made by 굳잡맨(goodjobMan) · CC BY-NC 4.0 · 비영리·교육 목적, 출처를 밝히고 고쳐 써도 됩니다 -->\n<meta name="author" content="굳잡맨 (goodjobMan)">', 1)
 h = h.replace('</body>', '<script>/* gjm */(function(){try{Object.defineProperty(window,"__dotori",{value:Object.freeze({by:decodeURIComponent("%EA%B5%B3%EC%9E%A1%EB%A7%A8"),id:"goodjobMan",license:"CC BY-NC 4.0"}),enumerable:false});}catch(e){}})();</script>\n</body>', 1)

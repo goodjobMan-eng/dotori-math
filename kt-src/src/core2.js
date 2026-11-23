@@ -75,7 +75,10 @@ function probePool(st){ const b=pref().band||3, po=st.cpo||{}, hs=st.cph||{}, cv
 function probeTops(st){ const pool=probePool(st), inP=new Set(pool); const under=c=>{ const d1=CPC[c][2], d2=d1.flatMap(x=>CPC[x]?CPC[x][2]:[]); return new Set([...d1,...d2].filter(x=>inP.has(x))).size; };
   const pf=Object.keys(st.cpf||{}).filter(c=>CPC[c]&&!((st.cpo||{})[c]>=1)), hot=new Set(pf.flatMap(c=>{ const d1=CPC[c][2]; return [...d1,...d1.flatMap(x=>CPC[x]?CPC[x][2]:[])]; }));   /* 찔러서 틀린 갈래를 먼저 파 내려간다 */
   return pool.filter(c=>!pool.some(d=>CPC[d][2].includes(c))).map(c=>[under(c)+(hot.has(c)?10:0)+Math.random()*.5,c]).sort((a,b)=>b[0]-a[0]).map(x=>x[1]); }
-function probeQ(st,c){ let best=null, bv=-1; for(const {f,code} of shuffle(codesOfPiece(c).flatMap(code=>formsOf(code).map(f=>({f,code})))).slice(0,8)){ for(let t=0;t<4;t++){ let q; try{ q=G36[f.ep][f.i](); }catch(e){ break; }
+/* 11/23: 아래 학년 개념을 확인하는 문제라도, 문제 자체는 아이 학년까지의 편에서만 고른다(4학년에게 6학년 '원의 둘레' 문제가 확인용으로 나오던 것 막음). */
+function probeLim(){ const P=pref(); return P.gr?Math.max(3,P.band||3):((P.band||3)+1); }
+function epGradeOf(ep){ try{ const u=UNITS36[uix(ep)]; return u?+((u.title.match(/^(\d)-/)||[0,u.grade])[1]):9; }catch(e){ return 9; } }
+function probeQ(st,c){ let best=null, bv=-1; const lim=probeLim(); for(const {f,code} of shuffle(codesOfPiece(c).flatMap(code=>formsOf(code).map(f=>({f,code}))).filter(x=>epGradeOf(x.f.ep)<=lim)).slice(0,8)){ for(let t=0;t<4;t++){ let q; try{ q=G36[f.ep][f.i](); }catch(e){ break; }
       if(q&&!q.manip&&!q.onMount&&q.mis&&Object.values(q.mis).includes(code)){ q._ep=f.ep; q._ti=f.i; const v=qInfo(q,st); if(v>bv){ bv=v; best=q; } break; } } }
   if(best) best._probe=c; return best; }
 function pieceStage(st,c){ st.cpv=st.cpv||{}; const cp=st.cp||{}, hs=(st.cph||{})[c]||[]; const low=CPC[c]&&hs.length>=2&&cp[c]<.35; const v=st.cpv[c];
