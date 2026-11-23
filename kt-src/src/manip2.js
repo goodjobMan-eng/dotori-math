@@ -168,21 +168,27 @@ M2.qSalt=()=>{ const total=rndPick(100,200), pct=rndPick(10,20,30,40), step=tota
 
 /* ---------- E9. 소수점 찍기(소수의 곱셈·나눗셈) — 제미나이 제안(가벼운 화면으로 연산 편을 넓게 덮음) ---------- */
 // digits: 자연수끼리 계산한 결과의 숫자들(앞에 0을 채움). 숫자 사이를 눌러 소수점을 찍는다. pos: 정답 자리(앞에서 pos번째 숫자 뒤)
-M2.point=(digits,pos,alts)=>{ let at=0;   /* 0 = 아직 안 찍음 */
-  const o={ draw(){ let h=`<div style="display:flex;align-items:flex-end;justify-content:center;font-size:2rem;line-height:1">`; for(let i=0;i<digits.length;i++){ h+=`<span style="display:inline-block;min-width:26px;text-align:center;padding:4px 0;border-bottom:3px solid #C9A56B">${digits[i]}</span>`; if(i<digits.length-1) h+=m2b('g'+(i+1),at===i+1?'<b style="color:#D45F16;font-size:2rem">.</b>':'<span style="color:#D9C3A0">·</span>','min-width:40px;min-height:48px;padding:0;border-style:dashed;'+(at===i+1?'background:#FFD98A;border-color:#D45F16':'')); }
-      return h+`</div><div style="font-size:.9rem;color:#8A6A4A">숫자 사이를 눌러 소수점을 찍어요. 다시 누르면 지워져요.</div>`; },
-    on(a){ const i=+a.slice(1); at=at===i?0:i; }, check(){ return at===pos; },
-    wrong(){ if(!at) return null; return (alts&&alts[at])||'소수점의 자리가 달라요'; }, reveal(){ at=pos; }, goal:()=>({pos,alts:alts||{}}), state:()=>({at}) };
+/* 소수점 찍기 (11/23 다시 만듦 — 교수님: "오히려 오개념이 생기겠다", 제미나이 네온과 상의)
+   전: 자리를 맞추려고 0을 미리 채워 '0 8 7'을 보여 주고 사이를 누르게 함 → 정답이 '08.7'이라는 틀린 표기가 됨.
+   지금: 숫자만 놓고( 8 7 ) 그 앞·사이·뒤를 누른다. 앞을 누르면 그때 '0.'이 생겨 0.87, 한 칸 더 앞은 0.087, 사이는 8.7, 맨 뒤는 87(소수점 없음).
+   누를 곳은 답과 상관없이 늘 같은 개수(숫자 수 + 2)라서 자리 수가 답을 알려 주지 않는다. pos = 소수점 아래 자리 수. */
+M2.point=(digits,pos,alts)=>{ let at=-1; const D=String(digits).split(''), L=D.length;
+  const txt=s=>s<0?'':s===0?D.join(''):s<L?D.slice(0,L-s).join('')+'.'+D.slice(L-s).join(''):'0.'+'0'.repeat(s-L)+D.join('');
+  const o={ draw(){ const slot=(s,lab)=>m2b('g'+s,at===s?`<b style="color:#D45F16;font-size:${s===0?'1rem':'1.9rem'}">${lab}</b>`:`<span style="color:#C9B28A;font-size:${s===0?'.8rem':'1.4rem'}">${s===0?'점 없음':'·'}</span>`,'min-width:'+(s===0?52:44)+'px;min-height:50px;padding:0 1px;border-style:dashed;'+(at===s?'background:#FFE9B8;border-color:#D45F16':''));
+      let h=`<div style="display:flex;align-items:flex-end;justify-content:center;gap:2px;font-size:2rem;line-height:1">`+slot(L+1,'0.0')+slot(L,at===L+1?'':'0.');
+      for(let i=0;i<L;i++){ h+=`<span style="display:inline-block;min-width:22px;text-align:center;padding:4px 0;border-bottom:3px solid #C9A56B">${D[i]}</span>`; const s=L-1-i; h+=slot(s,s===0?'점 없음':'.'); }
+      return h+`</div><div style="font-size:1rem;color:#6B4A1E;margin-top:6px;min-height:1.5em">${at<0?'<span style="font-size:.9rem;color:#8A6A4A">소수점이 들어갈 자리를 눌러요. 다시 누르면 지워져요.</span>':`지금 만든 수: <b style="font-size:1.25rem;color:#D45F16">${txt(at)}</b>`}</div>`; },
+    on(a){ const i=+a.slice(1); at=at===i?-1:i; }, check(){ return at===pos; },
+    wrong(){ if(at<0) return null; return (alts&&alts[at])||'소수점의 자리가 달라요'; }, reveal(){ at=pos; },
+    goal:()=>{ const ws=Object.keys(alts||{}).map(Number).filter(x=>x!==pos); const w=ws.length?ws[0]:(pos===1?2:1); return {pos,alts:alts||{},taps:['g'+pos],mis:['g'+w],misName:(alts&&alts[w])||'소수점의 자리가 달라요'}; }, state:()=>({at:at<0?'_':at}) };
   const m=m2make(o); m._o=o; return m; };
 const _dstr=(n,d)=>d?(n/Math.pow(10,d)).toFixed(d):String(n);
-M2.qPointMul=()=>{ const da=rndPick(1,1,2), db=rndPick(0,1,1,2); if(da+db>3) return M2.qPointMul(); const A=da===1?rnd(2,9)+rndPick(0,0,10,20,30):rnd(2,9)+rndPick(0,10,20), B=db===0?rnd(2,9):db===1?rnd(2,9):rnd(2,9); const P=A*B; if(P%10===0) return M2.qPointMul();
-  const d=da+db, digits=String(P).padStart(d+1,'0').split(''), pos=digits.length-d, alts={}; const mx=digits.length-Math.max(da,db), ad=digits.length-Math.abs(da-db); if(mx!==pos&&mx>=1&&mx<digits.length) alts[mx]='소수 자릿수가 많은 쪽만 따랐어요'; for(let i=1;i<digits.length;i++) if(i!==pos&&!alts[i]) alts[i]='소수점의 자리가 달라요';
-  return m2q(`${A} × ${B} = ${P} 이에요. ${_dstr(A,da)} × ${_dstr(B,db)} 의 곱이 되도록 소수점을 찍어 보세요.`,`곱하는 두 수의 소수점 아래 자리 수를 더한 만큼(${da} + ${db} = ${d}자리) 소수점 아래 자리가 생겨요.`,M2.point(digits,pos,alts),`${_dstr(A,da)} × ${_dstr(B,db)} = ${_dstr(P,d)}`,{'소수 자릿수가 많은 쪽만 따랐어요':'N5-07','소수점의 자리가 달라요':'N5-07'}); };
-M2.qPointDiv=()=>{ const d=rndPick(1,1,2), n=rnd(2,9), Q=d===1?rnd(12,98):rnd(12,98), A=Q*n; if(Q%10===0||A>=1000) return M2.qPointDiv(); const digits=String(Q).padStart(d+1,'0').split(''), pos=digits.length-d, alts={}; for(let i=1;i<digits.length;i++) if(i!==pos) alts[i]='소수점의 자리가 달라요';
-  if(digits.length<3&&d===1) { digits.unshift('0'); return _m2PointDivFix(d,n,Q,A); }
-  return m2q(`${A} ÷ ${n} = ${Q} 이에요. ${_dstr(A,d)} ÷ ${n} 의 몫이 되도록 소수점을 찍어 보세요.`,`나누어지는 수가 ${Math.pow(10,d)}분의 1이 되면 몫도 ${Math.pow(10,d)}분의 1이 돼요.`,M2.point(digits,pos,alts),`${_dstr(A,d)} ÷ ${n} = ${_dstr(Q,d)}`,{'소수점의 자리가 달라요':'N6-07'}); };
-const _m2PointDivFix=(d,n,Q,A)=>{ const digits=String(Q).padStart(d+2,'0').split(''), pos=digits.length-d, alts={}; for(let i=1;i<digits.length;i++) if(i!==pos) alts[i]='소수점의 자리가 달라요';
-  return m2q(`${A} ÷ ${n} = ${Q} 이에요. ${_dstr(A,d)} ÷ ${n} 의 몫이 되도록 소수점을 찍어 보세요. (맨 앞의 0은 자리를 맞추려고 채운 거예요.)`,`나누어지는 수가 ${Math.pow(10,d)}분의 1이 되면 몫도 ${Math.pow(10,d)}분의 1이 돼요.`,M2.point(digits,pos,alts),`${_dstr(A,d)} ÷ ${n} = ${_dstr(Q,d)}`,{'소수점의 자리가 달라요':'N6-07'}); };
+M2.qPointMul=()=>{ const da=rndPick(1,1,2), db=rndPick(0,1,1,2); if(da+db>3) return M2.qPointMul(); const A=da===1?rnd(2,9)+rndPick(0,0,10,20,30):rnd(2,9)+rndPick(0,10,20), B=rnd(2,9); const P=A*B; if(P%10===0) return M2.qPointMul();
+  const d=da+db, L=String(P).length, alts={}, mx=Math.max(da,db); if(d>L+1) return M2.qPointMul(); if(mx!==d) alts[mx]='소수 자릿수가 많은 쪽만 따랐어요'; alts[0]=alts[0]||'소수점을 찍지 않았어요'; for(let i=1;i<=L+1;i++) if(i!==d&&!alts[i]) alts[i]='소수점의 자리가 달라요'; delete alts[d];
+  return m2q(`${A} × ${B} = ${P}를 보고, ${_dstr(A,da)} × ${_dstr(B,db)}의 값이 되도록 소수점 자리를 눌러 보세요.`,`곱하는 두 수의 소수점 아래 자리 수를 더한 만큼(${da} + ${db} = ${d}자리) 소수점 아래 자리가 생겨요.`,M2.point(String(P),d,alts),`${_dstr(A,da)} × ${_dstr(B,db)} = ${_dstr(P,d)}`,{'소수 자릿수가 많은 쪽만 따랐어요':'N5-07','소수점의 자리가 달라요':'N5-07','소수점을 찍지 않았어요':'N5-07'}); };
+M2.qPointDiv=()=>{ const d=rndPick(1,1,2), n=rnd(2,9), Q=rnd(12,98), A=Q*n; if(Q%10===0||A>=1000||A%10===0) return M2.qPointDiv(); /* A가 0으로 끝나면 2.70처럼 어색한 소수가 됨 */ const L=String(Q).length, alts={0:'소수점을 찍지 않았어요'}; for(let i=1;i<=L+1;i++) if(i!==d) alts[i]='소수점의 자리가 달라요';
+  const a=A/Math.pow(10,d), est=a>=10?Math.round(a/10)*10:a>=1?Math.round(a):null;
+  return m2q(`${A} ÷ ${n} = ${Q}를 보고, ${_dstr(A,d)} ÷ ${n}의 몫이 되도록 소수점 자리를 눌러 보세요.`,(est&&est>=n?`어림해 봐요. ${_dstr(A,d)}는 ${est}쯤이니까 몫은 ${est} ÷ ${n}쯤이 되어야 해요. `:'')+`나누어지는 수가 ${Math.pow(10,d)}분의 1이 되면 몫도 ${Math.pow(10,d)}분의 1이 돼요.`,M2.point(String(Q),d,alts),`${_dstr(A,d)} ÷ ${n} = ${_dstr(Q,d)}`,{'소수점의 자리가 달라요':'N6-07','소수점을 찍지 않았어요':'N6-07'}); };
 /* ---------- 편에 넣기(맨 끝에 추가) ---------- */
 try{ const add=(ep,g)=>{ if(G36[ep]&&g){ (window._NTW=window._NTW||[]).push([ep,G36[ep].length,g]); G36[ep].push(g); } };
   add('S2-08',M2.qShare); add('S2-09',M2.qMeasure); add('S2-11',M2.qShare); add('S2-11',M2.qMeasure); add('S2-10',M2.qBuild); add('S3-29',M2.qShareRem); add('S3-29',M2.qMeasureRem); add('S3-30',M2.qShareRem); add('S3-33',M2.qMeasureRem);
