@@ -482,6 +482,17 @@ h = h.replace("unit(6,'6-2 원기둥·원뿔·구, 원의 넓이',[", "unit(6,'6
 h = h.replace("'6-2 원기둥·원뿔·구, 원의 넓이':'KG6-4'", "'6-2 원의 넓이, 원기둥·원뿔·구':'KG6-4'")
 h = h.replace("GC18:['S6-74','S6-75'],GC19:['S6-62','S6-63']", "GC18:['S6-74','S6-75'],GC19:['S6-62','S6-63']")
 
+# 각도기 끌기(교수님 11/24: 눈금이 작아 안 보임, 실제처럼 뒤집고 싶음) → [각도기 뒤집기]·[돋보기] 단추
+_a = """<g id="prot" transform="translate(180,390)" style="cursor:grab">${pr}</g></svg><div class="hint" style="text-align:center">파란 각도기를 끌어서 가운데 점을 각의 꼭짓점에 맞춰요</div>`;"""
+assert h.count(_a) == 1, 'prot vis'
+h = h.replace(_a, """<g id="prot" transform="translate(180,390)" style="cursor:grab"><g id="protf">${pr}</g></g></svg><div style="display:flex;gap:8px;justify-content:center;margin:6px 0"><button type="button" class="m2b" id="pflip" style="min-height:44px;padding:6px 14px;border-radius:12px;border:2.5px solid #C9A56B;background:#fff;font-family:Jua,sans-serif;font-size:1rem;color:#4A2E14">↔ 각도기 뒤집기</button><button type="button" class="m2b" id="pzoom" style="min-height:44px;padding:6px 14px;border-radius:12px;border:2.5px solid #C9A56B;background:#fff;font-family:Jua,sans-serif;font-size:1rem;color:#4A2E14">🔍 눈금 크게 보기</button></div><div class="hint" style="text-align:center">파란 각도기를 끌어서 가운데 점을 각의 꼭짓점에 맞춰요. 눈금이 작으면 [눈금 크게 보기]를 눌러요</div>`;""")
+_a = """q.onMount=root=>{ const svg=root.querySelector('svg.pdrag'), g=svg.querySelector('#prot'); let px=180, py=390, off=null;"""
+assert h.count(_a) == 1, 'prot mount'
+h = h.replace('<svg class="pdrag" viewBox="0 0 360 400" style="width:100%', '<svg class="pdrag" viewBox="0 0 360 400" style="overflow:hidden;width:100%', 1)
+h = h.replace(_a, _a + """ let flip=false, zoom=false; const gf=svg.querySelector('#protf'); const fb=root.querySelector('#pflip'), zb=root.querySelector('#pzoom');
+    if(fb) fb.onclick=()=>{ flip=!flip; /* 뒤집으면 눈금이 거꾸로 읽히는 것과 같다: 바깥·안쪽 눈금 수가 서로 바뀜(글자는 바로 보이게) */ gf.querySelectorAll('text').forEach(t=>{ t.textContent=180-(+t.textContent); }); fb.style.borderColor=flip?'#E8743B':'#C9A56B'; };
+    if(zb) zb.onclick=()=>{ zoom=!zoom; if(zoom){ const tx=vx+150*Math.cos(a), ty=vy-150*Math.sin(a); const w=150, hh=167; svg.setAttribute('viewBox',`${Math.max(0,Math.min(360-w,tx-w/2)).toFixed(1)} ${Math.max(0,Math.min(400-hh,ty-hh/2)).toFixed(1)} ${w} ${hh}`); zb.textContent='🔍 원래 크기로'; zb.style.borderColor='#E8743B'; } else { svg.setAttribute('viewBox','0 0 360 400'); zb.textContent='🔍 눈금 크게 보기'; zb.style.borderColor='#C9A56B'; } };""")
+
 # 만든 사람 표시(교수님 11/23): 눈에 띄지 않게 코드 안에만
 h = h.replace('<head>', '<head>\n<!-- 도토리 숲 수학 퀴즈 · made by 굳잡맨(goodjobMan) · CC BY-NC 4.0 · 비영리·교육 목적, 출처를 밝히고 고쳐 써도 됩니다 -->\n<meta name="author" content="굳잡맨 (goodjobMan)">', 1)
 h = h.replace('</body>', '<script>/* gjm */(function(){try{Object.defineProperty(window,"__dotori",{value:Object.freeze({by:decodeURIComponent("%EA%B5%B3%EC%9E%A1%EB%A7%A8"),id:"goodjobMan",license:"CC BY-NC 4.0"}),enumerable:false});}catch(e){}})();</script>\n</body>', 1)
