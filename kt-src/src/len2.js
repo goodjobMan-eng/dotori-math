@@ -97,3 +97,45 @@ ADD('S6-81', MT([
   ['색연필의 길이는 약 몇 cm일까요?','약 15 cm',[['약 15 m','G3-07'],['약 150 cm','G3-07'],['약 1 cm','G3-07']]],
   ['지우개의 길이는 약 몇 cm일까요?','약 4 cm',[['약 4 m','G3-07'],['약 40 cm','G3-07']]],
   ['손가락 한 마디의 너비에 가장 가까운 길이는?','약 1 cm',[['약 10 cm','G3-07'],['약 1 m','G3-07']]]]));
+
+/* ===== 3-99b. 자로 직접 재기·긋기 조작(교수님 11/24: "자로 직접 재는 활동 필요") =====
+   ① 자를 끌어 0을 연필 끝에 맞추고 재는데, 끝이 눈금 사이면 가까운 눈금 '약 □ cm'
+   ② 자를 사용하여 □ cm인 선 긋기: 자를 끌어 0을 점에 맞추고, 끝낼 눈금을 눌러 선을 긋는다 */
+function _l2rulerG(R,N,u,y){ let g=`<g class="rul" style="cursor:grab"><rect x="${R-8}" y="${y}" width="${N*u+16}" height="40" rx="4" fill="#FFF3C4" stroke="#B5701F" stroke-width="2"/>`;
+  for(let i=0;i<=N;i++){ g+=`<line x1="${R+i*u}" y1="${y}" x2="${R+i*u}" y2="${y+18}" stroke="#4A2E14" stroke-width="${i===0?3:1.8}"/><text x="${R+i*u}" y="${y+34}" font-size="12" font-weight="700" text-anchor="middle" fill="${i===0?'#D45F16':'#4A2E14'}">${i}</text>`; if(i<N) g+=`<line x1="${R+i*u+u/2}" y1="${y}" x2="${R+i*u+u/2}" y2="${y+9}" stroke="#4A2E14" stroke-width="1"/>`; }
+  return g+'</g>'; }
+const _l2pt=(svg,e)=>{ const r=svg.getBoundingClientRect(), vb=svg.viewBox.baseVal; return {x:(e.clientX-r.left)*vb.width/r.width, y:(e.clientY-r.top)*vb.height/r.height}; };
+
+/* ① 약 □ cm 재기 */
+function measureApprox(Lf,start){ const u=26, N=12, W=u*(N+3), near=Math.round(Lf), far=Lf>near?near+1:near-1; let rx=0.5, ans=0;
+  const draw=()=>pencilSvg(10+start*u,Lf,u,14)+_l2rulerG(10+rx*u,N,u,44)+`<text x="${W/2}" y="100" font-size="12" text-anchor="middle" fill="#8A6A4A">↔ 자를 끌어서 옮겨요</text>`;
+  const upd=root=>{ root.querySelector('svg.mmeas2').innerHTML=draw(); root.querySelector('#mval2').textContent=ans; };
+  return { html:`<svg class="mmeas2" viewBox="0 0 ${W} 104" style="width:100%;max-width:380px;touch-action:none">${draw()}</svg><div style="display:flex;align-items:center;justify-content:center;gap:8px;margin-top:6px;font-family:Jua,sans-serif;font-size:1.25rem"><span>연필의 길이: 약</span><button class="ghost" id="mminus2" style="width:44px;height:44px;font-size:1.4rem">−</button><b id="mval2" style="min-width:30px;text-align:center;font-size:1.6rem">0</b><button class="ghost" id="mplus2" style="width:44px;height:44px;font-size:1.4rem">+</button><span>cm</span></div>`,
+    mount(root){ const svg=root.querySelector('svg.mmeas2'); let grab=null;
+      svg.addEventListener('pointerdown',e=>{ e.preventDefault(); grab=_l2pt(svg,e).x/u-rx; svg.setPointerCapture(e.pointerId); });
+      svg.addEventListener('pointermove',e=>{ if(grab==null) return; rx=Math.max(-0.5,Math.min(3,Math.round((_l2pt(svg,e).x/u-grab)*2)/2)); upd(root); });
+      const end=()=>{ grab=null; }; svg.addEventListener('pointerup',end); svg.addEventListener('pointercancel',end);
+      root.querySelector('#mminus2').onclick=()=>{ ans=Math.max(0,ans-1); upd(root); }; root.querySelector('#mplus2').onclick=()=>{ ans=Math.min(N,ans+1); upd(root); }; },
+    check:()=>ans===near, state:()=>`${ans}@${rx}`,
+    mcode:()=>{ if(ans===far) return 'G2-19'; const endRead=start+Lf-rx; if(Math.abs(rx-start)>0.01&&ans===Math.round(endRead)) return 'G2-08'; return null; },
+    reveal(){ rx=start; ans=near; const r=document.getElementById('manip'); if(r) upd(r); } }; }
+ADD('S6-15', ()=>{ const L=rnd(4,8), Lf=L+rndPick(0.3,-0.3), start=rndPick(1,1.5,2); return MQ('자를 옮겨서 연필의 길이를 재어 보세요. 연필 끝이 눈금 사이에 있으면 가까운 눈금을 읽어요.','자의 0을 연필의 한쪽 끝에 맞추고, 다른 쪽 끝이 어느 눈금에 더 가까운지 봐요.',measureApprox(Lf,start),`약 ${Math.round(Lf)} cm`); });
+
+/* ② □ cm 선 긋기 */
+function drawLineManip(L,dot){ const u=26, N=10, W=u*(N+4); let rx=0.5, endI=null;
+  const dotX=10+dot*u, R=()=>10+rx*u;
+  const draw=()=>{ let g=`<circle cx="${dotX}" cy="34" r="5" fill="#D45F16"/><text x="${dotX}" y="20" font-size="12" text-anchor="middle" fill="#D45F16" font-weight="700">점 ㄱ</text>`;
+    if(endI!=null){ const ex=R()+endI*u; g+=`<line x1="${dotX}" y1="34" x2="${ex}" y2="34" stroke="#2F7DD6" stroke-width="4" stroke-linecap="round"/><circle cx="${ex}" cy="34" r="4" fill="#2F7DD6"/>`; }
+    return g+_l2rulerG(R(),N,u,44)+`<text x="${W/2}" y="100" font-size="12" text-anchor="middle" fill="#8A6A4A">자를 끌어 옮기고, 선을 끝낼 눈금을 눌러요</text>`; };
+  const upd=root=>{ root.querySelector('svg.mline').innerHTML=draw(); };
+  const lenNow=()=>endI==null?null:(R()+endI*u-dotX)/u;
+  return { html:`<svg class="mline" viewBox="0 0 ${W} 104" style="width:100%;max-width:380px;touch-action:none">${draw()}</svg>`,
+    mount(root){ const svg=root.querySelector('svg.mline'); let st=null;
+      svg.addEventListener('pointerdown',e=>{ e.preventDefault(); const p=_l2pt(svg,e); st={x:p.x,grab:p.x/u-rx,drag:false}; svg.setPointerCapture(e.pointerId); });
+      svg.addEventListener('pointermove',e=>{ if(!st) return; const p=_l2pt(svg,e); if(Math.abs(p.x-st.x)>6) st.drag=true; if(st.drag){ rx=Math.max(-0.5,Math.min(4,Math.round((p.x/u-st.grab)*2)/2)); endI=null; upd(root); } });
+      svg.addEventListener('pointerup',e=>{ if(st&&!st.drag){ const p=_l2pt(svg,e); const i=Math.round((p.x-R())/u); if(i>=1&&i<=N){ endI=i; upd(root); } } st=null; });
+      svg.addEventListener('pointercancel',()=>{ st=null; }); },
+    check:()=>endI!=null&&Math.abs(R()-dotX)<0.01&&endI===L, state:()=>`${endI}@${rx}`,
+    mcode:()=>{ if(endI==null) return null; if(Math.abs(R()-dotX)>0.01){ if(Math.abs(R()-8-dotX)<u*0.3) return 'G2-18'; if(endI===L) return 'G2-08'; } if(endI===L+1||Math.abs(lenNow()-(L+1))<0.01) return 'G2-09'; return null; },
+    reveal(){ rx=dot; endI=L; const r=document.getElementById('manip'); if(r) upd(r); } }; }
+ADD('S6-15', ()=>{ const L=rnd(3,6), dot=rndPick(2.5,3,3.5); return MQ(`자를 사용하여 점 ㄱ에서 시작하는 길이가 ${L} cm인 선을 그어 보세요.`,'자의 눈금 0을 점 ㄱ에 맞추고, 눈금 '+L+'까지 선을 그어요.',drawLineManip(L,dot),`${L} cm인 선`); });
