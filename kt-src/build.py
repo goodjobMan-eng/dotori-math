@@ -427,6 +427,11 @@ _i = h.index(_vp['videos_start']); _j = h.index('\n};', _i) + 3
 h = h[:_i] + _vp['videos'] + h[_j:]
 _l36 = [l for l in h.split('\n') if l.startswith('const VIDEOS36=')]; assert len(_l36) == 1
 h = h.replace(_l36[0], _vp['videos36'])
+# 새 시즌 1(다시 만든 1~2학년 51편) 영상 — S1-NN = 앱 EPnn. 옛 EP01~09 영상(비공개 예정)은 새 것으로 바꿈 (11/25)
+_vs=_re.search(r'const VIDEOS = \{\n(.*?)\n\}', h, _re.S); _body=_vs.group(1)
+_body=_re.sub(r'\n  EP\d\d: "[^"]*",','',_body)
+_body+= ''.join(f'\n  EP{k}: "https://youtube.com/shorts/{v}",' for k,v in sorted(_vp.get('season1',{}).items()))
+h=h[:_vs.start(1)]+_body+h[_vs.end(1):]
 # 영상 연결 바로잡기(11/24): 대본은 S5-04 = 내가 만든 규칙(1-2), S5-05 = 덧셈표·곱셈표(2-2)로 번호를 바꿨지만 앱 편 번호는 옛 번호 → 영상 주소를 내용에 맞게 맞바꿈
 import re as _re2
 _m=_re2.search(r'const VIDEOS36=(\{.*?\});', h); _v=_json.loads(_m.group(1))
