@@ -43,7 +43,12 @@ function checkActs(B,c){ const g0=+CPC[c][1][0], gradeOf=ep=>{ const u=UNITS36[u
 // 강의 효과를 견줄 수 있게, 비어 있는 조각이 확정되면 (익명 번호 + 조각)으로 정해지는 절반은 강의 먼저(A), 절반은 문제 먼저(B)로 나눈다.
 // 두 쪽 모두 '확정 직후 그 조각의 문제 2개'를 푼다(A는 강의를 본 뒤, B는 보기 전). B도 그 두 문제에서 하나라도 틀리면 다음 세트에서 강의를 본다.
 const armOf=c=>{ let h=0; for(const ch of did()+c) h=(h*31+ch.charCodeAt(0))>>>0; return h%2?'B':'A'; };
-function lecPlan(st,c){ st.lec=st.lec||{}; let L=st.lec[c]; if(!L) L=st.lec[c]={arm:armOf(c),mr:[],k:(CPL[c]||[]).find(lecHas)||''}; return L; }
+/* 코드별 강의(11/24, 교수·학습·평가 일체화): 한 조각에 여러 학년 내용이 묶인 경우(GC03 길이·들이·무게), 아이가 실제로 낸 오개념에 맞는 편의 영상을 먼저 */
+const CODE_LEC={'G1-05':['S6-07'],'G1-06':['S6-08'],'G2-15':['S6-08'],'G2-16':['S6-08'],'G2-08':['S6-15'],'G2-09':['S6-15','S6-14'],'G2-18':['S6-15'],'G2-19':['S6-15'],'G2-22':['S6-15'],
+  'G2-20':['S6-81','S6-16'],'G2-21':['S6-16','S6-81'],'G2-13':['S6-16'],'G2-17':['S6-16','S6-15']};
+const lecByCode=c=>{ try{ const x=report().mis.find(m=>MISC[m.c]&&MISC[m.c][0][0]===c&&CODE_LEC[m.c]); return x?(CODE_LEC[x.c].find(lecHas)||''):''; }catch(e){ return ''; } };
+function lecPlan(st,c){ st.lec=st.lec||{}; let L=st.lec[c]; if(!L) L=st.lec[c]={arm:armOf(c),mr:[],k:lecByCode(c)||(CPL[c]||[]).find(lecHas)||''}; return L; }
+try{ window._lecByCode=lecByCode; }catch(e){}
 function pieceVideo(c,L){ const card=!L.k&&typeof KCARDS!=='undefined'&&!!KCARDS[c];   /* 강의 영상이 없는 조각은 개념 카드가 영상 자리를 대신한다 */
   /* 영상을 본 날이 지났는데 이 조각이 또 비어 있다고 확정되면, 같은 영상을 다시 틀지 않고 다른 방법(개념 카드)으로 한 번 더 */
   if(L.v&&L.v!=='skip'&&L.v!==dstr(Date.now())&&!L.cv&&typeof KCARDS!=='undefined'&&KCARDS[c]){ L.cv=dstr(Date.now()); return {kind:'card',c,why:'again',key:'card:'+c,label:'개념 카드'}; }

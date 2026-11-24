@@ -112,10 +112,12 @@ sub("[`${a}%`,'D6-03']]); });", "[`${a}%`,'D6-03']], [`${100-b}%`]); });", 1)
 sub("[[`${2*(a+b)} cm²`,'G5-01'],[`${a+b} cm²`,'G5-01']]); },", "[[`${2*(a+b)} cm²`,'G5-01'],[`${a+b} cm²`,'G5-01']], [`${a*b+a} cm²`]); },", 1)
 
 
-out = '\n'.join(lines) + open('src/bank2.js', encoding='utf-8').read() + open('src/mis.js', encoding='utf-8').read() + open('src/tags3.js', encoding='utf-8').read() + open('src/basic.js', encoding='utf-8').read() + open('src/kfix.js', encoding='utf-8').read() + open('src/manip2.js', encoding='utf-8').read() + open('src/cpiece.js', encoding='utf-8').read() + open('src/assets2.js', encoding='utf-8').read() + open('src/core2.js', encoding='utf-8').read().replace('/*__FACTS__*/', open('src/facts.js', encoding='utf-8').read()).replace('/*__MODES__*/', open('src/modes.js', encoding='utf-8').read() + open('src/coach.js', encoding='utf-8').read()) + open('src/cards.js', encoding='utf-8').read()
+out = '\n'.join(lines) + open('src/bank2.js', encoding='utf-8').read() + open('src/mis.js', encoding='utf-8').read() + open('src/tags3.js', encoding='utf-8').read() + open('src/len2.js', encoding='utf-8').read() + open('src/basic.js', encoding='utf-8').read() + open('src/kfix.js', encoding='utf-8').read() + open('src/manip2.js', encoding='utf-8').read() + open('src/cpiece.js', encoding='utf-8').read() + open('src/assets2.js', encoding='utf-8').read() + open('src/core2.js', encoding='utf-8').read().replace('/*__FACTS__*/', open('src/facts.js', encoding='utf-8').read()).replace('/*__MODES__*/', open('src/modes.js', encoding='utf-8').read() + open('src/coach.js', encoding='utf-8').read()) + open('src/cards.js', encoding='utf-8').read()
 open('kt.js', 'w', encoding='utf-8').write(out)
 
 h = open('/tmp/dotori-math/index.html', encoding='utf-8').read()
+# 2학년 길이 재기 단원 바로 세우기(11/24): 2-1 길이 재기(S6-14 1 cm, S6-15 자로 재기)를 '여러 가지 도형'에서 뗌. S6-15의 1 m 문제는 len2.js가 S6-16(2-2)으로 옮김
+_t="unit(2,'1-2·2-2 시각과 시간',["; assert h.count(_t)==1; h=h.replace(_t,"{ const u=UNITS36[UNITS36.length-1]; u.eps=u.eps.filter(e=>e!=='S6-14'&&e!=='S6-15'); UNITS36.push({grade:2,title:'2-1 길이 재기',eps:['S6-14','S6-15']}); }\n"+_t)
 _t="const setOn=v=>{ if(v&&!stage.querySelector('.scrspace'))"; assert h.count(_t)==1; h=h.replace(_t,"const setOn=v=>{ if(!v&&on) ctx.clearRect(0,0,cv.width,cv.height); if(v&&!stage.querySelector('.scrspace'))")   # 펜 끄고 답하기(11/24): 펜을 끄면 연습장에 쓴 것을 모두 지움
 _t="['수직','평행','합동']"; assert h.count(_t)==1; h=h.replace(_t,"['수직','평행','대각선']")   # 4학년 문항의 보기에 5학년 용어(합동)
 i = h.index("const em=equivMsg(q,r.guess); if(em){"); j = h.index("S.tries++; sfx('bad');", i); assert j - i < 300

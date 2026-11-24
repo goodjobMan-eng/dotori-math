@@ -315,3 +315,6 @@ Object.assign(MISC,{'G6-20':[['GC17',.9]]});
 Object.assign(MISC,{'N3-45':[['C09',.9],['C04',.3]],'N4-28':[['C16',.9],['C12',.3]]});
 Object.assign(MISC,{'N3-46':[['C08',.9]],'N2-13':[['C05',.9]],'R6-15':[['RC07',.9]]});
 Object.assign(MISC,{'G1-06':[['GC03',.9]]});
+
+/* 뒤에 더한 오개념 코드의 조각 연결(11/24): manip2·len2가 window.__MISC_ADD에 넣어 둔 [코드, [[조각, 무게]]]를 MISC에 반영(전에는 읽는 곳이 없어 지식 추적에 빠져 있었음) */
+try{ for(const [c,v] of (window.__MISC_ADD||[])) if(!MISC[c]&&Array.isArray(v)&&v.every(x=>CPC[x[0]])) MISC[c]=v; }catch(e){}
