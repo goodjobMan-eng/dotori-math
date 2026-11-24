@@ -112,7 +112,7 @@ sub("[`${a}%`,'D6-03']]); });", "[`${a}%`,'D6-03']], [`${100-b}%`]); });", 1)
 sub("[[`${2*(a+b)} cm²`,'G5-01'],[`${a+b} cm²`,'G5-01']]); },", "[[`${2*(a+b)} cm²`,'G5-01'],[`${a+b} cm²`,'G5-01']], [`${a*b+a} cm²`]); },", 1)
 
 
-out = '\n'.join(lines) + open('src/bank2.js', encoding='utf-8').read() + open('src/mis.js', encoding='utf-8').read() + open('src/tags3.js', encoding='utf-8').read() + open('src/len2.js', encoding='utf-8').read() + open('src/basic.js', encoding='utf-8').read() + open('src/kfix.js', encoding='utf-8').read() + open('src/manip2.js', encoding='utf-8').read() + open('src/cpiece.js', encoding='utf-8').read() + open('src/assets2.js', encoding='utf-8').read() + open('src/core2.js', encoding='utf-8').read().replace('/*__FACTS__*/', open('src/facts.js', encoding='utf-8').read()).replace('/*__MODES__*/', open('src/modes.js', encoding='utf-8').read() + open('src/coach.js', encoding='utf-8').read()) + open('src/cards.js', encoding='utf-8').read()
+out = '\n'.join(lines) + open('src/bank2.js', encoding='utf-8').read() + open('src/mis.js', encoding='utf-8').read() + open('src/tags3.js', encoding='utf-8').read() + open('src/len2.js', encoding='utf-8').read() + open('src/seq3.js', encoding='utf-8').read() + open('src/basic.js', encoding='utf-8').read() + open('src/kfix.js', encoding='utf-8').read() + open('src/manip2.js', encoding='utf-8').read() + open('src/cpiece.js', encoding='utf-8').read() + open('src/assets2.js', encoding='utf-8').read() + open('src/core2.js', encoding='utf-8').read().replace('/*__FACTS__*/', open('src/facts.js', encoding='utf-8').read()).replace('/*__MODES__*/', open('src/modes.js', encoding='utf-8').read() + open('src/coach.js', encoding='utf-8').read()) + open('src/cards.js', encoding='utf-8').read()
 open('kt.js', 'w', encoding='utf-8').write(out)
 
 h = open('/tmp/dotori-math/index.html', encoding='utf-8').read()
@@ -427,6 +427,12 @@ _i = h.index(_vp['videos_start']); _j = h.index('\n};', _i) + 3
 h = h[:_i] + _vp['videos'] + h[_j:]
 _l36 = [l for l in h.split('\n') if l.startswith('const VIDEOS36=')]; assert len(_l36) == 1
 h = h.replace(_l36[0], _vp['videos36'])
+# 영상 연결 바로잡기(11/24): 대본은 S5-04 = 내가 만든 규칙(1-2), S5-05 = 덧셈표·곱셈표(2-2)로 번호를 바꿨지만 앱 편 번호는 옛 번호 → 영상 주소를 내용에 맞게 맞바꿈
+import re as _re2
+_m=_re2.search(r'const VIDEOS36=(\{.*?\});', h); _v=_json.loads(_m.group(1))
+if 'RyP8zeoApuw' in _v.get('S5-04','') and '28yKwMZ4V7w' in _v.get('S5-05',''):   # RyP8… = 「내가 만든 규칙」, 28yK… = 「덧셈표·곱셈표의 비밀」 (유튜브 제목으로 확인)
+    _v['S5-04'],_v['S5-05']=_v['S5-05'],_v['S5-04']; h=h[:_m.start(1)]+_json.dumps(_v,ensure_ascii=False,separators=(',',':'))+h[_m.end(1):]
+assert '28yKwMZ4V7w' in _json.loads(_re2.search(r'const VIDEOS36=(\{.*?\});', h).group(1))['S5-04']
 _nl = [l for l in h.split('\n') if 'class="nolink"' in l and 'if(!id)' in l]; assert len(_nl) == 1
 h = h.replace(_nl[0], _vp['nolink'])
 # 묶음으로 분수 나타내기(교수님 11/23: 2분의 1이라고 썼는데 틀렸다고 나옴 — 4분의 2와 크기가 같으니 틀렸다고 하면 안 됨)
@@ -494,6 +500,14 @@ _a = h.index(" ['S6-62','원기둥','원기둥',[", _u0); _b = h.index(" ['S6-74
 h = h[:_a] + h[_b:_c] + h[_a:_b] + h[_c:]
 h = h.replace("unit(6,'6-2 원기둥·원뿔·구, 원의 넓이',[", "unit(6,'6-2 원의 넓이, 원기둥·원뿔·구',[", 1)
 h = h.replace("'6-2 원기둥·원뿔·구, 원의 넓이':'KG6-4'", "'6-2 원의 넓이, 원기둥·원뿔·구':'KG6-4'")
+# 교과서 단원대로 나누기(11/24 점검, 2022 개정 4-2: 2 삼각형 · 4 사각형(수직과 평행 포함) · 6 다각형 / 6-2: 5 원의 넓이 · 6 원기둥, 원뿔, 구)
+_t="/* ================= 도형·측정 조작 활동 (터치) ================= */"; assert h.count(_t)==1
+h=h.replace(_t,"""{ const cut=(title)=>{ const i=UNITS36.findIndex(u=>u.title===title); return i<0?null:UNITS36.splice(i,1)[0]; };
+  const a=cut('4-2 수직과 평행'), b=cut('4-2 삼각형·사각형·다각형');
+  if(a&&b){ const i=UNITS36.findIndex(u=>u.title==='5-1 다각형의 둘레와 넓이'); UNITS36.splice(i,0,{grade:4,title:'4-2 삼각형',eps:['S6-28','S6-29']},{grade:4,title:'4-2 사각형',eps:['S6-20','S6-21','S6-30','S6-31']},{grade:4,title:'4-2 다각형',eps:['S6-32','S6-33']}); }
+  const c=cut('6-2 원의 넓이, 원기둥·원뿔·구');
+  if(c){ UNITS36.push({grade:6,title:'6-2 원의 넓이',eps:c.eps.filter(e=>e==='S6-74'||e==='S6-75')},{grade:6,title:'6-2 원기둥, 원뿔, 구',eps:c.eps.filter(e=>e!=='S6-74'&&e!=='S6-75')}); } }
+"""+_t)
 h = h.replace("GC18:['S6-74','S6-75'],GC19:['S6-62','S6-63']", "GC18:['S6-74','S6-75'],GC19:['S6-62','S6-63']")
 
 # 각도기 끌기(교수님 11/24: 눈금이 작아 안 보임, 실제처럼 뒤집고 싶음) → [각도기 뒤집기]·[돋보기] 단추

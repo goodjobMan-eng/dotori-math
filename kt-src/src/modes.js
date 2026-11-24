@@ -44,7 +44,7 @@ function checkActs(B,c){ const g0=+CPC[c][1][0], gradeOf=ep=>{ const u=UNITS36[u
 // 두 쪽 모두 '확정 직후 그 조각의 문제 2개'를 푼다(A는 강의를 본 뒤, B는 보기 전). B도 그 두 문제에서 하나라도 틀리면 다음 세트에서 강의를 본다.
 const armOf=c=>{ let h=0; for(const ch of did()+c) h=(h*31+ch.charCodeAt(0))>>>0; return h%2?'B':'A'; };
 /* 코드별 강의(11/24, 교수·학습·평가 일체화): 한 조각에 여러 학년 내용이 묶인 경우(GC03 길이·들이·무게), 아이가 실제로 낸 오개념에 맞는 편의 영상을 먼저 */
-const CODE_LEC={'G1-05':['S6-07'],'G1-06':['S6-08'],'G2-15':['S6-08'],'G2-16':['S6-08'],'G2-08':['S6-15'],'G2-09':['S6-15','S6-14'],'G2-18':['S6-15'],'G2-19':['S6-15'],'G2-22':['S6-15'],
+const CODE_LEC={'G1-05':['S6-07'],'G1-06':['S6-08'],'G2-15':['S6-08'],'G2-16':['S6-08'],'G2-08':['S6-15'],'G2-09':['S6-15','S6-14'],'G2-18':['S6-15'],'G2-19':['S6-15'],'G2-22':['S6-15'],'G2-23':['S6-14'],
   'G2-20':['S6-81','S6-16'],'G2-21':['S6-16','S6-81'],'G2-13':['S6-16'],'G2-17':['S6-16','S6-15']};
 const lecByCode=c=>{ try{ const x=report().mis.find(m=>MISC[m.c]&&MISC[m.c][0][0]===c&&CODE_LEC[m.c]); return x?(CODE_LEC[x.c].find(lecHas)||''):''; }catch(e){ return ''; } };
 function lecPlan(st,c){ st.lec=st.lec||{}; let L=st.lec[c]; if(!L) L=st.lec[c]={arm:armOf(c),mr:[],k:lecByCode(c)||(CPL[c]||[]).find(lecHas)||''}; return L; }
