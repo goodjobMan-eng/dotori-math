@@ -8731,6 +8731,8 @@ setTimeout(()=>{ try{
   dw('S5-02',q=>/(열[가-힣]*째|1\d\s?째|1\d번째)에 올/.test(T(q.q)));
   dw('S6-45',q=>/kg \d+ g인 도토리 바구니와 수평/.test(T(q.q)));           /* 톤 편에 kg·g 저울(같은 문제가 S6-46에 있음) */
 
+  /* 끝자리가 0인 소수(2.0, 1.50)가 문제의 수로 나오지 않게 — 끝자리 0을 배우는 S3-58만 예외(11/24 린트) */
+  for(const ep of Object.keys(G36)) if(ep!=='S3-58') dw(ep,q=>/(^|[^\d.])\d+\.\d*0(?![\d.])/.test(T(q.q).replace(/\d+\.\d*0 ?(cm|m|kg|g|L|mL|km)\b/g,'')));
   /* --- 옮기기: 수와 연산 --- */
   mv('S2-03',/처음에 있던/,'S2-06');                       /* 뺄셈이 섞인 문장제 → 뺄셈을 다 배운 편 */
   mv('S2-09',/똑같이 나누어 가져요.*식을 세워/,'S2-08');   /* 등분제 식 세우기 → 똑같이 나누어요 */
@@ -9155,6 +9157,7 @@ window.qpNb=t=>(/[가-힣]/.test(String(t||'').replace(/<[^>]+>/g,'').replace(/\
     t=t.replace(reJamo,(m,w,sp,j)=>w+pickJ(/ㄹ$/.test(w)?8:1,j));
     t=t.replace(reQuo,(m,c,q,j)=>c+q+pickJ(jong(c),j));
     t=t.replace(reSp,'$1$2');
+    t=t.replace(/\? (에|의|에서)(?=\s)/g,'?$1');   /* '? 에 알맞은' → '?에 알맞은' */
     t=t.replace(/(\d) (배|장|개|명|자루|권|살|그루|봉지|묶음|송이|마리|대|척|컵|병|도막|층|쪽)(?=$|[\s,.?!)]|[이가은는을를과와도씩만])/g,'$1$2');
     /* 끝맺음 없는 짧은 물음: '…를 소수로' → '…를 소수로 나타내면?' */
     t=t.replace(/^(.{2,40}?(?:을|를)\s(?:소수|분수|가분수|대분수|기약분수|백분율|숫자|수))로\??$/,'$1로 나타내면?');
@@ -12096,6 +12099,6 @@ function kcDone(c,tries){ try{ const L=JSON.parse(localStorage.getItem(KCK)||'[]
 
 </script>
 <script>/* gjm */(function(){try{Object.defineProperty(window,"__dotori",{value:Object.freeze({by:decodeURIComponent("%EA%B5%B3%EC%9E%A1%EB%A7%A8"),id:"goodjobMan",license:"CC BY-NC 4.0"}),enumerable:false});}catch(e){}})();</script>
-<script>window.__BUILD="6e19c4a712";(function(){var shown=0;function chk(){ if(shown||!navigator.onLine) return; fetch(location.pathname+'?v='+Date.now(),{cache:'no-store'}).then(function(r){return r.text();}).then(function(t){ var m=t.match(/window\.__BUILD="(\w+)"/); if(m&&m[1]!==window.__BUILD){ shown=1; var b=document.createElement('button'); b.textContent='새 버전이 나왔어요 · 눌러서 새로 고침'; b.style.cssText='position:fixed;top:8px;left:50%;transform:translateX(-50%);z-index:99999;padding:10px 16px;border-radius:999px;border:2px solid #7A4A1E;background:#FFE7A8;color:#4A2E14;font:16px Jua,sans-serif;box-shadow:0 2px 8px rgba(0,0,0,.25)'; b.onclick=function(){ location.reload(); }; document.body.appendChild(b); } }).catch(function(){}); } document.addEventListener('visibilitychange',function(){ if(document.visibilityState==='visible') chk(); }); setInterval(chk,20*60*1000); setTimeout(chk,5000); })();</script>
+<script>window.__BUILD="39d9363d09";(function(){var shown=0;function chk(){ if(shown||!navigator.onLine) return; fetch(location.pathname+'?v='+Date.now(),{cache:'no-store'}).then(function(r){return r.text();}).then(function(t){ var m=t.match(/window\.__BUILD="(\w+)"/); if(m&&m[1]!==window.__BUILD){ shown=1; var b=document.createElement('button'); b.textContent='새 버전이 나왔어요 · 눌러서 새로 고침'; b.style.cssText='position:fixed;top:8px;left:50%;transform:translateX(-50%);z-index:99999;padding:10px 16px;border-radius:999px;border:2px solid #7A4A1E;background:#FFE7A8;color:#4A2E14;font:16px Jua,sans-serif;box-shadow:0 2px 8px rgba(0,0,0,.25)'; b.onclick=function(){ location.reload(); }; document.body.appendChild(b); } }).catch(function(){}); } document.addEventListener('visibilitychange',function(){ if(document.visibilityState==='visible') chk(); }); setInterval(chk,20*60*1000); setTimeout(chk,5000); })();</script>
 </body>
 </html>
