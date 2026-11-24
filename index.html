@@ -6191,7 +6191,7 @@ B('S4-03', ['좋아하는 동물 표에서 강아지가 6명, 합계가 15명이
 B('S4-04', ['한 명에 ○를 하나씩 그린 그래프에 우유 ○○○, 주스 ○○○○○○가 있어요. 조사한 학생은 모두 몇 명일까요?','9명',[['3명','N1-03'],['2명','D1-02'],['6명','F']]]);
 B('S6-03', ['○, △, □ 모양에 대해 바르게 말한 것은?','□ 모양은 곧은 선이 4개이다',[['○ 모양은 곧은 선으로 둘러싸여 있다','G2-04'],['△ 모양을 거꾸로 돌리면 △ 모양이 아니다','G2-14'],['△ 모양은 뾰족한 곳이 2개이다','F']]]);
 B('S6-08', ['가득 찬 가 컵의 물을 빈 나 컵에 부었더니 넘쳤어요. 바르게 말한 것은?','가 컵에 더 많이 담긴다',[['나 컵에 더 많이 담긴다','G2-15'],['두 컵에 담기는 양이 같다','G2-16'],['가 컵이 더 높다','F']]],
-  ['크기가 같은 빨간 공과 파란 공을 양팔저울에 올렸더니 빨간 공 쪽이 내려갔어요. 바르게 말한 것은?','빨간 공이 더 무겁다',[['파란 공이 더 무겁다','G2-15'],['두 공의 무게가 같다','G2-16'],['빨간 공이 더 길다','F']]]);
+  ['크기가 같은 빨간 공과 파란 공을 양팔저울에 올렸더니 빨간 공 쪽이 내려갔어요. 바르게 말한 것은?','빨간 공이 더 무겁다',[['파란 공이 더 무겁다','G2-15'],['두 공의 무게가 같다','G2-16'],['빨간 공이 더 가볍다','G2-15']]]);
 
 /* ===== 3-31f. 4~5지선다 넓히기: 5-1 규칙과 대응, 6-1 비와 비율, 6-2 비례식과 비례배분 (직접 검산) ===== */
 B('S5-12', ['사탕을 한 봉지에 6개씩 담아요. 전체 사탕 수를 □, 봉지 수를 △라 할 때 알맞은 식은?','△ = □ ÷ 6',[['□ = △ ÷ 6','R5-01'],['△ = □ − 6','R5-02'],['△ = □ × 6','F']]],
@@ -8535,7 +8535,7 @@ window.KT_STAGE_NAME=['만져 보기','기본 익히기','이야기 문제','도
     return _W(`좋아하는 과목별 학생 수를 나타낸 막대그래프예요. ${names[ti]}${/[가-힣]$/.test(names[ti])&&((names[ti].charCodeAt(names[ti].length-1)-0xAC00)%28)?'을':'를'} 좋아하는 학생은 몇 명일까요?`,v,_kw(v,[[hs[ti],'D4-01'],[hs[ti]*u+u,'G2-09'],[hs[ti]*5===v?null:hs[ti]*5,'D4-01']]),'명',pic(g,x0+4*W+12,172)); };
   /* 해설: 학습지의 '핵심 콕콕'처럼 ① 무엇부터 보는지 ② 과정 ③ 한 줄 정리. 틀렸을 때(그리고 [풀이 보기]를 눌렀을 때) 나온다. */
   const H={ divSteps:q=>{ const m=String(q.q).match(/(\d+) ÷ (\d+)/), N=+m[1], d=+m[2], q1=Math.floor(N/d/10), big=d*q1*10; return `① 십의 자리부터 나눠요. ${d} × ${q1*10} = ${big}이니까 ${N}에서 ${big}을 먼저 빼요(㉠ = ${N} − ${big} = ${N-big}). ② 남은 수 ${N-big}도 같은 방법으로 나눠요. ${d} × ${Math.floor((N-big)/d)} = ${d*Math.floor((N-big)/d)}(㉡). ③ 마지막에 남은 수가 나머지예요.`; },
-    chips:q=>{ const m=String(q.q).match(/(\d+) \+ (\d+)/), a=+m[1], b=+m[2], o=a%10+b%10, t=Math.floor(a/10)%10+Math.floor(b/10)%10+(o>=10?1:0); return `① 1 카드부터 모아요: ${a%10} + ${b%10} = ${o}${o>=10?' → 10개가 넘으니 10 카드 1장으로 바꿔 올려요':''}. ② 10 카드: ${Math.floor(a/10)%10} + ${Math.floor(b/10)%10}${o>=10?' + 1':''} = ${t}${t>=10?' → 100 카드 1장으로 바꿔 올려요':''}. ③ 100 카드까지 더하면 ${a+b}예요. 같은 카드가 10장 모이면 꼭 윗자리로 올려요.`; },
+    chips:q=>{ const m=String(q.q).match(/(\d+) \+ (\d+)/), a=+m[1], b=+m[2], o=a%10+b%10, t=Math.floor(a/10)%10+Math.floor(b/10)%10+(o>=10?1:0); return `① 1 카드부터 모아요: ${a%10} + ${b%10} = ${o}${o>=10?' → 10개가 넘으니 10 카드 1장으로 바꿔 올려요':''}. ② 10 카드: ${Math.floor(a/10)%10} + ${Math.floor(b/10)%10}${o>=10?' + 1':''} = ${t}${t>=10?' → 100 카드 1장으로 바꿔 올려요':''}. ③ 마지막으로 100 카드를 모아 세어 보세요. 같은 카드가 10장 모이면 꼭 윗자리로 올려요.`; },
     estTalk:q=>`몇백으로 어림할 때는 십의 자리를 봐요. 십의 자리가 5, 6, 7, 8, 9이면 백의 자리가 1 커지고, 0~4이면 그대로예요.`,
     remPick:q=>`식마다 곱셈구구로 몫을 찾고, 남는 수를 구해 보세요. 나머지는 늘 나누는 수보다 작아요.`,
     fracSay:q=>`전체를 똑같이 나눈 칸의 수가 분모(아래), 색칠한 칸의 수가 분자(위)예요. 읽을 때는 분모부터 "몇 분의 몇"이라고 읽어요.`,
@@ -8605,7 +8605,7 @@ ADD('S6-15', MT([
 ADD('S6-81', ()=>{ let c,e1,e2; do{ c=rnd(5,9); const d1=rnd(1,2), d2=d1+rnd(1,2), s1=rnd(0,1)?1:-1; e1=c+s1*d1; e2=c-s1*d2; }while(e1<1||e2<1||e2>12);
   const [A,B]=shuffle(['도토','람이']); const vis=_l2svg([_l2ruler({N:10,a:0,b:c})],66);
   const o=CF(`${A}는 연필의 길이를 약 ${e1} cm, ${B}는 약 ${e2} cm로 어림했어요. 자로 재어 보고, 실제 길이에 더 가깝게 어림한 친구를 고르세요.`.replace('도토는','도토는').replace(/람이는/,'람이는'),vis,A,[A,B]);
-  o.mis={[B]:'G2-20'}; o.diag=1; o.hint=`자로 잰 길이는 ${c} cm예요. ${e1} cm와 ${e2} cm 중 ${c} cm와의 차가 더 작은 것을 찾아요.`; return o; });
+  o.mis={[B]:'G2-20'}; o.diag=1; o.hint='먼저 자로 실제 길이를 읽고, 어림한 길이와의 차가 더 작은 친구를 찾아요.'; return o; });
 
 /* 2-2: 양팔(약 1 m)로 어림하기 */
 ADD('S6-16', ()=>{ const n=rnd(3,6), what=rndPick('칠판','교실 앞쪽 벽','복도 게시판','운동장 철봉');
@@ -8620,7 +8620,7 @@ ADD('S6-16', ()=>{ const k=rnd(3,8), what=rndPick('복도','교실','현관','�
 /* 2-2: 어림한 길이 더하기 */
 ADD('S6-16', ()=>{ const a=rnd(2,5), b=rnd(1,4);
   const o=MC(`양팔을 벌린 길이가 약 1 m예요. 양팔로 재어 보니 칠판은 ${a}번쯤, 게시판은 ${b}번쯤이었어요. 칠판과 게시판을 나란히 이어 놓은 길이는 약 몇 m일까요?`,'',`약 ${a+b} m`,[[`약 ${a+b} cm`,'G3-07'],[`약 ${a} m`,'G2-21']]);
-  o.hint=`칠판은 약 ${a} m, 게시판은 약 ${b} m예요. 두 길이를 더해요.`; return o; });
+  o.hint='양팔 한 번이 약 1 m예요. 칠판과 게시판을 각각 어림한 뒤 두 길이를 더해 보세요.'; return o; });
 
 /* 2-2: 어림한 길이와 실제 길이 견주기(m와 cm) */
 ADD('S6-16', ()=>{ const r=rndPick(160,170,180,190), dA=200-r, dB=dA+rndPick(10,20), eB=r-dB, [A,B]=shuffle(['도토','람이']);
@@ -8828,7 +8828,7 @@ ADD('S6-24', MT([
 /* S6-14 뼘으로 재면 달라: 자 읽기를 '자로 재요'(S6-15)로 옮긴 자리에, 영상이 가르치는 '단위가 다르면 수가 달라진다 → 1 cm'를 묻는 문제 */
 ADD('S6-14', ()=>{ const a=rnd(4,6), b=a+rnd(1,2), [A,B]=shuffle(['도토','람이']);
   const o=MC(`같은 책상의 긴 쪽을 뼘으로 재었더니 ${A}는 ${a}뼘, ${B}는 ${b}뼘이었어요. 바르게 말한 것은?`,'',`${B}의 한 뼘이 더 짧다`,[[`${B}의 한 뼘이 더 길다`,'G2-23'],['책상의 길이가 달라졌다','G2-23']]);
-  o.hint='같은 길이를 잴 때, 한 뼘이 짧을수록 여러 번 재야 해요.'; return o; });
+  o.hint='뼘으로 잰 횟수가 많을수록 한 뼘의 길이는 어떨지 생각해 보세요.'; return o; });
 ADD('S6-14', MT([
   ['사람마다 뼘의 길이가 달라서 잰 수가 달라요. 누가 재어도 똑같이 말하려면 어떻게 해야 할까요?','1 cm처럼 누구나 같은 단위로 잰다',[['손이 가장 큰 사람이 잰다','G2-23'],['뼘으로 더 여러 번 잰다','G2-23']]],
   ['같은 끈을 클립과 연필로 재었어요. 더 여러 번 재어야 하는 것은?','클립',[['연필','G2-23'],['둘 다 똑같다','G2-23']]]]));
@@ -12099,6 +12099,6 @@ function kcDone(c,tries){ try{ const L=JSON.parse(localStorage.getItem(KCK)||'[]
 
 </script>
 <script>/* gjm */(function(){try{Object.defineProperty(window,"__dotori",{value:Object.freeze({by:decodeURIComponent("%EA%B5%B3%EC%9E%A1%EB%A7%A8"),id:"goodjobMan",license:"CC BY-NC 4.0"}),enumerable:false});}catch(e){}})();</script>
-<script>window.__BUILD="39d9363d09";(function(){var shown=0;function chk(){ if(shown||!navigator.onLine) return; fetch(location.pathname+'?v='+Date.now(),{cache:'no-store'}).then(function(r){return r.text();}).then(function(t){ var m=t.match(/window\.__BUILD="(\w+)"/); if(m&&m[1]!==window.__BUILD){ shown=1; var b=document.createElement('button'); b.textContent='새 버전이 나왔어요 · 눌러서 새로 고침'; b.style.cssText='position:fixed;top:8px;left:50%;transform:translateX(-50%);z-index:99999;padding:10px 16px;border-radius:999px;border:2px solid #7A4A1E;background:#FFE7A8;color:#4A2E14;font:16px Jua,sans-serif;box-shadow:0 2px 8px rgba(0,0,0,.25)'; b.onclick=function(){ location.reload(); }; document.body.appendChild(b); } }).catch(function(){}); } document.addEventListener('visibilitychange',function(){ if(document.visibilityState==='visible') chk(); }); setInterval(chk,20*60*1000); setTimeout(chk,5000); })();</script>
+<script>window.__BUILD="3f6254b6b2";(function(){var shown=0;function chk(){ if(shown||!navigator.onLine) return; fetch(location.pathname+'?v='+Date.now(),{cache:'no-store'}).then(function(r){return r.text();}).then(function(t){ var m=t.match(/window\.__BUILD="(\w+)"/); if(m&&m[1]!==window.__BUILD){ shown=1; var b=document.createElement('button'); b.textContent='새 버전이 나왔어요 · 눌러서 새로 고침'; b.style.cssText='position:fixed;top:8px;left:50%;transform:translateX(-50%);z-index:99999;padding:10px 16px;border-radius:999px;border:2px solid #7A4A1E;background:#FFE7A8;color:#4A2E14;font:16px Jua,sans-serif;box-shadow:0 2px 8px rgba(0,0,0,.25)'; b.onclick=function(){ location.reload(); }; document.body.appendChild(b); } }).catch(function(){}); } document.addEventListener('visibilitychange',function(){ if(document.visibilityState==='visible') chk(); }); setInterval(chk,20*60*1000); setTimeout(chk,5000); })();</script>
 </body>
 </html>
