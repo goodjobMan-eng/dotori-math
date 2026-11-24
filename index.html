@@ -946,25 +946,26 @@ const VIDEOS = {
   ch1: "", ch2: "", ch3: "",          // 챕터 인트로 (챕터 모든 편의 맨 앞)
   ch1out: "", ch2out: "", ch3out: "", // 챕터 마무리 (문제 뒤)
   // ---- 노래 (SONG_AFTER에서 어느 편 뒤에 나올지 정함) ----
-  S_numname: "",  // 숫자 이름 짝꿍
-  S_zero: "",  // 할머니의 영 이야기
-  S_gather5: "",  // 모으고 가르고
-  S_gather10: "",  // 열 모으고 가르고
-  S_ten10: "",  // 도토리 열 개
-  S_fifty: "",  // 우리말로 백까지
-  S_hundred: "",  // 도토리 백 개
-  S_family: "",  // 더하기 빼기는 한 가족
-  S_maketen: "",  // 열을 만드는 짝꿍
-  S_tenfast: "",  // 열을 만들어 척척
-  S_detective: "",  // 도토리 탐정
-  S_thousand: "",  // 천백십일
-  S_skip: "",  // 뛰어 세기
-  S_sign: "",  // 부호 친구들
-  S_front: "",  // 앞자리 비교
-  S_place: "",  // 자리마다 달라요
-  S_group: "",  // 묶어 세기
-  S_gugu: "",  // 구구단 행진
-  S_onezero: "",  // 일단 영단
+  S_numname: "https://youtube.com/shorts/dO9-xa3vu04",  // 숫자 이름 짝꿍
+  S_zero: "https://youtube.com/shorts/upOkBo2awLk",  // 할머니의 영 이야기
+  S_gather5: "https://youtube.com/shorts/RYrHQ2Wz5Qk",  // 모으고 가르고
+  S_gather10: "https://youtube.com/shorts/1pQI9xifc1M",  // 열 모으고 가르고
+  S_ten10: "https://youtube.com/shorts/c_5anrUTeGk",  // 도토리 열 개
+  S_fifty: "https://youtube.com/shorts/FetteW3qnDA",  // 우리말로 백까지
+  S_hundred: "https://youtube.com/shorts/rmsgKBEsul4",  // 도토리 백 개
+  S_family: "https://youtube.com/shorts/2VcqTNF3Le8",  // 더하기 빼기는 한 가족
+  S_maketen: "https://youtube.com/shorts/SLjGSUuiXxM",  // 열을 만드는 짝꿍
+  S_tenfast: "https://youtube.com/shorts/082IXr99tL4",  // 열을 만들어 척척
+  S_detective: "https://youtube.com/shorts/tPB50vWoMYQ",  // 도토리 탐정
+  S_thousand: "https://youtube.com/shorts/DPBko4J56-4",  // 천백십일
+  S_skip: "https://youtube.com/shorts/9a8jvfj2xKQ",  // 뛰어 세기
+  S_sign: "https://youtube.com/shorts/C3zXPLE_BIc",  // 부호 친구들
+  S_front: "https://youtube.com/shorts/Ggc69hN46UU",  // 앞자리 비교
+  S_place: "https://youtube.com/shorts/iSwgu3UFb2o",  // 자리마다 달라요
+  S_group: "https://youtube.com/shorts/07mXXeNMDE4",  // 묶어 세기
+  S_gugu: "https://youtube.com/shorts/cfQF2f7pIS0",  // 구구단 행진
+  S_carry: "https://youtube.com/shorts/XyZhx5Cb0Xk",  // 받아올림 내림
+  S_onezero: "https://youtube.com/shorts/Kg48NyUPV-E",  // 일단 영단
   EP01: "https://youtube.com/shorts/adxJ-1morec",
   EP02: "https://youtube.com/shorts/0EUS1OmqDrs",
   EP03: "https://youtube.com/shorts/un-6MJjGWBM",
@@ -984,7 +985,7 @@ const VIDEOS = {
   EP20: "https://youtube.com/shorts/kqtrdn3Xias",
   EP21: "https://youtube.com/shorts/owJ3yKhoveQ",
 };
-const SONG_AFTER = {2:["S_numname"], 3:["S_zero"], 9:["S_gather5"], 14:["S_gather10"], 15:["S_ten10"], 16:["S_fifty"], 17:["S_hundred"], 23:["S_family"], 24:["S_maketen"], 27:["S_tenfast"], 34:["S_detective"], 36:["S_thousand"], 37:["S_skip"], 38:["S_sign", "S_front"], 39:["S_place"], 40:["S_group"], 50:["S_gugu"], 51:["S_onezero"]};
+const SONG_AFTER = {32:["S_carry"], 2:["S_numname"], 3:["S_zero"], 9:["S_gather5"], 14:["S_gather10"], 15:["S_ten10"], 16:["S_fifty"], 17:["S_hundred"], 23:["S_family"], 24:["S_maketen"], 27:["S_tenfast"], 34:["S_detective"], 36:["S_thousand"], 37:["S_skip"], 38:["S_sign", "S_front"], 39:["S_place"], 40:["S_group"], 50:["S_gugu"], 51:["S_onezero"]};
 const SONG_NAME = {S_numname:'숫자 이름 짝꿍', S_zero:'할머니의 영 이야기', S_gather5:'모으고 가르고', S_gather10:'열 모으고 가르고', S_ten10:'도토리 열 개', S_fifty:'우리말로 백까지', S_hundred:'도토리 백 개', S_family:'더하기 빼기는 한 가족', S_maketen:'열을 만드는 짝꿍', S_tenfast:'열을 만들어 척척', S_detective:'도토리 탐정', S_thousand:'천백십일', S_skip:'뛰어 세기', S_sign:'부호 친구들', S_front:'앞자리 비교', S_place:'자리마다 달라요', S_group:'묶어 세기', S_gugu:'구구단 행진', S_onezero:'일단 영단'};
 
 const EPS = {
@@ -12066,6 +12067,6 @@ function kcDone(c,tries){ try{ const L=JSON.parse(localStorage.getItem(KCK)||'[]
 
 </script>
 <script>/* gjm */(function(){try{Object.defineProperty(window,"__dotori",{value:Object.freeze({by:decodeURIComponent("%EA%B5%B3%EC%9E%A1%EB%A7%A8"),id:"goodjobMan",license:"CC BY-NC 4.0"}),enumerable:false});}catch(e){}})();</script>
-<script>window.__BUILD="ab146522c4";(function(){var shown=0;function chk(){ if(shown||!navigator.onLine) return; fetch(location.pathname+'?v='+Date.now(),{cache:'no-store'}).then(function(r){return r.text();}).then(function(t){ var m=t.match(/window\.__BUILD="(\w+)"/); if(m&&m[1]!==window.__BUILD){ shown=1; var b=document.createElement('button'); b.textContent='새 버전이 나왔어요 · 눌러서 새로 고침'; b.style.cssText='position:fixed;top:8px;left:50%;transform:translateX(-50%);z-index:99999;padding:10px 16px;border-radius:999px;border:2px solid #7A4A1E;background:#FFE7A8;color:#4A2E14;font:16px Jua,sans-serif;box-shadow:0 2px 8px rgba(0,0,0,.25)'; b.onclick=function(){ location.reload(); }; document.body.appendChild(b); } }).catch(function(){}); } document.addEventListener('visibilitychange',function(){ if(document.visibilityState==='visible') chk(); }); setInterval(chk,20*60*1000); setTimeout(chk,5000); })();</script>
+<script>window.__BUILD="ab16779370";(function(){var shown=0;function chk(){ if(shown||!navigator.onLine) return; fetch(location.pathname+'?v='+Date.now(),{cache:'no-store'}).then(function(r){return r.text();}).then(function(t){ var m=t.match(/window\.__BUILD="(\w+)"/); if(m&&m[1]!==window.__BUILD){ shown=1; var b=document.createElement('button'); b.textContent='새 버전이 나왔어요 · 눌러서 새로 고침'; b.style.cssText='position:fixed;top:8px;left:50%;transform:translateX(-50%);z-index:99999;padding:10px 16px;border-radius:999px;border:2px solid #7A4A1E;background:#FFE7A8;color:#4A2E14;font:16px Jua,sans-serif;box-shadow:0 2px 8px rgba(0,0,0,.25)'; b.onclick=function(){ location.reload(); }; document.body.appendChild(b); } }).catch(function(){}); } document.addEventListener('visibilitychange',function(){ if(document.visibilityState==='visible') chk(); }); setInterval(chk,20*60*1000); setTimeout(chk,5000); })();</script>
 </body>
 </html>
