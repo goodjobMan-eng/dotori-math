@@ -347,10 +347,89 @@ def main(src, out):
         L.append(f'- {names[s] if 0 <= s < 4 else s}: {pct(sum(st[s]) / len(st[s]))} ({len(st[s])}건)')
     L += ['', '단계가 올라갈수록 정답률이 조금씩 내려가는 것이 자연스럽습니다. 거꾸로면 단계 가르기나 문제 난이도를 다시 봅니다.', '']
 
+    # ---------- 7. 난이도(실력을 고려한 Rasch 추정) ----------
+    L += difficulty(qrecs, by_tpl, info, out)
+
     open(os.path.join(out, 'report.md'), 'w', encoding='utf-8').write('\n'.join(L))
     json.dump(flags, open(os.path.join(out, 'flags.json'), 'w', encoding='utf-8'), ensure_ascii=False, indent=1)
     print(f'기기 {len(devs)}(뺀 것 {dropped}), 응답 {len(qrecs)}, 판단한 틀 {judged}, 고칠 후보 {len(flags)} → {out}/report.md')
 
+
+
+def difficulty(qrecs, by_tpl, info, out):
+    """틀마다 난이도를 '실력을 고려해서' 잰다(라쉬 모형, 1모수 IRT).
+    그냥 정답률은 '누가 풀었나'에 따라 흔들린다(잘하는 아이가 많이 푼 틀은 쉬워 보임). 그래서
+    P(맞힘) = 1 / (1 + exp(-(실력 - 난이도))) 로 기기 실력과 틀 난이도를 함께 맞춘다.
+    - 처음 만난 문제의 첫 답만 쓴다(다시 나온 문제·복습 제외). 응답 MIN_N건·기기 MIN_DEV대가 안 되는 틀은 '자료 부족'.
+    - 난이도 0 = 평균 실력의 아이가 반쯤 맞힘. +1이면 더 어려움. 다섯 단계(1 아주 쉬움 ~ 5 아주 어려움)로도 적는다.
+    - 출력 difficulty.csv, 보고서 7절(편 안에서 단계 순서와 난이도가 거꾸로인 곳 포함)."""
+    import math
+    rs = [(d, (r[1], r[2]), int(r[6])) for d, r in qrecs if r[13] == 0 and r[11] != 'r']
+    cnt, devs_of = Counter(k for _, k, _ in rs), defaultdict(set)
+    for d, k, _ in rs:
+        devs_of[k].add(d)
+    keep = {k for k in cnt if cnt[k] >= MIN_N and len(devs_of[k]) >= MIN_DEV}
+    rs = [x for x in rs if x[1] in keep]
+    L = ['## 7. 난이도(실력을 고려한 추정)', '']
+    if len(keep) < 3:
+        L += ['자료 부족: 응답이 충분한 틀이 3개 미만입니다.', '']
+        return L
+    th, b = defaultdict(float), {k: 0.0 for k in keep}
+    E = lambda d, k: 1 / (1 + math.exp(-(th[d] - b[k])))
+    clip = lambda x: max(-1.0, min(1.0, x))
+    for it in range(100):                                 # 번갈아 맞추기(JML): 실력 → 난이도 순서로, 한 번에 1 이하만 움직임
+        g, h = defaultdict(float), defaultdict(float)
+        for d, k, y in rs:
+            q = E(d, k); g[d] += y - q; h[d] += q * (1 - q)
+        for d in g:
+            th[d] = max(-6, min(6, th[d] + clip(g[d] / (h[d] + 0.3))))
+        g, h = defaultdict(float), defaultdict(float)
+        for d, k, y in rs:
+            q = E(d, k); g[k] += q - y; h[k] += q * (1 - q)
+        step = 0
+        for k in g:
+            dx = clip(g[k] / (h[k] + 0.3)); step = max(step, abs(dx))
+            b[k] = max(-6, min(6, b[k] + dx))
+        m = statistics.mean(b.values())
+        for k in b:
+            b[k] -= m
+        for d in th:
+            th[d] -= m
+        if step < 1e-3:
+            break
+    lv = lambda x: 1 if x < -1.5 else 2 if x < -0.5 else 3 if x <= 0.5 else 4 if x <= 1.5 else 5
+    names = ['아주 쉬움', '쉬움', '보통', '어려움', '아주 어려움']
+    rows = []
+    for k in sorted(b, key=lambda k: b[k]):
+        title, t = info(*k)
+        acc = statistics.mean(y for _, kk, y in rs if kk == k)
+        rows.append([k[0], k[1], title, t.get('stage', ''), t.get('form', ''), cnt[k], round(acc, 3), round(b[k], 2), lv(b[k])])
+    with open(os.path.join(out, 'difficulty.csv'), 'w', newline='', encoding='utf-8-sig') as f:
+        w = csv.writer(f)
+        w.writerow(['편', '틀', '편 이름', '단계', '형태', '첫 응답 수', '정답률', '난이도(로짓)', '난이도 1~5'])
+        w.writerows(rows)
+    dist = Counter(r[8] for r in rows)
+    L += [f'- 판단한 틀 {len(rows)}개: ' + ', '.join(f'{names[i-1]} {dist.get(i, 0)}' for i in range(1, 6)),
+          '- 정답률과 다를 수 있습니다: 잘하는 아이가 많이 푼 틀은 정답률이 높아도 난이도가 높게 나옵니다.', '',
+          '가장 어려운 틀 10개', '']
+    L += [f'- {r[0]}#{r[1]} {r[2]} — 난이도 {r[7]:+.2f}({names[r[8]-1]}), 정답률 {pct(r[6])}, {r[5]}건' for r in rows[::-1][:10]]
+    L += ['', '가장 쉬운 틀 10개', '']
+    L += [f'- {r[0]}#{r[1]} {r[2]} — 난이도 {r[7]:+.2f}({names[r[8]-1]}), 정답률 {pct(r[6])}, {r[5]}건' for r in rows[:10]]
+    inv = []
+    by_ep = defaultdict(list)
+    for r in rows:
+        if r[3] != '':
+            by_ep[r[0]].append(r)
+    for ep, xs in by_ep.items():                         # 앞 단계 틀이 뒤 단계 틀보다 1 이상 어려우면 거꾸로
+        for a in xs:
+            later = [c for c in xs if a[3] < c[3] and a[7] - c[7] >= 1.0]
+            if later:
+                inv.append(f'- {ep} {a[2]}: {a[3]}단계 #{a[1]}({a[7]:+.2f})가 뒤 단계 틀 {len(later)}개보다 어려움 '
+                           f'(예: {later[0][3]}단계 #{later[0][1]} {later[0][7]:+.2f})')
+    L += ['', '단계 순서와 난이도가 거꾸로인 곳(앞 단계가 1 이상 더 어려움)', '']
+    L += inv[:30] if inv else ['- 없음']
+    L.append('')
+    return L
 
 if __name__ == '__main__':
     if len(sys.argv) < 2:

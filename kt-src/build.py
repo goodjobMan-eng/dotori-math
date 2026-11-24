@@ -116,6 +116,7 @@ out = '\n'.join(lines) + open('src/bank2.js', encoding='utf-8').read() + open('s
 open('kt.js', 'w', encoding='utf-8').write(out)
 
 h = open('/tmp/dotori-math/index.html', encoding='utf-8').read()
+_t="const setOn=v=>{ if(v&&!stage.querySelector('.scrspace'))"; assert h.count(_t)==1; h=h.replace(_t,"const setOn=v=>{ if(!v&&on) ctx.clearRect(0,0,cv.width,cv.height); if(v&&!stage.querySelector('.scrspace'))")   # 펜 끄고 답하기(11/24): 펜을 끄면 연습장에 쓴 것을 모두 지움
 _t="['수직','평행','합동']"; assert h.count(_t)==1; h=h.replace(_t,"['수직','평행','대각선']")   # 4학년 문항의 보기에 5학년 용어(합동)
 i = h.index("const em=equivMsg(q,r.guess); if(em){"); j = h.index("S.tries++; sfx('bad');", i); assert j - i < 300
 h = h[:j] + "if(S.tries===0&&window.KT) KT.rec(q,r.guess,false); " + h[j:]
