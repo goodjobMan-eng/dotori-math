@@ -4,6 +4,13 @@
 <!-- 도토리 숲 수학 퀴즈 · made by 굳잡맨(goodjobMan) · CC BY-NC 4.0 · 비영리·교육 목적, 출처를 밝히고 고쳐 써도 됩니다 -->
 <meta name="author" content="굳잡맨 (goodjobMan)">
 <meta charset="utf-8">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#4A2E14">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="도토리 수학">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="color-scheme" content="only light">
 <meta name="supported-color-schemes" content="light">
@@ -8834,6 +8841,30 @@ ADD('S6-14', MT([
   ['사람마다 뼘의 길이가 달라서 잰 수가 달라요. 누가 재어도 똑같이 말하려면 어떻게 해야 할까요?','1 cm처럼 누구나 같은 단위로 잰다',[['손이 가장 큰 사람이 잰다','G2-23'],['뼘으로 더 여러 번 잰다','G2-23']]],
   ['같은 끈을 클립과 연필로 재었어요. 더 여러 번 재어야 하는 것은?','클립',[['연필','G2-23'],['둘 다 똑같다','G2-23']]]]));
 ADD('S6-14', ()=>{ const n=rnd(3,9); const o=MC(`1 cm가 ${n}번인 길이를 쓰고 읽으면?`,'',`${n} cm, ${n} 센티미터`,[[`${n} m, ${n} 미터`,'G3-07'],[`${n+1} cm, ${n+1} 센티미터`,'G2-09']]); o.hint='1 cm가 몇 번인지가 길이예요.'; return o; });
+
+/* ===== 3-101. 기기에 저장하기(홈 화면 설치, 11/27) =====
+   안드로이드·PC 크롬·엣지·삼성 인터넷: 「📲 기기에 저장」 → 설치 창. 아이폰·아이패드(사파리): 공유 → 홈 화면에 추가 안내.
+   이미 설치해서 연 경우(standalone)에는 단추를 숨긴다. 서비스 워커로 인터넷이 끊겨도 앱이 열린다. */
+(()=>{ let ev=null;
+  const installed=()=>{ try{ return matchMedia('(display-mode: standalone)').matches||navigator.standalone===true; }catch(e){ return false; } };
+  const ios=/iPad|iPhone|iPod/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
+  try{ if('serviceWorker' in navigator&&location.protocol==='https:') navigator.serviceWorker.register('sw.js').catch(()=>{}); }catch(e){}
+  window.addEventListener('beforeinstallprompt',e=>{ e.preventDefault(); ev=e; put(); });
+  window.addEventListener('appinstalled',()=>{ ev=null; document.querySelectorAll('.kt-inst').forEach(b=>b.remove()); });
+  const tip=()=>{ const d=document.createElement('div'); d.className='kt-insttip';
+    d.innerHTML=ios?`<b>홈 화면에 앱으로 저장하기</b><ol><li>아래(아이패드는 위)의 <b>공유 단추</b> <span style="font-size:1.2em">⎋</span>를 눌러요.</li><li><b>「홈 화면에 추가」</b>를 골라요.</li><li>오른쪽 위 <b>「추가」</b>를 누르면 끝!</li></ol><p>사파리에서만 할 수 있어요.</p>`
+      :`<b>홈 화면에 앱으로 저장하기</b><ol><li>브라우저 오른쪽 위 <b>⋮ 메뉴</b>를 눌러요.</li><li><b>「앱 설치」</b> 또는 <b>「홈 화면에 추가」</b>를 골라요.</li></ol>`;
+    d.innerHTML+=`<button type="button">알겠어요</button>`; d.querySelector('button').onclick=()=>d.remove(); document.body.appendChild(d); };
+  const click=async()=>{ if(ev){ ev.prompt(); try{ await ev.userChoice; }catch(e){} ev=null; } else tip(); };
+  const put=()=>{ if(installed()) return; const t=document.querySelector('.kt-hometop'); if(!t||t.querySelector('.kt-inst')) return;
+    const b=document.createElement('button'); b.type='button'; b.className='kt-gear kt-inst'; b.textContent='📲 기기에 저장'; b.onclick=click; t.prepend(b); };
+  const st=document.createElement('style'); st.textContent=`.kt-hometop{display:flex;gap:8px;justify-content:flex-end}
+   .kt-insttip{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);width:min(340px,calc(100% - 32px));z-index:99999;background:#FFF8E6;color:#4A2E14;border:3px solid #7A4A1E;border-radius:18px;padding:14px 16px;font:16px/1.5 'Gowun Dodum',sans-serif;box-shadow:0 6px 18px rgba(0,0,0,.3)}
+   .kt-insttip b{font-family:Jua,sans-serif}.kt-insttip ol{margin:6px 0 4px;padding-left:20px}.kt-insttip p{margin:0;font-size:.85em;opacity:.75}
+   .kt-insttip button{display:block;margin:8px auto 0;padding:8px 22px;border-radius:999px;border:2px solid #7A4A1E;background:#FFE7A8;font:16px Jua,sans-serif;color:#4A2E14}`;
+  document.head.appendChild(st);
+  new MutationObserver(put).observe(document.documentElement,{childList:true,subtree:true}); setTimeout(put,300);
+})();
 /* 문제지형 발문: 수와 단위가 줄바꿈으로 떨어지지 않게 */
 window.nmJ=w=>{ const k=(String(w).charCodeAt(String(w).length-1)-0xAC00)%28; return k>0?w+'이는':w+'는'; };
 window.qpNb=t=>(/[가-힣]/.test(String(t||'').replace(/<[^>]+>/g,'').replace(/\d+\s*[과와]\s*\d+분의\s*\d+|\d+분의\s*\d+|\d+시간|\d+분|\d+초/g,''))?String(t):`${t}<span class="qp-sub">계산해 보세요.</span>`).replace(/(\d[\d,.]*)\s(?=(cm|mm|km|m|kg|g|t|L|mL|°|%|초|분|시간|개|명|원|쪽|번|권|자루|마리|장|대|송이|배)(?![a-zA-Z]))/g,'$1&nbsp;');
@@ -12100,6 +12131,6 @@ function kcDone(c,tries){ try{ const L=JSON.parse(localStorage.getItem(KCK)||'[]
 
 </script>
 <script>/* gjm */(function(){try{Object.defineProperty(window,"__dotori",{value:Object.freeze({by:decodeURIComponent("%EA%B5%B3%EC%9E%A1%EB%A7%A8"),id:"goodjobMan",license:"CC BY-NC 4.0"}),enumerable:false});}catch(e){}})();</script>
-<script>window.__BUILD="ab16779370";(function(){var shown=0;function chk(){ if(shown||!navigator.onLine) return; fetch(location.pathname+'?v='+Date.now(),{cache:'no-store'}).then(function(r){return r.text();}).then(function(t){ var m=t.match(/window\.__BUILD="(\w+)"/); if(m&&m[1]!==window.__BUILD){ shown=1; var b=document.createElement('button'); b.textContent='새 버전이 나왔어요 · 눌러서 새로 고침'; b.style.cssText='position:fixed;top:8px;left:50%;transform:translateX(-50%);z-index:99999;padding:10px 16px;border-radius:999px;border:2px solid #7A4A1E;background:#FFE7A8;color:#4A2E14;font:16px Jua,sans-serif;box-shadow:0 2px 8px rgba(0,0,0,.25)'; b.onclick=function(){ location.reload(); }; document.body.appendChild(b); } }).catch(function(){}); } document.addEventListener('visibilitychange',function(){ if(document.visibilityState==='visible') chk(); }); setInterval(chk,20*60*1000); setTimeout(chk,5000); })();</script>
+<script>window.__BUILD="3eb4785a56";(function(){var shown=0;function chk(){ if(shown||!navigator.onLine) return; fetch(location.pathname+'?v='+Date.now(),{cache:'no-store'}).then(function(r){return r.text();}).then(function(t){ var m=t.match(/window\.__BUILD="(\w+)"/); if(m&&m[1]!==window.__BUILD){ shown=1; var b=document.createElement('button'); b.textContent='새 버전이 나왔어요 · 눌러서 새로 고침'; b.style.cssText='position:fixed;top:8px;left:50%;transform:translateX(-50%);z-index:99999;padding:10px 16px;border-radius:999px;border:2px solid #7A4A1E;background:#FFE7A8;color:#4A2E14;font:16px Jua,sans-serif;box-shadow:0 2px 8px rgba(0,0,0,.25)'; b.onclick=function(){ location.reload(); }; document.body.appendChild(b); } }).catch(function(){}); } document.addEventListener('visibilitychange',function(){ if(document.visibilityState==='visible') chk(); }); setInterval(chk,20*60*1000); setTimeout(chk,5000); })();</script>
 </body>
 </html>
